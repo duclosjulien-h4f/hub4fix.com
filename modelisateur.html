@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Devenir modélisateur — Hub4Fix</title>
+<meta name="description" content="Rejoignez le réseau de modélisateurs Hub4Fix. Modélisez les pièces détachées orphelines les plus demandées et percevez 1/3 du prix TTC en royalties.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ivory:#FAF8F5;--warm-white:#F3EEE8;--cream:#EDE6DC;--sand:#D4C9B8;--stone:#A89F91;--earth:#7A7268;--charcoal:#3B3632;--night:#1C1A18;--gold:#B8963E;--gold-light:#D4B15F;--gold-pale:rgba(184,150,62,0.08);--red:#C8102E;--red-soft:rgba(200,16,46,0.06);--green:#2D8B5E}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'Karla',sans-serif;background:var(--ivory);color:var(--charcoal);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+::selection{background:rgba(184,150,62,0.15);color:var(--night)}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.4rem 4rem;display:flex;justify-content:space-between;align-items:center;background:rgba(250,248,245,0.85);backdrop-filter:blur(24px);border-bottom:1px solid rgba(212,201,184,0.3);transition:all .5s cubic-bezier(.22,1,.36,1)}
+.nav-scrolled{padding:.9rem 4rem;box-shadow:0 1px 20px rgba(0,0,0,.04)}
+.nav-brand{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo{width:34px;height:34px;color:var(--red);transition:color .3s}
+.nav-brand:hover .nav-logo{color:var(--gold)}
+.nav-wordmark{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:500;color:var(--night);letter-spacing:.02em}
+.nav-wordmark span{color:var(--red)}
+.nav-back{font-size:.78rem;font-weight:500;color:var(--earth);text-decoration:none;letter-spacing:.04em;display:flex;align-items:center;gap:.4rem;transition:color .3s}
+.nav-back:hover{color:var(--gold)}
+
+.page-hero{padding:8rem 4rem 4rem;max-width:900px;margin:0 auto}
+.page-overline{font-size:.68rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;margin-bottom:1.5rem;display:flex;align-items:center;gap:.8rem}
+.page-overline::before{content:'';width:24px;height:1px}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,5vw,4rem);font-weight:300;color:var(--night);line-height:1.1;margin-bottom:1.5rem}
+.page-title em{font-style:italic;font-weight:400}
+.page-intro{font-size:1.1rem;line-height:1.75;color:var(--earth);font-weight:300;max-width:680px;margin-bottom:2rem}
+
+.content-section{padding:3rem 4rem;max-width:900px;margin:0 auto}
+.content-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2rem;margin-bottom:3rem}
+.content-card{padding:2rem;border-radius:3px;background:white;border:1px solid var(--cream);transition:all .3s}
+.content-card:hover{box-shadow:0 4px 24px rgba(0,0,0,.04)}
+.content-card h4{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;color:var(--night);margin-bottom:.6rem}
+.content-card p{font-size:.92rem;line-height:1.7;color:var(--earth);font-weight:300}
+
+.rewards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-bottom:3rem}
+.reward{padding:2rem 1.5rem;text-align:center;border-radius:3px;background:white;border:1px solid var(--cream)}
+.reward-value{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:500;color:var(--gold);line-height:1;margin-bottom:.5rem}
+.reward-label{font-size:.88rem;color:var(--night);font-weight:500;margin-bottom:.3rem}
+.reward-detail{font-size:.78rem;color:var(--stone);font-style:italic}
+
+.requirements{padding:3rem;border-radius:3px;background:var(--warm-white);margin-bottom:3rem;border-left:3px solid var(--gold)}
+.requirements h3{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:500;color:var(--night);margin-bottom:1.5rem}
+.requirements ul{list-style:none;display:flex;flex-direction:column;gap:.8rem}
+.requirements li{display:flex;align-items:baseline;gap:.8rem;font-size:.92rem;line-height:1.6;color:var(--charcoal);font-weight:300}
+.requirements li::before{content:'✓';color:var(--gold);font-weight:600;flex-shrink:0}
+
+.form-section{padding:4rem;max-width:720px;margin:0 auto 4rem;background:white;border-radius:3px;border:1px solid var(--cream)}
+.form-section h2{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--night);margin-bottom:.6rem}
+.form-section h2 em{font-style:italic;font-weight:400}
+.form-section .form-intro{font-size:.95rem;color:var(--earth);line-height:1.7;margin-bottom:2.5rem;font-weight:300}
+.form-group{margin-bottom:1.2rem}
+.form-group label{display:block;font-size:.78rem;font-weight:600;letter-spacing:.04em;color:var(--charcoal);margin-bottom:.5rem}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:.8rem 1rem;border-radius:2px;border:1px solid var(--cream);background:var(--ivory);color:var(--night);font-size:.92rem;font-family:'Karla',sans-serif;outline:none;transition:border-color .3s}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--gold)}
+.form-group textarea{min-height:100px;resize:vertical}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form-checkboxes{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:.5rem}
+.form-check{display:flex;align-items:center;gap:.5rem;padding:.5rem .9rem;border:1px solid var(--cream);border-radius:2px;cursor:pointer;transition:all .3s;font-size:.85rem}
+.form-check:hover{border-color:var(--sand)}
+.form-check input{width:16px;height:16px;margin:0;accent-color:var(--gold)}
+.form-check.checked{background:var(--gold-pale);border-color:var(--gold)}
+.form-submit{width:100%;margin-top:1.5rem;padding:1rem;background:var(--red);color:white;border:none;border-radius:2px;font-family:'Karla',sans-serif;font-size:.85rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.form-submit:hover{background:#A00D24;transform:translateY(-1px);box-shadow:0 6px 20px rgba(200,16,46,.2)}
+.form-note{font-size:.78rem;color:var(--stone);font-style:italic;text-align:center;margin-top:1rem}
+.form-success{text-align:center;padding:3rem}
+.form-success-icon{width:56px;height:56px;border-radius:50%;background:rgba(45,139,94,.1);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;margin:0 auto 1.5rem}
+.form-success h3{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:400;color:var(--night);margin-bottom:.8rem}
+.form-success p{font-size:.95rem;color:var(--earth);line-height:1.7;font-weight:300}
+
+footer{padding:3rem 4rem;border-top:1px solid var(--cream);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.footer-brand{display:flex;align-items:center;gap:.6rem}
+.footer-logo{width:22px;height:28px;color:var(--red)}.footer-logo svg{width:100%;height:100%}
+.footer-copy{font-size:.78rem;color:var(--stone)}
+.footer-tagline{font-family:'Cormorant Garamond',serif;font-size:.85rem;font-style:italic;color:var(--sand)}
+
+@media(max-width:900px){
+  nav{padding:1rem 1.5rem}
+  .page-hero{padding:6rem 1.5rem 2rem}
+  .content-section{padding:2rem 1.5rem}
+  .content-grid,.rewards-grid{grid-template-columns:1fr}
+  .requirements{padding:2rem 1.5rem}
+  .form-section{padding:2rem 1.5rem;margin:0 1rem 2rem}
+  .form-row{grid-template-columns:1fr}
+  footer{padding:2rem 1.5rem}
+}
+</style>
+</head>
+<body>
+
+<nav id="navbar">
+  <a href="index.html" class="nav-brand">
+    <svg class="nav-logo" xmlns="http://www.w3.org/2000/svg" viewBox="-14 -52 55 70"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.033 14.028L16.468-3.651A10 10 0 007.071-17.071L-12-17.071A2.5 2.5 0 01-12-22.071L7.071-22.071A15 15 0 0121.166-1.941L14.731 15.74A2.5 2.5 0 0110.033 14.028Z"/><path d="M20.207-48.209A2.5 2.5 0 1015.509-49.919L5.737-23.071L7.071-23.071A16 16 0 0110.889-22.609L20.207-48.209Z"/><path d="M37.376-46.48A2.5 2.5 0 0032.656-48.126L20.74-15.388A16 16 0 0123.071-7.175L37.376-46.48Z"/><path d="M8.47-15.962A9 9 0 007.071-16.071L3.189-16.071L-7.766 14.028A2.5 2.5 0 00-3.068 15.738L8.47-15.962Z"/><path d="M-12-10.536A2.5 2.5 0 00-12-5.536L-1.71-5.536L.11-10.536L-12-10.536Z"/></g></svg>
+    <span class="nav-wordmark">Hub<span>4</span>Fix</span>
+  </a>
+  <a href="index.html" class="nav-back">← Retour à l'accueil</a>
+</nav>
+
+<section class="page-hero">
+  <div class="page-overline" style="color:var(--gold)"><style>.page-hero .page-overline::before{background:var(--gold)}</style>Pour les créateurs numériques</div>
+  <h1 class="page-title">Devenir <em style="color:var(--gold)">modélisateur</em><br>Hub4Fix</h1>
+  <p class="page-intro">Si vous maîtrisez la CAO et que vous voulez mettre votre talent au service de l'économie circulaire, vous êtes au bon endroit. Les modélisateurs Hub4Fix sont les artisans numériques qui donnent vie à notre catalogue — chaque fichier qu'ils créent sauve des milliers d'appareils de la déchetterie.</p>
+</section>
+
+<section class="content-section">
+  <div class="content-grid">
+    <div class="content-card">
+      <h4>La Hotlist, votre boussole</h4>
+      <p>Vous consultez en temps réel les pièces les plus demandées par les utilisateurs. Pas de modélisation au hasard : vous modélisez ce que le marché cherche activement, avec une rentabilité prouvée dès la mise en ligne.</p>
+    </div>
+    <div class="content-card">
+      <h4>Système de Ticket FIFO</h4>
+      <p>Vous réservez une pièce en priorité selon votre niveau (Starter, Confirmé, Expert, Master). Plus votre Score de Fiabilité Cumulatif (SFC) est élevé, plus vous avez un accès privilégié aux pièces à forte avance.</p>
+    </div>
+    <div class="content-card">
+      <h4>Royalties à vie, valeur croissante</h4>
+      <p>Vous percevez <strong>1/3 du prix TTC</strong> de chaque vente. Mais surtout, deux forces jouent en votre faveur avec le temps : d'un côté, <strong>la pièce physique disparaît</strong> des stocks fabricants — votre fichier devient le seul recours. De l'autre, <strong>les appareils vieillissent et se cassent davantage</strong> — la demande de remplacement augmente mécaniquement. Résultat : vos royalties ne s'érodent pas, <strong>elles s'accélèrent année après année</strong>.</p>
+    </div>
+    <div class="content-card">
+      <h4>Avance sur royalties</h4>
+      <p>Pour les pièces à forte demande, Hub4Fix propose une avance. Modèle progressif : 60€ de base + 1€ à 3€ par inscrit en Hotlist. L'avance est un signal de marché — plus la demande est forte, plus l'avance grimpe.</p>
+    </div>
+  </div>
+
+  <div class="requirements">
+    <h3>Profil recherché</h3>
+    <ul>
+      <li>Maîtrise d'au moins un logiciel CAO (Fusion 360, SolidWorks, CATIA, SolidEdge, OnShape, Blender…)</li>
+      <li>Capacité à produire un fichier STEP exportable + votre fichier natif</li>
+      <li>Connaissance des contraintes de l'impression 3D (tolérances, orientation, supports)</li>
+      <li>Statut de freelance (micro-entrepreneur, auto-entrepreneur, SASU, société)</li>
+      <li>Rigueur, méthode, respect des délais</li>
+      <li><strong>Optionnel :</strong> scan 3D, reverse engineering, maîtrise de QuickSurface</li>
+    </ul>
+  </div>
+
+  <div class="rewards-grid">
+    <div class="reward">
+      <div class="reward-value">1/3</div>
+      <div class="reward-label">du prix TTC en royalties</div>
+      <div class="reward-detail">Paiement mensuel par virement</div>
+    </div>
+    <div class="reward">
+      <div class="reward-value">60€+</div>
+      <div class="reward-label">d'avance sur royalties</div>
+      <div class="reward-detail">Selon demande Hotlist</div>
+    </div>
+    <div class="reward">
+      <div class="reward-value">∞</div>
+      <div class="reward-label">Valeur croissante</div>
+      <div class="reward-detail">La rareté augmente avec le temps</div>
+    </div>
+  </div>
+</section>
+
+<section class="form-section">
+  <h2>Candidature <em>modélisateur</em></h2>
+  <p class="form-intro">Remplissez ce formulaire pour nous présenter votre profil. Nous étudions chaque candidature et revenons vers vous sous 7 jours.</p>
+
+  <form id="modeliseur-form" onsubmit="return submitModForm(event)">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Prénom *</label>
+        <input type="text" name="prenom" required>
+      </div>
+      <div class="form-group">
+        <label>Nom *</label>
+        <input type="text" name="nom" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Email *</label>
+      <input type="email" name="email" required>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Téléphone</label>
+        <input type="tel" name="tel">
+      </div>
+      <div class="form-group">
+        <label>Code postal *</label>
+        <input type="text" name="cp" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Statut professionnel</label>
+      <select name="statut">
+        <option value="">— Sélectionnez —</option>
+        <option>Micro-entrepreneur / Auto-entrepreneur</option>
+        <option>EURL / SASU</option>
+        <option>Société (SARL, SAS…)</option>
+        <option>Pas encore de statut</option>
+        <option>Autre</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Logiciels de CAO maîtrisés *</label>
+      <div class="form-checkboxes">
+        <label class="form-check"><input type="checkbox" name="logiciels" value="Fusion 360"> Fusion 360</label>
+        <label class="form-check"><input type="checkbox" name="logiciels" value="SolidWorks"> SolidWorks</label>
+        <label class="form-check"><input type="checkbox" name="logiciels" value="CATIA"> CATIA</label>
+        <label class="form-check"><input type="checkbox" name="logiciels" value="SolidEdge"> SolidEdge</label>
+        <label class="form-check"><input type="checkbox" name="logiciels" value="OnShape"> OnShape</label>
+        <label class="form-check"><input type="checkbox" name="logiciels" value="Blender"> Blender</label>
+        <label class="form-check"><input type="checkbox" name="logiciels" value="FreeCAD"> FreeCAD</label>
+        <label class="form-check"><input type="checkbox" name="logiciels" value="3DS Max"> 3DS Max</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Années d'expérience en modélisation 3D</label>
+      <select name="experience">
+        <option value="">— Sélectionnez —</option>
+        <option>Moins de 2 ans</option>
+        <option>2 à 5 ans</option>
+        <option>5 à 10 ans</option>
+        <option>Plus de 10 ans</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Capacités supplémentaires</label>
+      <div class="form-checkboxes">
+        <label class="form-check"><input type="checkbox" name="capa" value="Scan 3D"> Scan 3D</label>
+        <label class="form-check"><input type="checkbox" name="capa" value="Reverse engineering"> Reverse engineering</label>
+        <label class="form-check"><input type="checkbox" name="capa" value="Impression 3D"> Impression 3D (printer)</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Portfolio / lien vers vos travaux</label>
+      <input type="url" name="portfolio" placeholder="https://...">
+    </div>
+
+    <div class="form-group">
+      <label>Message / présentation libre</label>
+      <textarea name="message" placeholder="Parlez-nous de votre parcours, de vos motivations, de ce que vous voulez apporter à Hub4Fix…"></textarea>
+    </div>
+
+    <button type="submit" class="form-submit">Envoyer ma candidature →</button>
+    <p class="form-note">Vos données sont traitées conformément au RGPD. Nous revenons vers vous sous 7 jours.</p>
+  </form>
+
+  <div id="mod-success" class="form-success" style="display:none">
+    <div class="form-success-icon">✓</div>
+    <h3>Candidature reçue</h3>
+    <p>Merci pour votre candidature. Nous étudions votre profil et revenons vers vous par email sous 7 jours. À très vite !</p>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-brand">
+    <div class="footer-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-14 -52 55 70"><g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.033 14.028L16.468-3.651A10 10 0 007.071-17.071L-12-17.071A2.5 2.5 0 01-12-22.071L7.071-22.071A15 15 0 0121.166-1.941L14.731 15.74A2.5 2.5 0 0110.033 14.028Z"/><path d="M20.207-48.209A2.5 2.5 0 1015.509-49.919L5.737-23.071L7.071-23.071A16 16 0 0110.889-22.609L20.207-48.209Z"/><path d="M37.376-46.48A2.5 2.5 0 0032.656-48.126L20.74-15.388A16 16 0 0123.071-7.175L37.376-46.48Z"/><path d="M8.47-15.962A9 9 0 007.071-16.071L3.189-16.071L-7.766 14.028A2.5 2.5 0 00-3.068 15.738L8.47-15.962Z"/><path d="M-12-10.536A2.5 2.5 0 00-12-5.536L-1.71-5.536L.11-10.536L-12-10.536Z"/></g></svg></div>
+    <span class="footer-copy">© 2026 Hub4Fix — La STaTION, Viry-Châtillon · <a href="mailto:contact@hub4fix.com" style="color:var(--gold);text-decoration:none">contact@hub4fix.com</a></span>
+  </div>
+  <span class="footer-tagline">Un fichier numérique ne s'épuise jamais.</span>
+</footer>
+
+<script>
+const nav=document.getElementById('navbar');
+window.addEventListener('scroll',function(){nav.classList.toggle('nav-scrolled',window.scrollY>60)});
+document.querySelectorAll('.form-check input').forEach(function(cb){
+  cb.addEventListener('change',function(){
+    cb.parentElement.classList.toggle('checked',cb.checked);
+  });
+});
+function submitModForm(e){
+  e.preventDefault();
+  const form=document.getElementById('modeliseur-form');
+  const data={};
+  new FormData(form).forEach(function(v,k){
+    if(data[k]){data[k]=[].concat(data[k],v);}else{data[k]=v;}
+  });
+  console.log('Candidature modélisateur:',data);
+  document.getElementById('modeliseur-form').style.display='none';
+  document.getElementById('mod-success').style.display='block';
+  return false;
+}
+</script>
+</body>
+</html>

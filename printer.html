@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Devenir printer — Hub4Fix</title>
+<meta name="description" content="Rentabilisez votre imprimante 3D en imprimant pour Hub4Fix. G-code prêt, zéro paramétrage, paiement au taux horaire par matériau.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ivory:#FAF8F5;--warm-white:#F3EEE8;--cream:#EDE6DC;--sand:#D4C9B8;--stone:#A89F91;--earth:#7A7268;--charcoal:#3B3632;--night:#1C1A18;--gold:#B8963E;--gold-light:#D4B15F;--gold-pale:rgba(184,150,62,0.08);--red:#C8102E;--red-soft:rgba(200,16,46,0.06);--green:#2D8B5E}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'Karla',sans-serif;background:var(--ivory);color:var(--charcoal);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+::selection{background:rgba(184,150,62,0.15);color:var(--night)}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.4rem 4rem;display:flex;justify-content:space-between;align-items:center;background:rgba(250,248,245,0.85);backdrop-filter:blur(24px);border-bottom:1px solid rgba(212,201,184,0.3);transition:all .5s cubic-bezier(.22,1,.36,1)}
+.nav-scrolled{padding:.9rem 4rem;box-shadow:0 1px 20px rgba(0,0,0,.04)}
+.nav-brand{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo{width:34px;height:34px;color:var(--red);transition:color .3s}
+.nav-brand:hover .nav-logo{color:var(--gold)}
+.nav-wordmark{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:500;color:var(--night);letter-spacing:.02em}
+.nav-wordmark span{color:var(--red)}
+.nav-back{font-size:.78rem;font-weight:500;color:var(--earth);text-decoration:none;letter-spacing:.04em;display:flex;align-items:center;gap:.4rem;transition:color .3s}
+.nav-back:hover{color:var(--gold)}
+
+.page-hero{padding:8rem 4rem 4rem;max-width:900px;margin:0 auto}
+.page-overline{font-size:.68rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;margin-bottom:1.5rem;display:flex;align-items:center;gap:.8rem}
+.page-overline::before{content:'';width:24px;height:1px}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,5vw,4rem);font-weight:300;color:var(--night);line-height:1.1;margin-bottom:1.5rem}
+.page-title em{font-style:italic;font-weight:400}
+.page-intro{font-size:1.1rem;line-height:1.75;color:var(--earth);font-weight:300;max-width:680px;margin-bottom:2rem}
+
+.content-section{padding:3rem 4rem;max-width:900px;margin:0 auto}
+.content-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2rem;margin-bottom:3rem}
+.content-card{padding:2rem;border-radius:3px;background:white;border:1px solid var(--cream);transition:all .3s}
+.content-card:hover{box-shadow:0 4px 24px rgba(0,0,0,.04)}
+.content-card h4{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;color:var(--night);margin-bottom:.6rem}
+.content-card p{font-size:.92rem;line-height:1.7;color:var(--earth);font-weight:300}
+
+.rewards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-bottom:3rem}
+.reward{padding:2rem 1.5rem;text-align:center;border-radius:3px;background:white;border:1px solid var(--cream)}
+.reward-value{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:500;color:var(--gold);line-height:1;margin-bottom:.5rem}
+.reward-label{font-size:.88rem;color:var(--night);font-weight:500;margin-bottom:.3rem}
+.reward-detail{font-size:.78rem;color:var(--stone);font-style:italic}
+
+.requirements{padding:3rem;border-radius:3px;background:var(--warm-white);margin-bottom:3rem;border-left:3px solid var(--gold)}
+.requirements h3{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:500;color:var(--night);margin-bottom:1.5rem}
+.requirements ul{list-style:none;display:flex;flex-direction:column;gap:.8rem}
+.requirements li{display:flex;align-items:baseline;gap:.8rem;font-size:.92rem;line-height:1.6;color:var(--charcoal);font-weight:300}
+.requirements li::before{content:'✓';color:var(--gold);font-weight:600;flex-shrink:0}
+
+.form-section{padding:4rem;max-width:720px;margin:0 auto 4rem;background:white;border-radius:3px;border:1px solid var(--cream)}
+.form-section h2{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--night);margin-bottom:.6rem}
+.form-section h2 em{font-style:italic;font-weight:400}
+.form-section .form-intro{font-size:.95rem;color:var(--earth);line-height:1.7;margin-bottom:2.5rem;font-weight:300}
+.form-group{margin-bottom:1.2rem}
+.form-group label{display:block;font-size:.78rem;font-weight:600;letter-spacing:.04em;color:var(--charcoal);margin-bottom:.5rem}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:.8rem 1rem;border-radius:2px;border:1px solid var(--cream);background:var(--ivory);color:var(--night);font-size:.92rem;font-family:'Karla',sans-serif;outline:none;transition:border-color .3s}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--gold)}
+.form-group textarea{min-height:100px;resize:vertical}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form-checkboxes{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:.5rem}
+.form-check{display:flex;align-items:center;gap:.5rem;padding:.5rem .9rem;border:1px solid var(--cream);border-radius:2px;cursor:pointer;transition:all .3s;font-size:.85rem}
+.form-check:hover{border-color:var(--sand)}
+.form-check input{width:16px;height:16px;margin:0;accent-color:var(--gold)}
+.form-check.checked{background:var(--gold-pale);border-color:var(--gold)}
+.form-submit{width:100%;margin-top:1.5rem;padding:1rem;background:var(--red);color:white;border:none;border-radius:2px;font-family:'Karla',sans-serif;font-size:.85rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.form-submit:hover{background:#A00D24;transform:translateY(-1px);box-shadow:0 6px 20px rgba(200,16,46,.2)}
+.form-note{font-size:.78rem;color:var(--stone);font-style:italic;text-align:center;margin-top:1rem}
+.form-success{text-align:center;padding:3rem}
+.form-success-icon{width:56px;height:56px;border-radius:50%;background:rgba(45,139,94,.1);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;margin:0 auto 1.5rem}
+.form-success h3{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:400;color:var(--night);margin-bottom:.8rem}
+.form-success p{font-size:.95rem;color:var(--earth);line-height:1.7;font-weight:300}
+
+footer{padding:3rem 4rem;border-top:1px solid var(--cream);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.footer-brand{display:flex;align-items:center;gap:.6rem}
+.footer-logo{width:22px;height:28px;color:var(--red)}.footer-logo svg{width:100%;height:100%}
+.footer-copy{font-size:.78rem;color:var(--stone)}
+.footer-tagline{font-family:'Cormorant Garamond',serif;font-size:.85rem;font-style:italic;color:var(--sand)}
+
+@media(max-width:900px){
+  nav{padding:1rem 1.5rem}
+  .page-hero{padding:6rem 1.5rem 2rem}
+  .content-section{padding:2rem 1.5rem}
+  .content-grid,.rewards-grid{grid-template-columns:1fr}
+  .requirements{padding:2rem 1.5rem}
+  .form-section{padding:2rem 1.5rem;margin:0 1rem 2rem}
+  .form-row{grid-template-columns:1fr}
+  footer{padding:2rem 1.5rem}
+}
+</style>
+</head>
+<body>
+
+<nav id="navbar">
+  <a href="index.html" class="nav-brand">
+    <svg class="nav-logo" xmlns="http://www.w3.org/2000/svg" viewBox="-14 -52 55 70"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.033 14.028L16.468-3.651A10 10 0 007.071-17.071L-12-17.071A2.5 2.5 0 01-12-22.071L7.071-22.071A15 15 0 0121.166-1.941L14.731 15.74A2.5 2.5 0 0110.033 14.028Z"/><path d="M20.207-48.209A2.5 2.5 0 1015.509-49.919L5.737-23.071L7.071-23.071A16 16 0 0110.889-22.609L20.207-48.209Z"/><path d="M37.376-46.48A2.5 2.5 0 0032.656-48.126L20.74-15.388A16 16 0 0123.071-7.175L37.376-46.48Z"/><path d="M8.47-15.962A9 9 0 007.071-16.071L3.189-16.071L-7.766 14.028A2.5 2.5 0 00-3.068 15.738L8.47-15.962Z"/><path d="M-12-10.536A2.5 2.5 0 00-12-5.536L-1.71-5.536L.11-10.536L-12-10.536Z"/></g></svg>
+    <span class="nav-wordmark">Hub<span>4</span>Fix</span>
+  </a>
+  <a href="index.html" class="nav-back">← Retour à l'accueil</a>
+</nav>
+
+<section class="page-hero">
+  <div class="page-overline" style="color:var(--red)"><style>.page-hero .page-overline::before{background:var(--red)}</style>Pour les makers</div>
+  <h1 class="page-title">Devenir <em style="color:var(--red)">printer</em><br>Hub4Fix</h1>
+  <p class="page-intro">Votre imprimante 3D dort 22h sur 24 ? Rentabilisez-la en imprimant pour vos voisins. Hub4Fix vous envoie des G-codes prêts à lancer, sans aucun paramétrage. Vous imprimez, vous déposez la pièce dans un locker proche, vous êtes payé. C'est tout.</p>
+</section>
+
+<section class="content-section">
+  <div class="content-grid">
+    <div class="content-card">
+      <h4>FIFO géographique</h4>
+      <p>Les commandes vous sont attribuées par proximité. Un client passe commande : les 5 printers les plus proches reçoivent la notification. Premier à accepter, premier servi. 12h pour répondre avant que la commande passe au pool suivant.</p>
+    </div>
+    <div class="content-card">
+      <h4>G-code prêt, zéro slicing</h4>
+      <p>Vous recevez directement le G-code optimisé pour votre machine via le CloudSlicer. Aucun paramétrage, aucun test, aucun support à générer. Vous chargez sur l'imprimante et vous lancez.</p>
+    </div>
+    <div class="content-card">
+      <h4>Livraison locker</h4>
+      <p>Vous déposez la pièce nue dans un locker proche (Mondial Relay). Pas d'emballage, pas de colissimo, pas de point relais. Simple dépôt sécurisé. Zéro manutention, zéro logistique.</p>
+    </div>
+    <div class="content-card">
+      <h4>Paiement au taux horaire</h4>
+      <p>Rémunération par heure d'impression, selon le matériau. Du PLA (3€/h) au nylon technique (7€/h) jusqu'à la résine (8€/h). Mensualisation des paiements, transparence totale via votre tableau de bord.</p>
+    </div>
+  </div>
+
+  <div class="requirements">
+    <h3>Profil recherché</h3>
+    <ul>
+      <li>Posséder au minimum <strong>une imprimante 3D fonctionnelle</strong> (FDM ou résine)</li>
+      <li>Espace de travail ventilé (obligatoire pour les résines et plastiques techniques)</li>
+      <li>Connaissance de base : premier niveau de maintenance, résolution de problèmes d'impression courants</li>
+      <li>Statut de freelance pour facturation (micro-entrepreneur minimum)</li>
+      <li>Disponibilité régulière — vous devez pouvoir lancer une impression dans les 24h</li>
+      <li>Un locker Mondial Relay accessible dans votre zone</li>
+    </ul>
+  </div>
+
+  <div class="rewards-grid">
+    <div class="reward" style="border-top:3px solid #86c66e">
+      <div class="reward-value" style="color:#86c66e">3€/h</div>
+      <div class="reward-label">PLA</div>
+      <div class="reward-detail">50% du mix prévu</div>
+    </div>
+    <div class="reward" style="border-top:3px solid var(--gold)">
+      <div class="reward-value">4€/h</div>
+      <div class="reward-label">PETG</div>
+      <div class="reward-detail">20% du mix</div>
+    </div>
+    <div class="reward" style="border-top:3px solid var(--red);border-color:var(--red)">
+      <div class="reward-value" style="color:var(--red)">5,50€/h</div>
+      <div class="reward-label">ABS / ASA</div>
+      <div class="reward-detail">15% du mix</div>
+    </div>
+  </div>
+
+  <div class="rewards-grid">
+    <div class="reward">
+      <div class="reward-value">7€/h</div>
+      <div class="reward-label">PP / PC / Nylon</div>
+      <div class="reward-detail">Matériaux techniques</div>
+    </div>
+    <div class="reward">
+      <div class="reward-value">8€/h</div>
+      <div class="reward-label">Résine</div>
+      <div class="reward-detail">Finition premium</div>
+    </div>
+    <div class="reward">
+      <div class="reward-value">4</div>
+      <div class="reward-label">Niveaux de réputation</div>
+      <div class="reward-detail">Starter → Master</div>
+    </div>
+  </div>
+</section>
+
+<section class="form-section">
+  <h2>Inscription <em style="color:var(--red)">printer</em></h2>
+  <p class="form-intro">Renseignez votre parc d'impression pour rejoindre le réseau. Nous vous contactons sous 5 jours pour finaliser votre intégration.</p>
+
+  <form id="printer-form" onsubmit="return submitPrintForm(event)">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Prénom *</label>
+        <input type="text" name="prenom" required>
+      </div>
+      <div class="form-group">
+        <label>Nom *</label>
+        <input type="text" name="nom" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Email *</label>
+      <input type="email" name="email" required>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Téléphone *</label>
+        <input type="tel" name="tel" required>
+      </div>
+      <div class="form-group">
+        <label>Code postal *</label>
+        <input type="text" name="cp" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Ville *</label>
+      <input type="text" name="ville" required>
+    </div>
+
+    <div class="form-group">
+      <label>Statut professionnel</label>
+      <select name="statut">
+        <option value="">— Sélectionnez —</option>
+        <option>Micro-entrepreneur / Auto-entrepreneur</option>
+        <option>EURL / SASU</option>
+        <option>Société (SARL, SAS…)</option>
+        <option>Pas encore de statut (à créer)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Nombre d'imprimantes 3D *</label>
+      <select name="nb_imprimantes" required>
+        <option value="">— Sélectionnez —</option>
+        <option>1</option>
+        <option>2</option>
+        <option>3</option>
+        <option>4 à 5</option>
+        <option>Plus de 5</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Types de machines *</label>
+      <div class="form-checkboxes">
+        <label class="form-check"><input type="checkbox" name="types" value="FDM petite"> FDM < 250mm³</label>
+        <label class="form-check"><input type="checkbox" name="types" value="FDM moyenne"> FDM 250-400mm³</label>
+        <label class="form-check"><input type="checkbox" name="types" value="FDM grande"> FDM > 400mm³</label>
+        <label class="form-check"><input type="checkbox" name="types" value="Résine LCD"> Résine LCD</label>
+        <label class="form-check"><input type="checkbox" name="types" value="Résine SLA"> Résine SLA</label>
+        <label class="form-check"><input type="checkbox" name="types" value="SLS"> SLS (poudre)</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Marques / modèles principaux</label>
+      <input type="text" name="marques" placeholder="Ex: Bambu Lab X1C, Creality K2 Plus, Anycubic Photon…">
+    </div>
+
+    <div class="form-group">
+      <label>Matériaux maîtrisés *</label>
+      <div class="form-checkboxes">
+        <label class="form-check"><input type="checkbox" name="materiaux" value="PLA"> PLA</label>
+        <label class="form-check"><input type="checkbox" name="materiaux" value="PETG"> PETG</label>
+        <label class="form-check"><input type="checkbox" name="materiaux" value="ABS"> ABS</label>
+        <label class="form-check"><input type="checkbox" name="materiaux" value="ASA"> ASA</label>
+        <label class="form-check"><input type="checkbox" name="materiaux" value="PP"> PP</label>
+        <label class="form-check"><input type="checkbox" name="materiaux" value="PC"> PC</label>
+        <label class="form-check"><input type="checkbox" name="materiaux" value="Nylon"> Nylon</label>
+        <label class="form-check"><input type="checkbox" name="materiaux" value="Résine standard"> Résine std.</label>
+        <label class="form-check"><input type="checkbox" name="materiaux" value="Résine technique"> Résine tech.</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Votre espace de travail</label>
+      <select name="espace">
+        <option value="">— Sélectionnez —</option>
+        <option>Atelier dédié bien ventilé</option>
+        <option>Pièce dédiée chez moi</option>
+        <option>Garage / cave</option>
+        <option>Espace partagé (fablab…)</option>
+        <option>Salon / chambre (usage mixte)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Disponibilité hebdomadaire estimée</label>
+      <select name="dispo">
+        <option value="">— Sélectionnez —</option>
+        <option>Moins de 10h / semaine</option>
+        <option>10 à 20h / semaine</option>
+        <option>20 à 40h / semaine</option>
+        <option>Plus de 40h / semaine</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Autres informations</label>
+      <textarea name="message" placeholder="Locker Mondial Relay le plus proche, expérience en impression 3D, motivations…"></textarea>
+    </div>
+
+    <button type="submit" class="form-submit">Rejoindre le réseau →</button>
+    <p class="form-note">Vos données sont traitées conformément au RGPD. Nous revenons vers vous sous 5 jours.</p>
+  </form>
+
+  <div id="print-success" class="form-success" style="display:none">
+    <div class="form-success-icon">✓</div>
+    <h3>Bienvenue dans le réseau</h3>
+    <p>Merci pour votre inscription. Nous vérifions votre profil et revenons vers vous sous 5 jours pour finaliser votre intégration et vos premiers essais d'impression.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-brand">
+    <div class="footer-logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-14 -52 55 70"><g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.033 14.028L16.468-3.651A10 10 0 007.071-17.071L-12-17.071A2.5 2.5 0 01-12-22.071L7.071-22.071A15 15 0 0121.166-1.941L14.731 15.74A2.5 2.5 0 0110.033 14.028Z"/><path d="M20.207-48.209A2.5 2.5 0 1015.509-49.919L5.737-23.071L7.071-23.071A16 16 0 0110.889-22.609L20.207-48.209Z"/><path d="M37.376-46.48A2.5 2.5 0 0032.656-48.126L20.74-15.388A16 16 0 0123.071-7.175L37.376-46.48Z"/><path d="M8.47-15.962A9 9 0 007.071-16.071L3.189-16.071L-7.766 14.028A2.5 2.5 0 00-3.068 15.738L8.47-15.962Z"/><path d="M-12-10.536A2.5 2.5 0 00-12-5.536L-1.71-5.536L.11-10.536L-12-10.536Z"/></g></svg></div>
+    <span class="footer-copy">© 2026 Hub4Fix — La STaTION, Viry-Châtillon · <a href="mailto:contact@hub4fix.com" style="color:var(--gold);text-decoration:none">contact@hub4fix.com</a></span>
+  </div>
+  <span class="footer-tagline">Un fichier numérique ne s'épuise jamais.</span>
+</footer>
+
+<script>
+const nav=document.getElementById('navbar');
+window.addEventListener('scroll',function(){nav.classList.toggle('nav-scrolled',window.scrollY>60)});
+document.querySelectorAll('.form-check input').forEach(function(cb){
+  cb.addEventListener('change',function(){
+    cb.parentElement.classList.toggle('checked',cb.checked);
+  });
+});
+function submitPrintForm(e){
+  e.preventDefault();
+  const form=document.getElementById('printer-form');
+  const data={};
+  new FormData(form).forEach(function(v,k){
+    if(data[k]){data[k]=[].concat(data[k],v);}else{data[k]=v;}
+  });
+  console.log('Inscription printer:',data);
+  document.getElementById('printer-form').style.display='none';
+  document.getElementById('print-success').style.display='block';
+  return false;
+}
+</script>
+</body>
+</html>
