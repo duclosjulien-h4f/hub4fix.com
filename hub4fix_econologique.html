@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hub4Fix — L'Économie de la Pièce Juste</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --rouge: #C0392B;
+  --rouge-sombre: #922B21;
+  --rouge-pale: rgba(192,57,43,0.08);
+  --creme: #F5F0E8;
+  --ivoire: #EDE8DC;
+  --encre: #1C1A16;
+  --encre-mid: #3D3A33;
+  --encre-light: #7A766C;
+  --vert-doux: #2D6A4F;
+  --vert-pale: #E8F4ED;
+  --or: #B8860B;
+  --blanc: #FDFAF5;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--blanc);
+  color: var(--encre);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  overflow-x: hidden;
+}
+
+/* ─── NAV ─── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 1.1rem 3rem;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(253,250,245,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 0.5px solid rgba(28,26,22,0.1);
+}
+.nav-logo {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px; font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--encre);
+  text-decoration: none;
+}
+.nav-logo span { color: var(--rouge); }
+.nav-links { display: flex; gap: 2.5rem; list-style: none; }
+.nav-links a {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; font-weight: 400;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--encre-light); text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--rouge); }
+
+/* ─── HERO MANIFESTE ─── */
+.hero {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-left {
+  background: var(--encre);
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 6rem 4rem 5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-left::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 40px,
+    rgba(192,57,43,0.04) 40px,
+    rgba(192,57,43,0.04) 41px
+  );
+}
+
+.hero-kicker {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--rouge); margin-bottom: 2rem;
+  opacity: 0; animation: fadeUp 0.8s 0.2s forwards;
+}
+
+.hero-title {
+  font-size: clamp(2.8rem, 5vw, 4.5rem);
+  font-weight: 300; line-height: 1.08;
+  color: var(--creme);
+  margin-bottom: 2rem;
+  opacity: 0; animation: fadeUp 0.9s 0.4s forwards;
+}
+.hero-title em {
+  font-style: italic; color: var(--rouge);
+}
+
+.hero-body {
+  font-size: 1.15rem; line-height: 1.8;
+  color: rgba(245,240,232,0.7);
+  max-width: 480px;
+  opacity: 0; animation: fadeUp 0.9s 0.6s forwards;
+}
+
+.hero-right {
+  background: var(--creme);
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 6rem 4rem;
+  gap: 2rem;
+  opacity: 0; animation: fadeIn 1s 0.8s forwards;
+}
+
+.stat-block {
+  border-left: 2px solid var(--rouge);
+  padding-left: 1.5rem;
+}
+
+.stat-number {
+  font-family: 'DM Mono', monospace;
+  font-size: clamp(2.5rem, 4vw, 3.8rem);
+  font-weight: 300; line-height: 1;
+  color: var(--encre);
+  letter-spacing: -0.02em;
+}
+.stat-number span { color: var(--rouge); }
+
+.stat-label {
+  font-size: 0.9rem; line-height: 1.5;
+  color: var(--encre-mid); margin-top: 0.4rem;
+  font-weight: 300;
+}
+
+.hero-divider {
+  width: 1px; height: 60px;
+  background: linear-gradient(to bottom, transparent, var(--encre-light), transparent);
+  margin-left: 1.5rem;
+}
+
+/* ─── SECTION : LE PARADOXE ─── */
+.paradox {
+  padding: 8rem 3rem;
+  background: var(--blanc);
+  max-width: 1100px; margin: 0 auto;
+}
+
+.section-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--rouge); margin-bottom: 3rem;
+  display: flex; align-items: center; gap: 1rem;
+}
+.section-eyebrow::after {
+  content: '';
+  height: 1px; flex: 1 1 0;
+  background: rgba(192,57,43,0.3);
+}
+
+.paradox-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 5rem;
+  align-items: start;
+}
+
+.paradox-left h2 {
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 300; line-height: 1.2;
+  margin-bottom: 2rem;
+}
+.paradox-left h2 em { font-style: italic; color: var(--rouge); }
+
+.paradox-left p {
+  font-size: 1.1rem; line-height: 1.9;
+  color: var(--encre-mid);
+  margin-bottom: 1.5rem;
+}
+
+.waste-visual {
+  background: var(--ivoire);
+  border-radius: 2px;
+  padding: 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.waste-visual::before {
+  content: '650 000 000';
+  position: absolute; bottom: -1rem; right: -0.5rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 5rem; font-weight: 300;
+  color: rgba(28,26,22,0.04);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.waste-item {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 1rem 0;
+  border-bottom: 0.5px solid rgba(28,26,22,0.12);
+}
+.waste-item:last-child { border-bottom: none; }
+.waste-item-label {
+  font-size: 0.95rem; color: var(--encre-mid);
+}
+.waste-item-value {
+  font-family: 'DM Mono', monospace;
+  font-size: 1.1rem; font-weight: 500;
+  color: var(--rouge);
+}
+.waste-item-sub {
+  font-size: 0.75rem; color: var(--encre-light);
+  font-family: 'DM Mono', monospace;
+  display: block; margin-top: 2px;
+}
+
+/* ─── CERCLES VERTUEUX ─── */
+.circles {
+  background: var(--encre);
+  padding: 8rem 3rem;
+  position: relative; overflow: hidden;
+}
+.circles::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 70% 50%, rgba(192,57,43,0.12) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.circles-inner { max-width: 1200px; margin: 0 auto; }
+
+.circles-header { margin-bottom: 5rem; }
+.circles-header .section-eyebrow { color: rgba(192,57,43,0.8); }
+.circles-header .section-eyebrow::after { background: rgba(192,57,43,0.2); }
+.circles-header h2 {
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 300; line-height: 1.2;
+  color: var(--creme);
+}
+.circles-header h2 em { font-style: italic; color: var(--rouge); }
+
+.circles-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+}
+
+.circle-card {
+  padding: 3rem 2.5rem;
+  border: 0.5px solid rgba(245,240,232,0.1);
+  position: relative;
+  cursor: default;
+  transition: background 0.3s;
+}
+.circle-card:hover { background: rgba(245,240,232,0.04); }
+
+.circle-number {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem; letter-spacing: 0.2em;
+  color: var(--rouge); margin-bottom: 2rem;
+}
+
+.circle-icon {
+  width: 52px; height: 52px;
+  border: 1px solid rgba(192,57,43,0.4);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+}
+
+.circle-title {
+  font-size: 1.5rem; font-weight: 300;
+  color: var(--creme); margin-bottom: 1.2rem;
+  line-height: 1.3;
+}
+.circle-title em { font-style: italic; color: var(--rouge); }
+
+.circle-body {
+  font-size: 0.95rem; line-height: 1.9;
+  color: rgba(245,240,232,0.6);
+  margin-bottom: 2rem;
+}
+
+.circle-metrics { display: flex; flex-direction: column; gap: 0.7rem; }
+.metric {
+  display: flex; justify-content: space-between; align-items: center;
+  border-top: 0.5px solid rgba(245,240,232,0.08);
+  padding-top: 0.7rem;
+}
+.metric-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem; letter-spacing: 0.05em;
+  color: rgba(245,240,232,0.4);
+}
+.metric-value {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.8rem; font-weight: 500;
+  color: var(--rouge);
+}
+
+/* ─── BOUCLE MATIÈRE ─── */
+.loop {
+  padding: 8rem 3rem;
+  max-width: 1100px; margin: 0 auto;
+}
+
+.loop-header { margin-bottom: 5rem; }
+.loop-header h2 {
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 300; line-height: 1.2;
+}
+.loop-header h2 em { font-style: italic; color: var(--rouge); }
+
+.loop-diagram {
+  position: relative;
+  background: var(--ivoire);
+  border-radius: 4px;
+  padding: 4rem 3rem;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+  align-items: center; gap: 0;
+}
+
+.loop-step {
+  text-align: center; padding: 1.5rem 1rem;
+}
+.loop-step-icon {
+  font-size: 2rem; margin-bottom: 1rem;
+  display: block;
+}
+.loop-step-label {
+  font-size: 0.9rem; font-weight: 600;
+  color: var(--encre); margin-bottom: 0.4rem;
+}
+.loop-step-sub {
+  font-size: 0.78rem; line-height: 1.5;
+  color: var(--encre-light);
+  font-family: 'DM Mono', monospace;
+}
+
+.loop-arrow {
+  font-size: 1.5rem; color: var(--rouge);
+  opacity: 0.5; text-align: center;
+  padding: 0 0.5rem;
+}
+
+.asterisk-note {
+  margin-top: 2rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem; line-height: 1.7;
+  color: var(--encre-light);
+  border-left: 2px solid rgba(192,57,43,0.25);
+  padding-left: 1rem;
+  max-width: 680px;
+}
+
+.loop-note {
+  margin-top: 2rem; text-align: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.78rem; color: var(--encre-light);
+  letter-spacing: 0.05em;
+}
+.loop-note strong { color: var(--rouge); }
+
+/* ─── IMPACT TERRITORIAL ─── */
+.territory {
+  background: var(--creme);
+  padding: 8rem 3rem;
+}
+.territory-inner { max-width: 1100px; margin: 0 auto; }
+
+.territory-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 5rem;
+  align-items: center;
+}
+
+.territory-left h2 {
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 300; line-height: 1.2;
+  margin-bottom: 2rem;
+}
+.territory-left h2 em { font-style: italic; color: var(--rouge); }
+.territory-left p {
+  font-size: 1.1rem; line-height: 1.9;
+  color: var(--encre-mid); margin-bottom: 1.5rem;
+}
+
+.territory-right {
+  display: flex; flex-direction: column; gap: 1.5rem;
+}
+
+.territory-card {
+  display: flex; gap: 1.5rem; align-items: flex-start;
+  padding: 1.8rem;
+  background: var(--blanc);
+  border-left: 3px solid transparent;
+  transition: border-color 0.2s, transform 0.2s;
+  cursor: default;
+}
+.territory-card:hover {
+  border-left-color: var(--rouge);
+  transform: translateX(4px);
+}
+
+.territory-card-icon {
+  font-size: 1.4rem; flex-shrink: 0; margin-top: 2px;
+}
+.territory-card-title {
+  font-size: 1rem; font-weight: 600;
+  color: var(--encre); margin-bottom: 0.4rem;
+}
+.territory-card-body {
+  font-size: 0.9rem; line-height: 1.7;
+  color: var(--encre-mid);
+}
+
+/* ─── CO2 / IMPACT CHIFFRÉ ─── */
+.impact {
+  padding: 8rem 3rem;
+  background: var(--blanc);
+}
+.impact-inner { max-width: 1100px; margin: 0 auto; }
+
+.impact-header { margin-bottom: 4rem; }
+.impact-header h2 {
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 300; line-height: 1.2;
+}
+.impact-header h2 em { font-style: italic; color: var(--rouge); }
+
+.impact-strip {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border: 0.5px solid rgba(28,26,22,0.12);
+}
+
+.impact-cell {
+  padding: 2.5rem 2rem;
+  border-right: 0.5px solid rgba(28,26,22,0.12);
+  position: relative;
+}
+.impact-cell:last-child { border-right: none; }
+
+.impact-cell::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--rouge);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s;
+}
+.impact-cell:hover::before { transform: scaleX(1); }
+
+.impact-cell-number {
+  font-family: 'DM Mono', monospace;
+  font-size: 2.5rem; font-weight: 300;
+  color: var(--rouge); line-height: 1;
+  margin-bottom: 0.5rem;
+}
+.impact-cell-unit {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem; color: var(--encre-light);
+  margin-bottom: 1rem;
+  display: block;
+}
+.impact-cell-label {
+  font-size: 0.9rem; line-height: 1.6;
+  color: var(--encre-mid);
+}
+.impact-cell-source {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem; color: var(--encre-light);
+  margin-top: 1rem;
+  display: block; letter-spacing: 0.05em;
+}
+
+/* ─── MANIFESTE FINAL ─── */
+.manifeste {
+  padding: 10rem 3rem;
+  background: var(--encre);
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+.manifeste::before {
+  content: 'RÉPARER';
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20vw; font-weight: 300;
+  color: rgba(255,255,255,0.02);
+  white-space: nowrap; pointer-events: none;
+}
+
+.manifeste-inner { max-width: 700px; margin: 0 auto; position: relative; }
+
+.manifeste-kicker {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--rouge); margin-bottom: 3rem;
+}
+
+.manifeste-quote {
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-weight: 300; line-height: 1.4;
+  color: var(--creme); margin-bottom: 3rem;
+  font-style: italic;
+}
+.manifeste-quote strong {
+  font-style: normal; font-weight: 600;
+  color: var(--rouge);
+}
+
+.manifeste-body {
+  font-size: 1rem; line-height: 1.9;
+  color: rgba(245,240,232,0.55);
+  margin-bottom: 4rem;
+}
+
+.manifeste-cta {
+  display: inline-flex; align-items: center; gap: 0.8rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--blanc);
+  border: 0.5px solid rgba(245,240,232,0.3);
+  padding: 1rem 2rem;
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s;
+}
+.manifeste-cta:hover {
+  background: var(--rouge);
+  border-color: var(--rouge);
+}
+
+/* ─── FOOTER ─── */
+footer {
+  background: var(--encre);
+  border-top: 0.5px solid rgba(245,240,232,0.08);
+  padding: 2rem 3rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+footer .logo {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px; color: rgba(245,240,232,0.3);
+  letter-spacing: 0.1em;
+}
+footer .logo span { color: var(--rouge); }
+footer .mention {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; color: rgba(245,240,232,0.2);
+  letter-spacing: 0.08em;
+}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.reveal {
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.reveal.visible {
+  opacity: 1; transform: translateY(0);
+}
+
+/* ─── SCROLL PROGRESS ─── */
+.progress-bar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 2px; z-index: 200;
+  background: transparent;
+}
+.progress-fill {
+  height: 100%; background: var(--rouge);
+  width: 0%; transition: width 0.1s;
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; }
+  .hero-left { min-height: 60vh; }
+  .paradox-grid, .territory-grid { grid-template-columns: 1fr; gap: 3rem; }
+  .circles-grid { grid-template-columns: 1fr; }
+  .impact-strip { grid-template-columns: 1fr 1fr; }
+  .loop-diagram {
+    grid-template-columns: 1fr; gap: 1rem;
+  }
+  .loop-arrow { transform: rotate(90deg); }
+  nav { padding: 1rem 1.5rem; }
+  .nav-links { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">HUB<span>4</span>FIX</a>
+  <ul class="nav-links">
+    <li><a href="#paradoxe">Le paradoxe</a></li>
+    <li><a href="#cercles">Les leviers</a></li>
+    <li><a href="#boucle">La boucle</a></li>
+    <li><a href="#territoire">Le territoire</a></li>
+    <li><a href="#impact">L'impact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-kicker">Économie de la fonctionnalité · Circularité radicale</div>
+    <h1 class="hero-title">
+      Un appareil qui<br>
+      se répare ne<br>
+      finit pas<br>
+      <em>à la décharge.</em>
+    </h1>
+    <p class="hero-body">
+      Hub4Fix ne vend pas des pièces en plastique. 
+      Il vend du temps de vie — aux objets, aux territoires, aux gens. 
+      Chaque réparation est une tonne de CO₂ évitée, un emploi local ancré, 
+      une facture de remplacement épargñée.
+    </p>
+  </div>
+  <div class="hero-right">
+    <div class="stat-block">
+      <div class="stat-number">888<span>M</span></div>
+      <div class="stat-label">
+        d'appareils en circulation en France (670M PEM + 218M GEM).<br>
+        <span style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--encre-light)">GIFAM / NielsenIQ-GfK, bilan 2024 (fév. 2025)</span>
+      </div>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="stat-block">
+      <div class="stat-number">5<span>/6</span></div>
+      <div class="stat-label">
+        des appareils en panne NE sont PAS réparés.<br>~30M de pannes/an — seulement 1 sur 6 l'est.<br><span style="font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--encre-light)">Loi AGEC (2020) · aidealareparation.fr · ecosystem.eco</span>
+      </div>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="stat-block">
+      <div class="stat-number">0<span>€</span></div>
+      <div class="stat-label">
+        de stock physique. Un fichier numérique<br>
+        ne s'érode pas, ne se perd pas, ne pollue pas.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PARADOXE -->
+<section class="paradox reveal" id="paradoxe">
+  <div class="section-eyebrow">Le paradoxe de la pièce orpheline</div>
+  <div class="paradox-grid">
+    <div class="paradox-left">
+      <h2>L'objet existe encore.<br>La pièce a <em>disparu.</em></h2>
+      <p>
+        Un lave-linge de sept ans, en parfait état de marche, 
+        mis au rebut parce qu'un pignon de pompe de vidange 
+        est introuvable. Ni chez le fabricant, ni chez le réparateur, 
+        ni nulle part. Ce n'est pas de l'obsolescence programmée — 
+        c'est de l'obsolescence <strong>logistique</strong>.
+      </p>
+      <p>
+        La fabrication additive résout ce problème structurellement. 
+        Un fichier 3D validé ne périme pas. Il attend que la pièce 
+        soit demandée pour exister — sans stock, sans transport amont, 
+        sans surproduction. C'est la définition même de l'économie 
+        de la fonctionnalité appliquée à la réparation.
+      </p>
+      <p>
+        Hub4Fix construit cette bibliothèque de fichiers en anticipant 
+        la demande — avant même que la pièce disparaisse du marché. 
+        <em>Un actif numérique immatériel, impérissable, reproductible à l'infini.</em>
+      </p>
+    </div>
+    <div class="paradox-right">
+      <div class="waste-visual">
+        <div style="font-family:'DM Mono',monospace;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--encre-light);margin-bottom:1.5rem">
+          Réalité du marché de la réparation — France · sources : ADEME, GIFAM, Loi AGEC
+        </div>
+        <div class="waste-item">
+          <div>
+            <span class="waste-item-label">Appareils mis au rebut / an</span>
+            <span class="waste-item-sub">faute de réparation (1/6 réparé) · Loi AGEC / aidealareparation.fr</span>
+          </div>
+          <span class="waste-item-value">~3M</span>
+        </div>
+        <div class="waste-item">
+          <div>
+            <span class="waste-item-label">Délai de rupture catalogue</span>
+            <span class="waste-item-sub">après fin de production</span>
+          </div>
+          <span class="waste-item-value">3–5 ans</span>
+        </div>
+        <div class="waste-item">
+          <div>
+            <span class="waste-item-label">Poids carbone d'un lave-linge</span>
+            <span class="waste-item-sub">fabrication seule (cycle complet : 513 kg CO₂e)</span>
+          </div>
+          <span class="waste-item-value">341 kg CO₂e</span>
+        </div>
+        <div class="waste-item">
+          <div>
+            <span class="waste-item-label">Bonus réparation 2024 (lave-linge)</span>
+            <span class="waste-item-sub">Doublement en 2024 · Service-public.fr / ecosystem.eco</span>
+          </div>
+          <span class="waste-item-value">50 €</span>
+        </div>
+        <div class="waste-item">
+          <div>
+            <span class="waste-item-label">Coût de la pièce orpheline H4F</span>
+            <span class="waste-item-sub">vs. remplacement complet de l'appareil</span>
+          </div>
+          <span class="waste-item-value">3–19 €</span>
+        </div>
+        <div class="waste-item">
+          <div>
+            <span class="waste-item-label">Matière imprimée par pièce</span>
+            <span class="waste-item-sub">en masse filament PLA/PETG</span>
+          </div>
+          <span class="waste-item-value">&lt; 80 g</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CERCLES VERTUEUX -->
+<section class="circles reveal" id="cercles">
+  <div class="circles-inner">
+    <div class="circles-header">
+      <div class="section-eyebrow">Trois cercles. Un seul mouvement.</div>
+      <h2>Chaque réparation <em>renforce</em> le suivant.</h2>
+    </div>
+    <div class="circles-grid">
+      <!-- Économique -->
+      <div class="circle-card">
+        <div class="circle-number">01 / 03</div>
+        <div class="circle-icon">⟳</div>
+        <h3 class="circle-title">Le cercle<br><em>économique</em></h3>
+        <p class="circle-body">
+          Plus la demande monte dans la Hotlist, plus le fichier est produit vite. 
+          Plus le fichier est disponible, plus il génère des ventes. 
+          Plus il génère des ventes, plus le royaltie du modélisateur est rentable — 
+          et plus il cherche la prochaine pièce orpheline à valoriser. 
+          Un marché auto-alimenté, sans surstock, sans rupture.
+        </p>
+        <div class="circle-metrics">
+          <div class="metric">
+            <span class="metric-label">Taux de remplacement évité</span>
+            <span class="metric-value">~85% *</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">BFR structurel</span>
+            <span class="metric-value">Négatif</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Emplois locaux induits</span>
+            <span class="metric-value">1 printer / 15 ventes</span>
+          </div>
+          <div style="margin-top:1rem;font-family:'DM Mono',monospace;font-size:0.65rem;color:rgba(245,240,232,0.3);line-height:1.6;border-top:0.5px solid rgba(245,240,232,0.08);padding-top:0.7rem">
+            * 715 000 réparations réalisées via le bonus réparation en 2024<br>(×4 vs 2023). Source : GIFAM / NielsenIQ-GfK, fév. 2025
+          </div>
+        </div>
+      </div>
+      <!-- Écologique -->
+      <div class="circle-card">
+        <div class="circle-number">02 / 03</div>
+        <div class="circle-icon">◌</div>
+        <h3 class="circle-title">Le cercle<br><em>écologique</em></h3>
+        <p class="circle-body">
+          La pièce naît à la demande, à 2 km du client. 
+          Pas de fabrication spéculative, pas de transport intercontinental, 
+          pas d'emballage, pas de retour. 
+          Le G-code connaît le volume exact de l'objet : le casier de livraison 
+          est dimensionné au millimètre. 
+          <strong style="color:rgba(245,240,232,0.85)">Zéro Camion. Zéro Emballage.</strong>
+        </p>
+        <div class="circle-metrics">
+          <div class="metric">
+            <span class="metric-label">CO₂ vs. remplacement</span>
+            <span class="metric-value">−97%</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Emballage par pièce</span>
+            <span class="metric-value">0 g</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Km de transport moyen</span>
+            <span class="metric-value">&lt; 3 km *</span>
+          </div>
+        </div>
+      </div>
+      <!-- Social/territorial -->
+      <div class="circle-card">
+        <div class="circle-number">03 / 03</div>
+        <div class="circle-icon">◎</div>
+        <h3 class="circle-title">Le cercle<br><em>territorial</em></h3>
+        <p class="circle-body">
+          Chaque client qui achète un fichier numérique devient printer potentiel. 
+          Chaque réparateur Répar'Acteurs devient un point de compétence local. 
+          Le réseau est distribué, résilient, ancré. 
+          Il ne se concentre pas dans une plateforme centralisée : 
+          il pousse dans chaque commune comme une infrastructure de soin des objets.
+        </p>
+        <div class="circle-metrics">
+          <div class="metric">
+            <span class="metric-label">Réseau cible Phase 1</span>
+            <span class="metric-value">IDF dense</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Répar'Acteurs partenaires</span>
+            <span class="metric-value">7 500 artisans</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Modèle emploi</span>
+            <span class="metric-value">Freelance + ZFU</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOUCLE MATIÈRE -->
+<section class="loop reveal" id="boucle">
+  <div class="loop-header">
+    <div class="section-eyebrow">La boucle matière H4F</div>
+    <h2>De la panne au <em>retour en vie</em><br>en moins de 48 heures.</h2>
+  </div>
+  <div class="loop-diagram">
+    <div class="loop-step">
+      <span class="loop-step-icon">🔍</span>
+      <div class="loop-step-label">Panne déclarée</div>
+      <div class="loop-step-sub">Le client cherche<br>sa pièce. Hotlist<br>enregistre.</div>
+    </div>
+    <div class="loop-arrow">→</div>
+    <div class="loop-step">
+      <span class="loop-step-icon">📐</span>
+      <div class="loop-step-label">Fichier pris en charge</div>
+      <div class="loop-step-sub">Un modélisateur prend<br>en charge le besoin.<br>H4F paramètre + sécurise.</div>
+    </div>
+    <div class="loop-arrow">→</div>
+    <div class="loop-step">
+      <span class="loop-step-icon">🖨️</span>
+      <div class="loop-step-label">Impression locale</div>
+      <div class="loop-step-sub">Printer &lt; 3 km * ← frontière<br>numérique / physique.<br>G-code tokenisé · 20–80 g.</div>
+    </div>
+    <div class="loop-arrow">→</div>
+    <div class="loop-step">
+      <span class="loop-step-icon">♻️</span>
+      <div class="loop-step-label">Réparation</div>
+      <div class="loop-step-sub">L'appareil repart.<br>270 kg CO₂<br>restent dans le sol.</div>
+    </div>
+  </div>
+  <div class="asterisk-note reveal">
+    <span style="color:var(--rouge);font-weight:500">*</span> Moyenne estimée en zone urbaine dense (IDF, métropoles). Variable selon la densité du réseau de printers : 
+    &lt; 3 km en agglomération, 8–15 km en zone périurbaine, jusqu'à 30–50 km en zone rurale lors du démarrage — 
+    avec recours au backup Mondial Relay au-delà du délai de 24h. La densité du réseau croît mécaniquement 
+    avec le volume de clients flux numérique convertis en printers.
+  </div>
+  <div class="loop-note">
+    Le fichier reste dans la bibliothèque — reproductible à l'infini, 
+    sans aucune nouvelle extraction de matière première. 
+    <strong>Un actif qui prend de la valeur à mesure que la pièce physique disparaît du marché.</strong>
+  </div>
+</section>
+
+<!-- TERRITOIRE -->
+<section class="territory reveal" id="territoire">
+  <div class="territory-inner">
+    <div class="section-eyebrow">Ancrage territorial</div>
+    <div class="territory-grid">
+      <div class="territory-left">
+        <h2>Né en ZFU.<br>Pensé pour <em>essaimer.</em></h2>
+        <p>
+          Hub4Fix est implanté à La STaTION, Grande Borne, 
+          Viry-Châtillon — Zone Franche Urbaine. 
+          Ce n'est pas une stratégie fiscale : c'est une cohérence. 
+          Le projet naît là où les gens réparent par nécessité, 
+          pas par tendance.
+        </p>
+        <p>
+          Le modèle freelance (modélisateurs, printers) 
+          crée de l'emploi qualifié décentralisé : 
+          une économie de compétence distribuée, 
+          sans usine centralisée, sans dépendance à un seul bassin d'emploi.
+        </p>
+        <p style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--encre-light);line-height:1.6">
+          ZFU · SAS IS · Exonération IS et CFE jusqu'à 5 ans<br>
+          Essonne · Île-de-France · Phase 3 : national
+        </p>
+      </div>
+      <div class="territory-right">
+        <div class="territory-card reveal">
+          <div class="territory-card-icon">🏭</div>
+          <div>
+            <div class="territory-card-title">Désindustrialisation inversée</div>
+            <div class="territory-card-body">
+              L'impression 3D distribuée recrée une capacité de production 
+              locale là où les usines ont fermé — sans investissement lourd, 
+              sans centralisation logistique.
+            </div>
+          </div>
+        </div>
+        <div class="territory-card reveal">
+          <div class="territory-card-icon">🤝</div>
+          <div>
+            <div class="territory-card-title">Artisanat augmenté</div>
+            <div class="territory-card-body">
+              Les 7 500 réparateurs Répar'Acteurs CMA deviennent 
+              des prescripteurs et des co-producteurs — pas des concurrents 
+              à supplanter, des partenaires à équiper.
+            </div>
+          </div>
+        </div>
+        <div class="territory-card reveal">
+          <div class="territory-card-icon">📱</div>
+          <div>
+            <div class="territory-card-title">Accessibilité radicale</div>
+            <div class="territory-card-body">
+              3,50 € par pièce numérique. Pas d'abonnement obligatoire. 
+              Pas de formation requise. La réparation accessible à tous 
+              les ménages, y compris les plus contraints.
+            </div>
+          </div>
+        </div>
+        <div class="territory-card reveal">
+          <div class="territory-card-icon">📊</div>
+          <div>
+            <div class="territory-card-title">Indicateurs traçables</div>
+            <div class="territory-card-body">
+              Chaque transaction génère une donnée : référence réparée, 
+              poids imprimé, km de livraison. Un tableau de bord d'impact 
+              réel, pas déclaratif.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- IMPACT CHIFFRÉ -->
+<section class="impact reveal" id="impact">
+  <div class="impact-inner">
+    <div class="impact-header">
+      <div class="section-eyebrow">Projection d'impact · Phase 1 · 15 000 réparations/an</div>
+      <h2>Des ordres de grandeur<br><em>vérifiables.</em></h2>
+    </div>
+    <div class="impact-strip">
+      <div class="impact-cell">
+        <div class="impact-cell-number">5 115</div>
+        <span class="impact-cell-unit">tonnes CO₂ éq. évitées</span>
+        <div class="impact-cell-label">
+          Sur la base de 341 kg CO₂e évités par appareil non fabriqué (phase fabrication), 
+          pour 15 000 réparations réussies.
+        </div>
+        <span class="impact-cell-source">ADEME · Base Empreinte® · impactco2.fr · Étude ACV 2018 (Lhotellier et al.)</span>
+      </div>
+      <div class="impact-cell">
+        <div class="impact-cell-number">1,2T</div>
+        <span class="impact-cell-unit">kg de matière imprimée</span>
+        <div class="impact-cell-label">
+          Contre ~900 tonnes de matière plastique qui auraient constitué 
+          des appareils neufs de remplacement.
+        </div>
+        <span class="impact-cell-source">Calcul H4F · 80 g moy. par pièce</span>
+      </div>
+      <div class="impact-cell">
+        <div class="impact-cell-number">~300</div>
+        <span class="impact-cell-unit">emplois-équivalents activés</span>
+        <div class="impact-cell-label">
+          Modélisateurs freelance, printers locaux, 
+          artisans réparateurs partenaires — 
+          sans CDI centralisé.
+        </div>
+        <span class="impact-cell-source">Estimation · 1 printer / 50 pièces/mois</span>
+      </div>
+      <div class="impact-cell">
+        <div class="impact-cell-number">18M€</div>
+        <span class="impact-cell-unit">pouvoir d'achat préservé</span>
+        <div class="impact-cell-label">
+          Différentiel entre le coût d'un appareil neuf (~1 200€ moy.) 
+          et le coût de la réparation H4F (~3–19€), 
+          pour 15 000 ménages.
+        </div>
+        <span class="impact-cell-source">GIFAM / NielsenIQ-GfK · Bilan 2024 (fév. 2025) · 9,6 Md€ de CA électroménager</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MANIFESTE FINAL -->
+<section class="manifeste">
+  <div class="manifeste-inner">
+    <div class="manifeste-kicker">Hub4Fix · Le Kintsugi Numérique</div>
+    <blockquote class="manifeste-quote">
+      "La réparation n'est pas un retour en arrière.<br>
+      C'est la seule direction <strong>raisonnablement en avant.</strong>"
+    </blockquote>
+    <p class="manifeste-body">
+      Hub4Fix ne défend pas l'environnement dans une charte RSE. 
+      Il construit un modèle où la protection de l'environnement 
+      est la conséquence directe de chaque transaction rentable. 
+      L'écologie et l'économie ne s'opposent pas ici : 
+      elles se renforcent à chaque pièce imprimée, 
+      à chaque appareil qui ne finit pas à la décharge.
+    </p>
+    <a href="#" class="manifeste-cta">
+      Découvrir la plateforme →
+    </a>
+  </div>
+</section>
+
+
+<!-- SOURCES -->
+<section style="background:var(--ivoire);padding:3rem;border-top:0.5px solid rgba(28,26,22,0.1)">
+  <div style="max-width:1100px;margin:0 auto">
+    <div style="font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--encre-light);margin-bottom:1.2rem">Sources & références</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem">
+      <div style="font-family:'DM Mono',monospace;font-size:0.7rem;line-height:1.8;color:var(--encre-mid)">
+        <strong style="color:var(--encre);display:block;margin-bottom:0.4rem">Marché électroménager</strong>
+        GIFAM / NielsenIQ-GfK · Bilan 2024, 12 fév. 2025 · gifam.fr<br>
+        888M appareils en circulation (670M PEM + 218M GEM)<br>
+        68M appareils vendus/an · CA 9,6 Md€<br>
+        97% des foyers équipés GEM · 99% en PEM<br>
+        ~22 appareils PEM / foyer · ~7 GEM / foyer
+      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:0.7rem;line-height:1.8;color:var(--encre-mid)">
+        <strong style="color:var(--encre);display:block;margin-bottom:0.4rem">Impact carbone (ADEME)</strong>
+        Base Empreinte® · impactco2.fr · base-empreinte.ademe.fr<br>
+        Étude ACV 2018 (Lhotellier, Less, Bossanne, Pesnel)<br>
+        Lave-linge : 341 kg CO₂e fabrication / 513 kg cycle complet<br>
+        Aspirateur : 47 kg · Bouilloire : 37,8 kg CO₂e<br>
+        Fabrication = ~50% de l'empreinte totale d'un appareil
+      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:0.7rem;line-height:1.8;color:var(--encre-mid)">
+        <strong style="color:var(--encre);display:block;margin-bottom:0.4rem">Réparation & réglementation</strong>
+        Loi AGEC (fév. 2020) · Bonus réparation actif déc. 2022<br>
+        ~30M pannes/an · 1 appareil sur 6 réparé · aidealareparation.fr<br>
+        715 000 réparations via bonus en 2024 (×4 vs 181 000 en 2023)<br>
+        Bonus lave-linge doublé à 50€ au 1er jan. 2024 · service-public.fr<br>
+        Répar'Acteurs CMA · artisanat.fr · 7 500 artisans labellisés QualiRépar
+      </div>
+    </div>
+    <div style="margin-top:1.2rem;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--encre-light);border-top:0.5px solid rgba(28,26,22,0.1);padding-top:1rem">
+      Les projections d'impact (CO₂ évité, emplois induits, pouvoir d'achat préservé) sont des estimations H4F construites sur ces bases documentaires. 
+      Les chiffres marqués « Estimation H4F » sont des ordres de grandeur internes non audités.
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="logo">HUB<span>4</span>FIX — Kintsugi Numérique</div>
+  <div class="mention">SAS · ZFU Grande Borne · Viry-Châtillon · Essonne</div>
+</footer>
+
+<script>
+// Scroll progress
+window.addEventListener('scroll', () => {
+  const scrollTop = window.scrollY;
+  const docHeight = document.body.scrollHeight - window.innerHeight;
+  const progress = (scrollTop / docHeight) * 100;
+  document.getElementById('progress').style.width = progress + '%';
+});
+
+// Reveal on scroll
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => {
+        entry.target.classList.add('visible');
+      }, 80);
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+reveals.forEach(el => observer.observe(el));
+
+// Staggered reveals for territory cards
+const tcards = document.querySelectorAll('.territory-card');
+const cardObserver = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => {
+        entry.target.classList.add('visible');
+      }, i * 100);
+      cardObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+tcards.forEach(c => cardObserver.observe(c));
+</script>
+</body>
+</html>
