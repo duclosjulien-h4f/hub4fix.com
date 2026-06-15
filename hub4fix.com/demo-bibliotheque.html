@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hub4Fix — Bibliotheque</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/glass-sphere.css">
+<style>
+:root{--ivory:#FAF8F5;--warm-white:#F3EEE8;--cream:#EDE6DC;--sand:#D4C9B8;--stone:#A89F91;--earth:#7A7268;--charcoal:#3B3632;--night:#1C1A18;--gold:#B8963E;--gold-light:#D4B15F;--gold-pale:rgba(184,150,62,0.08);--gold-glow:rgba(184,150,62,0.15);--red:#C8102E;--red-soft:rgba(200,16,46,0.06);--red-medium:rgba(200,16,46,0.18);--green:#2D8B5E;--font-serif:'Cormorant Garamond',serif;--font-sans:'Karla',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);background:var(--ivory);color:var(--charcoal);-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+::selection{background:var(--gold-glow);color:var(--night)}
+
+/* ════ HEADER ════ */
+.header{position:sticky;top:0;z-index:100;background:var(--warm-white);border-bottom:1px solid var(--cream);padding:0 2.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.header-left{display:flex;align-items:center;gap:.6rem;text-decoration:none;flex-shrink:0}
+.header-logo{width:auto;height:30px}
+.header-wordmark{font-family:var(--font-serif);font-size:1.05rem;font-weight:500;color:var(--night);letter-spacing:.02em}
+.header-wordmark sup{color:var(--red);font-size:.65em;vertical-align:super;line-height:0}
+.header-center{display:flex;align-items:center;gap:.5rem;font-size:.82rem;color:var(--earth);font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.header-center strong{font-weight:600;color:var(--charcoal)}
+.header-right{display:flex;align-items:center;gap:1rem;flex-shrink:0}
+.badge-pro{display:inline-flex;align-items:center;gap:.3rem;padding:.3rem .8rem;background:var(--gold-pale);border:1px solid var(--gold);border-radius:2px;font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);white-space:nowrap}
+.btn-logout{background:none;border:none;font-family:var(--font-sans);font-size:.75rem;font-weight:500;color:var(--stone);cursor:pointer;padding:.3rem .5rem;transition:color .2s;letter-spacing:.03em}
+.btn-logout:hover{color:var(--red)}
+
+/* ════ MAIN CONTENT ════ */
+.main{flex:1;padding:2.5rem 2.5rem 3rem;max-width:1200px;width:100%;margin:0 auto}
+
+/* Welcome */
+.welcome{margin-bottom:2.5rem}
+.welcome-title{font-family:var(--font-serif);font-size:1.8rem;font-weight:400;color:var(--night);margin-bottom:.4rem;line-height:1.2}
+.welcome-text{font-size:.85rem;color:var(--earth);font-weight:300;line-height:1.6}
+
+/* Stats bar */
+.stats-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.5rem;margin-bottom:2.5rem}
+.stat-card{background:white;border:1px solid var(--cream);border-radius:4px;padding:1.2rem 1.4rem;display:flex;align-items:center;gap:1rem;transition:box-shadow .2s}
+.stat-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.04)}
+.stat-value{font-family:'Courier New',monospace;font-size:1.5rem;font-weight:700;line-height:1}
+.stat-value.red{color:var(--red)}
+.stat-value.charcoal{color:var(--charcoal)}
+.stat-label{font-size:.72rem;color:var(--earth);font-weight:400;letter-spacing:.02em;margin-top:.15rem}
+.stat-badge{display:inline-flex;align-items:center;gap:.25rem;padding:.15rem .5rem;border-radius:10px;font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.stat-badge.red-badge{background:var(--red-soft);color:var(--red)}
+
+/* ════ PIECE GRID ════ */
+.section-label{font-size:.68rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--stone);margin-bottom:1rem;display:flex;align-items:center;gap:.6rem}
+.section-label::before{content:'';width:16px;height:1px;background:var(--stone)}
+.pieces-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem}
+
+/* ════ PIECE CARD ════ */
+.piece-card{background:white;border:1px solid var(--cream);border-radius:5px;overflow:hidden;transition:transform .25s,box-shadow .25s;position:relative}
+.piece-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(200,16,46,.08)}
+.piece-card-image{width:100%;height:200px;position:relative;overflow:hidden;background:var(--warm-white)}
+.piece-card-image img{width:100%;height:100%;object-fit:cover}
+.piece-card-placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6rem;background:linear-gradient(135deg,var(--warm-white) 0%,var(--cream) 100%);color:var(--stone)}
+.piece-card-placeholder svg{width:40px;height:40px;opacity:.5}
+.piece-card-placeholder span{font-size:.72rem;font-weight:500;text-align:center;padding:0 1rem;opacity:.7}
+
+/* Skeleton shimmer */
+.skeleton{background:linear-gradient(90deg,var(--cream) 25%,var(--ivory) 50%,var(--cream) 75%);background-size:200% 100%;animation:shimmer 1.5s ease-in-out infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* Status badge */
+.piece-status{position:absolute;top:.8rem;left:.8rem;padding:.2rem .6rem;border-radius:2px;font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.piece-status.nouveau{background:rgba(45,139,94,.12);color:var(--green)}
+.piece-status.suggestion{background:var(--gold-pale);color:var(--gold)}
+
+/* Card body */
+.piece-card-body{padding:1.2rem 1.3rem 1.3rem}
+.piece-name{font-family:var(--font-serif);font-size:1.1rem;font-weight:500;color:var(--night);margin-bottom:.2rem;line-height:1.3}
+.piece-machine{font-size:.78rem;color:var(--earth);font-weight:400;margin-bottom:.6rem}
+.piece-filament{display:inline-flex;align-items:center;gap:.3rem;padding:.15rem .5rem;background:var(--warm-white);border:1px solid var(--cream);border-radius:2px;font-size:.65rem;font-weight:600;color:var(--charcoal);letter-spacing:.04em;margin-bottom:.6rem}
+.piece-rating{display:flex;align-items:center;gap:.35rem;margin-bottom:1rem}
+.piece-stars{color:var(--gold);font-size:.85rem;letter-spacing:1px}
+.piece-rating-value{font-size:.75rem;color:var(--earth);font-weight:500}
+
+/* Card buttons */
+.btn-download{display:flex;align-items:center;justify-content:center;gap:.4rem;width:100%;padding:.7rem 1rem;font-family:var(--font-sans);font-size:.72rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:var(--red);color:white;border:none;border-radius:3px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;min-height:40px}
+.btn-download:hover:not(:disabled){background:#a80d26;transform:translateY(-1px);box-shadow:0 4px 16px rgba(200,16,46,.25)}
+.btn-download:disabled{cursor:not-allowed;opacity:.7}
+.btn-download svg{width:14px;height:14px;flex-shrink:0}
+.btn-acquire{display:flex;align-items:center;justify-content:center;gap:.4rem;width:100%;padding:.7rem 1rem;font-family:var(--font-sans);font-size:.72rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:var(--warm-white);color:var(--earth);border:1px solid var(--sand);border-radius:3px;cursor:pointer;transition:all .25s;min-height:40px}
+.btn-acquire:hover{background:var(--cream);color:var(--charcoal);border-color:var(--stone)}
+.btn-acquire svg{width:13px;height:13px;flex-shrink:0;opacity:.6}
+
+/* ════ PROGRESS BAR (G-code generation) ════ */
+.gcode-progress{width:100%;display:none;flex-direction:column;gap:.5rem}
+.gcode-progress.active{display:flex}
+.progress-bar-track{width:100%;height:6px;background:var(--cream);border-radius:3px;overflow:hidden}
+.progress-bar-fill{width:0;height:100%;background:var(--red);border-radius:3px;transition:width .3s ease}
+.progress-message{font-family:'Courier New',monospace;font-size:.68rem;color:var(--earth);min-height:1.1em;letter-spacing:.01em}
+.progress-cursor{display:inline-block;width:1px;height:.85em;background:var(--red);animation:blink .6s step-end infinite;vertical-align:text-bottom;margin-left:1px}
+@keyframes blink{50%{opacity:0}}
+
+/* Success message */
+.gcode-success{display:none;align-items:center;gap:.5rem;padding:.6rem .8rem;background:rgba(45,139,94,.06);border:1px solid rgba(45,139,94,.15);border-radius:3px;margin-top:.3rem}
+.gcode-success.visible{display:flex}
+.gcode-success svg{width:18px;height:18px;color:var(--green);flex-shrink:0}
+.gcode-success-text{display:flex;flex-direction:column;gap:.1rem}
+.gcode-success-title{font-size:.78rem;font-weight:600;color:var(--green)}
+.gcode-success-detail{font-size:.68rem;color:var(--earth)}
+
+/* Lock overlay */
+.piece-card-lock{position:absolute;top:.8rem;right:.8rem;width:28px;height:28px;background:rgba(255,255,255,.9);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.piece-card-lock svg{width:13px;height:13px;color:var(--earth)}
+
+/* ════ FOOTER ════ */
+.page-footer{padding:1.5rem 2.5rem;border-top:1px solid var(--cream);display:flex;align-items:center;justify-content:space-between;font-size:.72rem;color:var(--stone);letter-spacing:.03em}
+.footer-logout{background:none;border:none;font-family:var(--font-sans);font-size:.72rem;color:var(--stone);cursor:pointer;transition:color .2s}
+.footer-logout:hover{color:var(--red)}
+
+/* ════ RESPONSIVE ════ */
+@media(max-width:768px){
+  .header{padding:0 1.2rem;gap:.5rem}
+  .header-center{display:none}
+  .main{padding:1.5rem 1.2rem 2rem}
+  .stats-bar{grid-template-columns:1fr}
+  .badge-pro{display:none}
+}
+@media(max-width:480px){
+  .pieces-grid{grid-template-columns:1fr}
+  .page-footer{flex-direction:column;gap:.5rem;text-align:center}
+}
+
+/* ════ ANIMATIONS ════ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.fade-up{animation:fadeUp .5s ease both}
+.fade-up-1{animation-delay:.05s}
+.fade-up-2{animation-delay:.1s}
+.fade-up-3{animation-delay:.15s}
+.fade-up-4{animation-delay:.2s}
+.fade-up-5{animation-delay:.25s}
+.fade-up-6{animation-delay:.3s}
+</style>
+</head>
+<body>
+
+<!-- ════ HEADER ════ -->
+<header class="header">
+  <a href="index.html" class="header-left">
+    <svg class="header-logo" viewBox="0 0 202.6 265.4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><linearGradient id="lg1"><stop style="stop-color:#2a00fe" offset="0.336"/><stop style="stop-color:#fff" offset="1"/></linearGradient><linearGradient id="lg2"><stop style="stop-color:#fff" offset="0.107"/><stop style="stop-color:#fe0000" offset="0.684"/></linearGradient><linearGradient xlink:href="#lg1" id="grad1" x1="129.89" y1="808.83" x2="194.31" y2="808.83" gradientUnits="userSpaceOnUse"/><linearGradient xlink:href="#lg2" id="grad2" x1="271.02" y1="731.42" x2="327.45" y2="731.42" gradientUnits="userSpaceOnUse" spreadMethod="pad"/></defs><g transform="translate(-129.894,-634.847)"><g transform="translate(-114.063,-139.373)"><path d="m 353.331,791.185 -24.32,66.818 c -8.972,24.651 9.283,50.722 35.516,50.722 h 72.08 c 5.218,0 9.449,4.23 9.449,9.449 0,5.218 -4.231,9.449 -9.449,9.449 h -72.08 c -39.35,0 -66.732,-39.106 -53.274,-76.083 l 7.123,-19.57 17.2,-47.256 c 1.787,-4.903 7.21,-7.428 12.113,-5.642 4.903,1.787 7.429,7.21 5.643,12.112 z" style="fill:#000;stroke:#000"/><path d="m 314.879,1026.411 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#000;stroke:#000"/><path d="m 249.987,1019.877 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:#000;stroke:#000"/><path d="m 359.24,904.532 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#000;stroke:#000"/><path d="m 436.607,884.024 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:#000;stroke:#000"/></g><g><path d="m 234.225,648.032 -24.32,66.818 a 37.795,37.795 0 0 0 35.516,50.722 h 72.08 a 9.449,9.449 0 0 1 0,18.898 h -72.08 a 56.693,56.693 0 0 1 -53.274,-76.083 l 24.323,-66.826 a 9.449,9.449 0 0 1 17.755,6.471 z" style="fill:#fff;stroke:#000"/><path d="m 195.773,883.258 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#fff;stroke:#000"/><path d="m 130.881,876.724 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:url(#grad1);stroke:#000"/><path d="m 240.133,761.379 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#fff;stroke:#000"/><path d="m 317.5,740.871 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:url(#grad2);stroke:#000"/></g></g></svg>
+    <span class="header-wordmark">Hub<sup>4</sup>Fix</span>
+  </a>
+  <div class="header-center" id="headerCenter"></div>
+  <div class="header-right">
+    <span class="badge-pro">Compte Maker Pro</span>
+    <button class="btn-logout" id="btnLogout">Deconnexion</button>
+  </div>
+</header>
+
+<!-- ════ MAIN ════ -->
+<main class="main">
+
+  <!-- Welcome -->
+  <div class="welcome fade-up">
+    <h1 class="welcome-title">Votre bibliotheque de pieces Hub<sup style="color:var(--red);font-size:.6em">4</sup>Fix</h1>
+    <p class="welcome-text">Retrouvez vos pieces detachees, generez vos G-codes et lancez vos impressions.</p>
+  </div>
+
+  <!-- Stats bar -->
+  <div class="stats-bar">
+    <div class="stat-card fade-up fade-up-1">
+      <div>
+        <div class="stat-value red">5</div>
+        <div style="display:flex;align-items:center;gap:.4rem;margin-top:.25rem">
+          <span class="stat-badge red-badge">S-tokens</span>
+        </div>
+      </div>
+      <div class="stat-label">Solde disponible</div>
+    </div>
+    <div class="stat-card fade-up fade-up-2">
+      <div>
+        <div class="stat-value charcoal">1</div>
+      </div>
+      <div class="stat-label">Piece en bibliotheque</div>
+    </div>
+    <div class="stat-card fade-up fade-up-3">
+      <div>
+        <div class="stat-value charcoal">0</div>
+      </div>
+      <div class="stat-label">Impressions en cours</div>
+    </div>
+  </div>
+
+  <!-- Section label -->
+  <div class="section-label fade-up fade-up-3">Vos pieces</div>
+
+  <!-- Pieces grid -->
+  <div class="pieces-grid" id="piecesGrid"></div>
+
+</main>
+
+<!-- ════ FOOTER ════ -->
+<footer class="page-footer">
+  <span id="footerText">Hub<sup style="color:var(--red);font-size:.8em">4</sup>Fix SAS — Session demo</span>
+  <button class="footer-logout" id="btnLogoutFooter">Deconnexion</button>
+</footer>
+
+<script>
+(function(){
+
+  /* ═══ SESSION CHECK ═══ */
+  var raw = localStorage.getItem('demoSession');
+  if (!raw) { window.location.href = 'demo-login.html'; return; }
+  var session;
+  try { session = JSON.parse(raw); } catch(e) { window.location.href = 'demo-login.html'; return; }
+
+  /* ═══ PERSONALIZATION ═══ */
+  var prenom = session.prenom || 'Utilisateur';
+  var entreprise = session.entreprise || '';
+  var ville = session.ville || '';
+  var piece = session.piece || 'Piece detachee';
+  var machine = session.machine || 'Appareil';
+  var filament = (session.filament || 'PLA').toUpperCase();
+  var createdAt = session.created_at || '';
+
+  document.getElementById('headerCenter').innerHTML =
+    'Bonjour <strong>' + escapeHtml(prenom) + '</strong> — ' +
+    escapeHtml(entreprise) + (ville ? ' &middot; ' + escapeHtml(ville) : '');
+
+  if (createdAt) {
+    var d = new Date(createdAt);
+    if (!isNaN(d)) {
+      document.getElementById('footerText').innerHTML =
+        'Hub<sup style="color:var(--red);font-size:.8em">4</sup>Fix SAS — Session demo &middot; ' +
+        d.toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
+    }
+  }
+
+  /* ═══ LOGOUT ═══ */
+  function logout() {
+    localStorage.removeItem('demoSession');
+    window.location.href = 'demo-login.html';
+  }
+  document.getElementById('btnLogout').addEventListener('click', logout);
+  document.getElementById('btnLogoutFooter').addEventListener('click', logout);
+
+  /* ═══ HELPERS ═══ */
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
+  function slugify(str) {
+    return str.toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+  }
+
+  function randomAlphanum(len) {
+    var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    var result = '';
+    for (var i = 0; i < len; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
+    return result;
+  }
+
+  function starsHtml(rating) {
+    var full = Math.floor(rating);
+    var half = (rating - full) >= 0.5;
+    var html = '';
+    for (var i = 0; i < full; i++) html += '★';
+    if (half) { html += '★'; full++; }
+    for (var i = full + (half ? 0 : 0); i < 5; i++) html += '☆';
+    return html;
+  }
+
+  function getTemps(fil) {
+    var map = {
+      'PLA':  { ext: 210, bed: 60 },
+      'PETG': { ext: 240, bed: 80 },
+      'ABS':  { ext: 250, bed: 100 },
+      'ASA':  { ext: 250, bed: 100 },
+      'TPU':  { ext: 230, bed: 50 }
+    };
+    return map[fil] || map['PLA'];
+  }
+
+  /* ═══ CARD DATA ═══ */
+  var cards = [
+    { piece: piece, machine: machine, filament: filament, rating: 4.2, status: 'nouveau', owned: true },
+    { piece: 'Bras de panier lave-vaisselle', machine: 'Bosch SMS46', filament: 'PETG', rating: 4.5, status: 'suggestion', owned: false },
+    { piece: 'Poignee de hublot', machine: 'Samsung WW80', filament: 'ABS', rating: 4.0, status: 'suggestion', owned: false },
+    { piece: 'Roulette de panier', machine: 'Whirlpool WFC 3C26', filament: 'PLA', rating: 4.8, status: 'suggestion', owned: false },
+    { piece: 'Bouton de commande', machine: 'Magimix 3200XL', filament: 'PETG', rating: 3.9, status: 'suggestion', owned: false },
+    { piece: 'Support filtre', machine: 'Delonghi Magnifica', filament: 'PLA', rating: 4.3, status: 'suggestion', owned: false }
+  ];
+
+  /* ═══ RENDER CARDS ═══ */
+  var grid = document.getElementById('piecesGrid');
+
+  cards.forEach(function(card, index) {
+    var el = document.createElement('div');
+    el.className = 'piece-card fade-up fade-up-' + (index + 1);
+
+    var statusClass = card.status === 'nouveau' ? 'nouveau' : 'suggestion';
+    var statusText = card.status === 'nouveau' ? 'Nouveau' : 'Suggestion';
+
+    var imageId = 'img-' + index;
+    var imageHtml =
+      '<div class="piece-card-image" id="' + imageId + '">' +
+        '<div class="piece-card-placeholder">' +
+          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
+            '<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>' +
+          '</svg>' +
+          '<span>' + escapeHtml(card.piece) + '</span>' +
+        '</div>' +
+        '<span class="piece-status ' + statusClass + '">' + statusText + '</span>' +
+      '</div>';
+
+    var lockHtml = '';
+    if (!card.owned) {
+      lockHtml =
+        '<div class="piece-card-lock">' +
+          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+            '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>' +
+          '</svg>' +
+        '</div>';
+    }
+
+    var buttonHtml = '';
+    if (card.owned) {
+      buttonHtml =
+        '<button class="btn-download" id="btnGcode" type="button">' +
+          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
+          '<span>Telecharger G-code</span>' +
+        '</button>' +
+        '<div class="gcode-progress" id="gcodeProgress">' +
+          '<div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>' +
+          '<div class="progress-message" id="progressMsg"></div>' +
+        '</div>' +
+        '<div class="gcode-success" id="gcodeSuccess">' +
+          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' +
+          '<div class="gcode-success-text">' +
+            '<span class="gcode-success-title">G-code telecharge avec succes</span>' +
+            '<span class="gcode-success-detail">Temps estime : 2h47 &middot; Filament : 18.4g</span>' +
+          '</div>' +
+        '</div>';
+    } else {
+      buttonHtml =
+        '<button class="btn-acquire" type="button">' +
+          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>' +
+          '<span>Acquerir — 1 S-token</span>' +
+        '</button>';
+    }
+
+    el.innerHTML =
+      imageHtml +
+      lockHtml +
+      '<div class="piece-card-body">' +
+        '<div class="piece-name">' + escapeHtml(card.piece) + '</div>' +
+        '<div class="piece-machine">' + escapeHtml(card.machine) + '</div>' +
+        '<div class="piece-filament">' + card.filament + '</div>' +
+        '<div class="piece-rating">' +
+          '<span class="piece-stars">' + starsHtml(card.rating) + '</span>' +
+          '<span class="piece-rating-value">' + card.rating.toFixed(1) + '/5</span>' +
+        '</div>' +
+        buttonHtml +
+      '</div>';
+
+    grid.appendChild(el);
+  });
+
+  /* ═══ GEMINI IMAGE GENERATION ═══ */
+  var apiKey = (typeof window.GEMINI_API_KEY !== 'undefined') ? window.GEMINI_API_KEY : null;
+
+  if (apiKey) {
+    cards.forEach(function(card, index) {
+      var container = document.getElementById('img-' + index);
+      // Replace placeholder with skeleton
+      var placeholder = container.querySelector('.piece-card-placeholder');
+      var statusEl = container.querySelector('.piece-status');
+      placeholder.className = 'piece-card-placeholder skeleton';
+      placeholder.innerHTML = '';
+
+      var prompt = 'Photorealistic 3D-printed spare part, ' + card.piece + ' for ' + card.machine +
+        ', printed in ' + card.filament + ' filament, white background, studio lighting, product photography style, sharp details showing layer lines';
+
+      fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=' + apiKey, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
+        })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        var parts = data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts;
+        if (parts) {
+          for (var i = 0; i < parts.length; i++) {
+            if (parts[i].inlineData) {
+              var img = document.createElement('img');
+              img.src = 'data:' + parts[i].inlineData.mimeType + ';base64,' + parts[i].inlineData.data;
+              img.alt = card.piece;
+              img.style.animation = 'fadeIn .4s ease';
+              container.innerHTML = '';
+              container.appendChild(img);
+              container.appendChild(statusEl);
+              return;
+            }
+          }
+        }
+        // Fallback: restore placeholder
+        restorePlaceholder(container, card, statusEl);
+      })
+      .catch(function() {
+        restorePlaceholder(container, card, statusEl);
+      });
+    });
+  }
+
+  function restorePlaceholder(container, card, statusEl) {
+    container.innerHTML =
+      '<div class="piece-card-placeholder">' +
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
+          '<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>' +
+        '</svg>' +
+        '<span>' + escapeHtml(card.piece) + '</span>' +
+      '</div>';
+    container.appendChild(statusEl);
+  }
+
+  /* ═══ G-CODE DOWNLOAD ═══ */
+  var btnGcode = document.getElementById('btnGcode');
+  if (btnGcode) {
+    btnGcode.addEventListener('click', function() {
+      btnGcode.style.display = 'none';
+      var progressEl = document.getElementById('gcodeProgress');
+      var fillEl = document.getElementById('progressFill');
+      var msgEl = document.getElementById('progressMsg');
+      progressEl.classList.add('active');
+
+      var steps = [
+        { msg: 'Analyse des parametres machine...', pct: 18, delay: 800 },
+        { msg: 'Calcul des profils d\'impression ' + filament + '...', pct: 40, delay: 800 },
+        { msg: 'Generation des supports...', pct: 58, delay: 600 },
+        { msg: 'Optimisation des chemins d\'extrusion...', pct: 80, delay: 800 },
+        { msg: 'Finalisation du G-code...', pct: 100, delay: 500 }
+      ];
+
+      var stepIdx = 0;
+
+      function typeMessage(text, callback) {
+        msgEl.innerHTML = '';
+        var i = 0;
+        var cursor = document.createElement('span');
+        cursor.className = 'progress-cursor';
+        function typeChar() {
+          if (i < text.length) {
+            msgEl.textContent = text.substring(0, i + 1);
+            msgEl.appendChild(cursor);
+            i++;
+            setTimeout(typeChar, 18 + Math.random() * 12);
+          } else {
+            if (callback) callback();
+          }
+        }
+        typeChar();
+      }
+
+      function nextStep() {
+        if (stepIdx >= steps.length) {
+          // Done — trigger download
+          setTimeout(function() {
+            progressEl.classList.remove('active');
+            progressEl.style.display = 'none';
+            triggerGcodeDownload();
+            document.getElementById('gcodeSuccess').classList.add('visible');
+          }, 300);
+          return;
+        }
+        var step = steps[stepIdx];
+        fillEl.style.width = step.pct + '%';
+        typeMessage(step.msg, function() {
+          stepIdx++;
+          setTimeout(nextStep, step.delay);
+        });
+      }
+
+      nextStep();
+    });
+  }
+
+  /* ═══ G-CODE FILE GENERATION ═══ */
+  function triggerGcodeDownload() {
+    var token = 'H4F_STOKEN_' + randomAlphanum(6);
+    var temps = getTemps(filament);
+    var now = new Date();
+    var dateStr = now.toLocaleString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    var dateFile = now.toISOString().slice(0,10).replace(/-/g, '');
+
+    var gcode = [
+      '; ═══════════════════════════════════════',
+      '; Hub4Fix - G-code genere automatiquement',
+      '; ═══════════════════════════════════════',
+      '; Piece    : ' + piece,
+      '; Machine  : ' + machine,
+      '; Filament : ' + filament,
+      '; Genere le: ' + dateStr,
+      '; Profil   : Hub4Fix_' + filament + '_Standard_v2.3',
+      '; Temps estime : 2h47min',
+      '; Masse filament : 18.4g',
+      '; S-token  : ' + token,
+      '; ═══════════════════════════════════════',
+      '',
+      '; === START G-CODE ===',
+      '; ' + token.replace('STOKEN', 'STOKEN_START:'),
+      'G28 ; Home all axes',
+      'G1 Z5 F5000 ; Lift nozzle',
+      'M104 S' + temps.ext + ' ; Set extruder temp',
+      'M140 S' + temps.bed + ' ; Set bed temp',
+      'M109 S' + temps.ext + ' ; Wait for extruder',
+      'M190 S' + temps.bed + ' ; Wait for bed',
+      'G92 E0 ; Reset extruder',
+      'G1 Z0.3 F3000 ; Move to start height',
+      '',
+      '; === PURGE LINE ===',
+      'G1 X5 Y20 F5000',
+      'G1 X5 Y200 E15 F1500',
+      'G1 X5.4 Y200 F5000',
+      'G1 X5.4 Y20 E30 F1500',
+      'G92 E0',
+      '',
+      '; === LAYER 1 ===',
+      'G1 Z0.3 F1200',
+      'G1 X50 Y50 F3000',
+      'G1 X150 Y50 E8.5 F1200',
+      'G1 X150 Y150 E17.0 F1200',
+      'G1 X50 Y150 E25.5 F1200',
+      'G1 X50 Y50 E34.0 F1200',
+      '',
+      '; === LAYER 2 ===',
+      'G1 Z0.6 F1200',
+      'G1 X52 Y52 F3000',
+      'G1 X148 Y52 E42.5 F1200',
+      'G1 X148 Y148 E51.0 F1200',
+      'G1 X52 Y148 E59.5 F1200',
+      'G1 X52 Y52 E68.0 F1200',
+      '',
+      '; === LAYER 3 ===',
+      'G1 Z0.9 F1200',
+      'G1 X50 Y50 F3000',
+      'G1 X150 Y50 E76.5 F1200',
+      'G1 X150 Y150 E85.0 F1200',
+      'G1 X50 Y150 E93.5 F1200',
+      'G1 X50 Y50 E102.0 F1200',
+      '',
+      '; === LAYER 5 ===',
+      'G1 Z1.5 F1200',
+      'G1 X48 Y48 F3000',
+      'G1 X152 Y48 E118.3 F1200',
+      'G1 X152 Y152 E126.8 F1200',
+      'G1 X48 Y152 E135.3 F1200',
+      'G1 X48 Y48 E143.8 F1200',
+      'G1 X60 Y60 F3000',
+      'G1 X140 Y60 E151.2 F1200',
+      'G1 X140 Y140 E158.6 F1200',
+      'G1 X60 Y140 E166.0 F1200',
+      'G1 X60 Y60 E173.4 F1200',
+      '',
+      '; === LAYER 10 ===',
+      'G1 Z3.0 F1200',
+      'G1 X50 Y50 F3000',
+      'G1 X150 Y50 E195.7 F1200',
+      'G1 X150 Y150 E204.2 F1200',
+      'G1 X50 Y150 E212.7 F1200',
+      'G1 X50 Y50 E221.2 F1200',
+      'G1 X55 Y55 F3000',
+      'G1 X145 Y55 E228.9 F1200',
+      'G1 X145 Y145 E236.6 F1200',
+      'G1 X55 Y145 E244.3 F1200',
+      'G1 X55 Y55 E252.0 F1200',
+      '',
+      '; === MID G-CODE ===',
+      '; ' + token.replace('STOKEN', 'STOKEN_MID:'),
+      '',
+      '; === LAYER 15 ===',
+      'G1 Z4.5 F1200',
+      'G1 X50 Y50 F3000',
+      'G1 X150 Y50 E274.3 F1200',
+      'G1 X150 Y150 E282.8 F1200',
+      'G1 X50 Y150 E291.3 F1200',
+      'G1 X50 Y50 E299.8 F1200',
+      '',
+      '; === LAYER 20 ===',
+      'G1 Z6.0 F1200',
+      'G1 X52 Y52 F3000',
+      'G1 X148 Y52 E315.1 F1200',
+      'G1 X148 Y148 E323.6 F1200',
+      'G1 X52 Y148 E332.1 F1200',
+      'G1 X52 Y52 E340.6 F1200',
+      '',
+      '; === LAYER 25 (sample) ===',
+      'G1 Z7.5 F1200',
+      'G1 X55 Y55 F3000',
+      'G1 X145 Y55 E356.9 F1200',
+      'G1 X145 Y145 E365.4 F1200',
+      'G1 X55 Y145 E373.9 F1200',
+      'G1 X55 Y55 E382.4 F1200',
+      '',
+      '; === LAYER 30 ===',
+      'G1 Z9.0 F1200',
+      'G1 X50 Y50 F3000',
+      'G1 X150 Y50 E398.7 F1200',
+      'G1 X150 Y150 E407.2 F1200',
+      'G1 X50 Y150 E415.7 F1200',
+      'G1 X50 Y50 E424.2 F1200',
+      '',
+      '; === COOLING ===',
+      'M104 S0 ; Extruder off',
+      'M140 S0 ; Bed off',
+      'M107    ; Fan off',
+      '',
+      '; === END G-CODE ===',
+      '; ' + token.replace('STOKEN', 'STOKEN_END:'),
+      'G28 X Y ; Home X Y',
+      'M84     ; Disable motors',
+      '; ═══════════════════════════════════════',
+      '; Hub4Fix SAS — Fichier genere pour demo',
+      '; Ne pas utiliser en production',
+      '; ═══════════════════════════════════════',
+      ''
+    ].join('\n');
+
+    var blob = new Blob([gcode], { type: 'text/plain' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'Hub4Fix_' + slugify(piece) + '_' + slugify(machine) + '_' + dateFile + '.gcode';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+})();
+</script>
+<script>
+(function(){var cvs=document.createElement('canvas');cvs.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none;';document.body.insertBefore(cvs,document.body.firstChild);var ctx=cvs.getContext('2d'),W,H,P=[],dpr;var DIST=130,SPD=0.35;function resize(){dpr=window.devicePixelRatio||1;W=window.innerWidth;H=window.innerHeight;cvs.width=W*dpr;cvs.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}function make(){P=[];var n=Math.min(Math.round(W*H/13000),80);for(var i=0;i<n;i++)P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*SPD,vy:(Math.random()-.5)*SPD,r:Math.random()*.7+.5});}function tick(){ctx.clearRect(0,0,W,H);for(var i=0;i<P.length;i++){for(var j=i+1;j<P.length;j++){var dx=P[i].x-P[j].x,dy=P[i].y-P[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<DIST){ctx.strokeStyle='rgba(168,159,145,'+(0.28*(1-d/DIST)).toFixed(3)+')';ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(P[i].x,P[i].y);ctx.lineTo(P[j].x,P[j].y);ctx.stroke();}}ctx.fillStyle='rgba(168,159,145,.3)';ctx.beginPath();ctx.arc(P[i].x,P[i].y,P[i].r,0,6.283);ctx.fill();P[i].x+=P[i].vx;P[i].y+=P[i].vy;if(P[i].x<0||P[i].x>W)P[i].vx*=-1;if(P[i].y<0||P[i].y>H)P[i].vy*=-1;}requestAnimationFrame(tick);}resize();make();tick();window.addEventListener('resize',function(){resize();make();});})();
+</script>
+<script src="/js/sphere-bg.js"></script>
+</body>
+</html>

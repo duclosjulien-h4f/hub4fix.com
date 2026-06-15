@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Devenir modélisateur — Hub⁴Fix</title>
+<meta name="description" content="Rejoignez le réseau de modélisateurs Hub⁴Fix. Modélisez les pièces détachées orphelines les plus demandées et percevez 1/3 du prix TTC en royalties.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/glass-sphere.css">
+<style>
+:root{--ivory:#FAF8F5;--warm-white:#F3EEE8;--cream:#EDE6DC;--sand:#D4C9B8;--stone:#A89F91;--earth:#7A7268;--charcoal:#3B3632;--night:#1C1A18;--gold:#B8963E;--gold-light:#D4B15F;--gold-pale:rgba(184,150,62,0.08);--red:#C8102E;--red-soft:rgba(200,16,46,0.06);--green:#2D8B5E}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'Karla',sans-serif;background:var(--ivory);color:var(--charcoal);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+::selection{background:rgba(184,150,62,0.15);color:var(--night)}
+
+/* ════ NAV ════ */
+nav{position:sticky;top:0;z-index:100;padding:1rem 4rem;display:flex;justify-content:space-between;align-items:center;background:rgba(243,238,232,0.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(237,230,220,0.4)}
+.nav-brand{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo{width:auto;height:36px;transition:transform .5s cubic-bezier(.25,.46,.45,.94);transform-origin:center center;position:relative;z-index:101}
+.nav-brand:hover .nav-logo{transform:scale(3);filter:drop-shadow(0 8px 24px rgba(0,0,0,.2))}
+@keyframes suckIn{0%{transform:scale(1);opacity:1;filter:blur(0)}60%{transform:scale(.3) translate(0,-30vh);opacity:.6;filter:blur(2px)}100%{transform:scale(0) translate(0,-40vh);opacity:0;filter:blur(8px)}}
+.page-sucking{animation:suckIn .7s cubic-bezier(.55,.06,.68,.19) forwards;pointer-events:none}
+.nav-wordmark{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:500;color:var(--night);letter-spacing:.02em}
+.nav-wordmark sup{color:var(--red);font-size:.7em;vertical-align:super;line-height:0}
+.nav-right{display:flex;align-items:center;gap:1rem}
+.nav-back{font-size:.78rem;font-weight:500;color:var(--earth);text-decoration:none;letter-spacing:.04em;display:flex;align-items:center;gap:.4rem;transition:color .3s}
+.nav-back:hover{color:var(--red)}
+.lang-dropdown{position:relative}
+.lang-dropdown-btn{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;justify-content:center;width:34px;height:23px;padding:0;background:white;border:1px solid rgba(212,201,184,0.4);border-radius:4px;cursor:pointer;font-size:0;color:transparent;transition:all .25s ease;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.lang-dropdown-btn .flag{display:none}
+.lang-dropdown-btn::before{content:'';position:absolute;inset:0;border-radius:3px;background-size:contain;background-position:center;background-repeat:no-repeat;opacity:1;z-index:0}
+.lang-dropdown-btn:hover{box-shadow:0 2px 8px rgba(0,0,0,.12);transform:scale(1.08)}
+.lang-dropdown.open .lang-dropdown-btn{box-shadow:0 2px 10px rgba(0,0,0,.15);transform:scale(1.08)}
+.lang-dropdown-btn[data-lang="fr"]::before{background-image:url(https://flagcdn.com/w80/fr.png)}
+.lang-dropdown-btn[data-lang="en"]::before{background-image:url(https://flagcdn.com/w80/gb.png)}
+.lang-dropdown-btn[data-lang="de"]::before{background-image:url(https://flagcdn.com/w80/de.png)}
+.lang-dropdown-btn[data-lang="es"]::before{background-image:url(https://flagcdn.com/w80/es.png)}
+.lang-dropdown-btn[data-lang="it"]::before{background-image:url(https://flagcdn.com/w80/it.png)}
+.lang-dropdown-btn[data-lang="pt"]::before{background-image:url(https://flagcdn.com/w80/pt.png)}
+.lang-dropdown-btn[data-lang="zh"]::before{background-image:url(https://flagcdn.com/w80/cn.png)}
+.lang-dropdown-btn[data-lang="hi"]::before{background-image:url(https://flagcdn.com/w80/in.png)}
+.lang-dropdown-btn .lang-arrow{display:none}
+.lang-dropdown-list{position:absolute;top:calc(100% + 6px);right:0;background:rgba(255,255,255,0.97);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(212,201,184,0.3);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.08),0 2px 8px rgba(0,0,0,.04);display:none;z-index:210;min-width:155px;padding:6px;transform-origin:top right}
+.lang-dropdown.open .lang-dropdown-list{display:block;animation:langDropIn .25s cubic-bezier(.22,.61,.36,1)}
+@keyframes langDropIn{from{opacity:0;transform:scale(.95) translateY(-4px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.lang-opt{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:8px 12px;cursor:pointer;font-size:.78rem;font-weight:500;color:var(--charcoal);font-family:'Karla',sans-serif;border-radius:8px;transition:all .2s ease}
+.lang-opt .flag{display:none}
+.lang-opt::before{content:'';position:absolute;inset:0;background-size:contain;background-position:right center;background-repeat:no-repeat;border-radius:8px;opacity:0;transition:opacity .25s ease;z-index:-1}
+.lang-opt:hover{transform:translateX(2px);text-shadow:0 0 8px rgba(255,255,255,1),0 0 16px rgba(255,255,255,1),0 0 2px rgba(255,255,255,1)}
+.lang-opt:hover::before{opacity:.9}
+.lang-opt.active{font-weight:700;text-shadow:0 0 8px rgba(255,255,255,1),0 0 16px rgba(255,255,255,1),0 0 2px rgba(255,255,255,1)}
+.lang-opt.active::before{opacity:.85}
+.lang-opt[data-lang="fr"]::before{background:url(https://flagcdn.com/w160/fr.png) no-repeat right center / contain,#002654}
+.lang-opt[data-lang="en"]::before{background:url(https://flagcdn.com/w160/gb.png) no-repeat right center / contain,linear-gradient(to bottom,#012169 33%,#FFF 33% 40%,#C8102E 40% 60%,#FFF 60% 67%,#012169 67%)}
+.lang-opt[data-lang="de"]::before{background:url(https://flagcdn.com/w160/de.png) no-repeat right center / contain,linear-gradient(to bottom,#000 33%,#DD0000 33% 66%,#FFCC00 66%)}
+.lang-opt[data-lang="es"]::before{background:url(https://flagcdn.com/w160/es.png) no-repeat right center / auto 100%,linear-gradient(to bottom,#ad1519 25%,#fabd00 25% 75%,#ad1519 75%)}
+.lang-opt[data-lang="it"]::before{background:url(https://flagcdn.com/w160/it.png) no-repeat right center / contain,#009246}
+.lang-opt[data-lang="pt"]::before{background:url(https://flagcdn.com/w160/pt.png) no-repeat right center / contain,#006600}
+.lang-opt[data-lang="zh"]::before{background:url(https://flagcdn.com/w160/cn.png) no-repeat right center / contain,#EE1C25}
+.lang-opt[data-lang="hi"]::before{background:url(https://flagcdn.com/w160/in.png) no-repeat right center / contain,linear-gradient(to bottom,#ff6820 33%,#FFF 33% 66%,#046a38 66%)}
+.lang-opt::after{content:'';position:absolute;left:0;top:4px;bottom:4px;width:3px;border-radius:2px;z-index:1;transition:opacity .2s ease;opacity:.7}
+.lang-opt:hover::after,.lang-opt.active::after{opacity:1}
+.lang-opt[data-lang="fr"]::after{background:#002395}
+.lang-opt[data-lang="en"]::after{background:#012169}
+.lang-opt[data-lang="de"]::after{background:linear-gradient(to bottom,#000 33%,#DD0000 33% 66%,#FFCC00 66%)}
+.lang-opt[data-lang="es"]::after{background:linear-gradient(to bottom,#AA151B 25%,#F1BF00 25% 75%,#AA151B 75%)}
+.lang-opt[data-lang="it"]::after{background:#008C45}
+.lang-opt[data-lang="pt"]::after{background:#006600}
+.lang-opt[data-lang="zh"]::after{background:#DE2910}
+.lang-opt[data-lang="hi"]::after{background:linear-gradient(to bottom,#ff6820 33%,#FFF 33% 66%,#046a38 66%)}
+.nav-account{position:relative}
+.nav-account-btn{display:flex;align-items:center;gap:.3rem;background:none;border:none;cursor:pointer;padding:.3rem;border-radius:2px;transition:background .2s}
+.nav-account-btn:hover{background:var(--cream)}
+.nav-account-icon{width:22px;height:22px;color:var(--charcoal)}
+.nav-token-badge{background:var(--red);color:white;font-size:.65rem;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;line-height:1}
+.nav-account-menu{position:absolute;top:calc(100% + 8px);right:0;width:340px;background:white;border:1px solid var(--cream);border-radius:4px;box-shadow:0 16px 48px rgba(0,0,0,.12);display:none;z-index:200}
+.nav-account-menu.visible{display:block;animation:fadeUp .25s}
+.account-menu-header{padding:1rem 1.2rem;border-bottom:1px solid var(--cream);display:flex;justify-content:space-between;align-items:center}
+.account-menu-header-left{display:flex;flex-direction:column}
+.account-menu-name{font-weight:600;font-size:.9rem;color:var(--night)}
+.account-menu-email{font-size:.72rem;color:var(--earth);margin-top:.15rem}
+.account-menu-tokens-inline{display:flex;align-items:center;gap:.3rem;background:var(--red-soft);padding:4px 10px;border-radius:12px}
+.account-menu-tokens-inline .token-icon{font-size:.75rem;color:var(--red)}
+.account-menu-tokens-inline strong{font-family:'Courier New',monospace;font-size:1rem;color:var(--red)}
+.account-roles{padding:.8rem;display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;border-bottom:1px solid var(--cream)}
+.account-role{display:flex;flex-direction:column;align-items:center;gap:.4rem;padding:.8rem .4rem;border-radius:4px;cursor:pointer;border:2px solid transparent;transition:all .2s;text-decoration:none}
+.account-role:hover{transform:translateY(-1px)}
+.account-role-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem}
+.account-role-label{font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-align:center}
+.account-role-sub{font-size:.6rem;color:var(--earth);text-align:center;line-height:1.2}
+.account-role-client .account-role-icon{background:var(--red-soft);color:var(--red)}
+.account-role-client .account-role-label{color:var(--red)}
+.account-role-client.active{border-color:var(--red);background:var(--red-soft)}
+.account-role-printer .account-role-icon{background:#1a2a3a;color:#5ba8d4}
+.account-role-printer .account-role-label{color:#2c6e9b}
+.account-role-printer.active{border-color:#2c6e9b;background:#e8f1f8}
+.account-role-printer:hover{background:#e8f1f8}
+.account-role-modeler .account-role-icon{background:#2a1f1a;color:#d4845b}
+.account-role-modeler .account-role-label{color:#a0522d}
+.account-role-modeler.active{border-color:#a0522d;background:#f5ece5}
+.account-role-modeler:hover{background:#f5ece5}
+.account-role.locked{opacity:.5;pointer-events:auto;position:relative}
+.account-role.locked .account-role-icon{filter:grayscale(.6)}
+.account-role-lock{font-size:.6rem;margin-top:-.1rem}
+.account-role.locked:hover{opacity:.75}
+.account-role.locked:hover .account-role-sub{display:none}
+.account-role.locked:hover::after{content:'Inscription requise';font-size:.55rem;color:var(--earth);text-align:center}
+.account-menu-links{padding:.3rem 0}
+.account-menu-item{display:flex;align-items:center;gap:.6rem;padding:.6rem 1.2rem;font-size:.82rem;color:var(--charcoal);text-decoration:none;transition:background .15s}
+.account-menu-item:hover{background:var(--warm-white)}
+.account-menu-item svg{width:16px;height:16px;color:var(--stone);flex-shrink:0}
+.account-menu-logout{color:var(--earth);border-top:1px solid var(--cream)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.page-hero{padding:4rem 4rem 4rem;max-width:900px;margin:0 auto}
+.page-overline{font-size:.68rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;margin-bottom:1.5rem;display:flex;align-items:center;gap:.8rem}
+.page-overline::before{content:'';width:24px;height:1px}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,5vw,4rem);font-weight:300;color:var(--night);line-height:1.1;margin-bottom:1.5rem}
+.page-title em{font-style:italic;font-weight:400}
+.page-intro{font-size:1.1rem;line-height:1.75;color:var(--earth);font-weight:300;max-width:680px;margin-bottom:2rem}
+
+.content-section{padding:3rem 4rem;max-width:900px;margin:0 auto}
+.content-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2rem;margin-bottom:3rem}
+.content-card{padding:2rem;border-radius:3px;background:rgba(255,255,255,0.45);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(237,230,220,0.5);transition:all .3s}
+.content-card:hover{box-shadow:0 4px 24px rgba(0,0,0,.04)}
+.content-card h4{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;color:var(--night);margin-bottom:.6rem}
+.content-card p{font-size:.92rem;line-height:1.7;color:var(--earth);font-weight:300}
+.hotlist-cta{display:inline-flex;align-items:center;gap:.4rem;margin-top:.8rem;padding:.45rem 1.2rem;font-size:.72rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold);border-radius:2px;text-decoration:none;transition:all .25s}
+.hotlist-cta:hover{background:var(--gold);color:white}
+.hotlist-cta::after{content:'\2192';font-size:.85rem}
+
+.rewards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-bottom:3rem}
+.reward{padding:2rem 1.5rem;text-align:center;border-radius:3px;background:rgba(255,255,255,0.45);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(237,230,220,0.5)}
+.reward-value{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:500;color:var(--gold);line-height:1;margin-bottom:.5rem}
+.reward-label{font-size:.88rem;color:var(--night);font-weight:500;margin-bottom:.3rem}
+.reward-detail{font-size:.78rem;color:var(--stone);font-style:italic}
+
+.requirements{padding:3rem;border-radius:3px;background:rgba(243,238,232,0.4);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);margin-bottom:3rem;border-left:3px solid var(--gold)}
+.requirements h3{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:500;color:var(--night);margin-bottom:1.5rem}
+.requirements ul{list-style:none;display:flex;flex-direction:column;gap:.8rem}
+.requirements li{display:flex;align-items:baseline;gap:.8rem;font-size:.92rem;line-height:1.6;color:var(--charcoal);font-weight:300}
+.requirements li::before{content:'✓';color:var(--gold);font-weight:600;flex-shrink:0}
+
+.form-section{padding:4rem;max-width:720px;margin:0 auto 4rem;background:rgba(255,255,255,0.45);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:3px;border:1px solid rgba(237,230,220,0.5)}
+.form-section h2{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--night);margin-bottom:.6rem}
+.form-section h2 em{font-style:italic;font-weight:400}
+.form-section .form-intro{font-size:.95rem;color:var(--earth);line-height:1.7;margin-bottom:2.5rem;font-weight:300}
+.form-group{margin-bottom:1.2rem}
+.form-group label{display:block;font-size:.78rem;font-weight:600;letter-spacing:.04em;color:var(--charcoal);margin-bottom:.5rem}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:.8rem 1rem;border-radius:2px;border:1px solid var(--cream);background:var(--ivory);color:var(--night);font-size:.92rem;font-family:'Karla',sans-serif;outline:none;transition:border-color .3s}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--gold)}
+.form-group textarea{min-height:100px;resize:vertical}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form-checkboxes{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:.5rem}
+.form-check{display:flex;align-items:center;gap:.5rem;padding:.5rem .9rem;border:1px solid var(--cream);border-radius:2px;cursor:pointer;transition:all .3s;font-size:.85rem}
+.form-check:hover{border-color:var(--sand)}
+.form-check input{width:16px;height:16px;margin:0;accent-color:var(--gold)}
+.form-check.checked{background:var(--gold-pale);border-color:var(--gold)}
+.form-submit{width:100%;margin-top:1.5rem;padding:1rem;background:var(--red);color:white;border:none;border-radius:2px;font-family:'Karla',sans-serif;font-size:.85rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.form-submit:hover{background:#A00D24;transform:translateY(-1px);box-shadow:0 6px 20px rgba(200,16,46,.2)}
+.form-note{font-size:.78rem;color:var(--stone);font-style:italic;text-align:center;margin-top:1rem}
+.form-success{text-align:center;padding:3rem}
+.form-success-icon{width:56px;height:56px;border-radius:50%;background:rgba(45,139,94,.1);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;margin:0 auto 1.5rem}
+.form-success h3{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:400;color:var(--night);margin-bottom:.8rem}
+.form-success p{font-size:.95rem;color:var(--earth);line-height:1.7;font-weight:300}
+
+footer{padding:3rem 4rem;border-top:1px solid var(--cream);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.footer-brand{display:flex;align-items:center;gap:.6rem}
+.footer-logo{width:auto;height:28px}.footer-logo svg{width:auto;height:100%}
+.footer-copy{font-size:.78rem;color:var(--stone)}
+.footer-tagline{font-family:'Cormorant Garamond',serif;font-size:.85rem;font-style:italic;color:var(--sand)}
+
+@media(max-width:900px){
+  nav{padding:1rem 1.5rem}
+  .page-hero{padding:6rem 1.5rem 2rem}
+  .content-section{padding:2rem 1.5rem}
+  .content-grid,.rewards-grid{grid-template-columns:1fr}
+  .requirements{padding:2rem 1.5rem}
+  .form-section{padding:2rem 1.5rem;margin:0 1rem 2rem}
+  .form-row{grid-template-columns:1fr}
+  footer{padding:2rem 1.5rem}
+}
+
+/* ════ MOBILE 600px ════ */
+@media(max-width:600px){
+  nav{padding:.6rem 1rem}
+  .nav-wordmark{font-size:1.1rem}
+  .nav-right{gap:.5rem}
+  .nav-account-menu{width:calc(100vw - 2rem);max-width:340px;right:0}
+  .lang-dropdown-list{right:0;min-width:140px}
+  .lang-dropdown-btn{width:28px;height:19px}
+  .page-hero{padding:3rem 1rem 1.5rem}
+  .page-title{font-size:clamp(1.8rem,5vw,2.5rem)}
+  .page-overline{font-size:.6rem;letter-spacing:.12em}
+  .page-intro{font-size:.95rem;line-height:1.6}
+  .content-section{padding:1.5rem 1rem}
+  .content-card{padding:1.5rem}
+  .content-card h4{font-size:1.05rem}
+  .content-card p{font-size:.85rem}
+  .content-grid{gap:1rem}
+  .rewards-grid{gap:1rem}
+  .reward{padding:1.5rem 1rem}
+  .reward-value{font-size:1.6rem}
+  .reward-label{font-size:.82rem}
+  .requirements{padding:1.5rem 1rem}
+  .requirements h3{font-size:1.15rem}
+  .requirements li{font-size:.85rem;gap:.6rem}
+  .form-section{padding:1.5rem 1rem;margin:0 .5rem 1.5rem}
+  .form-section h2{font-size:1.6rem}
+  .form-section .form-intro{font-size:.88rem;margin-bottom:1.5rem}
+  .form-group input,.form-group textarea,.form-group select{font-size:.88rem;padding:.7rem .8rem}
+  .form-checkboxes{gap:.5rem}
+  .form-check{padding:.4rem .7rem;font-size:.8rem}
+  .form-submit{font-size:.8rem;padding:.85rem}
+  footer{padding:1.5rem 1rem;flex-direction:column;align-items:flex-start;gap:.8rem}
+  .footer-copy{font-size:.72rem}
+  .footer-tagline{font-size:.78rem}
+}
+
+/* ════ MOBILE 480px ════ */
+@media(max-width:480px){
+  .page-title{font-size:1.6rem}
+  .page-intro{font-size:.9rem}
+  .content-card{padding:1.2rem}
+  .content-card h4{font-size:1rem}
+  .reward-value{font-size:1.4rem}
+  .form-section h2{font-size:1.4rem}
+  .form-check{font-size:.75rem;padding:.35rem .6rem}
+}
+
+/* ════ WATERMARK SLOGANS ════ */
+.section-watermark{position:relative;overflow:hidden}
+.section-watermark::before{content:attr(data-watermark);position:absolute;font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,6vw,5rem);font-weight:300;font-style:italic;color:rgba(180,160,130,.07);white-space:nowrap;pointer-events:none;z-index:0;top:50%;left:50%;transform:translate(-50%,-50%);width:max-content}
+.section-watermark>*{position:relative;z-index:1}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand">
+    <svg class="nav-logo" viewBox="0 0 202.6 265.4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><linearGradient id="lg1"><stop style="stop-color:#2a00fe" offset="0.336"/><stop style="stop-color:#fff" offset="1"/></linearGradient><linearGradient id="lg2"><stop style="stop-color:#fff" offset="0.107"/><stop style="stop-color:#fe0000" offset="0.684"/></linearGradient><linearGradient xlink:href="#lg1" id="grad1" x1="129.89" y1="808.83" x2="194.31" y2="808.83" gradientUnits="userSpaceOnUse"/><linearGradient xlink:href="#lg2" id="grad2" x1="271.02" y1="731.42" x2="327.45" y2="731.42" gradientUnits="userSpaceOnUse" spreadMethod="pad"/></defs><g transform="translate(-129.894,-634.847)"><g transform="translate(-114.063,-139.373)"><path d="m 353.331,791.185 -24.32,66.818 c -8.972,24.651 9.283,50.722 35.516,50.722 h 72.08 c 5.218,0 9.449,4.23 9.449,9.449 0,5.218 -4.231,9.449 -9.449,9.449 h -72.08 c -39.35,0 -66.732,-39.106 -53.274,-76.083 l 7.123,-19.57 17.2,-47.256 c 1.787,-4.903 7.21,-7.428 12.113,-5.642 4.903,1.787 7.429,7.21 5.643,12.112 z" style="fill:#000;stroke:#000"/><path d="m 314.879,1026.411 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#000;stroke:#000"/><path d="m 249.987,1019.877 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:#000;stroke:#000"/><path d="m 359.24,904.532 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#000;stroke:#000"/><path d="m 436.607,884.024 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:#000;stroke:#000"/></g><g><path d="m 234.225,648.032 -24.32,66.818 a 37.795,37.795 0 0 0 35.516,50.722 h 72.08 a 9.449,9.449 0 0 1 0,18.898 h -72.08 a 56.693,56.693 0 0 1 -53.274,-76.083 l 24.323,-66.826 a 9.449,9.449 0 0 1 17.755,6.471 z" style="fill:#fff;stroke:#000"/><path d="m 195.773,883.258 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#fff;stroke:#000"/><path d="m 130.881,876.724 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:url(#grad1);stroke:#000"/><path d="m 240.133,761.379 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#fff;stroke:#000"/><path d="m 317.5,740.871 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:url(#grad2);stroke:#000"/></g></g></svg>
+    <span class="nav-wordmark">Hub<sup>4</sup>Fix</span>
+  </a>
+  <div class="nav-right">
+    <a href="index.html" class="nav-back"><span class="nav-back-arrow">←</span></a>
+    <div class="lang-dropdown" id="langDropdown">
+      <button class="lang-dropdown-btn" id="langDropdownBtn" data-lang="fr"></button>
+      <div class="lang-dropdown-list" id="langDropdownList">
+        <button class="lang-opt active" data-lang="fr"><span class="flag">🇫🇷</span> Francais</button>
+        <button class="lang-opt" data-lang="en"><span class="flag">🇬🇧</span> English</button>
+        <button class="lang-opt" data-lang="de"><span class="flag">🇩🇪</span> Deutsch</button>
+        <button class="lang-opt" data-lang="es"><span class="flag">🇪🇸</span> Espanol</button>
+        <button class="lang-opt" data-lang="it"><span class="flag">🇮🇹</span> Italiano</button>
+        <button class="lang-opt" data-lang="pt"><span class="flag">🇵🇹</span> Portugues</button>
+        <button class="lang-opt" data-lang="zh"><span class="flag">🇨🇳</span> 中文</button>
+        <button class="lang-opt" data-lang="hi"><span class="flag">🇮🇳</span> हिन्दी</button>
+      </div>
+    </div>
+    <div class="nav-account" id="navAccount">
+      <button class="nav-account-btn" id="accountBtn">
+        <svg class="nav-account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0112 0v1"/></svg>
+        <span class="nav-token-badge" id="tokenBadge">5</span>
+      </button>
+      <div class="nav-account-menu" id="accountMenu">
+        <div class="account-menu-header">
+          <div class="account-menu-header-left">
+            <span class="account-menu-name">Julien D.</span>
+            <span class="account-menu-email">demo@hub4fix.com</span>
+          </div>
+          <div class="account-menu-tokens-inline">
+            <span class="token-icon">⬡</span>
+            <strong id="accountTokenCount">5</strong>
+          </div>
+        </div>
+        <div class="account-roles">
+          <a href="#" class="account-role account-role-client active">
+            <div class="account-role-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            <span class="account-role-label">Reparer</span>
+            <span class="account-role-sub">Trouver sa piece</span>
+          </a>
+          <a href="printer.html" class="account-role account-role-printer locked">
+            <div class="account-role-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="20" width="18" height="2" rx=".5"/><path d="M7 20v-5h10v5"/><path d="M12 4v6"/><path d="M9.5 10h5L12 15.5 9.5 10z"/></svg>
+            </div>
+            <span class="account-role-label">Printer</span>
+            <span class="account-role-sub">Devenir printer</span>
+            <span class="account-role-lock">🔒</span>
+          </a>
+          <a href="modelisateur.html" class="account-role account-role-modeler locked">
+            <div class="account-role-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 7v4l9 5 9-5V7l-9-5z"/><path d="M12 22V12"/><path d="M3 7l9 5 9-5"/><path d="M21 11v6l-9 5-9-5v-6"/></svg>
+            </div>
+            <span class="account-role-label">Modelisateur</span>
+            <span class="account-role-sub">Devenir modelisateur</span>
+            <span class="account-role-lock">🔒</span>
+          </a>
+        </div>
+        <div class="account-menu-links">
+          <a href="#" class="account-menu-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+            <span data-i18n="account_library">Ma bibliotheque</span>
+          </a>
+          <a href="#" class="account-menu-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            <span data-i18n="account_settings">Parametres</span>
+          </a>
+          <a href="#" class="account-menu-item account-menu-logout">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span data-i18n="account_logout">Deconnexion</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<section class="page-hero section-watermark" data-watermark="La technologie au service du geste juste.">
+  <div class="page-overline" style="color:var(--gold)"><style>.page-hero .page-overline::before{background:var(--gold)}</style><span data-i18n="hero_overline">Pour les créateurs numériques</span></div>
+  <h1 class="page-title" data-i18n-html="hero_title">Devenir <em style="color:var(--gold)">modélisateur</em><br>Hub⁴Fix</h1>
+  <p class="page-intro" data-i18n="hero_intro">Si vous maîtrisez la CAO et que vous voulez mettre votre talent au service de l'économie circulaire, vous êtes au bon endroit. Les modélisateurs Hub⁴Fix sont les artisans numériques qui donnent vie à notre catalogue — chaque fichier qu'ils créent sauve des milliers d'appareils de la déchetterie.</p>
+</section>
+
+<section class="content-section section-watermark" data-watermark="Dématérialiser le stock, rematérialiser l'objet.">
+  <div class="content-grid">
+    <div class="content-card">
+      <h4 data-i18n="card_hotlist_title">La Hotlist, votre boussole</h4>
+      <p data-i18n="card_hotlist_body">Vous consultez en temps réel les pièces les plus demandées par les utilisateurs. Pas de modélisation au hasard : vous modélisez ce que le marché cherche activement, avec une rentabilité prouvée dès la mise en ligne.</p>
+      <a href="hotlist.html" class="hotlist-cta" data-i18n="card_hotlist_cta">Consulter la Hotlist</a>
+    </div>
+    <div class="content-card">
+      <h4 data-i18n="card_fifo_title">Système de Ticket FIFO</h4>
+      <p data-i18n="card_fifo_body">Vous réservez une pièce en priorité selon votre niveau (Starter, Confirmé, Expert, Master). Plus votre Score de Fiabilité Cumulatif (SFC) est élevé, plus vous avez un accès privilégié aux pièces à forte avance.</p>
+    </div>
+    <div class="content-card">
+      <h4 data-i18n="card_royalties_title">Royalties à vie, valeur croissante</h4>
+      <p data-i18n-html="card_royalties_body">Vous percevez <strong>1/3 du prix TTC</strong> de chaque vente. Mais surtout, deux forces jouent en votre faveur avec le temps : d'un côté, <strong>la pièce physique disparaît</strong> des stocks fabricants — votre fichier devient le seul recours. De l'autre, <strong>les appareils vieillissent et se cassent davantage</strong> — la demande de remplacement augmente mécaniquement. Résultat : vos royalties ne s'érodent pas, <strong>elles s'accélèrent année après année</strong>.</p>
+    </div>
+    <div class="content-card">
+      <h4 data-i18n="card_advance_title">Avance sur royalties</h4>
+      <p data-i18n="card_advance_body">Pour les pièces à forte demande, Hub⁴Fix propose une avance. Modèle progressif : 60€ de base + 1€ à 3€ par inscrit en Hotlist. L'avance est un signal de marché — plus la demande est forte, plus l'avance grimpe.</p>
+    </div>
+  </div>
+
+  <div class="requirements">
+    <h3 data-i18n="req_title">Profil recherché</h3>
+    <ul>
+      <li data-i18n="req_1">Maîtrise d'au moins un logiciel CAO (Fusion 360, SolidWorks, CATIA, SolidEdge, OnShape, Blender…)</li>
+      <li data-i18n="req_2">Capacité à produire un fichier STEP exportable + votre fichier natif</li>
+      <li data-i18n="req_3">Connaissance des contraintes de l'impression 3D (tolérances, orientation, supports)</li>
+      <li data-i18n="req_4">Statut de freelance (micro-entrepreneur, auto-entrepreneur, SASU, société)</li>
+      <li data-i18n="req_5">Rigueur, méthode, respect des délais</li>
+      <li data-i18n-html="req_6"><strong>Optionnel :</strong> scan 3D, reverse engineering, maîtrise de QuickSurface</li>
+    </ul>
+  </div>
+
+  <div class="rewards-grid">
+    <div class="reward">
+      <div class="reward-value">1/3</div>
+      <div class="reward-label" data-i18n="reward_1_label">du prix TTC en royalties</div>
+      <div class="reward-detail" data-i18n="reward_1_detail">Paiement mensuel par virement</div>
+    </div>
+    <div class="reward">
+      <div class="reward-value">60€+</div>
+      <div class="reward-label" data-i18n="reward_2_label">d'avance sur royalties</div>
+      <div class="reward-detail" data-i18n="reward_2_detail">Selon demande Hotlist</div>
+    </div>
+    <div class="reward">
+      <div class="reward-value">∞</div>
+      <div class="reward-label" data-i18n="reward_3_label">Valeur croissante</div>
+      <div class="reward-detail" data-i18n="reward_3_detail">La rareté augmente avec le temps</div>
+    </div>
+  </div>
+</section>
+
+<section class="form-section">
+  <h2 data-i18n-html="form_title">Candidature <em>modélisateur</em></h2>
+  <p class="form-intro" data-i18n="form_intro">Remplissez ce formulaire pour nous présenter votre profil. Nous étudions chaque candidature et revenons vers vous sous 7 jours.</p>
+
+  <form id="modeliseur-form" onsubmit="return submitModForm(event)">
+    <div class="form-row">
+      <div class="form-group">
+        <label data-i18n="form_firstname">Prénom *</label>
+        <input type="text" name="prenom" required>
+      </div>
+      <div class="form-group">
+        <label data-i18n="form_lastname">Nom *</label>
+        <input type="text" name="nom" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label data-i18n="form_email">Email *</label>
+      <input type="email" name="email" required>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label data-i18n="form_phone">Téléphone</label>
+        <input type="tel" name="tel">
+      </div>
+      <div class="form-group">
+        <label data-i18n="form_zip">Code postal *</label>
+        <input type="text" name="cp" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label data-i18n="form_status">Statut professionnel</label>
+      <select name="statut">
+        <option value="" data-i18n="form_status_default">— Sélectionnez —</option>
+        <option data-i18n="form_status_micro">Micro-entrepreneur / Auto-entrepreneur</option>
+        <option data-i18n="form_status_eurl">EURL / SASU</option>
+        <option data-i18n="form_status_company">Société (SARL, SAS…)</option>
+        <option data-i18n="form_status_none">Pas encore de statut</option>
+        <option data-i18n="form_status_other">Autre</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label data-i18n="form_cad">Logiciels de CAO maîtrisés *</label>
+      <div class="form-checkboxes">
+        <label class="form-check"><input type="checkbox" name="logiciels" value="Fusion 360"> Fusion 360</label>
+        <label class="form-check"><input type="checkbox" name="logiciels" value="SolidWorks"> SolidWorks</label>
+        <label class="form-check"><input type="checkbox" name="logiciels" value="CATIA"> CATIA</label>
+        <label class="form-check"><input type="checkbox" name="logiciels" value="SolidEdge"> SolidEdge</label>
+        <label class="form-check"><input type="checkbox" name="logiciels" value="OnShape"> OnShape</label>
+        <label class="form-check"><input type="checkbox" name="logiciels" value="Blender"> Blender</label>
+        <label class="form-check"><input type="checkbox" name="logiciels" value="FreeCAD"> FreeCAD</label>
+        <label class="form-check"><input type="checkbox" name="logiciels" value="3DS Max"> 3DS Max</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label data-i18n="form_experience">Années d'expérience en modélisation 3D</label>
+      <select name="experience">
+        <option value="" data-i18n="form_exp_default">— Sélectionnez —</option>
+        <option data-i18n="form_exp_2">Moins de 2 ans</option>
+        <option data-i18n="form_exp_2_5">2 à 5 ans</option>
+        <option data-i18n="form_exp_5_10">5 à 10 ans</option>
+        <option data-i18n="form_exp_10">Plus de 10 ans</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label data-i18n="form_extra">Capacités supplémentaires</label>
+      <div class="form-checkboxes">
+        <label class="form-check"><input type="checkbox" name="capa" value="Scan 3D"> <span data-i18n="form_extra_scan">Scan 3D</span></label>
+        <label class="form-check"><input type="checkbox" name="capa" value="Reverse engineering"> <span data-i18n="form_extra_reverse">Reverse engineering</span></label>
+        <label class="form-check"><input type="checkbox" name="capa" value="Impression 3D"> <span data-i18n="form_extra_print">Impression 3D (printer)</span></label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label data-i18n="form_portfolio">Portfolio / lien vers vos travaux</label>
+      <input type="url" name="portfolio" placeholder="https://...">
+    </div>
+
+    <div class="form-group">
+      <label data-i18n="form_message">Message / présentation libre</label>
+      <textarea name="message" data-i18n-placeholder="form_message_placeholder" placeholder="Parlez-nous de votre parcours, de vos motivations, de ce que vous voulez apporter à Hub⁴Fix…"></textarea>
+    </div>
+
+    <button type="submit" class="form-submit" data-i18n="form_submit">Envoyer ma candidature →</button>
+    <p class="form-note" data-i18n="form_note">Vos données sont traitées conformément au RGPD. Nous revenons vers vous sous 7 jours.</p>
+  </form>
+
+  <div id="mod-success" class="form-success" style="display:none">
+    <div class="form-success-icon">✓</div>
+    <h3 data-i18n="success_title">Candidature reçue</h3>
+    <p data-i18n="success_body">Merci pour votre candidature. Nous étudions votre profil et revenons vers vous par email sous 7 jours. À très vite !</p>
+  </div>
+</section>
+
+<script src="js/collect-email.js"></script>
+<footer>
+  <div class="footer-brand">
+    <div class="footer-logo"><svg viewBox="0 0 202.6 265.4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><linearGradient id="flg1"><stop style="stop-color:#2a00fe" offset="0.336"/><stop style="stop-color:#fff" offset="1"/></linearGradient><linearGradient id="flg2"><stop style="stop-color:#fff" offset="0.107"/><stop style="stop-color:#fe0000" offset="0.684"/></linearGradient><linearGradient xlink:href="#flg1" id="fgr1" x1="129.89" y1="808.83" x2="194.31" y2="808.83" gradientUnits="userSpaceOnUse"/><linearGradient xlink:href="#flg2" id="fgr2" x1="271.02" y1="731.42" x2="327.45" y2="731.42" gradientUnits="userSpaceOnUse" spreadMethod="pad"/></defs><g transform="translate(-129.894,-634.847)"><g transform="translate(-114.063,-139.373)"><path d="m 353.331,791.185 -24.32,66.818 c -8.972,24.651 9.283,50.722 35.516,50.722 h 72.08 c 5.218,0 9.449,4.23 9.449,9.449 0,5.218 -4.231,9.449 -9.449,9.449 h -72.08 c -39.35,0 -66.732,-39.106 -53.274,-76.083 l 7.123,-19.57 17.2,-47.256 c 1.787,-4.903 7.21,-7.428 12.113,-5.642 4.903,1.787 7.429,7.21 5.643,12.112 z" style="fill:#000;stroke:#000"/><path d="m 314.879,1026.411 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#000;stroke:#000"/><path d="m 249.987,1019.877 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:#000;stroke:#000"/><path d="m 359.24,904.532 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#000;stroke:#000"/><path d="m 436.607,884.024 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:#000;stroke:#000"/></g><g><path d="m 234.225,648.032 -24.32,66.818 a 37.795,37.795 0 0 0 35.516,50.722 h 72.08 a 9.449,9.449 0 0 1 0,18.898 h -72.08 a 56.693,56.693 0 0 1 -53.274,-76.083 l 24.323,-66.826 a 9.449,9.449 0 0 1 17.755,6.471 z" style="fill:#fff;stroke:#000"/><path d="m 195.773,883.258 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#fff;stroke:#000"/><path d="m 130.881,876.724 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:url(#fgr1);stroke:#000"/><path d="m 240.133,761.379 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#fff;stroke:#000"/><path d="m 317.5,740.871 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:url(#fgr2);stroke:#000"/></g></g></svg></div>
+    <span class="footer-copy">© 2026 Hub⁴Fix — La STaTION, Viry-Châtillon · <a href="mailto:contact@hub4fix.com" style="color:var(--gold);text-decoration:none">contact@hub4fix.com</a></span>
+  </div>
+  <span class="footer-tagline" data-i18n="footer_tagline">Un fichier numérique ne s'épuise jamais.</span>
+  <div style="width:100%;text-align:center;margin-top:.6rem;font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.06em"><a href="cgu.html" style="color:var(--stone,#A89F91);text-decoration:none">CGU</a> &middot; <a href="cgv.html" style="color:var(--stone,#A89F91);text-decoration:none">CGV</a></div>
+</footer>
+
+<script>
+// ════ I18N ════
+var I18N = {
+  fr: {
+    hero_overline: "Pour les créateurs numériques",
+    hero_title: 'Devenir <em style="color:var(--gold)">modélisateur</em><br>Hub⁴Fix',
+    hero_intro: "Si vous maîtrisez la CAO et que vous voulez mettre votre talent au service de l'économie circulaire, vous êtes au bon endroit. Les modélisateurs Hub⁴Fix sont les artisans numériques qui donnent vie à notre catalogue — chaque fichier qu'ils créent sauve des milliers d'appareils de la déchetterie.",
+    card_hotlist_title: "La Hotlist, votre boussole",
+    card_hotlist_body: "Vous consultez en temps réel les pièces les plus demandées par les utilisateurs. Pas de modélisation au hasard : vous modélisez ce que le marché cherche activement, avec une rentabilité prouvée dès la mise en ligne.",
+    card_hotlist_cta: "Consulter la Hotlist",
+    card_fifo_title: "Système de Ticket FIFO",
+    card_fifo_body: "Vous réservez une pièce en priorité selon votre niveau (Starter, Confirmé, Expert, Master). Plus votre Score de Fiabilité Cumulatif (SFC) est élevé, plus vous avez un accès privilégié aux pièces à forte avance.",
+    card_royalties_title: "Royalties à vie, valeur croissante",
+    card_royalties_body: "Vous percevez <strong>1/3 du prix TTC</strong> de chaque vente. Mais surtout, deux forces jouent en votre faveur avec le temps : d'un côté, <strong>la pièce physique disparaît</strong> des stocks fabricants — votre fichier devient le seul recours. De l'autre, <strong>les appareils vieillissent et se cassent davantage</strong> — la demande de remplacement augmente mécaniquement. Résultat : vos royalties ne s'érodent pas, <strong>elles s'accélèrent année après année</strong>.",
+    card_advance_title: "Avance sur royalties",
+    card_advance_body: "Pour les pièces à forte demande, Hub⁴Fix propose une avance. Modèle progressif : 60 € de base + 1 € à 3 € par inscrit en Hot List. L'avance est un signal de marché — plus la demande est forte, plus l'avance grimpe.",
+    req_title: "Profil recherché",
+    req_1: "Maîtrise d'au moins un logiciel CAO (Fusion 360, SolidWorks, CATIA, SolidEdge, OnShape, Blender…)",
+    req_2: "Capacité à produire un fichier STEP exportable + votre fichier natif",
+    req_3: "Connaissance des contraintes de l'impression 3D (tolérances, orientation, supports)",
+    req_4: "Statut de freelance (micro-entrepreneur, auto-entrepreneur, SASU, société)",
+    req_5: "Rigueur, méthode, respect des délais",
+    req_6: "<strong>Optionnel :</strong> scan 3D, reverse engineering, maîtrise de QuickSurface",
+    reward_1_label: "du prix TTC en royalties",
+    reward_1_detail: "Paiement mensuel par virement",
+    reward_2_label: "d'avance sur royalties",
+    reward_2_detail: "Selon demande Hot List",
+    reward_3_label: "Valeur croissante",
+    reward_3_detail: "La rareté augmente avec le temps",
+    form_title: "Candidature <em>modélisateur</em>",
+    form_intro: "Remplissez ce formulaire pour nous présenter votre profil. Nous étudions chaque candidature et revenons vers vous sous 7 jours.",
+    form_firstname: "Prénom *",
+    form_lastname: "Nom *",
+    form_email: "Email *",
+    form_phone: "Téléphone",
+    form_zip: "Code postal *",
+    form_status: "Statut professionnel",
+    form_status_default: "— Sélectionnez —",
+    form_status_micro: "Micro-entrepreneur / Auto-entrepreneur",
+    form_status_eurl: "EURL / SASU",
+    form_status_company: "Société (SARL, SAS…)",
+    form_status_none: "Pas encore de statut",
+    form_status_other: "Autre",
+    form_cad: "Logiciels de CAO maîtrisés *",
+    form_experience: "Années d'expérience en modélisation 3D",
+    form_exp_default: "— Sélectionnez —",
+    form_exp_2: "Moins de 2 ans",
+    form_exp_2_5: "2 à 5 ans",
+    form_exp_5_10: "5 à 10 ans",
+    form_exp_10: "Plus de 10 ans",
+    form_extra: "Capacités supplémentaires",
+    form_extra_scan: "Scan 3D",
+    form_extra_reverse: "Reverse engineering",
+    form_extra_print: "Impression 3D (printer)",
+    form_portfolio: "Portfolio / lien vers vos travaux",
+    form_message: "Message / présentation libre",
+    form_message_placeholder: "Parlez-nous de votre parcours, de vos motivations, de ce que vous voulez apporter à Hub⁴Fix…",
+    form_submit: "Envoyer ma candidature →",
+    form_note: "Vos données sont traitées conformément au RGPD. Nous revenons vers vous sous 7 jours.",
+    success_title: "Candidature reçue",
+    success_body: "Merci pour votre candidature. Nous étudions votre profil et revenons vers vous par email sous 7 jours. À très vite !",
+    account_library: "Ma bibliothèque",
+    account_settings: "Paramètres",
+    account_logout: "Déconnexion",
+    footer_tagline: "Un fichier numérique ne s'épuise jamais."
+  },
+
+  en: {
+    hero_overline: "For digital creators",
+    hero_title: 'Become a <em style="color:var(--gold)">modeler</em><br>at Hub⁴Fix',
+    hero_intro: "If you master CAD and want to put your talent at the service of the circular economy, you're in the right place. Hub⁴Fix modelers are the digital craftsmen who bring our catalog to life — every file they create saves thousands of appliances from landfill.",
+    card_hotlist_title: "The Hot List, your compass",
+    card_hotlist_body: "You access in real time the parts most requested by users. No random modeling: you design what the market is actively searching for, with proven profitability from the moment the file goes live.",
+    card_hotlist_cta: "View the Hot List",
+    card_fifo_title: "FIFO Ticket System",
+    card_fifo_body: "You reserve a part based on your tier (Starter, Confirmed, Expert, Master). The higher your Cumulative Reliability Score (CRS), the earlier you get access to parts with the highest advances.",
+    card_royalties_title: "Lifetime royalties, growing value",
+    card_royalties_body: "You earn <strong>1/3 of the retail price</strong> on every sale. But two forces work in your favour over time: on one hand, <strong>the physical part disappears</strong> from manufacturer stocks — your file becomes the only option. On the other, <strong>appliances age and break more</strong> — replacement demand grows mechanically. Result: your royalties don't erode, <strong>they accelerate year after year</strong>.",
+    card_advance_title: "Royalty advance",
+    card_advance_body: "For high-demand parts, Hub⁴Fix offers an advance. Progressive model: €60 base + €1 to €3 per Hot List subscriber. The advance is a market signal — the stronger the demand, the higher it climbs.",
+    req_title: "Desired profile",
+    req_1: "Proficiency in at least one CAD software (Fusion 360, SolidWorks, CATIA, SolidEdge, OnShape, Blender...)",
+    req_2: "Ability to produce an exportable STEP file + your native file",
+    req_3: "Knowledge of 3D printing constraints (tolerances, orientation, supports)",
+    req_4: "Freelance status (sole trader, micro-enterprise, limited company)",
+    req_5: "Rigour, methodology, respect for deadlines",
+    req_6: "<strong>Optional:</strong> 3D scanning, reverse engineering, QuickSurface proficiency",
+    reward_1_label: "of retail price in royalties",
+    reward_1_detail: "Monthly payment by bank transfer",
+    reward_2_label: "royalty advance",
+    reward_2_detail: "Based on Hot List demand",
+    reward_3_label: "Growing value",
+    reward_3_detail: "Scarcity increases over time",
+    form_title: "Modeler <em>application</em>",
+    form_intro: "Fill in this form to introduce your profile. We review every application and get back to you within 7 days.",
+    form_firstname: "First name *",
+    form_lastname: "Last name *",
+    form_email: "Email *",
+    form_phone: "Phone",
+    form_zip: "Postal code *",
+    form_status: "Professional status",
+    form_status_default: "— Select —",
+    form_status_micro: "Sole trader / Micro-enterprise",
+    form_status_eurl: "EURL / SASU",
+    form_status_company: "Company (SARL, SAS...)",
+    form_status_none: "No status yet",
+    form_status_other: "Other",
+    form_cad: "CAD software proficiency *",
+    form_experience: "Years of 3D modeling experience",
+    form_exp_default: "— Select —",
+    form_exp_2: "Less than 2 years",
+    form_exp_2_5: "2 to 5 years",
+    form_exp_5_10: "5 to 10 years",
+    form_exp_10: "More than 10 years",
+    form_extra: "Additional capabilities",
+    form_extra_scan: "3D scanning",
+    form_extra_reverse: "Reverse engineering",
+    form_extra_print: "3D printing (printer)",
+    form_portfolio: "Portfolio / link to your work",
+    form_message: "Message / free introduction",
+    form_message_placeholder: "Tell us about your background, motivations, and what you want to bring to Hub⁴Fix...",
+    form_submit: "Submit my application →",
+    form_note: "Your data is processed in compliance with GDPR. We will get back to you within 7 days.",
+    success_title: "Application received",
+    success_body: "Thank you for your application. We are reviewing your profile and will contact you by email within 7 days. See you soon!",
+    account_library: "My library",
+    account_settings: "Settings",
+    account_logout: "Log out",
+    footer_tagline: "A digital file never runs out."
+  },
+
+  de: {
+    hero_overline: "Für digitale Gestalter",
+    hero_title: '<em style="color:var(--gold)">Modellierer</em> werden<br>bei Hub⁴Fix',
+    hero_intro: "Sie beherrschen CAD und möchten Ihr Talent in den Dienst der Kreislaufwirtschaft stellen? Dann sind Sie hier richtig. Hub⁴Fix-Modellierer sind die digitalen Handwerker, die unseren Katalog zum Leben erwecken — jede Datei, die sie erstellen, rettet Tausende Geräte vor der Deponie.",
+    card_hotlist_title: "Die Hot List, Ihr Kompass",
+    card_hotlist_body: "Sie sehen in Echtzeit die von den Nutzern am meisten nachgefragten Teile. Kein zufälliges Modellieren: Sie entwerfen, wonach der Markt aktiv sucht, mit nachgewiesener Rentabilität ab der Veröffentlichung.",
+    card_hotlist_cta: "Hot List ansehen",
+    card_fifo_title: "FIFO-Ticket-System",
+    card_fifo_body: "Sie reservieren ein Teil je nach Ihrer Stufe (Starter, Bestätigt, Experte, Master). Je höher Ihr Kumulativer Zuverlässigkeits-Score (KZS), desto früher erhalten Sie Zugang zu Teilen mit den höchsten Vorschüssen.",
+    card_royalties_title: "Lebenslange Royalties, steigender Wert",
+    card_royalties_body: "Sie erhalten <strong>1/3 des Bruttopreises</strong> bei jedem Verkauf. Zwei Kräfte wirken dabei zu Ihren Gunsten: Einerseits <strong>verschwindet das physische Teil</strong> aus den Lagern der Hersteller — Ihre Datei wird zur einzigen Option. Andererseits <strong>altern Geräte und gehen häufiger kaputt</strong> — die Ersatznachfrage steigt mechanisch. Ergebnis: Ihre Royalties erodieren nicht, <strong>sie beschleunigen sich Jahr für Jahr</strong>.",
+    card_advance_title: "Vorschuss auf Royalties",
+    card_advance_body: "Für stark nachgefragte Teile bietet Hub⁴Fix einen Vorschuss an. Progressives Modell: 60 € Basis + 1 € bis 3 € pro Hot List-Abonnent. Der Vorschuss ist ein Marktsignal — je stärker die Nachfrage, desto höher steigt er.",
+    req_title: "Gesuchtes Profil",
+    req_1: "Beherrschung mindestens einer CAD-Software (Fusion 360, SolidWorks, CATIA, SolidEdge, OnShape, Blender…)",
+    req_2: "Fähigkeit, eine exportierbare STEP-Datei + Ihre native Datei zu liefern",
+    req_3: "Kenntnis der Einschränkungen des 3D-Drucks (Toleranzen, Ausrichtung, Stützstrukturen)",
+    req_4: "Freiberufler-Status (Einzelunternehmen, Kleinunternehmer, GmbH, Kapitalgesellschaft)",
+    req_5: "Sorgfalt, Methodik, Einhaltung von Fristen",
+    req_6: "<strong>Optional:</strong> 3D-Scan, Reverse Engineering, QuickSurface-Kenntnisse",
+    reward_1_label: "des Bruttopreises als Royalties",
+    reward_1_detail: "Monatliche Überweisung",
+    reward_2_label: "Vorschuss auf Royalties",
+    reward_2_detail: "Je nach Hot List-Nachfrage",
+    reward_3_label: "Steigender Wert",
+    reward_3_detail: "Knappheit nimmt mit der Zeit zu",
+    form_title: "Bewerbung als <em>Modellierer</em>",
+    form_intro: "Füllen Sie dieses Formular aus, um sich vorzustellen. Wir prüfen jede Bewerbung und melden uns innerhalb von 7 Tagen bei Ihnen.",
+    form_firstname: "Vorname *",
+    form_lastname: "Nachname *",
+    form_email: "E-Mail *",
+    form_phone: "Telefon",
+    form_zip: "Postleitzahl *",
+    form_status: "Beruflicher Status",
+    form_status_default: "— Bitte wählen —",
+    form_status_micro: "Einzelunternehmer / Kleinunternehmer",
+    form_status_eurl: "EURL / SASU",
+    form_status_company: "Gesellschaft (SARL, SAS…)",
+    form_status_none: "Noch kein Status",
+    form_status_other: "Sonstiges",
+    form_cad: "Beherrschte CAD-Software *",
+    form_experience: "Jahre Erfahrung in 3D-Modellierung",
+    form_exp_default: "— Bitte wählen —",
+    form_exp_2: "Weniger als 2 Jahre",
+    form_exp_2_5: "2 bis 5 Jahre",
+    form_exp_5_10: "5 bis 10 Jahre",
+    form_exp_10: "Mehr als 10 Jahre",
+    form_extra: "Zusätzliche Fähigkeiten",
+    form_extra_scan: "3D-Scan",
+    form_extra_reverse: "Reverse Engineering",
+    form_extra_print: "3D-Druck (Printer)",
+    form_portfolio: "Portfolio / Link zu Ihren Arbeiten",
+    form_message: "Nachricht / freie Vorstellung",
+    form_message_placeholder: "Erzählen Sie uns von Ihrem Werdegang, Ihren Motivationen und was Sie zu Hub⁴Fix beitragen möchten…",
+    form_submit: "Bewerbung absenden →",
+    form_note: "Ihre Daten werden gemäß DSGVO verarbeitet. Wir melden uns innerhalb von 7 Tagen bei Ihnen.",
+    success_title: "Bewerbung eingegangen",
+    success_body: "Vielen Dank für Ihre Bewerbung. Wir prüfen Ihr Profil und kontaktieren Sie per E-Mail innerhalb von 7 Tagen. Bis bald!",
+    account_library: "Meine Bibliothek",
+    account_settings: "Einstellungen",
+    account_logout: "Abmelden",
+    footer_tagline: "Eine digitale Datei erschöpft sich nie."
+  },
+
+  es: {
+    hero_overline: "Para creadores digitales",
+    hero_title: 'Convertirse en <em style="color:var(--gold)">modelador</em><br>en Hub⁴Fix',
+    hero_intro: "Si domina el CAD y desea poner su talento al servicio de la economía circular, está en el lugar indicado. Los modeladores de Hub⁴Fix son los artesanos digitales que dan vida a nuestro catálogo — cada archivo que crean salva miles de aparatos del vertedero.",
+    card_hotlist_title: "La Hot List, su brújula",
+    card_hotlist_body: "Consulta en tiempo real las piezas más solicitadas por los usuarios. Nada de modelado al azar: modela lo que el mercado busca activamente, con una rentabilidad probada desde la publicación.",
+    card_hotlist_cta: "Ver la Hot List",
+    card_fifo_title: "Sistema de Tickets FIFO",
+    card_fifo_body: "Reserva una pieza en función de su nivel (Starter, Confirmado, Experto, Master). Cuanto mayor sea su Puntuación de Fiabilidad Acumulada (PFA), antes accederá a las piezas con mayores anticipos.",
+    card_royalties_title: "Royalties de por vida, valor creciente",
+    card_royalties_body: "Percibe <strong>1/3 del precio con IVA</strong> en cada venta. Pero sobre todo, dos fuerzas juegan a su favor con el tiempo: por un lado, <strong>la pieza física desaparece</strong> de los stocks del fabricante — su archivo se convierte en la única opción. Por otro, <strong>los aparatos envejecen y se rompen más</strong> — la demanda de recambios crece mecánicamente. Resultado: sus royalties no se erosionan, <strong>se aceleran año tras año</strong>.",
+    card_advance_title: "Anticipo sobre royalties",
+    card_advance_body: "Para las piezas con alta demanda, Hub⁴Fix ofrece un anticipo. Modelo progresivo: 60 € de base + 1 € a 3 € por suscriptor en la Hot List. El anticipo es una señal de mercado — cuanto mayor es la demanda, más sube.",
+    req_title: "Perfil buscado",
+    req_1: "Dominio de al menos un software CAD (Fusion 360, SolidWorks, CATIA, SolidEdge, OnShape, Blender…)",
+    req_2: "Capacidad para producir un archivo STEP exportable + su archivo nativo",
+    req_3: "Conocimiento de las limitaciones de la impresión 3D (tolerancias, orientación, soportes)",
+    req_4: "Estatus de autónomo (microempresa, autónomo, sociedad limitada)",
+    req_5: "Rigor, metodología, cumplimiento de plazos",
+    req_6: "<strong>Opcional:</strong> escaneo 3D, reverse engineering, dominio de QuickSurface",
+    reward_1_label: "del precio con IVA en royalties",
+    reward_1_detail: "Pago mensual por transferencia",
+    reward_2_label: "anticipo sobre royalties",
+    reward_2_detail: "Según demanda Hot List",
+    reward_3_label: "Valor creciente",
+    reward_3_detail: "La escasez aumenta con el tiempo",
+    form_title: "Candidatura como <em>modelador</em>",
+    form_intro: "Rellene este formulario para presentar su perfil. Estudiamos cada candidatura y le respondemos en un plazo de 7 días.",
+    form_firstname: "Nombre *",
+    form_lastname: "Apellido *",
+    form_email: "Email *",
+    form_phone: "Teléfono",
+    form_zip: "Código postal *",
+    form_status: "Situación profesional",
+    form_status_default: "— Seleccione —",
+    form_status_micro: "Autónomo / Microempresa",
+    form_status_eurl: "EURL / SASU",
+    form_status_company: "Sociedad (SARL, SAS…)",
+    form_status_none: "Sin estatus aún",
+    form_status_other: "Otro",
+    form_cad: "Software CAD que domina *",
+    form_experience: "Años de experiencia en modelado 3D",
+    form_exp_default: "— Seleccione —",
+    form_exp_2: "Menos de 2 años",
+    form_exp_2_5: "2 a 5 años",
+    form_exp_5_10: "5 a 10 años",
+    form_exp_10: "Más de 10 años",
+    form_extra: "Capacidades adicionales",
+    form_extra_scan: "Escaneo 3D",
+    form_extra_reverse: "Reverse engineering",
+    form_extra_print: "Impresión 3D (printer)",
+    form_portfolio: "Portfolio / enlace a sus trabajos",
+    form_message: "Mensaje / presentación libre",
+    form_message_placeholder: "Cuéntenos sobre su trayectoria, sus motivaciones y lo que desea aportar a Hub⁴Fix…",
+    form_submit: "Enviar mi candidatura →",
+    form_note: "Sus datos se tratan conforme al RGPD. Le respondemos en un plazo de 7 días.",
+    success_title: "Candidatura recibida",
+    success_body: "Gracias por su candidatura. Estamos analizando su perfil y le contactaremos por email en un plazo de 7 días. ¡Hasta pronto!",
+    account_library: "Mi biblioteca",
+    account_settings: "Ajustes",
+    account_logout: "Cerrar sesión",
+    footer_tagline: "Un archivo digital nunca se agota."
+  },
+
+  it: {
+    hero_overline: "Per i creatori digitali",
+    hero_title: 'Diventare <em style="color:var(--gold)">modellatore</em><br>Hub⁴Fix',
+    hero_intro: "Se padroneggi il CAD e vuoi mettere il tuo talento al servizio dell'economia circolare, sei nel posto giusto. I modellatori Hub⁴Fix sono gli artigiani digitali che danno vita al nostro catalogo — ogni file che creano salva migliaia di apparecchi dalla discarica.",
+    card_hotlist_title: "La Hot List, la tua bussola",
+    card_hotlist_body: "Consulti in tempo reale i pezzi più richiesti dagli utenti. Nessuna modellazione a caso: progetti ciò che il mercato cerca attivamente, con una redditività comprovata dal momento della pubblicazione.",
+    card_hotlist_cta: "Vedi la Hot List",
+    card_fifo_title: "Sistema di Ticket FIFO",
+    card_fifo_body: "Riservi un pezzo in base al tuo livello (Starter, Confermato, Esperto, Master). Più alto è il tuo Punteggio di Affidabilità Cumulativo (PAC), prima accedi ai pezzi con gli anticipi più elevati.",
+    card_royalties_title: "Royalties a vita, valore crescente",
+    card_royalties_body: "Percepisci <strong>1/3 del prezzo IVA inclusa</strong> su ogni vendita. Ma soprattutto, due forze giocano a tuo favore nel tempo: da un lato, <strong>il pezzo fisico scompare</strong> dai magazzini dei produttori — il tuo file diventa l'unica alternativa. Dall'altro, <strong>gli apparecchi invecchiano e si rompono di più</strong> — la domanda di ricambio cresce meccanicamente. Risultato: le tue royalties non si erodono, <strong>accelerano anno dopo anno</strong>.",
+    card_advance_title: "Anticipo sulle royalties",
+    card_advance_body: "Per i pezzi ad alta domanda, Hub⁴Fix offre un anticipo. Modello progressivo: 60 € di base + da 1 € a 3 € per iscritto alla Hot List. L'anticipo è un segnale di mercato — più forte è la domanda, più sale.",
+    req_title: "Profilo ricercato",
+    req_1: "Padronanza di almeno un software CAD (Fusion 360, SolidWorks, CATIA, SolidEdge, OnShape, Blender…)",
+    req_2: "Capacità di produrre un file STEP esportabile + il file nativo",
+    req_3: "Conoscenza dei vincoli della stampa 3D (tolleranze, orientamento, supporti)",
+    req_4: "Status di freelance (lavoratore autonomo, ditta individuale, società)",
+    req_5: "Rigore, metodo, rispetto delle scadenze",
+    req_6: "<strong>Facoltativo:</strong> scansione 3D, reverse engineering, padronanza di QuickSurface",
+    reward_1_label: "del prezzo IVA inclusa in royalties",
+    reward_1_detail: "Pagamento mensile tramite bonifico",
+    reward_2_label: "anticipo sulle royalties",
+    reward_2_detail: "In base alla domanda Hot List",
+    reward_3_label: "Valore crescente",
+    reward_3_detail: "La rarità aumenta con il tempo",
+    form_title: "Candidatura come <em>modellatore</em>",
+    form_intro: "Compila questo modulo per presentare il tuo profilo. Esaminiamo ogni candidatura e ti rispondiamo entro 7 giorni.",
+    form_firstname: "Nome *",
+    form_lastname: "Cognome *",
+    form_email: "Email *",
+    form_phone: "Telefono",
+    form_zip: "CAP *",
+    form_status: "Stato professionale",
+    form_status_default: "— Seleziona —",
+    form_status_micro: "Lavoratore autonomo / Ditta individuale",
+    form_status_eurl: "EURL / SASU",
+    form_status_company: "Società (SARL, SAS…)",
+    form_status_none: "Nessuno status ancora",
+    form_status_other: "Altro",
+    form_cad: "Software CAD padroneggiati *",
+    form_experience: "Anni di esperienza nella modellazione 3D",
+    form_exp_default: "— Seleziona —",
+    form_exp_2: "Meno di 2 anni",
+    form_exp_2_5: "Da 2 a 5 anni",
+    form_exp_5_10: "Da 5 a 10 anni",
+    form_exp_10: "Più di 10 anni",
+    form_extra: "Capacità aggiuntive",
+    form_extra_scan: "Scansione 3D",
+    form_extra_reverse: "Reverse engineering",
+    form_extra_print: "Stampa 3D (printer)",
+    form_portfolio: "Portfolio / link ai tuoi lavori",
+    form_message: "Messaggio / presentazione libera",
+    form_message_placeholder: "Raccontaci del tuo percorso, delle tue motivazioni e di ciò che vuoi portare a Hub⁴Fix…",
+    form_submit: "Invia la mia candidatura →",
+    form_note: "I tuoi dati vengono trattati in conformità al GDPR. Ti rispondiamo entro 7 giorni.",
+    success_title: "Candidatura ricevuta",
+    success_body: "Grazie per la tua candidatura. Stiamo esaminando il tuo profilo e ti contatteremo via email entro 7 giorni. A presto!",
+    account_library: "La mia libreria",
+    account_settings: "Impostazioni",
+    account_logout: "Disconnetti",
+    footer_tagline: "Un file digitale non si esaurisce mai."
+  }
+};
+
+function applyLang(lang) {
+  if (!I18N[lang]) lang = 'fr';
+  document.documentElement.lang = lang;
+
+  var data = I18N[lang];
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n');
+    if (data[key] !== undefined) el.textContent = data[key];
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n-html');
+    if (data[key] !== undefined) el.innerHTML = data[key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n-placeholder');
+    if (data[key] !== undefined) el.placeholder = data[key];
+  });
+
+  var btn = document.getElementById('langDropdownBtn');
+  btn.setAttribute('data-lang', lang);
+  document.querySelectorAll('.lang-opt').forEach(function(o) {
+    o.classList.toggle('active', o.getAttribute('data-lang') === lang);
+  });
+}
+
+// ════ FORM ════
+document.querySelectorAll('.form-check input').forEach(function(cb){
+  cb.addEventListener('change',function(){
+    cb.parentElement.classList.toggle('checked',cb.checked);
+  });
+});
+function submitModForm(e){
+  e.preventDefault();
+  var form=document.getElementById('modeliseur-form');
+  var data={};
+  new FormData(form).forEach(function(v,k){
+    if(data[k]){data[k]=[].concat(data[k],v);}else{data[k]=v;}
+  });
+  h4fCollect({ email: data.email, type: 'modelisateur', name: data.prenom || data.nom || null })
+    .catch(function(err){ console.error('Collect error:', err); });
+  document.getElementById('modeliseur-form').style.display='none';
+  document.getElementById('mod-success').style.display='block';
+  return false;
+}
+
+// ════ NAV ════
+document.getElementById('accountBtn').addEventListener('click', function(e) {
+  e.stopPropagation();
+  document.getElementById('accountMenu').classList.toggle('visible');
+  document.getElementById('langDropdown').classList.remove('open');
+});
+document.addEventListener('click', function() { document.getElementById('accountMenu').classList.remove('visible'); document.getElementById('langDropdown').classList.remove('open'); });
+document.getElementById('langDropdownBtn').addEventListener('click', function(e) {
+  e.stopPropagation();
+  document.getElementById('langDropdown').classList.toggle('open');
+  document.getElementById('accountMenu').classList.remove('visible');
+});
+document.getElementById('langDropdownList').addEventListener('click', function(e) {
+  var opt = e.target.closest('.lang-opt');
+  if (!opt) return;
+  var lang = opt.getAttribute('data-lang');
+  applyLang(lang);
+  document.getElementById('langDropdown').classList.remove('open');
+});
+document.querySelectorAll('.account-role.locked').forEach(function(el) {
+  el.addEventListener('click', function(e) { e.preventDefault(); });
+});
+
+applyLang('fr');
+
+// Logo click suction effect
+(function(){
+  var brand = document.querySelector('.nav-brand');
+  if(!brand) return;
+  brand.addEventListener('click', function(e){
+    var href = brand.getAttribute('href') || 'index.html';
+    e.preventDefault();
+    document.body.style.transformOrigin = 'top center';
+    document.body.classList.add('page-sucking');
+    var navigated = false;
+    function go(){ if(!navigated){ navigated=true; window.location.assign(href); } }
+    document.body.addEventListener('animationend', go);
+    setTimeout(go, 800);
+  });
+})();
+</script>
+<script>
+(function(){var cvs=document.createElement('canvas');cvs.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none;';document.body.insertBefore(cvs,document.body.firstChild);var ctx=cvs.getContext('2d'),W,H,P=[],dpr;var DIST=130,SPD=0.35;function resize(){dpr=window.devicePixelRatio||1;W=window.innerWidth;H=window.innerHeight;cvs.width=W*dpr;cvs.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}function make(){P=[];var n=Math.min(Math.round(W*H/13000),80);for(var i=0;i<n;i++)P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*SPD,vy:(Math.random()-.5)*SPD,r:Math.random()*.7+.5});}function tick(){ctx.clearRect(0,0,W,H);for(var i=0;i<P.length;i++){for(var j=i+1;j<P.length;j++){var dx=P[i].x-P[j].x,dy=P[i].y-P[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<DIST){ctx.strokeStyle='rgba(168,159,145,'+(0.28*(1-d/DIST)).toFixed(3)+')';ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(P[i].x,P[i].y);ctx.lineTo(P[j].x,P[j].y);ctx.stroke();}}ctx.fillStyle='rgba(168,159,145,.3)';ctx.beginPath();ctx.arc(P[i].x,P[i].y,P[i].r,0,6.283);ctx.fill();P[i].x+=P[i].vx;P[i].y+=P[i].vy;if(P[i].x<0||P[i].x>W)P[i].vx*=-1;if(P[i].y<0||P[i].y>H)P[i].vy*=-1;}requestAnimationFrame(tick);}resize();make();tick();window.addEventListener('resize',function(){resize();make();});})();
+</script>
+<script src="/js/sphere-bg.js"></script>
+<script src="js/nav-mindmap.js"></script>
+</body>
+</html>

@@ -1,0 +1,2267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hub⁴Fix — L'Économie de la Pièce Juste</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Karla:wght@300;400;500;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/glass-sphere.css">
+<style>
+:root {
+  --rouge: #C0392B;
+  --rouge-sombre: #922B21;
+  --rouge-pale: rgba(192,57,43,0.08);
+  --creme: #F5F0E8;
+  --ivoire: #EDE8DC;
+  --encre: #1C1A16;
+  --encre-mid: #3D3A33;
+  --encre-light: #7A766C;
+  --vert-doux: #2D6A4F;
+  --vert-pale: #E8F4ED;
+  --or: #B8860B;
+  --blanc: #FDFAF5;
+  /* Unified header vars */
+  --ivory:#FAF8F5;--warm-white:#F3EEE8;--cream:#EDE6DC;--sand:#D4C9B8;
+  --stone:#A89F91;--earth:#7A7268;--charcoal:#3B3632;--night:#1C1A18;
+  --gold:#B8963E;--red:#C8102E;--red-soft:rgba(200,16,46,0.06);--green:#2D8B5E;
+  --font-serif:'Cormorant Garamond',serif;--font-sans:'Karla',sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--blanc);
+  color: var(--encre);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  overflow-x: hidden;
+}
+
+/* ════ NAV ════ */
+nav{position:sticky;top:0;z-index:100;padding:1rem 4rem;display:flex;justify-content:space-between;align-items:center;background:rgba(243,238,232,0.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(237,230,220,0.4)}
+.nav-brand{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo{width:auto;height:36px;transition:transform .5s cubic-bezier(.25,.46,.45,.94);transform-origin:center center;position:relative;z-index:101}
+.nav-brand:hover .nav-logo{transform:scale(3);filter:drop-shadow(0 8px 24px rgba(0,0,0,.2))}
+@keyframes suckIn{0%{transform:scale(1);opacity:1;filter:blur(0)}60%{transform:scale(.3) translate(0,-30vh);opacity:.6;filter:blur(2px)}100%{transform:scale(0) translate(0,-40vh);opacity:0;filter:blur(8px)}}
+.page-sucking{animation:suckIn .7s cubic-bezier(.55,.06,.68,.19) forwards;pointer-events:none}
+.nav-wordmark{font-family:var(--font-serif);font-size:1.15rem;font-weight:500;color:var(--night);letter-spacing:.02em}
+.nav-wordmark sup{color:var(--red);font-size:.7em;vertical-align:super;line-height:0}
+.nav-right{display:flex;align-items:center;gap:1rem}
+.nav-links{display:flex;gap:1.5rem;list-style:none;align-items:center}
+.nav-links a{font-size:.78rem;font-weight:500;color:var(--earth);text-decoration:none;letter-spacing:.04em;transition:color .3s}
+.nav-links a:hover{color:var(--red)}
+.nav-back{font-size:.78rem;font-weight:500;color:var(--earth);text-decoration:none;letter-spacing:.04em;display:flex;align-items:center;gap:.4rem;transition:color .3s}
+.nav-back:hover{color:var(--red)}
+.lang-dropdown{position:relative}
+.lang-dropdown-btn{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;justify-content:center;width:34px;height:23px;padding:0;background:white;border:1px solid rgba(212,201,184,0.4);border-radius:4px;cursor:pointer;font-size:0;color:transparent;transition:all .25s ease;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.lang-dropdown-btn .flag{display:none}
+.lang-dropdown-btn::before{content:'';position:absolute;inset:0;border-radius:3px;background-size:contain;background-position:center;background-repeat:no-repeat;opacity:1;z-index:0}
+.lang-dropdown-btn:hover{box-shadow:0 2px 8px rgba(0,0,0,.12);transform:scale(1.08)}
+.lang-dropdown.open .lang-dropdown-btn{box-shadow:0 2px 10px rgba(0,0,0,.15);transform:scale(1.08)}
+.lang-dropdown-btn[data-lang="fr"]::before{background-image:url(https://flagcdn.com/w80/fr.png)}
+.lang-dropdown-btn[data-lang="en"]::before{background-image:url(https://flagcdn.com/w80/gb.png)}
+.lang-dropdown-btn[data-lang="de"]::before{background-image:url(https://flagcdn.com/w80/de.png)}
+.lang-dropdown-btn[data-lang="es"]::before{background-image:url(https://flagcdn.com/w80/es.png)}
+.lang-dropdown-btn[data-lang="it"]::before{background-image:url(https://flagcdn.com/w80/it.png)}
+.lang-dropdown-btn[data-lang="pt"]::before{background-image:url(https://flagcdn.com/w80/pt.png)}
+.lang-dropdown-btn[data-lang="zh"]::before{background-image:url(https://flagcdn.com/w80/cn.png)}
+.lang-dropdown-btn[data-lang="hi"]::before{background-image:url(https://flagcdn.com/w80/in.png)}
+.lang-dropdown-btn .lang-arrow{display:none}
+.lang-dropdown-list{position:absolute;top:calc(100% + 6px);right:0;background:rgba(255,255,255,0.97);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(212,201,184,0.3);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.08),0 2px 8px rgba(0,0,0,.04);display:none;z-index:210;min-width:155px;padding:6px;transform-origin:top right}
+.lang-dropdown.open .lang-dropdown-list{display:block;animation:langDropIn .25s cubic-bezier(.22,.61,.36,1)}
+@keyframes langDropIn{from{opacity:0;transform:scale(.95) translateY(-4px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.lang-opt{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:8px 12px;cursor:pointer;font-size:.78rem;font-weight:500;color:var(--charcoal);font-family:var(--font-sans);border-radius:8px;transition:all .2s ease}
+.lang-opt .flag{display:none}
+.lang-opt::before{content:'';position:absolute;inset:0;background-size:contain;background-position:right center;background-repeat:no-repeat;border-radius:8px;opacity:0;transition:opacity .25s ease;z-index:-1}
+.lang-opt:hover{transform:translateX(2px);text-shadow:0 0 8px rgba(255,255,255,1),0 0 16px rgba(255,255,255,1),0 0 2px rgba(255,255,255,1)}
+.lang-opt:hover::before{opacity:.9}
+.lang-opt.active{font-weight:700;text-shadow:0 0 8px rgba(255,255,255,1),0 0 16px rgba(255,255,255,1),0 0 2px rgba(255,255,255,1)}
+.lang-opt.active::before{opacity:.85}
+.lang-opt[data-lang="fr"]::before{background:url(https://flagcdn.com/w160/fr.png) no-repeat right center / contain,#002654}
+.lang-opt[data-lang="en"]::before{background:url(https://flagcdn.com/w160/gb.png) no-repeat right center / contain,linear-gradient(to bottom,#012169 33%,#FFF 33% 40%,#C8102E 40% 60%,#FFF 60% 67%,#012169 67%)}
+.lang-opt[data-lang="de"]::before{background:url(https://flagcdn.com/w160/de.png) no-repeat right center / contain,linear-gradient(to bottom,#000 33%,#DD0000 33% 66%,#FFCC00 66%)}
+.lang-opt[data-lang="es"]::before{background:url(https://flagcdn.com/w160/es.png) no-repeat right center / auto 100%,linear-gradient(to bottom,#ad1519 25%,#fabd00 25% 75%,#ad1519 75%)}
+.lang-opt[data-lang="it"]::before{background:url(https://flagcdn.com/w160/it.png) no-repeat right center / contain,#009246}
+.lang-opt[data-lang="pt"]::before{background:url(https://flagcdn.com/w160/pt.png) no-repeat right center / contain,#006600}
+.lang-opt[data-lang="zh"]::before{background:url(https://flagcdn.com/w160/cn.png) no-repeat right center / contain,#EE1C25}
+.lang-opt[data-lang="hi"]::before{background:url(https://flagcdn.com/w160/in.png) no-repeat right center / contain,linear-gradient(to bottom,#ff6820 33%,#FFF 33% 66%,#046a38 66%)}
+.lang-opt::after{content:'';position:absolute;left:0;top:4px;bottom:4px;width:3px;border-radius:2px;z-index:1;transition:opacity .2s ease;opacity:.7}
+.lang-opt:hover::after,.lang-opt.active::after{opacity:1}
+.lang-opt[data-lang="fr"]::after{background:#002395}
+.lang-opt[data-lang="en"]::after{background:#012169}
+.lang-opt[data-lang="de"]::after{background:linear-gradient(to bottom,#000 33%,#DD0000 33% 66%,#FFCC00 66%)}
+.lang-opt[data-lang="es"]::after{background:linear-gradient(to bottom,#AA151B 25%,#F1BF00 25% 75%,#AA151B 75%)}
+.lang-opt[data-lang="it"]::after{background:#008C45}
+.lang-opt[data-lang="pt"]::after{background:#006600}
+.lang-opt[data-lang="zh"]::after{background:#DE2910}
+.lang-opt[data-lang="hi"]::after{background:linear-gradient(to bottom,#ff6820 33%,#FFF 33% 66%,#046a38 66%)}
+.nav-account{position:relative}
+.nav-account-btn{display:flex;align-items:center;gap:.3rem;background:none;border:none;cursor:pointer;padding:.3rem;border-radius:2px;transition:background .2s}
+.nav-account-btn:hover{background:var(--cream)}
+.nav-account-icon{width:22px;height:22px;color:var(--charcoal)}
+.nav-token-badge{background:var(--red);color:white;font-size:.65rem;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;line-height:1}
+.nav-account-menu{position:absolute;top:calc(100% + 8px);right:0;width:340px;background:white;border:1px solid var(--cream);border-radius:4px;box-shadow:0 16px 48px rgba(0,0,0,.12);display:none;z-index:200}
+.nav-account-menu.visible{display:block;animation:fadeUp .25s}
+.account-menu-header{padding:1rem 1.2rem;border-bottom:1px solid var(--cream);display:flex;justify-content:space-between;align-items:center}
+.account-menu-header-left{display:flex;flex-direction:column}
+.account-menu-name{font-weight:600;font-size:.9rem;color:var(--night)}
+.account-menu-email{font-size:.72rem;color:var(--earth);margin-top:.15rem}
+.account-menu-tokens-inline{display:flex;align-items:center;gap:.3rem;background:var(--red-soft);padding:4px 10px;border-radius:12px}
+.account-menu-tokens-inline .token-icon{font-size:.75rem;color:var(--red)}
+.account-menu-tokens-inline strong{font-family:'Courier New',monospace;font-size:1rem;color:var(--red)}
+.account-roles{padding:.8rem;display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;border-bottom:1px solid var(--cream)}
+.account-role{display:flex;flex-direction:column;align-items:center;gap:.4rem;padding:.8rem .4rem;border-radius:4px;cursor:pointer;border:2px solid transparent;transition:all .2s;text-decoration:none}
+.account-role:hover{transform:translateY(-1px)}
+.account-role-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem}
+.account-role-label{font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-align:center}
+.account-role-sub{font-size:.6rem;color:var(--earth);text-align:center;line-height:1.2}
+.account-role-client .account-role-icon{background:var(--red-soft);color:var(--red)}
+.account-role-client .account-role-label{color:var(--red)}
+.account-role-client.active{border-color:var(--red);background:var(--red-soft)}
+.account-role-printer .account-role-icon{background:#1a2a3a;color:#5ba8d4}
+.account-role-printer .account-role-label{color:#2c6e9b}
+.account-role-printer.active{border-color:#2c6e9b;background:#e8f1f8}
+.account-role-printer:hover{background:#e8f1f8}
+.account-role-modeler .account-role-icon{background:#2a1f1a;color:#d4845b}
+.account-role-modeler .account-role-label{color:#a0522d}
+.account-role-modeler.active{border-color:#a0522d;background:#f5ece5}
+.account-role-modeler:hover{background:#f5ece5}
+.account-role.locked{opacity:.5;pointer-events:auto;position:relative}
+.account-role.locked .account-role-icon{filter:grayscale(.6)}
+.account-role-lock{font-size:.6rem;margin-top:-.1rem}
+.account-role.locked:hover{opacity:.75}
+.account-role.locked:hover .account-role-sub{display:none}
+.account-role.locked:hover::after{content:'Inscription requise';font-size:.55rem;color:var(--earth);text-align:center}
+.account-menu-links{padding:.3rem 0}
+.account-menu-item{display:flex;align-items:center;gap:.6rem;padding:.6rem 1.2rem;font-size:.82rem;color:var(--charcoal);text-decoration:none;transition:background .15s}
+.account-menu-item:hover{background:var(--warm-white)}
+.account-menu-item svg{width:16px;height:16px;color:var(--stone);flex-shrink:0}
+.account-menu-logout{color:var(--earth);border-top:1px solid var(--cream)}
+
+/* ─── HERO MANIFESTE ─── */
+.hero {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-left {
+  background: var(--encre);
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 6rem 4rem 5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-left::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 40px,
+    rgba(192,57,43,0.04) 40px,
+    rgba(192,57,43,0.04) 41px
+  );
+}
+
+.hero-kicker {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--rouge); margin-bottom: 2rem;
+  opacity: 0; animation: fadeUp 0.8s 0.2s forwards;
+}
+
+.hero-title {
+  font-size: clamp(2.8rem, 5vw, 4.5rem);
+  font-weight: 300; line-height: 1.08;
+  color: var(--creme);
+  margin-bottom: 2rem;
+  opacity: 0; animation: fadeUp 0.9s 0.4s forwards;
+}
+.hero-title em {
+  font-style: italic; color: var(--rouge);
+}
+
+.hero-body {
+  font-size: 1.15rem; line-height: 1.8;
+  color: rgba(245,240,232,0.7);
+  max-width: 480px;
+  opacity: 0; animation: fadeUp 0.9s 0.6s forwards;
+}
+
+.hero-right {
+  background: var(--creme);
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 6rem 4rem;
+  gap: 2rem;
+  opacity: 0; animation: fadeIn 1s 0.8s forwards;
+}
+
+.stat-block {
+  border-left: 2px solid var(--rouge);
+  padding-left: 1.5rem;
+}
+
+.stat-number {
+  font-family: 'DM Mono', monospace;
+  font-size: clamp(2.5rem, 4vw, 3.8rem);
+  font-weight: 300; line-height: 1;
+  color: var(--encre);
+  letter-spacing: -0.02em;
+}
+.stat-number span { color: var(--rouge); }
+
+.stat-label {
+  font-size: 0.9rem; line-height: 1.5;
+  color: var(--encre-mid); margin-top: 0.4rem;
+  font-weight: 300;
+}
+
+.hero-divider {
+  width: 1px; height: 60px;
+  background: linear-gradient(to bottom, transparent, var(--encre-light), transparent);
+  margin-left: 1.5rem;
+}
+
+/* ─── ODOMETER 888M ─── */
+.stat-odometer {
+  display: inline-flex;
+  align-items: baseline;
+}
+.odo-digit {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  height: 1.1em;
+  width: 0.65em;
+  vertical-align: baseline;
+  color: var(--rouge);
+}
+.odo-digit .odo-strip {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  transition: transform 2.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.odo-strip span {
+  height: 1.1em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: inherit !important;
+}
+
+/* ─── CARROUSEL VERTICAL 0 STOCK ─── */
+.zero-carousel {
+  overflow: hidden;
+  position: relative;
+}
+.zero-carousel .stat-number {
+  position: relative;
+  overflow: hidden;
+  height: 1.1em;
+}
+.zero-slides {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.zero-slide {
+  height: 1.1em;
+  flex-shrink: 0;
+  display: flex;
+  align-items: baseline;
+}
+.zero-slide .zero-val { color: inherit; }
+.zero-slide .zero-unit { color: var(--rouge); }
+.zero-asterisk {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--encre-light);
+  margin-top: 0.6rem;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.zero-asterisk.visible { opacity: 1; }
+
+/* ─── BANDEAU COMPTEUR DÉCHETS ─── */
+.waste-ticker {
+  background: var(--encre);
+  color: var(--creme);
+  padding: 3rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.waste-ticker::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(90deg, transparent, transparent 200px, rgba(192,57,43,0.03) 200px, rgba(192,57,43,0.03) 201px);
+}
+.waste-ticker-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+  position: relative;
+  z-index: 1;
+}
+.waste-ticker-counter {
+  flex: 0 0 auto;
+  text-align: center;
+  min-width: 320px;
+}
+.waste-ticker-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--rouge);
+  margin-bottom: 0.6rem;
+}
+.waste-ticker-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.4em;
+  margin-bottom: 0.3rem;
+}
+.waste-ticker-number {
+  font-family: 'DM Mono', monospace;
+  font-size: clamp(2.2rem, 4vw, 3.5rem);
+  font-weight: 300;
+  color: #fff;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.waste-ticker-number .ticker-decimal {
+  font-size: 0.6em;
+  opacity: 0.5;
+}
+.waste-ticker-tonnes {
+  font-family: 'DM Mono', monospace;
+  font-size: clamp(2.2rem, 4vw, 3.5rem);
+  font-weight: 300;
+  color: #fff;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+.waste-ticker-unit {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(245,240,232,0.4);
+}
+.waste-ticker-sep {
+  width: 1px;
+  height: 80px;
+  background: linear-gradient(to bottom, transparent, var(--rouge), transparent);
+  flex-shrink: 0;
+}
+.waste-ticker-text {
+  flex: 1;
+}
+.waste-ticker-quote {
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: rgba(245,240,232,0.7);
+  font-weight: 300;
+  font-style: italic;
+}
+.waste-ticker-quote strong {
+  color: var(--rouge);
+  font-weight: 600;
+  font-style: normal;
+}
+.waste-ticker-src {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: rgba(245,240,232,0.25);
+  margin-top: 0.8rem;
+  text-transform: uppercase;
+}
+.waste-ticker-pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(192,57,43,0.06) 0%, transparent 70%);
+  animation: tickerPulse 3s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes tickerPulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.3; }
+  50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+}
+@media (max-width: 768px) {
+  .waste-ticker-inner { flex-direction: column; gap: 1.5rem; text-align: center; }
+  .waste-ticker-sep { width: 60px; height: 1px; background: linear-gradient(to right, transparent, var(--rouge), transparent); }
+  .waste-ticker-counter { min-width: auto; }
+}
+
+/* ─── SECTION : LE PARADOXE ─── */
+.paradox {
+  padding: 8rem 3rem;
+  background: transparent;
+  max-width: 1100px; margin: 0 auto;
+}
+
+.section-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--rouge); margin-bottom: 3rem;
+  display: flex; align-items: center; gap: 1rem;
+}
+.section-eyebrow::after {
+  content: '';
+  height: 1px; flex: 1 1 0;
+  background: rgba(192,57,43,0.3);
+}
+
+.paradox-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 5rem;
+  align-items: start;
+}
+
+.paradox-left h2 {
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 300; line-height: 1.2;
+  margin-bottom: 2rem;
+}
+.paradox-left h2 em { font-style: italic; color: var(--rouge); }
+
+.paradox-left p {
+  font-size: 1.1rem; line-height: 1.9;
+  color: var(--encre-mid);
+  margin-bottom: 1.5rem;
+}
+
+.waste-visual {
+  background: rgba(250,248,245,0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(237,230,220,0.5);
+  border-radius: 2px;
+  padding: 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.waste-visual::before {
+  content: '650 000 000';
+  position: absolute; bottom: -1rem; right: -0.5rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 5rem; font-weight: 300;
+  color: rgba(28,26,22,0.04);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.waste-item {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 1rem 0;
+  border-bottom: 0.5px solid rgba(28,26,22,0.12);
+}
+.waste-item:last-child { border-bottom: none; }
+.waste-item-label {
+  font-size: 0.95rem; color: var(--encre-mid);
+}
+.waste-item-value {
+  font-family: 'DM Mono', monospace;
+  font-size: 1.1rem; font-weight: 500;
+  color: var(--rouge);
+}
+.waste-item-sub {
+  font-size: 0.75rem; color: var(--encre-light);
+  font-family: 'DM Mono', monospace;
+  display: block; margin-top: 2px;
+}
+
+/* ─── CERCLES VERTUEUX ─── */
+.circles {
+  background: var(--encre);
+  padding: 8rem 3rem;
+  position: relative; overflow: hidden;
+}
+.circles::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 70% 50%, rgba(192,57,43,0.12) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.circles-inner { max-width: 1200px; margin: 0 auto; }
+
+.circles-header { margin-bottom: 5rem; }
+.circles-header .section-eyebrow { color: rgba(192,57,43,0.8); }
+.circles-header .section-eyebrow::after { background: rgba(192,57,43,0.2); }
+.circles-header h2 {
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 300; line-height: 1.2;
+  color: var(--creme);
+}
+.circles-header h2 em { font-style: italic; color: var(--rouge); }
+
+.circles-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+}
+
+.circle-card {
+  padding: 3rem 2.5rem;
+  border: 0.5px solid rgba(245,240,232,0.1);
+  background: rgba(245,240,232,0.03);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  position: relative;
+  cursor: default;
+  transition: background 0.3s;
+}
+.circle-card:hover { background: rgba(245,240,232,0.06); }
+
+.circle-number {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem; letter-spacing: 0.2em;
+  color: var(--rouge); margin-bottom: 2rem;
+}
+
+.circle-icon-wrap {
+  --ci-color: rgba(192,57,43,1);
+  --ci-glow: rgba(192,57,43,0.35);
+  position: relative;
+  width: 80px; height: 80px;
+  margin-bottom: 2rem;
+  cursor: pointer;
+}
+/* Galet en verre : fond avec gradient de profondeur */
+.circle-icon-glass {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse 60% 40% at 40% 35%, rgba(255,255,255,0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 80% 80% at 50% 50%, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0.25) 100%),
+    linear-gradient(160deg, rgba(255,255,255,0.06) 0%, rgba(0,0,0,0.15) 100%);
+  border: 1.5px solid rgba(255,255,255,0.08);
+  box-shadow:
+    inset 0 1px 2px rgba(255,255,255,0.12),
+    inset 0 -2px 6px rgba(0,0,0,0.3),
+    0 2px 12px rgba(0,0,0,0.3);
+  transition: box-shadow .4s, border-color .4s;
+}
+/* Lumiere de tranche : anneau subtil */
+.circle-icon-edge {
+  position: absolute; inset: -2px;
+  border-radius: 50%;
+  border: 1.5px solid color-mix(in srgb, var(--ci-color) 15%, transparent);
+  transition: border-color .4s, box-shadow .4s;
+}
+/* Arc rotatif (partie de la lumiere qui tourne) */
+.circle-icon-arc {
+  position: absolute; inset: -4px;
+  border-radius: 50%;
+  border: 2.5px solid transparent;
+  border-top-color: var(--ci-color);
+  border-right-color: color-mix(in srgb, var(--ci-color) 40%, transparent);
+  opacity: 0;
+  transition: opacity .4s;
+  filter: blur(0.5px);
+}
+@keyframes arcSpin { 0%{transform:rotate(0deg)}100%{transform:rotate(360deg)} }
+/* Icone SVG filaire */
+.circle-icon-svg {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .4s cubic-bezier(.34,1.56,.64,1), filter .4s;
+}
+.circle-icon-svg svg {
+  width: 34px; height: 34px;
+  stroke: var(--ci-color);
+  stroke-width: 1.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke .3s, filter .3s;
+}
+/* Hover : glow de tranche + arc rotatif */
+.circle-icon-wrap:hover .circle-icon-glass {
+  border-color: color-mix(in srgb, var(--ci-color) 25%, transparent);
+  box-shadow:
+    inset 0 1px 2px rgba(255,255,255,0.15),
+    inset 0 -2px 6px rgba(0,0,0,0.3),
+    0 0 20px var(--ci-glow),
+    0 0 40px color-mix(in srgb, var(--ci-color) 15%, transparent);
+}
+.circle-icon-wrap:hover .circle-icon-edge {
+  border-color: color-mix(in srgb, var(--ci-color) 50%, transparent);
+  box-shadow: 0 0 12px var(--ci-glow);
+}
+.circle-icon-wrap:hover .circle-icon-arc {
+  opacity: 1;
+  animation: arcSpin 1.2s linear infinite;
+}
+.circle-icon-wrap:hover .circle-icon-svg {
+  transform: scale(1.08);
+  filter: drop-shadow(0 0 6px var(--ci-glow));
+}
+.circle-icon-wrap:hover .circle-icon-svg svg {
+  stroke: #fff;
+}
+/* Couleurs par cercle */
+.ci-eco { --ci-color: #D4A020; --ci-glow: rgba(212,160,32,0.35); }
+.ci-ecol { --ci-color: #2D8B5E; --ci-glow: rgba(45,139,94,0.35); }
+.ci-terr { --ci-color: #3B82C4; --ci-glow: rgba(59,130,196,0.35); }
+
+.circle-title {
+  font-size: 1.5rem; font-weight: 300;
+  color: var(--creme); margin-bottom: 1.2rem;
+  line-height: 1.3;
+}
+.circle-title em { font-style: italic; color: var(--rouge); }
+
+.circle-body {
+  font-size: 0.95rem; line-height: 1.9;
+  color: rgba(245,240,232,0.6);
+  margin-bottom: 2rem;
+}
+
+.circle-metrics { display: flex; flex-direction: column; gap: 0.7rem; }
+.metric {
+  display: flex; justify-content: space-between; align-items: center;
+  border-top: 0.5px solid rgba(245,240,232,0.08);
+  padding-top: 0.7rem;
+}
+.metric-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem; letter-spacing: 0.05em;
+  color: rgba(245,240,232,0.4);
+}
+.metric-value {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.8rem; font-weight: 500;
+  color: var(--rouge);
+}
+
+/* ─── BOUCLE MATIÈRE ─── */
+.loop {
+  padding: 8rem 3rem;
+  max-width: 1100px; margin: 0 auto;
+}
+
+.loop-header { margin-bottom: 5rem; }
+.loop-header h2 {
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 300; line-height: 1.2;
+}
+.loop-header h2 em { font-style: italic; color: var(--rouge); }
+
+.loop-diagram {
+  position: relative;
+  background: rgba(250,248,245,0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(237,230,220,0.5);
+  border-radius: 4px;
+  padding: 4rem 3rem;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+  align-items: center; gap: 0;
+}
+
+.loop-step {
+  text-align: center; padding: 1.5rem 1rem;
+}
+.loop-step-icon {
+  font-size: 2rem; margin-bottom: 1rem;
+  display: block;
+}
+.loop-step-label {
+  font-size: 0.9rem; font-weight: 600;
+  color: var(--encre); margin-bottom: 0.4rem;
+}
+.loop-step-sub {
+  font-size: 0.78rem; line-height: 1.5;
+  color: var(--encre-light);
+  font-family: 'DM Mono', monospace;
+}
+
+.loop-arrow {
+  font-size: 1.5rem; color: var(--rouge);
+  opacity: 0.5; text-align: center;
+  padding: 0 0.5rem;
+}
+
+.asterisk-note {
+  margin-top: 2rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem; line-height: 1.7;
+  color: var(--encre-light);
+  border-left: 2px solid rgba(192,57,43,0.25);
+  padding-left: 1rem;
+  max-width: 680px;
+}
+
+.loop-note {
+  margin-top: 2rem; text-align: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.78rem; color: var(--encre-light);
+  letter-spacing: 0.05em;
+}
+.loop-note strong { color: var(--rouge); }
+
+/* ─── IMPACT TERRITORIAL ─── */
+.territory {
+  background: transparent;
+  padding: 8rem 3rem;
+}
+.territory-inner { max-width: 1100px; margin: 0 auto; }
+
+.territory-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 5rem;
+  align-items: center;
+}
+
+.territory-left h2 {
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 300; line-height: 1.2;
+  margin-bottom: 2rem;
+}
+.territory-left h2 em { font-style: italic; color: var(--rouge); }
+.territory-left p {
+  font-size: 1.1rem; line-height: 1.9;
+  color: var(--encre-mid); margin-bottom: 1.5rem;
+}
+
+.territory-right {
+  display: flex; flex-direction: column; gap: 1.5rem;
+}
+
+.territory-card {
+  display: flex; gap: 1.5rem; align-items: flex-start;
+  padding: 1.8rem;
+  background: rgba(255,255,255,0.45);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(237,230,220,0.5);
+  border-left: 3px solid transparent;
+  transition: border-color 0.2s, transform 0.2s;
+  cursor: default;
+}
+.territory-card:hover {
+  border-left-color: var(--rouge);
+  transform: translateX(4px);
+}
+
+.territory-card-icon {
+  font-size: 1.4rem; flex-shrink: 0; margin-top: 2px;
+}
+.territory-card-title {
+  font-size: 1rem; font-weight: 600;
+  color: var(--encre); margin-bottom: 0.4rem;
+}
+.territory-card-body {
+  font-size: 0.9rem; line-height: 1.7;
+  color: var(--encre-mid);
+}
+
+/* ─── CO2 / IMPACT CHIFFRÉ ─── */
+.impact {
+  padding: 8rem 3rem;
+  background: transparent;
+}
+.impact-inner { max-width: 1100px; margin: 0 auto; }
+
+.impact-header { margin-bottom: 4rem; }
+.impact-header h2 {
+  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-weight: 300; line-height: 1.2;
+}
+.impact-header h2 em { font-style: italic; color: var(--rouge); }
+
+.impact-strip {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border: 0.5px solid rgba(28,26,22,0.12);
+  background: rgba(255,255,255,0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 3px;
+}
+
+.impact-cell {
+  padding: 2.5rem 2rem;
+  border-right: 0.5px solid rgba(28,26,22,0.12);
+  position: relative;
+}
+.impact-cell:last-child { border-right: none; }
+
+.impact-cell::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--rouge);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s;
+}
+.impact-cell:hover::before { transform: scaleX(1); }
+
+.impact-cell-number {
+  font-family: 'DM Mono', monospace;
+  font-size: 2.5rem; font-weight: 300;
+  color: var(--rouge); line-height: 1;
+  margin-bottom: 0.5rem;
+}
+.impact-cell-unit {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem; color: var(--encre-light);
+  margin-bottom: 1rem;
+  display: block;
+}
+.impact-cell-label {
+  font-size: 0.9rem; line-height: 1.6;
+  color: var(--encre-mid);
+}
+.impact-cell-source {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem; color: var(--encre-light);
+  margin-top: 1rem;
+  display: block; letter-spacing: 0.05em;
+}
+
+/* ─── MANIFESTE FINAL ─── */
+.manifeste {
+  padding: 10rem 3rem;
+  background: var(--encre);
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+.manifeste::before {
+  content: 'RÉPARER';
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20vw; font-weight: 300;
+  color: rgba(255,255,255,0.02);
+  white-space: nowrap; pointer-events: none;
+}
+
+.manifeste-inner { max-width: 700px; margin: 0 auto; position: relative; }
+
+.manifeste-kicker {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--rouge); margin-bottom: 3rem;
+}
+
+.manifeste-quote {
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-weight: 300; line-height: 1.4;
+  color: var(--creme); margin-bottom: 3rem;
+  font-style: italic;
+}
+.manifeste-quote strong {
+  font-style: normal; font-weight: 600;
+  color: var(--rouge);
+}
+
+.manifeste-body {
+  font-size: 1rem; line-height: 1.9;
+  color: rgba(245,240,232,0.55);
+  margin-bottom: 4rem;
+}
+
+.manifeste-cta {
+  display: inline-flex; align-items: center; gap: 0.8rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--blanc);
+  border: 0.5px solid rgba(245,240,232,0.3);
+  padding: 1rem 2rem;
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s;
+}
+.manifeste-cta:hover {
+  background: var(--rouge);
+  border-color: var(--rouge);
+}
+
+/* ─── FOOTER ─── */
+footer {
+  background: var(--encre);
+  border-top: 0.5px solid rgba(245,240,232,0.08);
+  padding: 2rem 3rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+footer .logo {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px; color: rgba(245,240,232,0.3);
+  letter-spacing: 0.1em;
+}
+footer .logo span { color: var(--rouge); }
+footer .mention {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; color: rgba(245,240,232,0.2);
+  letter-spacing: 0.08em;
+}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.reveal {
+  opacity: 0; transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.reveal.visible {
+  opacity: 1; transform: translateY(0);
+}
+
+/* ─── SCROLL PROGRESS ─── */
+.progress-bar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 2px; z-index: 200;
+  background: transparent;
+}
+.progress-fill {
+  height: 100%; background: var(--rouge);
+  width: 0%; transition: width 0.1s;
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; }
+  .hero-left { min-height: 60vh; }
+  .paradox-grid, .territory-grid { grid-template-columns: 1fr; gap: 3rem; }
+  .circles-grid { grid-template-columns: 1fr; }
+  .impact-strip { grid-template-columns: 1fr 1fr; }
+  .loop-diagram {
+    grid-template-columns: 1fr; gap: 1rem;
+  }
+  .loop-arrow { transform: rotate(90deg); }
+  nav { padding: 1rem 1.5rem; }
+}
+
+/* ════ MOBILE 600px ════ */
+@media (max-width: 600px) {
+  nav{padding:.6rem 1rem}
+  .nav-wordmark{font-size:1.1rem}
+  .nav-right{gap:.5rem}
+  .nav-account-menu{width:calc(100vw - 2rem);max-width:340px;right:0}
+  .lang-dropdown-list{right:0;min-width:140px}
+  .lang-dropdown-btn{width:28px;height:19px}
+  .hero-left{min-height:50vh;padding:3rem 1.5rem 3rem}
+  .hero-right{padding:3rem 1.5rem}
+  .hero-title{font-size:clamp(1.8rem,5vw,2.8rem)}
+  .hero-body{font-size:1rem}
+  .hero-kicker{margin-bottom:1.2rem}
+  .stat-number{font-size:clamp(1.8rem,4vw,2.5rem)}
+  .stat-label{font-size:.82rem}
+  .paradox{padding:3rem 1rem}
+  .paradox-grid{gap:2rem}
+  .paradox-left h2{font-size:clamp(1.6rem,4vw,2.2rem)}
+  .paradox-left p{font-size:1rem}
+  .circles{padding:3rem 1rem}
+  .circles-header{margin-bottom:3rem}
+  .circles-header h2{font-size:clamp(1.6rem,4vw,2.2rem)}
+  .circle-card{padding:2rem 1.5rem}
+  .circle-title{font-size:1.2rem}
+  .circle-body{font-size:.88rem}
+  .loop{padding:3rem 1rem}
+  .loop-header{margin-bottom:3rem}
+  .loop-header h2{font-size:clamp(1.6rem,4vw,2.2rem)}
+  .loop-diagram{padding:2rem 1rem}
+  .territory{padding:3rem 1rem}
+  .territory-grid{gap:2rem}
+  .territory-left h2{font-size:clamp(1.6rem,4vw,2.2rem)}
+  .territory-left p{font-size:1rem}
+  .territory-card{padding:1.2rem;gap:1rem}
+  .impact{padding:3rem 1rem}
+  .impact-header{margin-bottom:2rem}
+  .impact-header h2{font-size:clamp(1.6rem,4vw,2.2rem)}
+  .impact-strip{grid-template-columns:1fr}
+  .impact-cell{padding:1.5rem 1rem;border-right:none;border-bottom:0.5px solid rgba(28,26,22,0.12)}
+  .impact-cell:last-child{border-bottom:none}
+  .impact-cell-number{font-size:2rem}
+  .manifeste{padding:4rem 1.5rem}
+  .manifeste-quote{font-size:clamp(1.4rem,3vw,2rem)}
+  .manifeste-body{font-size:.92rem}
+  footer{padding:1.5rem 1rem}
+}
+
+/* ════ MOBILE 480px ════ */
+@media (max-width: 480px) {
+  .hero-left{min-height:auto;padding:2.5rem 1rem}
+  .hero-right{padding:2rem 1rem}
+  .hero-title{font-size:1.6rem}
+  .stat-number{font-size:1.6rem}
+  .paradox-left h2,.circles-header h2,.loop-header h2,.territory-left h2,.impact-header h2{font-size:1.5rem}
+  .circle-card{padding:1.5rem 1rem}
+  .loop-diagram{padding:1.5rem .8rem}
+  .manifeste{padding:3rem 1rem}
+  .manifeste-quote{font-size:1.3rem}
+}
+
+/* ════ WATERMARK SLOGANS ════ */
+.section-watermark{position:relative;overflow:hidden}
+.section-watermark::before{content:attr(data-watermark);position:absolute;font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,6vw,5rem);font-weight:300;font-style:italic;color:rgba(180,160,130,.07);white-space:nowrap;pointer-events:none;z-index:0;top:50%;left:50%;transform:translate(-50%,-50%);width:max-content}
+.section-watermark>*{position:relative;z-index:1}
+</style>
+</head>
+<body>
+
+<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-brand">
+    <svg class="nav-logo" viewBox="0 0 202.6 265.4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><linearGradient id="lg1"><stop style="stop-color:#2a00fe" offset="0.336"/><stop style="stop-color:#fff" offset="1"/></linearGradient><linearGradient id="lg2"><stop style="stop-color:#fff" offset="0.107"/><stop style="stop-color:#fe0000" offset="0.684"/></linearGradient><linearGradient xlink:href="#lg1" id="grad1" x1="129.89" y1="808.83" x2="194.31" y2="808.83" gradientUnits="userSpaceOnUse"/><linearGradient xlink:href="#lg2" id="grad2" x1="271.02" y1="731.42" x2="327.45" y2="731.42" gradientUnits="userSpaceOnUse" spreadMethod="pad"/></defs><g transform="translate(-129.894,-634.847)"><g transform="translate(-114.063,-139.373)"><path d="m 353.331,791.185 -24.32,66.818 c -8.972,24.651 9.283,50.722 35.516,50.722 h 72.08 c 5.218,0 9.449,4.23 9.449,9.449 0,5.218 -4.231,9.449 -9.449,9.449 h -72.08 c -39.35,0 -66.732,-39.106 -53.274,-76.083 l 7.123,-19.57 17.2,-47.256 c 1.787,-4.903 7.21,-7.428 12.113,-5.642 4.903,1.787 7.429,7.21 5.643,12.112 z" style="fill:#000;stroke:#000"/><path d="m 314.879,1026.411 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#000;stroke:#000"/><path d="m 249.987,1019.877 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:#000;stroke:#000"/><path d="m 359.24,904.532 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#000;stroke:#000"/><path d="m 436.607,884.024 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:#000;stroke:#000"/></g><g><path d="m 234.225,648.032 -24.32,66.818 a 37.795,37.795 0 0 0 35.516,50.722 h 72.08 a 9.449,9.449 0 0 1 0,18.898 h -72.08 a 56.693,56.693 0 0 1 -53.274,-76.083 l 24.323,-66.826 a 9.449,9.449 0 0 1 17.755,6.471 z" style="fill:#fff;stroke:#000"/><path d="m 195.773,883.258 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#fff;stroke:#000"/><path d="m 130.881,876.724 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:url(#grad1);stroke:#000"/><path d="m 240.133,761.379 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#fff;stroke:#000"/><path d="m 317.5,740.871 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:url(#grad2);stroke:#000"/></g></g></svg>
+    <span class="nav-wordmark">Hub<sup>4</sup>Fix</span>
+  </a>
+  <div class="nav-right">
+    <a href="index.html" class="nav-back"><span class="nav-back-arrow">←</span></a>
+    <div class="lang-dropdown" id="langDropdown">
+      <button class="lang-dropdown-btn" id="langDropdownBtn" data-lang="fr"></button>
+      <div class="lang-dropdown-list" id="langDropdownList">
+        <button class="lang-opt active" data-lang="fr"><span class="flag">🇫🇷</span> Francais</button>
+        <button class="lang-opt" data-lang="en"><span class="flag">🇬🇧</span> English</button>
+        <button class="lang-opt" data-lang="de"><span class="flag">🇩🇪</span> Deutsch</button>
+        <button class="lang-opt" data-lang="es"><span class="flag">🇪🇸</span> Espanol</button>
+        <button class="lang-opt" data-lang="it"><span class="flag">🇮🇹</span> Italiano</button>
+        <button class="lang-opt" data-lang="pt"><span class="flag">🇵🇹</span> Portugues</button>
+        <button class="lang-opt" data-lang="zh"><span class="flag">🇨🇳</span> 中文</button>
+        <button class="lang-opt" data-lang="hi"><span class="flag">🇮🇳</span> हिन्दी</button>
+      </div>
+    </div>
+    <div class="nav-account" id="navAccount">
+      <button class="nav-account-btn" id="accountBtn">
+        <svg class="nav-account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0112 0v1"/></svg>
+        <span class="nav-token-badge" id="tokenBadge">5</span>
+      </button>
+      <div class="nav-account-menu" id="accountMenu">
+        <div class="account-menu-header">
+          <div class="account-menu-header-left">
+            <span class="account-menu-name">Julien D.</span>
+            <span class="account-menu-email">demo@hub4fix.com</span>
+          </div>
+          <div class="account-menu-tokens-inline">
+            <span class="token-icon">⬡</span>
+            <strong id="accountTokenCount">5</strong>
+          </div>
+        </div>
+        <div class="account-roles">
+          <a href="#" class="account-role account-role-client active">
+            <div class="account-role-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            <span class="account-role-label">Reparer</span>
+            <span class="account-role-sub">Trouver sa piece</span>
+          </a>
+          <a href="printer.html" class="account-role account-role-printer locked">
+            <div class="account-role-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="20" width="18" height="2" rx=".5"/><path d="M7 20v-5h10v5"/><path d="M12 4v6"/><path d="M9.5 10h5L12 15.5 9.5 10z"/></svg>
+            </div>
+            <span class="account-role-label">Printer</span>
+            <span class="account-role-sub">Devenir printer</span>
+            <span class="account-role-lock">🔒</span>
+          </a>
+          <a href="modelisateur.html" class="account-role account-role-modeler locked">
+            <div class="account-role-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 7v4l9 5 9-5V7l-9-5z"/><path d="M12 22V12"/><path d="M3 7l9 5 9-5"/><path d="M21 11v6l-9 5-9-5v-6"/></svg>
+            </div>
+            <span class="account-role-label">Modelisateur</span>
+            <span class="account-role-sub">Devenir modelisateur</span>
+            <span class="account-role-lock">🔒</span>
+          </a>
+        </div>
+        <div class="account-menu-links">
+          <a href="#" class="account-menu-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+            <span data-i18n="account_library">Ma bibliotheque</span>
+          </a>
+          <a href="#" class="account-menu-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            <span data-i18n="account_settings">Parametres</span>
+          </a>
+          <a href="#" class="account-menu-item account-menu-logout">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span data-i18n="account_logout">Deconnexion</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero section-watermark" data-watermark="La plateforme qui manque à l'économie circulaire.">
+  <div class="hero-left">
+    <div class="hero-kicker" data-i18n="hero_kicker">Économie de la fonctionnalité · Circularité radicale</div>
+    <h1 class="hero-title" data-i18n-html="hero_title">
+      Un appareil qui<br>
+      se répare ne<br>
+      finit pas<br>
+      <em>à la décharge.</em>
+    </h1>
+    <p class="hero-body" data-i18n="hero_body">
+      Hub⁴Fix ne vend pas des pièces en plastique.
+      Il vend du temps de vie — aux objets, aux territoires, aux gens.
+      Chaque réparation est une tonne de CO₂ évitée, un emploi local ancré,
+      une facture de remplacement épargnée.
+    </p>
+  </div>
+  <div class="hero-right">
+    <div class="stat-block">
+      <div class="stat-number stat-odometer" id="stat888"><span class="odo-digit" data-target="8" style="--delay:1.2s">0</span><span class="odo-digit" data-target="8" style="--delay:0.6s">0</span><span class="odo-digit" data-target="8" style="--delay:0s">0</span><span>M</span></div>
+      <div class="stat-label" data-i18n-html="stat_888m">
+        d'appareils en circulation en France (670M PEM + 218M GEM).<br>
+        <span style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--encre-light)">GIFAM / NielsenIQ-GfK, bilan 2024 (fév. 2025)</span>
+      </div>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="stat-block">
+      <div class="stat-number"><span id="statCountUp">0</span><span>/6</span></div>
+      <div class="stat-label" data-i18n-html="stat_5_6">
+        des appareils en panne NE sont PAS réparés.<br>~30M de pannes/an — seulement 1 sur 6 l'est.<br><span style="font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--encre-light)">Loi AGEC (2020) · aidealareparation.fr · ecosystem.eco</span>
+      </div>
+    </div>
+    <div class="hero-divider"></div>
+    <div class="stat-block zero-carousel" id="zeroCarousel">
+      <div class="stat-number">
+        <div class="zero-slides" id="zeroSlides">
+          <div class="zero-slide"><span class="zero-val" style="color:var(--encre)">Zéro&nbsp;</span><span class="zero-unit">€</span></div>
+          <div class="zero-slide"><span class="zero-val" style="color:var(--encre)">Zéro&nbsp;</span><span class="zero-unit">m²</span></div>
+          <div class="zero-slide"><span class="zero-val" style="color:var(--encre)">Zéro&nbsp;</span><span class="zero-unit">km</span><span class="zero-unit" style="font-size:.5em;vertical-align:super">*</span></div>
+        </div>
+      </div>
+      <div class="stat-label" id="zeroLabel">
+        de stock physique. Un fichier numérique<br>
+        ne s'érode pas, ne se perd pas, ne pollue pas.
+      </div>
+      <div class="zero-asterisk" id="zeroAsterisk">* pour les clients numériques</div>
+    </div>
+  </div>
+</section>
+
+<!-- BANDEAU COMPTEUR DÉCHETS TEMPS RÉEL -->
+<div class="waste-ticker">
+  <div class="waste-ticker-pulse"></div>
+  <div class="waste-ticker-inner">
+    <div class="waste-ticker-counter">
+      <div class="waste-ticker-label" data-i18n="ticker_label">Déchets électroniques en Europe — temps réel</div>
+      <div class="waste-ticker-row">
+        <div class="waste-ticker-number" id="wasteCounter">0</div>
+        <div class="waste-ticker-tonnes">To</div>
+      </div>
+      <div class="waste-ticker-unit" data-i18n="ticker_unit">depuis le 01 janvier 2020</div>
+    </div>
+    <div class="waste-ticker-sep"></div>
+    <div class="waste-ticker-text">
+      <div class="waste-ticker-quote" data-i18n-html="ticker_quote">L'Europe détient le <strong>record mondial</strong> de production de déchets électroniques : chaque habitant jette en moyenne <strong>17,6 kg</strong> par an. En France, ce chiffre grimpe à <strong>22 kg par personne</strong>.</div>
+      <div class="waste-ticker-src">Source : Global E-Waste Monitor 2024 · UNITAR / ITU</div>
+    </div>
+  </div>
+</div>
+
+<!-- PARADOXE -->
+<section class="paradox reveal" id="paradoxe">
+  <div class="section-eyebrow" data-i18n="paradox_eyebrow">Le paradoxe de la pièce orpheline</div>
+  <div class="paradox-grid">
+    <div class="paradox-left">
+      <h2 data-i18n-html="paradox_title">L'objet existe encore.<br>La pièce a <em>disparu.</em></h2>
+      <p data-i18n-html="paradox_p1">
+        Un lave-linge de sept ans, en parfait état de marche,
+        mis au rebut parce qu'un pignon de pompe de vidange
+        est introuvable. Ni chez le fabricant, ni chez le réparateur,
+        ni nulle part. Ce n'est pas de l'obsolescence programmée —
+        c'est de l'obsolescence <strong>logistique</strong>.
+      </p>
+      <p data-i18n="paradox_p2">
+        La fabrication additive résout ce problème structurellement.
+        Un fichier 3D validé ne périme pas. Il attend que la pièce
+        soit demandée pour exister — sans stock, sans transport amont,
+        sans surproduction. C'est la définition même de l'économie
+        de la fonctionnalité appliquée à la réparation.
+      </p>
+      <p data-i18n-html="paradox_p3">
+        Hub⁴Fix construit cette bibliothèque de fichiers en anticipant
+        la demande — avant même que la pièce disparaisse du marché.
+        <em>Un actif numérique immatériel, impérissable, reproductible à l'infini.</em>
+      </p>
+    </div>
+    <div class="paradox-right">
+      <div class="waste-visual">
+        <div style="font-family:'DM Mono',monospace;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--encre-light);margin-bottom:1.5rem" data-i18n="waste_header">
+          Réalité du marché de la réparation — France · sources : ADEME, GIFAM, Loi AGEC
+        </div>
+        <div class="waste-item">
+          <div>
+            <span class="waste-item-label" data-i18n="waste_1_label">Appareils mis au rebut / an</span>
+            <span class="waste-item-sub" data-i18n="waste_1_sub">faute de réparation (1/6 réparé) · Loi AGEC / aidealareparation.fr</span>
+          </div>
+          <span class="waste-item-value">~3M</span>
+        </div>
+        <div class="waste-item">
+          <div>
+            <span class="waste-item-label" data-i18n="waste_2_label">Délai de rupture catalogue</span>
+            <span class="waste-item-sub" data-i18n="waste_2_sub">après fin de production</span>
+          </div>
+          <span class="waste-item-value" data-i18n="waste_2_value">3–5 ans</span>
+        </div>
+        <div class="waste-item">
+          <div>
+            <span class="waste-item-label" data-i18n="waste_3_label">Poids carbone d'un lave-linge</span>
+            <span class="waste-item-sub" data-i18n="waste_3_sub">fabrication seule (cycle complet : 513 kg CO₂e)</span>
+          </div>
+          <span class="waste-item-value">341 kg CO₂e</span>
+        </div>
+        <div class="waste-item">
+          <div>
+            <span class="waste-item-label" data-i18n="waste_4_label">Bonus réparation 2024 (lave-linge)</span>
+            <span class="waste-item-sub" data-i18n="waste_4_sub">Doublement en 2024 · Service-public.fr / ecosystem.eco</span>
+          </div>
+          <span class="waste-item-value">50 €</span>
+        </div>
+        <div class="waste-item">
+          <div>
+            <span class="waste-item-label" data-i18n="waste_5_label">Coût de la pièce orpheline H4F</span>
+            <span class="waste-item-sub" data-i18n="waste_5_sub">vs. remplacement complet de l'appareil</span>
+          </div>
+          <span class="waste-item-value">3–19 €</span>
+        </div>
+        <div class="waste-item">
+          <div>
+            <span class="waste-item-label" data-i18n="waste_6_label">Matière imprimée par pièce</span>
+            <span class="waste-item-sub" data-i18n="waste_6_sub">en masse filament PLA/PETG</span>
+          </div>
+          <span class="waste-item-value">&lt; 80 g</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CERCLES VERTUEUX -->
+<section class="circles reveal" id="cercles">
+  <div class="circles-inner">
+    <div class="circles-header">
+      <div class="section-eyebrow" data-i18n="circles_eyebrow">Trois cercles. Un seul mouvement.</div>
+      <h2 data-i18n-html="circles_title">Chaque réparation <em>renforce</em> le suivant.</h2>
+    </div>
+    <div class="circles-grid">
+      <!-- Économique -->
+      <div class="circle-card" data-circle="eco">
+        <div class="circle-number">01 / 03</div>
+        <div class="circle-icon-wrap ci-eco"><div class="circle-icon-glass"></div><div class="circle-icon-edge"></div><div class="circle-icon-arc"></div><div class="circle-icon-svg"><svg viewBox="0 0 36 36">
+<!-- 3 pieces empilees en perspective -->
+<ellipse cx="18" cy="26" rx="8" ry="3.2"/>
+<line x1="10" y1="23" x2="10" y2="26"/><line x1="26" y1="23" x2="26" y2="26"/>
+<ellipse cx="18" cy="23" rx="8" ry="3.2"/>
+<line x1="10" y1="19.5" x2="10" y2="23"/><line x1="26" y1="19.5" x2="26" y2="23"/>
+<ellipse cx="18" cy="19.5" rx="8" ry="3.2"/>
+<line x1="10" y1="16" x2="10" y2="19.5"/><line x1="26" y1="16" x2="26" y2="19.5"/>
+<ellipse cx="18" cy="16" rx="8" ry="3.2"/>
+<!-- reflet sur piece du haut -->
+<path d="M13 15 Q15 13.5 17 14" opacity=".5"/>
+</svg></div></div>
+        <h3 class="circle-title" data-i18n-html="circle_eco_title">Le cercle<br><em>vertueux</em></h3>
+        <p class="circle-body" data-i18n-html="circle_eco_body">
+          Plus la demande monte dans la Hot List, plus le fichier est modélisé vite.
+          Plus il est disponible, plus il génère des ventes.
+          Plus il génère des ventes, plus le modélisateur est récompensé —
+          et plus il cherche la prochaine pièce orpheline à valoriser.
+          Un marché auto-alimenté, sans surstock, sans rupture.
+        </p>
+        <div class="circle-metrics">
+          <div class="metric">
+            <span class="metric-label" data-i18n="metric_replacement">Taux de remplacement évité</span>
+            <span class="metric-value">~85% *</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label" data-i18n="metric_jobs">Modèle d'opportunité</span>
+            <span class="metric-value" style="font-size:.55rem;line-height:1.5;max-width:180px" data-i18n="metric_jobs_value">Chaque printer choisit ses missions, son rythme, ses revenus. Aucun lien de subordination.</span>
+          </div>
+          <div style="margin-top:1rem;font-family:'DM Mono',monospace;font-size:0.65rem;color:rgba(245,240,232,0.3);line-height:1.6;border-top:0.5px solid rgba(245,240,232,0.08);padding-top:0.7rem">
+            * 715 000 réparations réalisées via le bonus réparation en 2024<br>(×4 vs 2023). Source : GIFAM / NielsenIQ-GfK, fév. 2025
+          </div>
+        </div>
+      </div>
+      <!-- Écologique -->
+      <div class="circle-card" data-circle="ecol">
+        <div class="circle-number">02 / 03</div>
+        <div class="circle-icon-wrap ci-ecol"><div class="circle-icon-glass"></div><div class="circle-icon-edge"></div><div class="circle-icon-arc"></div><div class="circle-icon-svg"><svg viewBox="0 0 36 36">
+<!-- feuille avec nervure centrale -->
+<path d="M18 30 L18 13"/>
+<path d="M18 13 C11 13 5 7 5 3 C12 3 18 8 18 13"/>
+<path d="M18 19 C24 17 29 11 29 6 C23 7 18 13 18 19"/>
+<!-- nervures -->
+<path d="M18 16 L13 11" opacity=".4"/>
+<path d="M18 22 L23 16" opacity=".4"/>
+</svg></div></div>
+        <h3 class="circle-title" data-i18n-html="circle_ecol_title">Le cercle<br><em>écologique</em></h3>
+        <p class="circle-body" data-i18n-html="circle_ecol_body">
+          La fabrication additive dépose la matière uniquement là où la pièce l'exige — pas de moule, pas d'outillage, pas de chute.
+          Rien n'est produit en excès, rien ne traverse un continent.
+          Le filament PLA est biosourcé, le PETG est recyclable.
+          <strong style="color:rgba(245,240,232,0.85)">Une pièce de 40 g consomme 40 g de matière — pas 400 g de plastique injecté.</strong>
+        </p>
+        <div class="circle-metrics">
+          <div class="metric">
+            <span class="metric-label" data-i18n="metric_waste">Taux de chute matière</span>
+            <span class="metric-value">&lt; 5%</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label" data-i18n="metric_co2">CO₂ vs. remplacement neuf</span>
+            <span class="metric-value">−97%</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label" data-i18n="metric_tooling">Outillage / moule requis</span>
+            <span class="metric-value">0</span>
+          </div>
+        </div>
+      </div>
+      <!-- Territorial -->
+      <div class="circle-card" data-circle="terr">
+        <div class="circle-number">03 / 03</div>
+        <div class="circle-icon-wrap ci-terr"><div class="circle-icon-glass"></div><div class="circle-icon-edge"></div><div class="circle-icon-arc"></div><div class="circle-icon-svg"><svg viewBox="0 0 36 36">
+<!-- mat -->
+<line x1="11" y1="5" x2="11" y2="28"/>
+<!-- drapeau rectangulaire -->
+<rect x="11" y="5" width="16" height="11" rx="0.5"/>
+<!-- socle en pierre -->
+<path d="M5 28 L7 25 L15 25 L17 28 Z"/>
+<ellipse cx="11" cy="28.5" rx="7" ry="2"/>
+</svg></div></div>
+        <h3 class="circle-title" data-i18n-html="circle_terr_title">Le cercle<br><em>territorial</em></h3>
+        <p class="circle-body" data-i18n-html="circle_terr_body">
+          La pièce naît à la demande, à 2 km du client.
+          Pas de fabrication spéculative, pas d'emballage, pas de stock.
+          Chaque client qui achète un fichier numérique devient printer potentiel.
+          Le réseau est distribué, résilient, ancré dans chaque commune.
+        </p>
+        <div class="circle-metrics">
+          <div class="metric">
+            <span class="metric-label" data-i18n="metric_km">Km de transport moyen</span>
+            <span class="metric-value">&lt; 3 km</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label" data-i18n="metric_packaging">Emballage par pièce</span>
+            <span class="metric-value">0 g</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label" data-i18n="metric_network">Réseau cible Phase 1</span>
+            <span class="metric-value" data-i18n="metric_network_value">IDF dense</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOUCLE MATIÈRE -->
+<section class="loop reveal section-watermark" id="boucle" data-watermark="Le cycle de vie commence ici.">
+  <div class="loop-header">
+    <div class="section-eyebrow" data-i18n="loop_eyebrow">La boucle matière H4F</div>
+    <h2 data-i18n-html="loop_title">De la panne au <em>retour en vie</em><br>en moins de 48 heures.</h2>
+  </div>
+  <div class="loop-diagram">
+    <div class="loop-step">
+      <span class="loop-step-icon">🔍</span>
+      <div class="loop-step-label" data-i18n="loop_step1_label">Panne déclarée</div>
+      <div class="loop-step-sub" data-i18n-html="loop_step1_sub">Le client cherche<br>sa pièce. Hot List<br>enregistre.</div>
+    </div>
+    <div class="loop-arrow">→</div>
+    <div class="loop-step">
+      <span class="loop-step-icon">📐</span>
+      <div class="loop-step-label" data-i18n="loop_step2_label">Fichier pris en charge</div>
+      <div class="loop-step-sub" data-i18n-html="loop_step2_sub">Un modélisateur prend<br>en charge le besoin.<br>H4F paramètre + sécurise.</div>
+    </div>
+    <div class="loop-arrow">→</div>
+    <div class="loop-step">
+      <span class="loop-step-icon">🖨️</span>
+      <div class="loop-step-label" data-i18n="loop_step3_label">Impression locale</div>
+      <div class="loop-step-sub" data-i18n-html="loop_step3_sub">Printer &lt; 3 km * ← frontière<br>numérique / physique.<br>G-code tokenisé · 20–80 g.</div>
+    </div>
+    <div class="loop-arrow">→</div>
+    <div class="loop-step">
+      <span class="loop-step-icon">♻️</span>
+      <div class="loop-step-label" data-i18n="loop_step4_label">Réparation</div>
+      <div class="loop-step-sub" data-i18n-html="loop_step4_sub">L'appareil repart.<br>270 kg CO₂<br>restent dans le sol.</div>
+    </div>
+  </div>
+  <div class="asterisk-note reveal">
+    <span style="color:var(--rouge);font-weight:500">*</span> Moyenne estimée en zone urbaine dense (IDF, métropoles). Variable selon la densité du réseau de printers : 
+    &lt; 3 km en agglomération, 8–15 km en zone périurbaine, jusqu'à 30–50 km en zone rurale lors du démarrage — 
+    avec recours au backup Mondial Relay au-delà du délai de 24h. La densité du réseau croît mécaniquement 
+    avec le volume de clients flux numérique convertis en printers.
+  </div>
+  <div class="loop-note" data-i18n-html="loop_note">
+    Le fichier reste dans la bibliothèque — reproductible à l'infini,
+    sans aucune nouvelle extraction de matière première.
+    <strong>Un actif qui prend de la valeur à mesure que la pièce physique disparaît du marché.</strong>
+  </div>
+</section>
+
+<!-- TERRITOIRE -->
+<section class="territory reveal section-watermark" id="territoire" data-watermark="La production locale, la solution globale.">
+  <div class="territory-inner">
+    <div class="section-eyebrow" data-i18n="territory_eyebrow">Ancrage territorial</div>
+    <div class="territory-grid">
+      <div class="territory-left">
+        <h2 data-i18n-html="territory_title">Né en ZFU.<br>Pensé pour <em>essaimer.</em></h2>
+        <p data-i18n="territory_p1">
+          Hub⁴Fix est implanté à La STaTION, Grande Borne,
+          Viry-Châtillon — Zone Franche Urbaine.
+          Ce n'est pas une stratégie fiscale : c'est une cohérence.
+          Le projet naît là où les gens réparent par nécessité,
+          pas par tendance.
+        </p>
+        <p data-i18n="territory_p2">
+          Le modèle freelance (modélisateurs, printers)
+          crée de l'emploi qualifié décentralisé :
+          une économie de compétence distribuée,
+          sans usine centralisée, sans dépendance à un seul bassin d'emploi.
+        </p>
+        <p style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--encre-light);line-height:1.6">
+          ZFU · SAS IS · Exonération IS et CFE jusqu'à 5 ans<br>
+          Essonne · Île-de-France · Phase 3 : national
+        </p>
+      </div>
+      <div class="territory-right">
+        <div class="territory-card reveal">
+          <div class="territory-card-icon">🏭</div>
+          <div>
+            <div class="territory-card-title" data-i18n="terr_card1_title">Désindustrialisation inversée</div>
+            <div class="territory-card-body" data-i18n="terr_card1_body">
+              L'impression 3D distribuée recrée une capacité de production
+              locale là où les usines ont fermé — sans investissement lourd,
+              sans centralisation logistique.
+            </div>
+          </div>
+        </div>
+        <div class="territory-card reveal">
+          <div class="territory-card-icon">🤝</div>
+          <div>
+            <div class="territory-card-title" data-i18n="terr_card2_title">Artisanat augmenté</div>
+            <div class="territory-card-body" data-i18n="terr_card2_body">
+              Les 7 500 réparateurs Répar'Acteurs CMA deviennent
+              des prescripteurs et des co-producteurs — pas des concurrents
+              à supplanter, des partenaires à équiper.
+            </div>
+          </div>
+        </div>
+        <div class="territory-card reveal">
+          <div class="territory-card-icon">📱</div>
+          <div>
+            <div class="territory-card-title" data-i18n="terr_card3_title">Accessibilité radicale</div>
+            <div class="territory-card-body" data-i18n="terr_card3_body">
+              3,50 € par pièce numérique. Pas d'abonnement obligatoire.
+              Pas de formation requise. La réparation accessible à tous
+              les ménages, y compris les plus contraints.
+            </div>
+          </div>
+        </div>
+        <div class="territory-card reveal">
+          <div class="territory-card-icon">📊</div>
+          <div>
+            <div class="territory-card-title" data-i18n="terr_card4_title">Indicateurs traçables</div>
+            <div class="territory-card-body" data-i18n="terr_card4_body">
+              Chaque transaction génère une donnée : référence réparée,
+              poids imprimé, km de livraison. Un tableau de bord d'impact
+              réel, pas déclaratif.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- IMPACT CHIFFRÉ -->
+<section class="impact reveal section-watermark" id="impact" data-watermark="Ne jetez plus, réactivez.">
+  <div class="impact-inner">
+    <div class="impact-header">
+      <div class="section-eyebrow" data-i18n="impact_eyebrow">Projection d'impact · Phase 1 · 15 000 réparations/an</div>
+      <h2 data-i18n-html="impact_title">Des ordres de grandeur<br><em>vérifiables.</em></h2>
+    </div>
+    <div class="impact-strip">
+      <div class="impact-cell">
+        <div class="impact-cell-number">5 115</div>
+        <span class="impact-cell-unit" data-i18n="impact_1_unit">tonnes CO₂ éq. évitées</span>
+        <div class="impact-cell-label" data-i18n="impact_1_label">
+          Sur la base de 341 kg CO₂e évités par appareil non fabriqué (phase fabrication),
+          pour 15 000 réparations réussies.
+        </div>
+        <span class="impact-cell-source">ADEME · Base Empreinte® · impactco2.fr · Étude ACV 2018 (Lhotellier et al.)</span>
+      </div>
+      <div class="impact-cell">
+        <div class="impact-cell-number">1,2T</div>
+        <span class="impact-cell-unit" data-i18n="impact_2_unit">kg de matière imprimée</span>
+        <div class="impact-cell-label" data-i18n="impact_2_label">
+          Contre ~900 tonnes de matière plastique qui auraient constitué
+          des appareils neufs de remplacement.
+        </div>
+        <span class="impact-cell-source">Calcul H4F · 80 g moy. par pièce</span>
+      </div>
+      <div class="impact-cell">
+        <div class="impact-cell-number">~300</div>
+        <span class="impact-cell-unit" data-i18n="impact_3_unit">emplois-équivalents activés</span>
+        <div class="impact-cell-label" data-i18n="impact_3_label">
+          Modélisateurs freelance, printers locaux,
+          artisans réparateurs partenaires —
+          sans CDI centralisé.
+        </div>
+        <span class="impact-cell-source">Estimation · 1 printer / 50 pièces/mois</span>
+      </div>
+      <div class="impact-cell">
+        <div class="impact-cell-number">18M€</div>
+        <span class="impact-cell-unit" data-i18n="impact_4_unit">pouvoir d'achat préservé</span>
+        <div class="impact-cell-label" data-i18n="impact_4_label">
+          Différentiel entre le coût d'un appareil neuf (~1 200 € moy.)
+          et le coût de la réparation H4F (~3–19 €),
+          pour 15 000 ménages.
+        </div>
+        <span class="impact-cell-source">GIFAM / NielsenIQ-GfK · Bilan 2024 (fév. 2025) · 9,6 Md€ de CA électroménager</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MANIFESTE FINAL -->
+<section class="manifeste">
+  <div class="manifeste-inner">
+    <div class="manifeste-kicker" data-i18n="manifeste_kicker">Hub⁴Fix · Le Kintsugi Numérique</div>
+    <blockquote class="manifeste-quote" data-i18n-html="manifeste_quote">
+      "La réparation n'est pas un retour en arrière.<br>
+      C'est la seule direction <strong>raisonnablement en avant.</strong>"
+    </blockquote>
+    <p class="manifeste-body" data-i18n="manifeste_body">
+      Hub⁴Fix ne défend pas l'environnement dans une charte RSE.
+      Il construit un modèle où la protection de l'environnement
+      est la conséquence directe de chaque transaction rentable.
+      L'écologie et l'économie ne s'opposent pas ici :
+      elles se renforcent à chaque pièce imprimée,
+      à chaque appareil qui ne finit pas à la décharge.
+    </p>
+    <a href="#" class="manifeste-cta" data-i18n="manifeste_cta">
+      Découvrir la plateforme →
+    </a>
+  </div>
+</section>
+
+
+<!-- SOURCES -->
+<section style="background:var(--ivoire);padding:3rem;border-top:0.5px solid rgba(28,26,22,0.1)">
+  <div style="max-width:1100px;margin:0 auto">
+    <div style="font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--encre-light);margin-bottom:1.2rem">Sources & références</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem">
+      <div style="font-family:'DM Mono',monospace;font-size:0.7rem;line-height:1.8;color:var(--encre-mid)">
+        <strong style="color:var(--encre);display:block;margin-bottom:0.4rem">Marché électroménager</strong>
+        GIFAM / NielsenIQ-GfK · Bilan 2024, 12 fév. 2025 · gifam.fr<br>
+        888M appareils en circulation (670M PEM + 218M GEM)<br>
+        68M appareils vendus/an · CA 9,6 Md€<br>
+        97% des foyers équipés GEM · 99% en PEM<br>
+        ~22 appareils PEM / foyer · ~7 GEM / foyer
+      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:0.7rem;line-height:1.8;color:var(--encre-mid)">
+        <strong style="color:var(--encre);display:block;margin-bottom:0.4rem">Impact carbone (ADEME)</strong>
+        Base Empreinte® · impactco2.fr · base-empreinte.ademe.fr<br>
+        Étude ACV 2018 (Lhotellier, Less, Bossanne, Pesnel)<br>
+        Lave-linge : 341 kg CO₂e fabrication / 513 kg cycle complet<br>
+        Aspirateur : 47 kg · Bouilloire : 37,8 kg CO₂e<br>
+        Fabrication = ~50% de l'empreinte totale d'un appareil
+      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:0.7rem;line-height:1.8;color:var(--encre-mid)">
+        <strong style="color:var(--encre);display:block;margin-bottom:0.4rem">Réparation & réglementation</strong>
+        Loi AGEC (fév. 2020) · Bonus réparation actif déc. 2022<br>
+        ~30M pannes/an · 1 appareil sur 6 réparé · aidealareparation.fr<br>
+        715 000 réparations via bonus en 2024 (×4 vs 181 000 en 2023)<br>
+        Bonus lave-linge doublé à 50€ au 1er jan. 2024 · service-public.fr<br>
+        Répar'Acteurs CMA · artisanat.fr · 7 500 artisans labellisés QualiRépar
+      </div>
+    </div>
+    <div style="margin-top:1.2rem;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--encre-light);border-top:0.5px solid rgba(28,26,22,0.1);padding-top:1rem">
+      Les projections d'impact (CO₂ évité, emplois induits, pouvoir d'achat préservé) sont des estimations H4F construites sur ces bases documentaires. 
+      Les chiffres marqués « Estimation H4F » sont des ordres de grandeur internes non audités.
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="logo">HUB<span>4</span>FIX — Kintsugi Numérique</div>
+  <div class="mention">SAS · ZFU Grande Borne · Viry-Châtillon · Essonne</div>
+</footer>
+
+<script>
+// ════ I18N ════
+var I18N = {
+  fr: {
+    hero_kicker: "Économie de la fonctionnalité · Circularité radicale",
+    hero_title: "Un appareil qui<br>se répare ne<br>finit pas<br><em>à la décharge.</em>",
+    hero_body: "Hub⁴Fix ne vend pas des pièces en plastique. Il vend du temps de vie — aux objets, aux territoires, aux gens. Chaque réparation est une tonne de CO₂ évitée, un emploi local ancré, une facture de remplacement épargnée.",
+    stat_888m: "d'appareils en circulation en France (670M PEM + 218M GEM).<br><span style=\"font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--encre-light)\">GIFAM / NielsenIQ-GfK, bilan 2024 (fév. 2025)</span>",
+    stat_5_6: "des appareils en panne NE sont PAS réparés.<br>~30M de pannes/an — seulement 1 sur 6 l'est.<br><span style=\"font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--encre-light)\">Loi AGEC (2020) · aidealareparation.fr · ecosystem.eco</span>",
+    stat_0e: "de stock physique. Un fichier numérique<br>ne s'érode pas, ne se perd pas, ne pollue pas.",
+    paradox_eyebrow: "Le paradoxe de la pièce orpheline",
+    paradox_title: "L'objet existe encore.<br>La pièce a <em>disparu.</em>",
+    paradox_p1: "Un lave-linge de sept ans, en parfait état de marche, mis au rebut parce qu'un pignon de pompe de vidange est introuvable. Ni chez le fabricant, ni chez le réparateur, ni nulle part. Ce n'est pas de l'obsolescence programmée — c'est de l'obsolescence <strong>logistique</strong>.",
+    paradox_p2: "La fabrication additive résout ce problème structurellement. Un fichier 3D validé ne périme pas. Il attend que la pièce soit demandée pour exister — sans stock, sans transport amont, sans surproduction. C'est la définition même de l'économie de la fonctionnalité appliquée à la réparation.",
+    paradox_p3: "Hub⁴Fix construit cette bibliothèque de fichiers en anticipant la demande — avant même que la pièce disparaisse du marché. <em>Un actif numérique immatériel, impérissable, reproductible à l'infini.</em>",
+    waste_header: "Réalité du marché de la réparation — France · sources : ADEME, GIFAM, Loi AGEC",
+    waste_1_label: "Appareils mis au rebut / an",
+    waste_1_sub: "faute de réparation (1/6 réparé) · Loi AGEC / aidealareparation.fr",
+    waste_2_label: "Délai de rupture catalogue",
+    waste_2_sub: "après fin de production",
+    waste_2_value: "3–5 ans",
+    waste_3_label: "Poids carbone d'un lave-linge",
+    waste_3_sub: "fabrication seule (cycle complet : 513 kg CO₂e)",
+    waste_4_label: "Bonus réparation 2024 (lave-linge)",
+    waste_4_sub: "Doublement en 2024 · Service-public.fr / ecosystem.eco",
+    waste_5_label: "Coût de la pièce orpheline H4F",
+    waste_5_sub: "vs. remplacement complet de l'appareil",
+    waste_6_label: "Matière imprimée par pièce",
+    waste_6_sub: "en masse filament PLA/PETG",
+    circles_eyebrow: "Trois cercles. Un seul mouvement.",
+    circles_title: "Chaque réparation <em>renforce</em> le suivant.",
+    circle_eco_title: "Le cercle<br><em>vertueux</em>",
+    circle_eco_body: "Plus la demande monte dans la Hot List, plus le fichier est produit vite. Plus le fichier est disponible, plus il génère des ventes. Plus il génère des ventes, plus le royaltie du modélisateur est rentable — et plus il cherche la prochaine pièce orpheline à valoriser. Un marché auto-alimenté, sans surstock, sans rupture.",
+    metric_replacement: "Taux de remplacement évité",
+    metric_bfr: "BFR structurel",
+    metric_bfr_value: "Négatif",
+    metric_jobs: "Emplois locaux induits",
+    circle_ecol_title: "Le cercle<br><em>écologique</em>",
+    circle_ecol_body: "La fabrication additive dépose la matière uniquement là où la pièce l'exige — pas de moule, pas d'outillage, pas de chute. Rien n'est produit en excès, rien ne traverse un continent. Le filament PLA est biosourcé, le PETG est recyclable. <strong style=\"color:rgba(245,240,232,0.85)\">Une pièce de 40 g consomme 40 g de matière — pas 400 g de plastique injecté.</strong>",
+    metric_co2: "CO₂ vs. remplacement",
+    metric_packaging: "Emballage par pièce",
+    metric_km: "Km de transport moyen",
+    circle_terr_title: "Le cercle<br><em>territorial</em>",
+    circle_terr_body: "La pièce naît à la demande, à 2 km du client. Pas de fabrication spéculative, pas d'emballage, pas de stock. Chaque client qui achète un fichier numérique devient printer potentiel. Le réseau est distribué, résilient, ancré dans chaque commune.",
+    metric_network: "Réseau cible Phase 1",
+    metric_network_value: "IDF dense",
+    metric_reparacteurs: "Répar'Acteurs partenaires",
+    metric_reparacteurs_value: "7 500 artisans",
+    metric_employment: "Modèle emploi",
+    loop_eyebrow: "La boucle matière H4F",
+    loop_title: "De la panne au <em>retour en vie</em><br>en moins de 48 heures.",
+    loop_step1_label: "Panne déclarée",
+    loop_step1_sub: "Le client cherche<br>sa pièce. Hot List<br>enregistre.",
+    loop_step2_label: "Fichier pris en charge",
+    loop_step2_sub: "Un modélisateur prend<br>en charge le besoin.<br>H4F paramètre + sécurise.",
+    loop_step3_label: "Impression locale",
+    loop_step3_sub: "Printer &lt; 3 km * ← frontière<br>numérique / physique.<br>G-code tokenisé · 20–80 g.",
+    loop_step4_label: "Réparation",
+    loop_step4_sub: "L'appareil repart.<br>270 kg CO₂<br>restent dans le sol.",
+    loop_note: "Le fichier reste dans la bibliothèque — reproductible à l'infini, sans aucune nouvelle extraction de matière première. <strong>Un actif qui prend de la valeur à mesure que la pièce physique disparaît du marché.</strong>",
+    territory_eyebrow: "Ancrage territorial",
+    territory_title: "Né en ZFU.<br>Pensé pour <em>essaimer.</em>",
+    territory_p1: "Hub⁴Fix est implanté à La STaTION, Grande Borne, Viry-Châtillon — Zone Franche Urbaine. Ce n'est pas une stratégie fiscale : c'est une cohérence. Le projet naît là où les gens réparent par nécessité, pas par tendance.",
+    territory_p2: "Le modèle freelance (modélisateurs, printers) crée de l'emploi qualifié décentralisé : une économie de compétence distribuée, sans usine centralisée, sans dépendance à un seul bassin d'emploi.",
+    terr_card1_title: "Désindustrialisation inversée",
+    terr_card1_body: "L'impression 3D distribuée recrée une capacité de production locale là où les usines ont fermé — sans investissement lourd, sans centralisation logistique.",
+    terr_card2_title: "Artisanat augmenté",
+    terr_card2_body: "Les 7 500 réparateurs Répar'Acteurs CMA deviennent des prescripteurs et des co-producteurs — pas des concurrents à supplanter, des partenaires à équiper.",
+    terr_card3_title: "Accessibilité radicale",
+    terr_card3_body: "3,50 € par pièce numérique. Pas d'abonnement obligatoire. Pas de formation requise. La réparation accessible à tous les ménages, y compris les plus contraints.",
+    terr_card4_title: "Indicateurs traçables",
+    terr_card4_body: "Chaque transaction génère une donnée : référence réparée, poids imprimé, km de livraison. Un tableau de bord d'impact réel, pas déclaratif.",
+    impact_eyebrow: "Projection d'impact · Phase 1 · 15 000 réparations/an",
+    impact_title: "Des ordres de grandeur<br><em>vérifiables.</em>",
+    impact_1_unit: "tonnes CO₂ éq. évitées",
+    impact_1_label: "Sur la base de 341 kg CO₂e évités par appareil non fabriqué (phase fabrication), pour 15 000 réparations réussies.",
+    impact_2_unit: "kg de matière imprimée",
+    impact_2_label: "Contre ~900 tonnes de matière plastique qui auraient constitué des appareils neufs de remplacement.",
+    impact_3_unit: "emplois-équivalents activés",
+    impact_3_label: "Modélisateurs freelance, printers locaux, artisans réparateurs partenaires — sans CDI centralisé.",
+    impact_4_unit: "pouvoir d'achat préservé",
+    impact_4_label: "Différentiel entre le coût d'un appareil neuf (~1 200 € moy.) et le coût de la réparation H4F (~3–19 €), pour 15 000 ménages.",
+    manifeste_kicker: "Hub⁴Fix · Le Kintsugi Numérique",
+    manifeste_quote: "\"La réparation n'est pas un retour en arrière.<br>C'est la seule direction <strong>raisonnablement en avant.</strong>\"",
+    manifeste_body: "Hub⁴Fix ne défend pas l'environnement dans une charte RSE. Il construit un modèle où la protection de l'environnement est la conséquence directe de chaque transaction rentable. L'écologie et l'économie ne s'opposent pas ici : elles se renforcent à chaque pièce imprimée, à chaque appareil qui ne finit pas à la décharge.",
+    manifeste_cta: "Découvrir la plateforme →",
+    account_library: "Ma bibliothèque",
+    account_settings: "Paramètres",
+    account_logout: "Déconnexion"
+  },
+
+  en: {
+    hero_kicker: "Functional economy · Radical circularity",
+    hero_title: "An appliance that<br>gets repaired<br>doesn't end up<br><em>in a landfill.</em>",
+    hero_body: "Hub⁴Fix doesn't sell plastic parts. It sells lifespan — for objects, for communities, for people. Every repair is a tonne of CO₂ avoided, a local job anchored, a replacement bill spared.",
+    stat_888m: "appliances in circulation in France (670M small + 218M large).<br><span style=\"font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--encre-light)\">GIFAM / NielsenIQ-GfK, 2024 report (Feb. 2025)</span>",
+    stat_5_6: "of broken appliances are NOT repaired.<br>~30M breakdowns/year — only 1 in 6 gets fixed.<br><span style=\"font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--encre-light)\">AGEC Law (2020) · aidealareparation.fr · ecosystem.eco</span>",
+    stat_0e: "physical stock. A digital file<br>doesn't erode, doesn't get lost, doesn't pollute.",
+    paradox_eyebrow: "The orphan part paradox",
+    paradox_title: "The appliance still exists.<br>The part has <em>vanished.</em>",
+    paradox_p1: "A seven-year-old washing machine, in perfect working order, discarded because a drain pump gear is nowhere to be found. Not at the manufacturer, not at the repair shop, nowhere. This isn't planned obsolescence — it's <strong>logistical</strong> obsolescence.",
+    paradox_p2: "Additive manufacturing solves this problem structurally. A validated 3D file doesn't expire. It waits for the part to be needed to exist — no stock, no upstream transport, no overproduction. This is the very definition of functional economy applied to repair.",
+    paradox_p3: "Hub⁴Fix builds this file library by anticipating demand — even before the part disappears from the market. <em>An intangible digital asset, imperishable, infinitely reproducible.</em>",
+    waste_header: "Repair market reality — France · sources: ADEME, GIFAM, AGEC Law",
+    waste_1_label: "Appliances scrapped / year",
+    waste_1_sub: "due to lack of repair (1/6 repaired) · AGEC Law / aidealareparation.fr",
+    waste_2_label: "Catalog discontinuation delay",
+    waste_2_sub: "after end of production",
+    waste_2_value: "3–5 years",
+    waste_3_label: "Carbon footprint of a washing machine",
+    waste_3_sub: "manufacturing only (full cycle: 513 kg CO₂e)",
+    waste_4_label: "Repair bonus 2024 (washing machine)",
+    waste_4_sub: "Doubled in 2024 · Service-public.fr / ecosystem.eco",
+    waste_5_label: "Cost of an H4F orphan part",
+    waste_5_sub: "vs. full appliance replacement",
+    waste_6_label: "Printed material per part",
+    waste_6_sub: "filament weight PLA/PETG",
+    circles_eyebrow: "Three circles. One single movement.",
+    circles_title: "Each repair <em>strengthens</em> the next.",
+    circle_eco_title: "The <em>virtuous</em><br>circle",
+    circle_eco_body: "The more demand rises in the Hot List, the faster the file is produced. The more the file is available, the more sales it generates. The more sales it generates, the more profitable the modeler's royalties become — and the more they seek out the next orphan part to valorize. A self-feeding market, with no overstock, no shortage.",
+    metric_replacement: "Replacement rate avoided",
+    metric_bfr: "Structural working capital",
+    metric_bfr_value: "Negative",
+    metric_jobs: "Local jobs generated",
+    circle_ecol_title: "The <em>ecological</em><br>circle",
+    circle_ecol_body: "Additive manufacturing deposits material only where the part requires it — no mould, no tooling, no waste. Nothing is produced in excess, nothing crosses a continent. PLA filament is bio-sourced, PETG is recyclable. <strong style=\"color:rgba(245,240,232,0.85)\">A 40 g part consumes 40 g of material — not 400 g of injection-moulded plastic.</strong>",
+    metric_co2: "CO₂ vs. replacement",
+    metric_packaging: "Packaging per part",
+    metric_km: "Average transport distance",
+    circle_terr_title: "The <em>territorial</em><br>circle",
+    circle_terr_body: "The part is born on demand, 2 km from the customer. No speculative manufacturing, no packaging, no stock. Every customer who buys a digital file becomes a potential printer. The network is distributed, resilient, anchored in every municipality.",
+    metric_network: "Phase 1 target network",
+    metric_network_value: "Dense Paris region",
+    metric_reparacteurs: "Répar'Acteurs partners",
+    metric_reparacteurs_value: "7,500 craftsmen",
+    metric_employment: "Employment model",
+    loop_eyebrow: "The H4F material loop",
+    loop_title: "From breakdown to <em>back to life</em><br>in under 48 hours.",
+    loop_step1_label: "Breakdown reported",
+    loop_step1_sub: "The customer searches<br>for their part. Hot List<br>records it.",
+    loop_step2_label: "File taken on",
+    loop_step2_sub: "A modeler takes<br>on the need.<br>H4F configures + secures.",
+    loop_step3_label: "Local printing",
+    loop_step3_sub: "Printer &lt; 3 km * ← digital /<br>physical boundary.<br>Tokenised G-code · 20–80 g.",
+    loop_step4_label: "Repair",
+    loop_step4_sub: "The appliance runs again.<br>270 kg CO₂<br>stay in the ground.",
+    loop_note: "The file stays in the library — infinitely reproducible, without any new raw material extraction. <strong>An asset that gains value as the physical part disappears from the market.</strong>",
+    territory_eyebrow: "Territorial anchoring",
+    territory_title: "Born in a ZFU.<br>Designed to <em>spread.</em>",
+    territory_p1: "Hub⁴Fix is based at La STaTION, Grande Borne, Viry-Châtillon — an Urban Enterprise Zone. This isn't a tax strategy: it's coherence. The project is born where people repair out of necessity, not as a trend.",
+    territory_p2: "The freelance model (modelers, printers) creates decentralised skilled employment: a distributed competence economy, without a centralised factory, without dependence on a single employment basin.",
+    terr_card1_title: "Reversed deindustrialisation",
+    terr_card1_body: "Distributed 3D printing recreates local production capacity where factories have closed — without heavy investment, without logistical centralisation.",
+    terr_card2_title: "Augmented craftsmanship",
+    terr_card2_body: "The 7,500 Répar'Acteurs CMA repairers become prescribers and co-producers — not competitors to supplant, but partners to equip.",
+    terr_card3_title: "Radical accessibility",
+    terr_card3_body: "€3.50 per digital part. No mandatory subscription. No training required. Repair accessible to all households, including the most constrained.",
+    terr_card4_title: "Traceable indicators",
+    terr_card4_body: "Every transaction generates data: repaired reference, printed weight, delivery distance. A real impact dashboard, not declarative.",
+    impact_eyebrow: "Impact projection · Phase 1 · 15,000 repairs/year",
+    impact_title: "Orders of magnitude<br>that are <em>verifiable.</em>",
+    impact_1_unit: "tonnes CO₂ eq. avoided",
+    impact_1_label: "Based on 341 kg CO₂e avoided per appliance not manufactured (production phase), for 15,000 successful repairs.",
+    impact_2_unit: "kg of printed material",
+    impact_2_label: "Versus ~900 tonnes of plastic that would have formed new replacement appliances.",
+    impact_3_unit: "job-equivalents activated",
+    impact_3_label: "Freelance modelers, local printers, partner repair craftsmen — without centralised permanent contracts.",
+    impact_4_unit: "purchasing power preserved",
+    impact_4_label: "Difference between the cost of a new appliance (~€1,200 avg.) and the H4F repair cost (~€3–19), for 15,000 households.",
+    manifeste_kicker: "Hub⁴Fix · Digital Kintsugi",
+    manifeste_quote: "\"Repair is not a step backward.<br>It is the only direction <strong>reasonably forward.</strong>\"",
+    manifeste_body: "Hub⁴Fix doesn't defend the environment in a CSR charter. It builds a model where environmental protection is the direct consequence of every profitable transaction. Ecology and economy don't oppose each other here: they reinforce each other with every printed part, with every appliance that doesn't end up in a landfill.",
+    manifeste_cta: "Discover the platform →",
+    account_library: "My library",
+    account_settings: "Settings",
+    account_logout: "Log out"
+  },
+
+  de: {
+    hero_kicker: "Funktionale Ökonomie · Radikale Kreislaufwirtschaft",
+    hero_title: "Ein Gerät, das<br>repariert wird,<br>landet nicht<br><em>auf der Deponie.</em>",
+    hero_body: "Hub⁴Fix verkauft keine Plastikteile. Es verkauft Lebensdauer — für Gegenstände, für Gemeinden, für Menschen. Jede Reparatur ist eine Tonne vermiedenes CO₂, ein verankerter lokaler Arbeitsplatz, eine eingesparte Ersatzrechnung.",
+    stat_888m: "Geräte im Umlauf in Frankreich (670M Kleingeräte + 218M Großgeräte).<br><span style=\"font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--encre-light)\">GIFAM / NielsenIQ-GfK, Bericht 2024 (Feb. 2025)</span>",
+    stat_5_6: "der defekten Geräte werden NICHT repariert.<br>~30M Defekte/Jahr — nur 1 von 6 wird repariert.<br><span style=\"font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--encre-light)\">AGEC-Gesetz (2020) · aidealareparation.fr · ecosystem.eco</span>",
+    stat_0e: "physischer Lagerbestand. Eine digitale Datei<br>erodiert nicht, geht nicht verloren, verschmutzt nicht.",
+    paradox_eyebrow: "Das Paradox des verwaisten Ersatzteils",
+    paradox_title: "Das Gerät existiert noch.<br>Das Teil ist <em>verschwunden.</em>",
+    paradox_p1: "Eine sieben Jahre alte Waschmaschine, in perfektem Zustand, wird entsorgt, weil ein Zahnrad der Ablaufpumpe nirgends zu finden ist. Nicht beim Hersteller, nicht beim Reparateur, nirgendwo. Das ist keine geplante Obsoleszenz — das ist <strong>logistische</strong> Obsoleszenz.",
+    paradox_p2: "Die additive Fertigung löst dieses Problem strukturell. Eine validierte 3D-Datei verfällt nicht. Sie wartet, bis das Teil gebraucht wird — ohne Lager, ohne Vorlauftransport, ohne Überproduktion. Das ist die Definition der Funktionalökonomie, angewandt auf Reparatur.",
+    paradox_p3: "Hub⁴Fix baut diese Dateibibliothek auf, indem es die Nachfrage antizipiert — noch bevor das Teil vom Markt verschwindet. <em>Ein immaterieller, unvergänglicher, unendlich reproduzierbarer digitaler Vermögenswert.</em>",
+    waste_header: "Realität des Reparaturmarktes — Frankreich · Quellen: ADEME, GIFAM, AGEC-Gesetz",
+    waste_1_label: "Entsorgte Geräte / Jahr",
+    waste_1_sub: "mangels Reparatur (1/6 repariert) · AGEC-Gesetz / aidealareparation.fr",
+    waste_2_label: "Katalogabkündigung",
+    waste_2_sub: "nach Produktionsende",
+    waste_2_value: "3–5 Jahre",
+    waste_3_label: "CO₂-Fußabdruck einer Waschmaschine",
+    waste_3_sub: "nur Herstellung (Gesamtzyklus: 513 kg CO₂e)",
+    waste_4_label: "Reparaturbonus 2024 (Waschmaschine)",
+    waste_4_sub: "Verdoppelung 2024 · Service-public.fr / ecosystem.eco",
+    waste_5_label: "Kosten eines H4F-Ersatzteils",
+    waste_5_sub: "vs. kompletter Geräte-Ersatz",
+    waste_6_label: "Gedrucktes Material pro Teil",
+    waste_6_sub: "Filamentgewicht PLA/PETG",
+    circles_eyebrow: "Drei Kreise. Eine einzige Bewegung.",
+    circles_title: "Jede Reparatur <em>stärkt</em> die nächste.",
+    circle_eco_title: "Der <em>tugendhafte</em><br>Kreislauf",
+    circle_eco_body: "Je mehr die Nachfrage in der Hot List steigt, desto schneller wird die Datei erstellt. Je verfügbarer die Datei, desto mehr Verkäufe generiert sie. Je mehr Verkäufe, desto rentabler die Royalties des Modellierers — und desto mehr sucht er das nächste verwaiste Teil. Ein sich selbst nährender Markt, ohne Überbestand, ohne Engpass.",
+    metric_replacement: "Vermiedene Ersatzquote",
+    metric_bfr: "Strukturelles Working Capital",
+    metric_bfr_value: "Negativ",
+    metric_jobs: "Induzierte lokale Arbeitsplätze",
+    circle_ecol_title: "Der <em>ökologische</em><br>Kreislauf",
+    circle_ecol_body: "Additive Fertigung bringt Material nur dort auf, wo das Teil es erfordert — keine Form, kein Werkzeug, kein Abfall. Nichts wird im Übermaß produziert, nichts überquert einen Kontinent. PLA-Filament ist biobasiert, PETG ist recycelbar. <strong style=\"color:rgba(245,240,232,0.85)\">Ein 40-g-Teil verbraucht 40 g Material — nicht 400 g Spritzguss-Kunststoff.</strong>",
+    metric_co2: "CO₂ vs. Ersatz",
+    metric_packaging: "Verpackung pro Teil",
+    metric_km: "Durchschn. Transportweg",
+    circle_terr_title: "Der <em>territoriale</em><br>Kreislauf",
+    circle_terr_body: "Das Teil entsteht auf Abruf, 2 km vom Kunden. Keine spekulative Fertigung, keine Verpackung, kein Lager. Jeder Kunde, der eine digitale Datei kauft, wird zum potenziellen Printer. Das Netzwerk ist verteilt, resilient, in jeder Gemeinde verankert.",
+    metric_network: "Zielnetzwerk Phase 1",
+    metric_network_value: "Dichte Pariser Region",
+    metric_reparacteurs: "Répar'Acteurs-Partner",
+    metric_reparacteurs_value: "7.500 Handwerker",
+    metric_employment: "Beschäftigungsmodell",
+    loop_eyebrow: "Der H4F-Materialkreislauf",
+    loop_title: "Vom Defekt zum <em>Weiterleben</em><br>in weniger als 48 Stunden.",
+    loop_step1_label: "Defekt gemeldet",
+    loop_step1_sub: "Der Kunde sucht<br>sein Teil. Hot List<br>registriert.",
+    loop_step2_label: "Datei übernommen",
+    loop_step2_sub: "Ein Modellierer übernimmt<br>den Bedarf.<br>H4F konfiguriert + sichert.",
+    loop_step3_label: "Lokaler Druck",
+    loop_step3_sub: "Printer &lt; 3 km * ← digitale /<br>physische Grenze.<br>Tokenisierter G-code · 20–80 g.",
+    loop_step4_label: "Reparatur",
+    loop_step4_sub: "Das Gerät läuft wieder.<br>270 kg CO₂<br>bleiben im Boden.",
+    loop_note: "Die Datei bleibt in der Bibliothek — unendlich reproduzierbar, ohne neue Rohstoffgewinnung. <strong>Ein Vermögenswert, der an Wert gewinnt, je mehr das physische Teil vom Markt verschwindet.</strong>",
+    territory_eyebrow: "Territoriale Verankerung",
+    territory_title: "In einer ZFU geboren.<br>Zum <em>Wachsen</em> gedacht.",
+    territory_p1: "Hub⁴Fix hat seinen Sitz in La STaTION, Grande Borne, Viry-Châtillon — einer städtischen Freihandelszone. Das ist keine Steuerstrategie: Es ist Kohärenz. Das Projekt entsteht dort, wo Menschen aus Notwendigkeit reparieren, nicht aus Trend.",
+    territory_p2: "Das Freelance-Modell (Modellierer, Printer) schafft dezentrale qualifizierte Beschäftigung: eine verteilte Kompetenzwirtschaft, ohne zentrale Fabrik, ohne Abhängigkeit von einem einzigen Beschäftigungsgebiet.",
+    terr_card1_title: "Umgekehrte Deindustrialisierung",
+    terr_card1_body: "Verteilter 3D-Druck schafft lokale Produktionskapazitäten dort, wo Fabriken geschlossen haben — ohne schwere Investitionen, ohne logistische Zentralisierung.",
+    terr_card2_title: "Erweitertes Handwerk",
+    terr_card2_body: "Die 7.500 Répar'Acteurs-CMA-Reparateure werden zu Empfehlern und Co-Produzenten — keine Konkurrenten, die verdrängt werden, sondern Partner, die ausgestattet werden.",
+    terr_card3_title: "Radikale Zugänglichkeit",
+    terr_card3_body: "3,50 € pro digitalem Teil. Kein Pflichtabonnement. Keine Schulung erforderlich. Reparatur für alle Haushalte zugänglich, auch für die am stärksten eingeschränkten.",
+    terr_card4_title: "Nachverfolgbare Indikatoren",
+    terr_card4_body: "Jede Transaktion erzeugt Daten: reparierte Referenz, Druckgewicht, Lieferentfernung. Ein echtes Wirkungsdashboard, nicht deklarativ.",
+    impact_eyebrow: "Wirkungsprognose · Phase 1 · 15.000 Reparaturen/Jahr",
+    impact_title: "Größenordnungen,<br>die <em>überprüfbar</em> sind.",
+    impact_1_unit: "Tonnen CO₂-Äq. vermieden",
+    impact_1_label: "Auf Basis von 341 kg CO₂e, die pro nicht hergestelltem Gerät vermieden werden (Fertigungsphase), bei 15.000 erfolgreichen Reparaturen.",
+    impact_2_unit: "kg gedrucktes Material",
+    impact_2_label: "Gegenüber ~900 Tonnen Kunststoff, die neue Ersatzgeräte gebildet hätten.",
+    impact_3_unit: "aktivierte Arbeitsplatzäquivalente",
+    impact_3_label: "Freiberufliche Modellierer, lokale Printer, Partner-Reparaturhandwerker — ohne zentrale Festanstellungen.",
+    impact_4_unit: "erhaltene Kaufkraft",
+    impact_4_label: "Differenz zwischen den Kosten eines Neugeräts (~1.200 € Durchschn.) und den H4F-Reparaturkosten (~3–19 €), für 15.000 Haushalte.",
+    manifeste_kicker: "Hub⁴Fix · Digitales Kintsugi",
+    manifeste_quote: "\"Reparatur ist kein Rückschritt.<br>Es ist die einzige Richtung, die <strong>vernünftigerweise vorwärts führt.</strong>\"",
+    manifeste_body: "Hub⁴Fix verteidigt nicht die Umwelt in einer CSR-Charta. Es baut ein Modell auf, in dem Umweltschutz die direkte Folge jeder rentablen Transaktion ist. Ökologie und Ökonomie stehen sich hier nicht gegenüber: Sie verstärken sich mit jedem gedruckten Teil, mit jedem Gerät, das nicht auf der Deponie landet.",
+    manifeste_cta: "Die Plattform entdecken →",
+    account_library: "Meine Bibliothek",
+    account_settings: "Einstellungen",
+    account_logout: "Abmelden"
+  },
+
+  es: {
+    hero_kicker: "Economía funcional · Circularidad radical",
+    hero_title: "Un aparato que<br>se repara<br>no termina<br><em>en el vertedero.</em>",
+    hero_body: "Hub⁴Fix no vende piezas de plástico. Vende tiempo de vida — a los objetos, a los territorios, a las personas. Cada reparación es una tonelada de CO₂ evitada, un empleo local anclado, una factura de reemplazo ahorrada.",
+    stat_888m: "aparatos en circulación en Francia (670M pequeños + 218M grandes).<br><span style=\"font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--encre-light)\">GIFAM / NielsenIQ-GfK, informe 2024 (feb. 2025)</span>",
+    stat_5_6: "de los aparatos averiados NO se reparan.<br>~30M averías/año — solo 1 de cada 6 se repara.<br><span style=\"font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--encre-light)\">Ley AGEC (2020) · aidealareparation.fr · ecosystem.eco</span>",
+    stat_0e: "de stock físico. Un archivo digital<br>no se erosiona, no se pierde, no contamina.",
+    paradox_eyebrow: "La paradoja de la pieza huérfana",
+    paradox_title: "El aparato sigue existiendo.<br>La pieza ha <em>desaparecido.</em>",
+    paradox_p1: "Una lavadora de siete años, en perfecto estado, desechada porque un piñón de la bomba de desagüe es imposible de encontrar. Ni en el fabricante, ni en el taller, ni en ningún lugar. Esto no es obsolescencia programada — es obsolescencia <strong>logística</strong>.",
+    paradox_p2: "La fabricación aditiva resuelve este problema de forma estructural. Un archivo 3D validado no caduca. Espera a que la pieza sea solicitada para existir — sin stock, sin transporte previo, sin sobreproducción. Es la definición misma de la economía funcional aplicada a la reparación.",
+    paradox_p3: "Hub⁴Fix construye esta biblioteca de archivos anticipando la demanda — incluso antes de que la pieza desaparezca del mercado. <em>Un activo digital intangible, imperecedero, infinitamente reproducible.</em>",
+    waste_header: "Realidad del mercado de reparación — Francia · fuentes: ADEME, GIFAM, Ley AGEC",
+    waste_1_label: "Aparatos desechados / año",
+    waste_1_sub: "por falta de reparación (1/6 reparado) · Ley AGEC / aidealareparation.fr",
+    waste_2_label: "Plazo de descatalogación",
+    waste_2_sub: "tras fin de producción",
+    waste_2_value: "3–5 años",
+    waste_3_label: "Huella de carbono de una lavadora",
+    waste_3_sub: "solo fabricación (ciclo completo: 513 kg CO₂e)",
+    waste_4_label: "Bono reparación 2024 (lavadora)",
+    waste_4_sub: "Duplicado en 2024 · Service-public.fr / ecosystem.eco",
+    waste_5_label: "Coste de la pieza huérfana H4F",
+    waste_5_sub: "vs. reemplazo completo del aparato",
+    waste_6_label: "Material impreso por pieza",
+    waste_6_sub: "peso de filamento PLA/PETG",
+    circles_eyebrow: "Tres círculos. Un solo movimiento.",
+    circles_title: "Cada reparación <em>refuerza</em> la siguiente.",
+    circle_eco_title: "El círculo<br><em>virtuoso</em>",
+    circle_eco_body: "Cuanto más sube la demanda en la Hot List, más rápido se produce el archivo. Cuanto más disponible está, más ventas genera. Cuanto más vende, más rentables son las royalties del modelador — y más busca la siguiente pieza huérfana. Un mercado autoalimentado, sin sobrestock, sin ruptura.",
+    metric_replacement: "Tasa de reemplazo evitada",
+    metric_bfr: "Capital circulante estructural",
+    metric_bfr_value: "Negativo",
+    metric_jobs: "Empleos locales generados",
+    circle_ecol_title: "El círculo<br><em>ecológico</em>",
+    circle_ecol_body: "La fabricación aditiva deposita material solo donde la pieza lo requiere — sin molde, sin herramientas, sin desperdicio. Nada se produce en exceso, nada cruza un continente. El filamento PLA es de origen biológico, el PETG es reciclable. <strong style=\"color:rgba(245,240,232,0.85)\">Una pieza de 40 g consume 40 g de material — no 400 g de plástico inyectado.</strong>",
+    metric_co2: "CO₂ vs. reemplazo",
+    metric_packaging: "Embalaje por pieza",
+    metric_km: "Distancia media de transporte",
+    circle_terr_title: "El círculo<br><em>territorial</em>",
+    circle_terr_body: "La pieza nace bajo demanda, a 2 km del cliente. Sin fabricación especulativa, sin embalaje, sin stock. Cada cliente que compra un archivo digital se convierte en un printer potencial. La red es distribuida, resiliente, arraigada en cada municipio.",
+    metric_network: "Red objetivo Fase 1",
+    metric_network_value: "Región parisina densa",
+    metric_reparacteurs: "Socios Répar'Acteurs",
+    metric_reparacteurs_value: "7.500 artesanos",
+    metric_employment: "Modelo de empleo",
+    loop_eyebrow: "El ciclo de materiales H4F",
+    loop_title: "De la avería a <em>volver a la vida</em><br>en menos de 48 horas.",
+    loop_step1_label: "Avería declarada",
+    loop_step1_sub: "El cliente busca<br>su pieza. Hot List<br>la registra.",
+    loop_step2_label: "Archivo asignado",
+    loop_step2_sub: "Un modelador asume<br>la necesidad.<br>H4F configura + asegura.",
+    loop_step3_label: "Impresión local",
+    loop_step3_sub: "Printer &lt; 3 km * ← frontera<br>digital / física.<br>G-code tokenizado · 20–80 g.",
+    loop_step4_label: "Reparación",
+    loop_step4_sub: "El aparato funciona de nuevo.<br>270 kg CO₂<br>se quedan en el suelo.",
+    loop_note: "El archivo permanece en la biblioteca — reproducible infinitamente, sin ninguna nueva extracción de materia prima. <strong>Un activo que gana valor a medida que la pieza física desaparece del mercado.</strong>",
+    territory_eyebrow: "Arraigo territorial",
+    territory_title: "Nacido en una ZFU.<br>Diseñado para <em>expandirse.</em>",
+    territory_p1: "Hub⁴Fix está ubicado en La STaTION, Grande Borne, Viry-Châtillon — una Zona Franca Urbana. Esto no es una estrategia fiscal: es coherencia. El proyecto nace donde la gente repara por necesidad, no por tendencia.",
+    territory_p2: "El modelo freelance (modeladores, printers) crea empleo cualificado descentralizado: una economía de competencias distribuida, sin fábrica centralizada, sin dependencia de un único polo de empleo.",
+    terr_card1_title: "Desindustrialización invertida",
+    terr_card1_body: "La impresión 3D distribuida recrea capacidad de producción local donde las fábricas han cerrado — sin inversión pesada, sin centralización logística.",
+    terr_card2_title: "Artesanía aumentada",
+    terr_card2_body: "Los 7.500 reparadores Répar'Acteurs CMA se convierten en prescriptores y coproductores — no competidores a desplazar, sino socios a equipar.",
+    terr_card3_title: "Accesibilidad radical",
+    terr_card3_body: "3,50 € por pieza digital. Sin suscripción obligatoria. Sin formación necesaria. Reparación accesible para todos los hogares, incluidos los más limitados.",
+    terr_card4_title: "Indicadores rastreables",
+    terr_card4_body: "Cada transacción genera datos: referencia reparada, peso impreso, distancia de entrega. Un panel de impacto real, no declarativo.",
+    impact_eyebrow: "Proyección de impacto · Fase 1 · 15.000 reparaciones/año",
+    impact_title: "Órdenes de magnitud<br><em>verificables.</em>",
+    impact_1_unit: "toneladas CO₂ eq. evitadas",
+    impact_1_label: "Sobre la base de 341 kg CO₂e evitados por aparato no fabricado (fase de producción), para 15.000 reparaciones exitosas.",
+    impact_2_unit: "kg de material impreso",
+    impact_2_label: "Frente a ~900 toneladas de plástico que habrían formado aparatos nuevos de reemplazo.",
+    impact_3_unit: "empleos-equivalentes activados",
+    impact_3_label: "Modeladores freelance, printers locales, artesanos reparadores asociados — sin contratos fijos centralizados.",
+    impact_4_unit: "poder adquisitivo preservado",
+    impact_4_label: "Diferencia entre el coste de un aparato nuevo (~1.200 € promedio) y el coste de reparación H4F (~3–19 €), para 15.000 hogares.",
+    manifeste_kicker: "Hub⁴Fix · Kintsugi Digital",
+    manifeste_quote: "\"La reparación no es un paso atrás.<br>Es la única dirección <strong>razonablemente hacia adelante.</strong>\"",
+    manifeste_body: "Hub⁴Fix no defiende el medio ambiente en una carta de RSC. Construye un modelo donde la protección ambiental es la consecuencia directa de cada transacción rentable. Ecología y economía no se oponen aquí: se refuerzan con cada pieza impresa, con cada aparato que no termina en el vertedero.",
+    manifeste_cta: "Descubrir la plataforma →",
+    account_library: "Mi biblioteca",
+    account_settings: "Ajustes",
+    account_logout: "Cerrar sesión"
+  },
+
+  it: {
+    hero_kicker: "Economia della funzionalità · Circolarità radicale",
+    hero_title: "Un apparecchio che<br>viene riparato<br>non finisce<br><em>in discarica.</em>",
+    hero_body: "Hub⁴Fix non vende pezzi in plastica. Vende tempo di vita — agli oggetti, ai territori, alle persone. Ogni riparazione è una tonnellata di CO₂ evitata, un posto di lavoro locale radicato, una fattura di sostituzione risparmiata.",
+    stat_888m: "apparecchi in circolazione in Francia (670M piccoli + 218M grandi).<br><span style=\"font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--encre-light)\">GIFAM / NielsenIQ-GfK, rapporto 2024 (feb. 2025)</span>",
+    stat_5_6: "degli apparecchi guasti NON vengono riparati.<br>~30M guasti/anno — solo 1 su 6 viene riparato.<br><span style=\"font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--encre-light)\">Legge AGEC (2020) · aidealareparation.fr · ecosystem.eco</span>",
+    stat_0e: "di stock fisico. Un file digitale<br>non si erode, non si perde, non inquina.",
+    paradox_eyebrow: "Il paradosso del ricambio orfano",
+    paradox_title: "L'apparecchio esiste ancora.<br>Il pezzo è <em>scomparso.</em>",
+    paradox_p1: "Una lavatrice di sette anni, in perfetto stato di funzionamento, gettata via perché un ingranaggio della pompa di scarico è introvabile. Non dal produttore, non dal riparatore, da nessuna parte. Non è obsolescenza programmata — è obsolescenza <strong>logistica</strong>.",
+    paradox_p2: "La fabbricazione additiva risolve questo problema strutturalmente. Un file 3D validato non scade. Attende che il pezzo sia richiesto per esistere — senza stock, senza trasporto a monte, senza sovrapproduzione. È la definizione stessa dell'economia della funzionalità applicata alla riparazione.",
+    paradox_p3: "Hub⁴Fix costruisce questa biblioteca di file anticipando la domanda — ancor prima che il pezzo scompaia dal mercato. <em>Un asset digitale immateriale, imperituro, riproducibile all'infinito.</em>",
+    waste_header: "Realtà del mercato della riparazione — Francia · fonti: ADEME, GIFAM, Legge AGEC",
+    waste_1_label: "Apparecchi smaltiti / anno",
+    waste_1_sub: "per mancata riparazione (1/6 riparato) · Legge AGEC / aidealareparation.fr",
+    waste_2_label: "Tempi di fuori catalogo",
+    waste_2_sub: "dopo fine produzione",
+    waste_2_value: "3–5 anni",
+    waste_3_label: "Impronta di carbonio di una lavatrice",
+    waste_3_sub: "solo produzione (ciclo completo: 513 kg CO₂e)",
+    waste_4_label: "Bonus riparazione 2024 (lavatrice)",
+    waste_4_sub: "Raddoppiato nel 2024 · Service-public.fr / ecosystem.eco",
+    waste_5_label: "Costo del pezzo orfano H4F",
+    waste_5_sub: "vs. sostituzione completa dell'apparecchio",
+    waste_6_label: "Materiale stampato per pezzo",
+    waste_6_sub: "peso filamento PLA/PETG",
+    circles_eyebrow: "Tre cerchi. Un unico movimento.",
+    circles_title: "Ogni riparazione <em>rafforza</em> la successiva.",
+    circle_eco_title: "Il cerchio<br><em>virtuoso</em>",
+    circle_eco_body: "Più la domanda sale nella Hot List, più velocemente viene prodotto il file. Più il file è disponibile, più vendite genera. Più vende, più le royalties del modellatore diventano redditizie — e più cerca il prossimo pezzo orfano da valorizzare. Un mercato autoalimentato, senza eccesso di scorte, senza rotture.",
+    metric_replacement: "Tasso di sostituzione evitato",
+    metric_bfr: "Capitale circolante strutturale",
+    metric_bfr_value: "Negativo",
+    metric_jobs: "Posti di lavoro locali generati",
+    circle_ecol_title: "Il cerchio<br><em>ecologico</em>",
+    circle_ecol_body: "La fabbricazione additiva deposita materiale solo dove il pezzo lo richiede — nessuno stampo, nessun utensile, nessuno scarto. Nulla è prodotto in eccesso, nulla attraversa un continente. Il filamento PLA è di origine biologica, il PETG è riciclabile. <strong style=\"color:rgba(245,240,232,0.85)\">Un pezzo da 40 g consuma 40 g di materiale — non 400 g di plastica stampata a iniezione.</strong>",
+    metric_co2: "CO₂ vs. sostituzione",
+    metric_packaging: "Imballaggio per pezzo",
+    metric_km: "Distanza media di trasporto",
+    circle_terr_title: "Il cerchio<br><em>territoriale</em>",
+    circle_terr_body: "Il pezzo nasce su richiesta, a 2 km dal cliente. Nessuna produzione speculativa, nessun imballaggio, nessun stock. Ogni cliente che acquista un file digitale diventa un potenziale printer. La rete è distribuita, resiliente, radicata in ogni comune.",
+    metric_network: "Rete target Fase 1",
+    metric_network_value: "Regione parigina densa",
+    metric_reparacteurs: "Partner Répar'Acteurs",
+    metric_reparacteurs_value: "7.500 artigiani",
+    metric_employment: "Modello occupazionale",
+    loop_eyebrow: "Il ciclo dei materiali H4F",
+    loop_title: "Dal guasto al <em>ritorno in vita</em><br>in meno di 48 ore.",
+    loop_step1_label: "Guasto segnalato",
+    loop_step1_sub: "Il cliente cerca<br>il suo pezzo. Hot List<br>lo registra.",
+    loop_step2_label: "File preso in carico",
+    loop_step2_sub: "Un modellatore prende<br>in carico la necessità.<br>H4F configura + protegge.",
+    loop_step3_label: "Stampa locale",
+    loop_step3_sub: "Printer &lt; 3 km * ← confine<br>digitale / fisico.<br>G-code tokenizzato · 20–80 g.",
+    loop_step4_label: "Riparazione",
+    loop_step4_sub: "L'apparecchio riparte.<br>270 kg CO₂<br>restano nel suolo.",
+    loop_note: "Il file resta nella biblioteca — riproducibile all'infinito, senza alcuna nuova estrazione di materia prima. <strong>Un asset che acquista valore man mano che il pezzo fisico scompare dal mercato.</strong>",
+    territory_eyebrow: "Radicamento territoriale",
+    territory_title: "Nato in una ZFU.<br>Pensato per <em>diffondersi.</em>",
+    territory_p1: "Hub⁴Fix ha sede a La STaTION, Grande Borne, Viry-Châtillon — una Zona Franca Urbana. Non è una strategia fiscale: è coerenza. Il progetto nasce dove le persone riparano per necessità, non per tendenza.",
+    territory_p2: "Il modello freelance (modellatori, printer) crea occupazione qualificata decentralizzata: un'economia di competenze distribuita, senza fabbrica centralizzata, senza dipendenza da un unico bacino occupazionale.",
+    terr_card1_title: "Deindustrializzazione invertita",
+    terr_card1_body: "La stampa 3D distribuita ricrea capacità produttiva locale dove le fabbriche hanno chiuso — senza investimenti pesanti, senza centralizzazione logistica.",
+    terr_card2_title: "Artigianato aumentato",
+    terr_card2_body: "I 7.500 riparatori Répar'Acteurs CMA diventano prescrittori e co-produttori — non concorrenti da soppiantare, ma partner da equipaggiare.",
+    terr_card3_title: "Accessibilità radicale",
+    terr_card3_body: "3,50 € per pezzo digitale. Nessun abbonamento obbligatorio. Nessuna formazione richiesta. Riparazione accessibile a tutte le famiglie, comprese le più vincolate.",
+    terr_card4_title: "Indicatori tracciabili",
+    terr_card4_body: "Ogni transazione genera dati: riferimento riparato, peso stampato, distanza di consegna. Una dashboard di impatto reale, non dichiarativa.",
+    impact_eyebrow: "Proiezione d'impatto · Fase 1 · 15.000 riparazioni/anno",
+    impact_title: "Ordini di grandezza<br><em>verificabili.</em>",
+    impact_1_unit: "tonnellate CO₂ eq. evitate",
+    impact_1_label: "Sulla base di 341 kg CO₂e evitati per apparecchio non fabbricato (fase di produzione), per 15.000 riparazioni riuscite.",
+    impact_2_unit: "kg di materiale stampato",
+    impact_2_label: "Contro ~900 tonnellate di plastica che avrebbero costituito nuovi apparecchi sostitutivi.",
+    impact_3_unit: "equivalenti occupazionali attivati",
+    impact_3_label: "Modellatori freelance, printer locali, artigiani riparatori partner — senza contratti a tempo indeterminato centralizzati.",
+    impact_4_unit: "potere d'acquisto preservato",
+    impact_4_label: "Differenza tra il costo di un apparecchio nuovo (~1.200 € media) e il costo di riparazione H4F (~3–19 €), per 15.000 famiglie.",
+    manifeste_kicker: "Hub⁴Fix · Kintsugi Digitale",
+    manifeste_quote: "\"La riparazione non è un passo indietro.<br>È l'unica direzione <strong>ragionevolmente in avanti.</strong>\"",
+    manifeste_body: "Hub⁴Fix non difende l'ambiente in una carta RSI. Costruisce un modello in cui la protezione ambientale è la conseguenza diretta di ogni transazione redditizia. Ecologia ed economia non si oppongono qui: si rafforzano con ogni pezzo stampato, con ogni apparecchio che non finisce in discarica.",
+    manifeste_cta: "Scopri la piattaforma →",
+    account_library: "La mia libreria",
+    account_settings: "Impostazioni",
+    account_logout: "Disconnetti"
+  }
+};
+
+function applyLang(lang) {
+  if (!I18N[lang]) lang = 'fr';
+  document.documentElement.lang = lang;
+
+  var data = I18N[lang];
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n');
+    if (data[key] !== undefined) el.textContent = data[key];
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n-html');
+    if (data[key] !== undefined) el.innerHTML = data[key];
+  });
+
+  var btn = document.getElementById('langDropdownBtn');
+  btn.setAttribute('data-lang', lang);
+  document.querySelectorAll('.lang-opt').forEach(function(o) {
+    o.classList.toggle('active', o.getAttribute('data-lang') === lang);
+  });
+}
+
+// ════ Scroll progress ════
+window.addEventListener('scroll', function() {
+  var scrollTop = window.scrollY;
+  var docHeight = document.body.scrollHeight - window.innerHeight;
+  var progress = (scrollTop / docHeight) * 100;
+  document.getElementById('progress').style.width = progress + '%';
+});
+
+// ════ Reveal on scroll ════
+var reveals = document.querySelectorAll('.reveal');
+var observer = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry) {
+    if (entry.isIntersecting) {
+      setTimeout(function() {
+        entry.target.classList.add('visible');
+      }, 80);
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+reveals.forEach(function(el) { observer.observe(el); });
+
+// Staggered reveals for territory cards
+var tcards = document.querySelectorAll('.territory-card');
+var cardObserver = new IntersectionObserver(function(entries) {
+  entries.forEach(function(entry, i) {
+    if (entry.isIntersecting) {
+      setTimeout(function() {
+        entry.target.classList.add('visible');
+      }, i * 100);
+      cardObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+tcards.forEach(function(c) { cardObserver.observe(c); });
+
+// ════ NAV ════
+document.getElementById('accountBtn').addEventListener('click', function(e) {
+  e.stopPropagation();
+  document.getElementById('accountMenu').classList.toggle('visible');
+  document.getElementById('langDropdown').classList.remove('open');
+});
+document.addEventListener('click', function() { document.getElementById('accountMenu').classList.remove('visible'); document.getElementById('langDropdown').classList.remove('open'); });
+document.getElementById('langDropdownBtn').addEventListener('click', function(e) {
+  e.stopPropagation();
+  document.getElementById('langDropdown').classList.toggle('open');
+  document.getElementById('accountMenu').classList.remove('visible');
+});
+document.getElementById('langDropdownList').addEventListener('click', function(e) {
+  var opt = e.target.closest('.lang-opt');
+  if (!opt) return;
+  var lang = opt.getAttribute('data-lang');
+  applyLang(lang);
+  document.getElementById('langDropdown').classList.remove('open');
+});
+document.querySelectorAll('.account-role.locked').forEach(function(el) {
+  el.addEventListener('click', function(e) { e.preventDefault(); });
+});
+
+applyLang('fr');
+
+// ════════ 888M odometer animation ════════
+(function() {
+  var digits = document.querySelectorAll('#stat888 .odo-digit');
+  if (!digits.length) return;
+  // Build digit strips (0-9) inside each digit
+  digits.forEach(function(d) {
+    var strip = document.createElement('div');
+    strip.className = 'odo-strip';
+    for (var i = 0; i <= 9; i++) {
+      var s = document.createElement('span');
+      s.textContent = i;
+      strip.appendChild(s);
+    }
+    d.textContent = '';
+    d.appendChild(strip);
+  });
+  var fired = false;
+  var observer = new IntersectionObserver(function(entries) {
+    if (entries[0].isIntersecting && !fired) {
+      fired = true;
+      digits.forEach(function(d) {
+        var target = parseInt(d.getAttribute('data-target'));
+        var delay = parseFloat(d.style.getPropertyValue('--delay')) * 1000 || 0;
+        setTimeout(function() {
+          var strip = d.querySelector('.odo-strip');
+          strip.style.transform = 'translateY(-' + (target * 1.1) + 'em)';
+          // Fade to black once digit settles
+          setTimeout(function() {
+            d.style.transition = 'color 1s';
+            d.style.color = 'var(--encre)';
+          }, 2600);
+        }, delay);
+      });
+    }
+  }, { threshold: 0.5 });
+  observer.observe(document.getElementById('stat888'));
+})();
+
+// ════════ 5/6 count-up animation ════════
+(function() {
+  var el = document.getElementById('statCountUp');
+  if (!el) return;
+  var fired = false;
+  var observer = new IntersectionObserver(function(entries) {
+    if (entries[0].isIntersecting && !fired) {
+      fired = true;
+      var i = 0;
+      var iv = setInterval(function() {
+        i++;
+        el.textContent = i;
+        if (i >= 5) {
+          clearInterval(iv);
+          setTimeout(function() {
+            el.style.transition = 'color 1s';
+            el.style.color = 'var(--encre)';
+          }, 50);
+        }
+      }, 350);
+    }
+  }, { threshold: 0.5 });
+  observer.observe(el.closest('.stat-block'));
+})();
+
+// ════════ Zero-stock vertical carousel ════════
+(function() {
+  var slides = document.getElementById('zeroSlides');
+  var asterisk = document.getElementById('zeroAsterisk');
+  var label = document.getElementById('zeroLabel');
+  if (!slides) return;
+  var total = slides.children.length;
+  var current = 0;
+  var labels = [
+    "de stock physique. Un fichier numérique<br>ne s'érode pas, ne se perd pas, ne pollue pas.",
+    "de stock physique. Un fichier numérique<br>ne s'érode pas, ne se perd pas, ne pollue pas.",
+    "du stock physique. Un fichier numérique<br>ne s'érode pas, ne se perd pas, ne pollue pas."
+  ];
+  setInterval(function() {
+    current = (current + 1) % total;
+    slides.style.transform = 'translateY(-' + (current * (100 / total)) + '%)';
+    label.innerHTML = labels[current];
+    if (current === 2) asterisk.classList.add('visible');
+    else asterisk.classList.remove('visible');
+  }, 2500);
+})();
+
+// ════════ Waste counter — real-time ticker ════════
+(function() {
+  var el = document.getElementById('wasteCounter');
+  if (!el) return;
+  // EU: 450M hab × 17.6 kg/year = 7,920,000 tonnes/year
+  var tonnesPerYear = 7920000;
+  var tonnesPerMs = tonnesPerYear / (365.25 * 24 * 3600 * 1000);
+  var epoch = new Date(2020, 0, 1).getTime();
+
+  function update() {
+    var now = new Date();
+    var msElapsed = now.getTime() - epoch;
+    var tonnes = msElapsed * tonnesPerMs;
+    var whole = Math.floor(tonnes);
+    var dec = Math.floor((tonnes - whole) * 100);
+    el.innerHTML = whole.toLocaleString('fr-FR') + '<span class="ticker-decimal">,' + (dec < 10 ? '0' : '') + dec + '</span>';
+    requestAnimationFrame(update);
+  }
+  update();
+})();
+
+// Logo click suction effect
+(function(){
+  var brand = document.querySelector('.nav-brand');
+  if(!brand) return;
+  brand.addEventListener('click', function(e){
+    var href = brand.getAttribute('href') || 'index.html';
+    e.preventDefault();
+    document.body.style.transformOrigin = 'top center';
+    document.body.classList.add('page-sucking');
+    var navigated = false;
+    function go(){ if(!navigated){ navigated=true; window.location.assign(href); } }
+    document.body.addEventListener('animationend', go);
+    setTimeout(go, 800);
+  });
+})();
+</script>
+<script>
+(function(){var cvs=document.createElement('canvas');cvs.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none;';document.body.insertBefore(cvs,document.body.firstChild);var ctx=cvs.getContext('2d'),W,H,P=[],dpr;var DIST=130,SPD=0.35;function resize(){dpr=window.devicePixelRatio||1;W=window.innerWidth;H=window.innerHeight;cvs.width=W*dpr;cvs.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}function make(){P=[];var n=Math.min(Math.round(W*H/13000),80);for(var i=0;i<n;i++)P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*SPD,vy:(Math.random()-.5)*SPD,r:Math.random()*.7+.5});}function tick(){ctx.clearRect(0,0,W,H);for(var i=0;i<P.length;i++){for(var j=i+1;j<P.length;j++){var dx=P[i].x-P[j].x,dy=P[i].y-P[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<DIST){ctx.strokeStyle='rgba(168,159,145,'+(0.28*(1-d/DIST)).toFixed(3)+')';ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(P[i].x,P[i].y);ctx.lineTo(P[j].x,P[j].y);ctx.stroke();}}ctx.fillStyle='rgba(168,159,145,.3)';ctx.beginPath();ctx.arc(P[i].x,P[i].y,P[i].r,0,6.283);ctx.fill();P[i].x+=P[i].vx;P[i].y+=P[i].vy;if(P[i].x<0||P[i].x>W)P[i].vx*=-1;if(P[i].y<0||P[i].y>H)P[i].vy*=-1;}requestAnimationFrame(tick);}resize();make();tick();window.addEventListener('resize',function(){resize();make();});})();
+</script>
+<script src="/js/sphere-bg.js"></script>
+<script src="js/nav-mindmap.js"></script>
+</body>
+</html>

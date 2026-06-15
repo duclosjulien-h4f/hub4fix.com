@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Repair Together — Hub⁴Fix</title>
+<meta name="description" content="Programme Repair Together : votre 1re pièce offerte en échange des droits sur le fichier 3D. Ensemble, construisons le plus grand catalogue de pièces détachées imprimables.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/glass-sphere.css">
+<style>
+:root{--ivory:#FAF8F5;--warm-white:#F3EEE8;--cream:#EDE6DC;--sand:#D4C9B8;--stone:#A89F91;--earth:#7A7268;--charcoal:#3B3632;--night:#1C1A18;--gold:#B8963E;--gold-light:#D4B15F;--gold-pale:rgba(184,150,62,0.08);--gold-glow:rgba(184,150,62,0.15);--red:#C8102E;--red-soft:rgba(200,16,46,0.06);--green:#2D8B5E;--green-soft:rgba(45,139,94,0.08);--font-serif:'Cormorant Garamond',serif;--font-sans:'Karla',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);background:var(--ivory);color:var(--charcoal);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+::selection{background:var(--gold-glow);color:var(--night)}
+
+/* ════ NAV ════ */
+nav{position:sticky;top:0;z-index:100;padding:1rem 4rem;display:flex;justify-content:space-between;align-items:center;background:var(--warm-white);border-bottom:1px solid var(--cream)}
+.nav-brand{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo{width:auto;height:36px;transition:transform .5s cubic-bezier(.25,.46,.45,.94);transform-origin:center center;position:relative;z-index:101}
+.nav-brand:hover .nav-logo{transform:scale(3);filter:drop-shadow(0 8px 24px rgba(0,0,0,.2))}
+@keyframes suckIn{0%{transform:scale(1);opacity:1;filter:blur(0)}60%{transform:scale(.3) translate(0,-30vh);opacity:.6;filter:blur(2px)}100%{transform:scale(0) translate(0,-40vh);opacity:0;filter:blur(8px)}}
+.page-sucking{animation:suckIn .7s cubic-bezier(.55,.06,.68,.19) forwards;pointer-events:none}
+.nav-wordmark{font-family:var(--font-serif);font-size:1.15rem;font-weight:500;color:var(--night);letter-spacing:.02em}
+.nav-wordmark sup{color:var(--red);font-size:.7em;vertical-align:super;line-height:0}
+.nav-right{display:flex;align-items:center;gap:1rem}
+.nav-back{font-size:.78rem;font-weight:500;color:var(--earth);text-decoration:none;letter-spacing:.04em;display:flex;align-items:center;gap:.4rem;transition:color .3s}
+.nav-back:hover{color:var(--red)}
+.lang-dropdown{position:relative}
+.lang-dropdown-btn{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;justify-content:center;width:34px;height:23px;padding:0;background:white;border:1px solid rgba(212,201,184,0.4);border-radius:4px;cursor:pointer;font-size:0;color:transparent;transition:all .25s ease;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.lang-dropdown-btn .flag{display:none}
+.lang-dropdown-btn::before{content:'';position:absolute;inset:0;border-radius:3px;background-size:contain;background-position:center;background-repeat:no-repeat;opacity:1;z-index:0}
+.lang-dropdown-btn:hover{box-shadow:0 2px 8px rgba(0,0,0,.12);transform:scale(1.08)}
+.lang-dropdown.open .lang-dropdown-btn{box-shadow:0 2px 10px rgba(0,0,0,.15);transform:scale(1.08)}
+.lang-dropdown-btn[data-lang="fr"]::before{background-image:url(https://flagcdn.com/w80/fr.png)}
+.lang-dropdown-btn[data-lang="en"]::before{background-image:url(https://flagcdn.com/w80/gb.png)}
+.lang-dropdown-btn[data-lang="de"]::before{background-image:url(https://flagcdn.com/w80/de.png)}
+.lang-dropdown-btn[data-lang="es"]::before{background-image:url(https://flagcdn.com/w80/es.png)}
+.lang-dropdown-btn[data-lang="it"]::before{background-image:url(https://flagcdn.com/w80/it.png)}
+.lang-dropdown-btn[data-lang="pt"]::before{background-image:url(https://flagcdn.com/w80/pt.png)}
+.lang-dropdown-btn[data-lang="zh"]::before{background-image:url(https://flagcdn.com/w80/cn.png)}
+.lang-dropdown-btn[data-lang="hi"]::before{background-image:url(https://flagcdn.com/w80/in.png)}
+.lang-dropdown-btn .lang-arrow{display:none}
+.lang-dropdown-list{position:absolute;top:calc(100% + 6px);right:0;background:rgba(255,255,255,0.97);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(212,201,184,0.3);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.08),0 2px 8px rgba(0,0,0,.04);display:none;z-index:210;min-width:155px;padding:6px;transform-origin:top right}
+.lang-dropdown.open .lang-dropdown-list{display:block;animation:langDropIn .25s cubic-bezier(.22,.61,.36,1)}
+@keyframes langDropIn{from{opacity:0;transform:scale(.95) translateY(-4px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.lang-opt{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:8px 12px;cursor:pointer;font-size:.78rem;font-weight:500;color:var(--charcoal);font-family:var(--font-sans);border-radius:8px;transition:all .2s ease}
+.lang-opt .flag{display:none}
+.lang-opt::before{content:'';position:absolute;inset:0;background-size:contain;background-position:right center;background-repeat:no-repeat;border-radius:8px;opacity:0;transition:opacity .25s ease;z-index:-1}
+.lang-opt:hover{transform:translateX(2px);text-shadow:0 0 8px rgba(255,255,255,1),0 0 16px rgba(255,255,255,1),0 0 2px rgba(255,255,255,1)}
+.lang-opt:hover::before{opacity:.9}
+.lang-opt.active{font-weight:700;text-shadow:0 0 8px rgba(255,255,255,1),0 0 16px rgba(255,255,255,1),0 0 2px rgba(255,255,255,1)}
+.lang-opt.active::before{opacity:.85}
+.lang-opt[data-lang="fr"]::before{background:url(https://flagcdn.com/w160/fr.png) no-repeat right center / contain,#002654}
+.lang-opt[data-lang="en"]::before{background:url(https://flagcdn.com/w160/gb.png) no-repeat right center / contain,linear-gradient(to bottom,#012169 33%,#FFF 33% 40%,#C8102E 40% 60%,#FFF 60% 67%,#012169 67%)}
+.lang-opt[data-lang="de"]::before{background:url(https://flagcdn.com/w160/de.png) no-repeat right center / contain,linear-gradient(to bottom,#000 33%,#DD0000 33% 66%,#FFCC00 66%)}
+.lang-opt[data-lang="es"]::before{background:url(https://flagcdn.com/w160/es.png) no-repeat right center / auto 100%,linear-gradient(to bottom,#ad1519 25%,#fabd00 25% 75%,#ad1519 75%)}
+.lang-opt[data-lang="it"]::before{background:url(https://flagcdn.com/w160/it.png) no-repeat right center / contain,#009246}
+.lang-opt[data-lang="pt"]::before{background:url(https://flagcdn.com/w160/pt.png) no-repeat right center / contain,#006600}
+.lang-opt[data-lang="zh"]::before{background:url(https://flagcdn.com/w160/cn.png) no-repeat right center / contain,#EE1C25}
+.lang-opt[data-lang="hi"]::before{background:url(https://flagcdn.com/w160/in.png) no-repeat right center / contain,linear-gradient(to bottom,#ff6820 33%,#FFF 33% 66%,#046a38 66%)}
+.lang-opt::after{content:'';position:absolute;left:0;top:4px;bottom:4px;width:3px;border-radius:2px;z-index:1;transition:opacity .2s ease;opacity:.7}
+.lang-opt:hover::after,.lang-opt.active::after{opacity:1}
+.lang-opt[data-lang="fr"]::after{background:#002395}
+.lang-opt[data-lang="en"]::after{background:#012169}
+.lang-opt[data-lang="de"]::after{background:linear-gradient(to bottom,#000 33%,#DD0000 33% 66%,#FFCC00 66%)}
+.lang-opt[data-lang="es"]::after{background:linear-gradient(to bottom,#AA151B 25%,#F1BF00 25% 75%,#AA151B 75%)}
+.lang-opt[data-lang="it"]::after{background:#008C45}
+.lang-opt[data-lang="pt"]::after{background:#006600}
+.lang-opt[data-lang="zh"]::after{background:#DE2910}
+.lang-opt[data-lang="hi"]::after{background:linear-gradient(to bottom,#ff6820 33%,#FFF 33% 66%,#046a38 66%)}
+.nav-account{position:relative}
+.nav-account-btn{display:flex;align-items:center;gap:.3rem;background:none;border:none;cursor:pointer;padding:.3rem;border-radius:2px;transition:background .2s}
+.nav-account-btn:hover{background:var(--cream)}
+.nav-account-icon{width:22px;height:22px;color:var(--charcoal)}
+.nav-token-badge{background:var(--red);color:white;font-size:.65rem;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;line-height:1}
+.nav-account-menu{position:absolute;top:calc(100% + 8px);right:0;width:340px;background:white;border:1px solid var(--cream);border-radius:4px;box-shadow:0 16px 48px rgba(0,0,0,.12);display:none;z-index:200}
+.nav-account-menu.visible{display:block;animation:fadeUp .25s}
+.account-menu-header{padding:1rem 1.2rem;border-bottom:1px solid var(--cream);display:flex;justify-content:space-between;align-items:center}
+.account-menu-header-left{display:flex;flex-direction:column}
+.account-menu-name{font-weight:600;font-size:.9rem;color:var(--night)}
+.account-menu-email{font-size:.72rem;color:var(--earth);margin-top:.15rem}
+.account-menu-tokens-inline{display:flex;align-items:center;gap:.3rem;background:var(--red-soft);padding:4px 10px;border-radius:12px}
+.account-menu-tokens-inline .token-icon{font-size:.75rem;color:var(--red)}
+.account-menu-tokens-inline strong{font-family:'Courier New',monospace;font-size:1rem;color:var(--red)}
+.account-roles{padding:.8rem;display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;border-bottom:1px solid var(--cream)}
+.account-role{display:flex;flex-direction:column;align-items:center;gap:.4rem;padding:.8rem .4rem;border-radius:4px;cursor:pointer;border:2px solid transparent;transition:all .2s;text-decoration:none}
+.account-role:hover{transform:translateY(-1px)}
+.account-role-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem}
+.account-role-label{font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-align:center}
+.account-role-sub{font-size:.6rem;color:var(--earth);text-align:center;line-height:1.2}
+.account-role-client .account-role-icon{background:var(--red-soft);color:var(--red)}
+.account-role-client .account-role-label{color:var(--red)}
+.account-role-client.active{border-color:var(--red);background:var(--red-soft)}
+.account-role-printer .account-role-icon{background:#1a2a3a;color:#5ba8d4}
+.account-role-printer .account-role-label{color:#2c6e9b}
+.account-role-printer.active{border-color:#2c6e9b;background:#e8f1f8}
+.account-role-printer:hover{background:#e8f1f8}
+.account-role-modeler .account-role-icon{background:#2a1f1a;color:#d4845b}
+.account-role-modeler .account-role-label{color:#a0522d}
+.account-role-modeler.active{border-color:#a0522d;background:#f5ece5}
+.account-role-modeler:hover{background:#f5ece5}
+.account-role.locked{opacity:.5;pointer-events:auto;position:relative}
+.account-role.locked .account-role-icon{filter:grayscale(.6)}
+.account-role-lock{font-size:.6rem;margin-top:-.1rem}
+.account-role.locked:hover{opacity:.75}
+.account-role.locked:hover .account-role-sub{display:none}
+.account-role.locked:hover::after{content:'Inscription requise';font-size:.55rem;color:var(--earth);text-align:center}
+.account-menu-links{padding:.3rem 0}
+.account-menu-item{display:flex;align-items:center;gap:.6rem;padding:.6rem 1.2rem;font-size:.82rem;color:var(--charcoal);text-decoration:none;transition:background .15s}
+.account-menu-item:hover{background:var(--warm-white)}
+.account-menu-item svg{width:16px;height:16px;color:var(--stone);flex-shrink:0}
+.account-menu-logout{color:var(--earth);border-top:1px solid var(--cream)}
+
+/* ════ HERO ════ */
+.page-hero{padding:4rem 4rem 3rem;max-width:900px;margin:0 auto;text-align:center}
+.page-overline{font-size:.68rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--green);margin-bottom:1.5rem;display:inline-flex;align-items:center;gap:.8rem}
+.page-overline::before{content:'';width:24px;height:1px;background:var(--green)}
+.page-title{font-family:var(--font-serif);font-size:clamp(2.2rem,4vw,3.2rem);font-weight:300;color:var(--night);line-height:1.15;margin-bottom:1.2rem}
+.page-title em{font-style:italic;font-weight:400;color:var(--green)}
+.page-subtitle{font-size:1.05rem;line-height:1.75;color:var(--earth);font-weight:300;max-width:680px;margin:0 auto}
+
+/* ════ DEAL ════ */
+.deal-section{max-width:900px;margin:0 auto;padding:0 4rem 4rem}
+.deal-block{background:white;border:1px solid var(--cream);border-radius:3px;overflow:hidden}
+.deal-exchange{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:0}
+.deal-give,.deal-get{padding:3rem 2.5rem;text-align:center}
+.deal-give{background:var(--warm-white)}
+.deal-arrow{display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:50%;background:var(--green);color:white;font-size:1.4rem;font-weight:700;z-index:1;position:relative}
+.deal-icon{font-size:2.5rem;margin-bottom:1rem}
+.deal-label{font-size:.68rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--stone);margin-bottom:.6rem}
+.deal-value{font-family:var(--font-serif);font-size:1.4rem;font-weight:500;color:var(--night);line-height:1.3}
+.deal-detail{font-size:.85rem;color:var(--earth);font-weight:300;margin-top:.5rem;line-height:1.6}
+.deal-conditions{padding:1.5rem 2.5rem;border-top:1px solid var(--cream);display:flex;gap:2rem;flex-wrap:wrap;justify-content:center}
+.deal-cond{display:flex;align-items:center;gap:.5rem;font-size:.82rem;color:var(--earth)}
+.deal-cond-icon{width:20px;height:20px;color:var(--green);flex-shrink:0}
+
+/* ════ HOW ════ */
+.how-section{max-width:900px;margin:0 auto;padding:2rem 4rem 4rem}
+.how-header{text-align:center;margin-bottom:3rem}
+.how-overline{font-size:.68rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;display:inline-flex;align-items:center;gap:.8rem}
+.how-overline::before,.how-overline::after{content:'';width:24px;height:1px;background:var(--gold)}
+.how-title{font-family:var(--font-serif);font-size:clamp(1.8rem,3vw,2.4rem);font-weight:400;color:var(--night)}
+.how-title em{font-style:italic;color:var(--gold)}
+.how-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem}
+.how-step{text-align:center;padding:2rem 1.5rem}
+.how-step-num{font-family:var(--font-serif);font-size:2.8rem;font-weight:300;color:var(--cream);line-height:1;margin-bottom:.8rem}
+.how-step h4{font-family:var(--font-serif);font-size:1.1rem;font-weight:500;color:var(--night);margin-bottom:.6rem}
+.how-step p{font-size:.88rem;line-height:1.7;color:var(--earth);font-weight:300}
+
+/* ════ WHY ════ */
+.why-section{max-width:900px;margin:0 auto;padding:2rem 4rem 4rem}
+.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.why-card{background:white;border:1px solid var(--cream);border-radius:3px;padding:2rem;border-top:2px solid var(--cream);transition:all .3s}
+.why-card:hover{border-top-color:var(--green);box-shadow:0 6px 24px rgba(0,0,0,.04);transform:translateY(-2px)}
+.why-card-icon{font-size:1.5rem;margin-bottom:.8rem}
+.why-card h4{font-family:var(--font-serif);font-size:1.05rem;font-weight:500;color:var(--night);margin-bottom:.5rem}
+.why-card p{font-size:.88rem;line-height:1.7;color:var(--earth);font-weight:300}
+
+/* ════ ACQUISITION BANNER ════ */
+.acq-section{max-width:900px;margin:0 auto;padding:2rem 4rem 4rem}
+.acq-banner{background:var(--green-soft);border:1px solid rgba(45,139,94,.15);border-radius:3px;padding:2.5rem;text-align:center}
+.acq-badge{display:inline-flex;align-items:center;gap:.5rem;font-size:.7rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:1rem;padding:.4rem 1rem;border:1px solid rgba(45,139,94,.2);border-radius:2px}
+.acq-badge::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.acq-title{font-family:var(--font-serif);font-size:1.6rem;font-weight:400;color:var(--night);margin-bottom:.8rem}
+.acq-desc{font-size:.92rem;line-height:1.7;color:var(--earth);font-weight:300;max-width:600px;margin:0 auto 1.5rem}
+.acq-cta{display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 2rem;background:var(--green);color:white;border:none;border-radius:2px;font-family:var(--font-sans);font-size:.82rem;font-weight:600;letter-spacing:.06em;cursor:pointer;transition:all .3s;text-decoration:none}
+.acq-cta:hover{background:#246e4a;transform:translateY(-1px);box-shadow:0 4px 16px rgba(45,139,94,.25)}
+
+/* ════ FAQ ════ */
+.faq-section{max-width:900px;margin:0 auto;padding:0 4rem 4rem}
+.faq-list{display:flex;flex-direction:column;gap:.5rem}
+.faq-item{background:white;border:1px solid var(--cream);border-radius:3px;overflow:hidden}
+.faq-q{padding:1.2rem 1.5rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:.92rem;font-weight:500;color:var(--night);transition:background .2s}
+.faq-q:hover{background:var(--warm-white)}
+.faq-q-arrow{font-size:.7rem;color:var(--stone);transition:transform .2s}
+.faq-item.open .faq-q-arrow{transform:rotate(180deg)}
+.faq-a{display:none;padding:0 1.5rem 1.2rem;font-size:.88rem;line-height:1.7;color:var(--earth);font-weight:300}
+.faq-item.open .faq-a{display:block}
+
+/* ════ FOOTER ════ */
+footer{padding:3rem 4rem;border-top:1px solid var(--cream);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.footer-brand{display:flex;align-items:center;gap:.6rem}
+.footer-logo{width:auto;height:28px}.footer-logo svg{width:auto;height:100%}
+.footer-copy{font-size:.78rem;color:var(--stone)}
+.footer-tagline{font-family:var(--font-serif);font-size:.85rem;font-style:italic;color:var(--sand)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:900px){
+  nav{padding:1rem 1.5rem}
+  .page-hero{padding:3rem 1.5rem 2rem}
+  .deal-section,.how-section,.why-section,.acq-section,.faq-section{padding-left:1.5rem;padding-right:1.5rem}
+  .deal-exchange{grid-template-columns:1fr;gap:0}
+  .deal-give,.deal-get{padding:2rem 1.5rem}
+  .deal-arrow{margin:-1rem auto;transform:rotate(90deg)}
+  .how-steps{grid-template-columns:1fr}
+  .why-grid{grid-template-columns:1fr}
+  footer{padding:2rem 1.5rem}
+}
+
+/* ════ MOBILE 600px ════ */
+@media(max-width:600px){
+  nav{padding:.6rem 1rem}
+  .nav-wordmark{font-size:1.1rem}
+  .nav-right{gap:.5rem}
+  .nav-account-menu{width:calc(100vw - 2rem);max-width:340px;right:0}
+  .lang-dropdown-list{right:0;min-width:140px}
+  .lang-dropdown-btn{width:28px;height:19px}
+  .page-hero{padding:2rem 1rem 1.5rem}
+  .page-title{font-size:clamp(1.8rem,4vw,2.4rem)}
+  .page-overline{font-size:.6rem;letter-spacing:.12em}
+  .page-subtitle{font-size:.92rem;line-height:1.6}
+  .deal-section{padding:0 1rem 2rem}
+  .deal-give,.deal-get{padding:1.5rem 1rem}
+  .deal-icon{font-size:2rem;margin-bottom:.6rem}
+  .deal-value{font-size:1.15rem}
+  .deal-detail{font-size:.8rem}
+  .deal-label{font-size:.62rem}
+  .deal-conditions{padding:1rem;gap:1rem;flex-direction:column}
+  .deal-cond{font-size:.78rem}
+  .how-section{padding:1.5rem 1rem 2rem}
+  .how-header{margin-bottom:2rem}
+  .how-title{font-size:clamp(1.4rem,3vw,1.8rem)}
+  .how-overline{font-size:.6rem}
+  .how-steps{grid-template-columns:1fr !important;gap:1rem !important}
+  .how-step{padding:1.2rem !important}
+  .how-step-num{font-size:2rem}
+  .how-step h4{font-size:1rem}
+  .how-step p{font-size:.82rem}
+  .why-section{padding:1.5rem 1rem 2rem}
+  .why-grid{grid-template-columns:1fr;gap:1rem}
+  .why-card{padding:1.5rem}
+  .why-card h4{font-size:.95rem}
+  .why-card p{font-size:.82rem}
+  .acq-section{padding:1rem 1rem 2rem}
+  .acq-banner{padding:1.5rem}
+  .acq-title{font-size:1.3rem}
+  .acq-desc{font-size:.85rem}
+  .faq-section{padding:0 1rem 2rem}
+  .faq-q{padding:1rem;font-size:.85rem}
+  .faq-a{padding:0 1rem 1rem;font-size:.82rem}
+  footer{padding:1.5rem 1rem;flex-direction:column;align-items:flex-start;gap:.8rem}
+  .footer-copy{font-size:.72rem}
+  .footer-tagline{font-size:.78rem}
+}
+
+/* ════ MOBILE 480px ════ */
+@media(max-width:480px){
+  .page-title{font-size:1.5rem}
+  .deal-value{font-size:1.05rem}
+  .deal-arrow{width:44px;height:44px;font-size:1.1rem}
+  .how-step-num{font-size:1.6rem}
+  .acq-title{font-size:1.1rem}
+  .faq-q{font-size:.8rem;padding:.8rem}
+}
+
+/* ════ WATERMARK SLOGANS ════ */
+.section-watermark{position:relative;overflow:hidden}
+.section-watermark::before{content:attr(data-watermark);position:absolute;font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,6vw,5rem);font-weight:300;font-style:italic;color:rgba(180,160,130,.07);white-space:nowrap;pointer-events:none;z-index:0;top:50%;left:50%;transform:translate(-50%,-50%);width:max-content}
+.section-watermark>*{position:relative;z-index:1}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand">
+    <svg class="nav-logo" viewBox="0 0 202.6 265.4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><linearGradient id="lg1"><stop style="stop-color:#2a00fe" offset="0.336"/><stop style="stop-color:#fff" offset="1"/></linearGradient><linearGradient id="lg2"><stop style="stop-color:#fff" offset="0.107"/><stop style="stop-color:#fe0000" offset="0.684"/></linearGradient><linearGradient xlink:href="#lg1" id="grad1" x1="129.89" y1="808.83" x2="194.31" y2="808.83" gradientUnits="userSpaceOnUse"/><linearGradient xlink:href="#lg2" id="grad2" x1="271.02" y1="731.42" x2="327.45" y2="731.42" gradientUnits="userSpaceOnUse" spreadMethod="pad"/></defs><g transform="translate(-129.894,-634.847)"><g transform="translate(-114.063,-139.373)"><path d="m 353.331,791.185 -24.32,66.818 c -8.972,24.651 9.283,50.722 35.516,50.722 h 72.08 c 5.218,0 9.449,4.23 9.449,9.449 0,5.218 -4.231,9.449 -9.449,9.449 h -72.08 c -39.35,0 -66.732,-39.106 -53.274,-76.083 l 7.123,-19.57 17.2,-47.256 c 1.787,-4.903 7.21,-7.428 12.113,-5.642 4.903,1.787 7.429,7.21 5.643,12.112 z" style="fill:#000;stroke:#000"/><path d="m 314.879,1026.411 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#000;stroke:#000"/><path d="m 249.987,1019.877 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:#000;stroke:#000"/><path d="m 359.24,904.532 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#000;stroke:#000"/><path d="m 436.607,884.024 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:#000;stroke:#000"/></g><g><path d="m 234.225,648.032 -24.32,66.818 a 37.795,37.795 0 0 0 35.516,50.722 h 72.08 a 9.449,9.449 0 0 1 0,18.898 h -72.08 a 56.693,56.693 0 0 1 -53.274,-76.083 l 24.323,-66.826 a 9.449,9.449 0 0 1 17.755,6.471 z" style="fill:#fff;stroke:#000"/><path d="m 195.773,883.258 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#fff;stroke:#000"/><path d="m 130.881,876.724 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:url(#grad1);stroke:#000"/><path d="m 240.133,761.379 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#fff;stroke:#000"/><path d="m 317.5,740.871 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:url(#grad2);stroke:#000"/></g></g></svg>
+    <span class="nav-wordmark">Hub<sup>4</sup>Fix</span>
+  </a>
+  <div class="nav-right">
+    <a href="index.html" class="nav-back"><span class="nav-back-arrow">←</span></a>
+    <div class="lang-dropdown" id="langDropdown">
+      <button class="lang-dropdown-btn" id="langDropdownBtn" data-lang="fr"></button>
+      <div class="lang-dropdown-list" id="langDropdownList">
+        <button class="lang-opt active" data-lang="fr"><span class="flag">🇫🇷</span> Francais</button>
+        <button class="lang-opt" data-lang="en"><span class="flag">🇬🇧</span> English</button>
+        <button class="lang-opt" data-lang="de"><span class="flag">🇩🇪</span> Deutsch</button>
+        <button class="lang-opt" data-lang="es"><span class="flag">🇪🇸</span> Espanol</button>
+        <button class="lang-opt" data-lang="it"><span class="flag">🇮🇹</span> Italiano</button>
+        <button class="lang-opt" data-lang="pt"><span class="flag">🇵🇹</span> Portugues</button>
+        <button class="lang-opt" data-lang="zh"><span class="flag">🇨🇳</span> 中文</button>
+        <button class="lang-opt" data-lang="hi"><span class="flag">🇮🇳</span> हिन्दी</button>
+      </div>
+    </div>
+    <div class="nav-account" id="navAccount">
+      <button class="nav-account-btn" id="accountBtn">
+        <svg class="nav-account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0112 0v1"/></svg>
+        <span class="nav-token-badge" id="tokenBadge">5</span>
+      </button>
+      <div class="nav-account-menu" id="accountMenu">
+        <div class="account-menu-header">
+          <div class="account-menu-header-left">
+            <span class="account-menu-name">Julien D.</span>
+            <span class="account-menu-email">demo@hub4fix.com</span>
+          </div>
+          <div class="account-menu-tokens-inline">
+            <span class="token-icon">⬡</span>
+            <strong id="accountTokenCount">5</strong>
+          </div>
+        </div>
+        <div class="account-roles">
+          <a href="#" class="account-role account-role-client active">
+            <div class="account-role-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            <span class="account-role-label">Reparer</span>
+            <span class="account-role-sub">Trouver sa piece</span>
+          </a>
+          <a href="printer.html" class="account-role account-role-printer locked">
+            <div class="account-role-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="20" width="18" height="2" rx=".5"/><path d="M7 20v-5h10v5"/><path d="M12 4v6"/><path d="M9.5 10h5L12 15.5 9.5 10z"/></svg>
+            </div>
+            <span class="account-role-label">Printer</span>
+            <span class="account-role-sub">Devenir printer</span>
+            <span class="account-role-lock">🔒</span>
+          </a>
+          <a href="modelisateur.html" class="account-role account-role-modeler locked">
+            <div class="account-role-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 7v4l9 5 9-5V7l-9-5z"/><path d="M12 22V12"/><path d="M3 7l9 5 9-5"/><path d="M21 11v6l-9 5-9-5v-6"/></svg>
+            </div>
+            <span class="account-role-label">Modelisateur</span>
+            <span class="account-role-sub">Devenir modelisateur</span>
+            <span class="account-role-lock">🔒</span>
+          </a>
+        </div>
+        <div class="account-menu-links">
+          <a href="#" class="account-menu-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+            <span>Ma bibliotheque</span>
+          </a>
+          <a href="#" class="account-menu-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            <span>Parametres</span>
+          </a>
+          <a href="#" class="account-menu-item account-menu-logout">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span>Deconnexion</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="page-hero">
+  <div class="page-overline">Programme communautaire</div>
+  <h1 class="page-title">Repair <em>Together</em></h1>
+  <p class="page-subtitle">Une piece cassee ? Contactez-nous avec photos et reference produit. Si la piece est eligible, nous la modelisons, l'imprimons et vous la livrons gratuitement. Votre premiere piece offerte, le catalogue s'enrichit pour tous.</p>
+</section>
+
+<!-- DEAL -->
+<section class="deal-section">
+  <div class="deal-block">
+    <div class="deal-exchange">
+      <div class="deal-give">
+        <div class="deal-icon">📸</div>
+        <div class="deal-label">Vous nous contactez</div>
+        <div class="deal-value">Photos + reference produit</div>
+        <div class="deal-detail">Envoyez-nous des photos de la piece cassee et la reference de votre appareil. On evalue la faisabilite avant tout.</div>
+      </div>
+      <div class="deal-arrow">⇄</div>
+      <div class="deal-get">
+        <div class="deal-icon">🎁</div>
+        <div class="deal-label">Vous recevez</div>
+        <div class="deal-value">Votre premiere piece neuve gratuite</div>
+        <div class="deal-detail">Apres validation, prise de cotes et modelisation : piece imprimee et livree sans frais. Valeur maximale : 15 EUR.</div>
+      </div>
+    </div>
+    <div class="deal-conditions">
+      <div class="deal-cond">
+        <svg class="deal-cond-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Piece de valeur ≤ 15 EUR
+      </div>
+      <div class="deal-cond">
+        <svg class="deal-cond-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        1 piece offerte par compte
+      </div>
+      <div class="deal-cond">
+        <svg class="deal-cond-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Fichier 3D propriete Hub⁴Fix
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMMENT CA MARCHE -->
+<section class="how-section section-watermark" data-watermark="Le cycle de vie commence ici.">
+  <div class="how-header">
+    <div class="how-overline">Le parcours</div>
+    <h2 class="how-title">Comment ca <em>marche</em></h2>
+  </div>
+  <div class="how-steps" style="grid-template-columns:1fr 1fr;gap:1.5rem">
+    <div class="how-step" style="text-align:left;padding:1.5rem;background:white;border:1px solid var(--cream);border-radius:3px">
+      <div class="how-step-num">01</div>
+      <h4>Demande en ligne</h4>
+      <p>Vous nous contactez avec des photos de la piece cassee et la reference du produit source (marque, modele). On evalue sur photo si la piece est compatible impression 3D.</p>
+    </div>
+    <div class="how-step" style="text-align:left;padding:1.5rem;background:white;border:1px solid var(--cream);border-radius:3px">
+      <div class="how-step-num">02</div>
+      <h4>Validation sur photo</h4>
+      <p>Notre equipe analyse les photos. Si la piece semble faisable en impression 3D, on vous demande de nous l'envoyer. Sinon, on vous explique pourquoi.</p>
+    </div>
+    <div class="how-step" style="text-align:left;padding:1.5rem;background:white;border:1px solid var(--cream);border-radius:3px">
+      <div class="how-step-num">03</div>
+      <h4>Envoi et prise de cotes</h4>
+      <p>Vous nous envoyez la piece. On effectue les prises de cotes pour confirmer la faisabilite. Si necessaire, on peut vous demander des elements de contexte (ex : l'arbre de transmission pour verifier un pignon, une piece adjacente pour valider l'assemblage).</p>
+    </div>
+    <div class="how-step" style="text-align:left;padding:1.5rem;background:white;border:1px solid var(--cream);border-radius:3px">
+      <div class="how-step-num">04</div>
+      <h4>Modelisation et livraison</h4>
+      <p>Faisabilite confirmee : on modelise, on imprime, on vous livre la piece neuve gratuitement. Le fichier 3D integre le catalogue Hub⁴Fix pour que d'autres puissent en beneficier.</p>
+    </div>
+  </div>
+</section>
+
+<!-- POURQUOI -->
+<section class="why-section section-watermark" data-watermark="Ne jetez plus, réactivez.">
+  <div class="why-grid">
+    <div class="why-card">
+      <div class="why-card-icon">🌱</div>
+      <h4>Un appareil sauve</h4>
+      <p>Chaque piece reparee, c'est un appareil de moins a la decheterie. Votre geste declenche une chaine de reparations pour tous les proprietaires du meme modele.</p>
+    </div>
+    <div class="why-card">
+      <div class="why-card-icon">🔓</div>
+      <h4>Le catalogue s'enrichit</h4>
+      <p>Votre piece cassee devient la reference pour un fichier 3D dans le catalogue. Les prochains clients avec le meme appareil la trouveront disponible immediatement.</p>
+    </div>
+    <div class="why-card">
+      <div class="why-card-icon">💰</div>
+      <h4>Zero frais pour vous</h4>
+      <p>Envoi, modelisation, impression, livraison : tout est pris en charge. Votre seule contribution, c'est la piece cassee et quelques photos.</p>
+    </div>
+    <div class="why-card">
+      <div class="why-card-icon">🤝</div>
+      <h4>Premier maillon de la chaine</h4>
+      <p>Vous etes le premier a signaler cette piece. Votre demande alimente la Hot List et accelere la couverture du catalogue pour tous.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PIECES EN ACQUISITION -->
+<section class="acq-section">
+  <div class="acq-banner">
+    <div class="acq-badge">En cours d'acquisition</div>
+    <div class="acq-title">Des pieces sont deja en cours de validation</div>
+    <p class="acq-desc">D'autres utilisateurs ont soumis leur demande via Repair Together. Certaines pieces sont en attente de reception, d'autres en prise de cotes. Bientot dans le catalogue.</p>
+    <a href="test-marchand.html" class="acq-cta">Chercher ma piece →</a>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section">
+  <div class="faq-list">
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        Quelles photos envoyer ?
+        <span class="faq-q-arrow">▼</span>
+      </div>
+      <div class="faq-a">Plusieurs angles de la piece cassee, avec un objet de reference pour l'echelle (piece de monnaie, regle). Ajoutez la reference du produit source (marque, modele, numero de serie si possible).</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        Pourquoi demander des pieces supplementaires ?
+        <span class="faq-q-arrow">▼</span>
+      </div>
+      <div class="faq-a">Certaines pieces ne peuvent etre modelisees sans leur contexte d'assemblage. Par exemple, pour un pignon, on peut avoir besoin de l'arbre de transmission et du pignon adjacent pour verifier l'entraxe et le module. Si la machine entiere est trop volumineuse, on ne demande que les elements strictement necessaires.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        Et si la piece n'est pas faisable en 3D ?
+        <span class="faq-q-arrow">▼</span>
+      </div>
+      <div class="faq-a">On vous le dit des l'etape photo si la piece ne semble pas compatible (trop sollicitee mecaniquement, materiau special, tolerances trop fines). Pas d'envoi inutile. Si le refus intervient apres reception, on vous renvoie votre piece.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        Combien de temps pour recevoir ma piece neuve ?
+        <span class="faq-q-arrow">▼</span>
+      </div>
+      <div class="faq-a">Validation photo : 24-48h. Apres envoi de la piece : prise de cotes (2-3j), modelisation (3-5j), impression et livraison (2-4j). Vous etes notifie a chaque etape.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        Que se passe-t-il si la piece depasse 15 EUR ?
+        <span class="faq-q-arrow">▼</span>
+      </div>
+      <div class="faq-a">On vous propose de payer la difference ou de passer par le flux classique. Le programme Repair Together reste gratuit jusqu'a 15 EUR de valeur piece.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        Est-ce que je peux en beneficier plusieurs fois ?
+        <span class="faq-q-arrow">▼</span>
+      </div>
+      <div class="faq-a">Le programme est limite a 1 piece offerte par compte. Ensuite, vous continuez via les flux numerique ou physique classiques de Hub⁴Fix.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-brand">
+    <div class="footer-logo"><svg viewBox="0 0 202.6 265.4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><linearGradient id="flg1"><stop style="stop-color:#2a00fe" offset="0.336"/><stop style="stop-color:#fff" offset="1"/></linearGradient><linearGradient id="flg2"><stop style="stop-color:#fff" offset="0.107"/><stop style="stop-color:#fe0000" offset="0.684"/></linearGradient><linearGradient xlink:href="#flg1" id="fgr1" x1="129.89" y1="808.83" x2="194.31" y2="808.83" gradientUnits="userSpaceOnUse"/><linearGradient xlink:href="#flg2" id="fgr2" x1="271.02" y1="731.42" x2="327.45" y2="731.42" gradientUnits="userSpaceOnUse" spreadMethod="pad"/></defs><g transform="translate(-129.894,-634.847)"><g transform="translate(-114.063,-139.373)"><path d="m 353.331,791.185 -24.32,66.818 c -8.972,24.651 9.283,50.722 35.516,50.722 h 72.08 c 5.218,0 9.449,4.23 9.449,9.449 0,5.218 -4.231,9.449 -9.449,9.449 h -72.08 c -39.35,0 -66.732,-39.106 -53.274,-76.083 l 7.123,-19.57 17.2,-47.256 c 1.787,-4.903 7.21,-7.428 12.113,-5.642 4.903,1.787 7.429,7.21 5.643,12.112 z" style="fill:#000;stroke:#000"/><path d="m 314.879,1026.411 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#000;stroke:#000"/><path d="m 249.987,1019.877 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:#000;stroke:#000"/><path d="m 359.24,904.532 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#000;stroke:#000"/><path d="m 436.607,884.024 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:#000;stroke:#000"/></g><g><path d="m 234.225,648.032 -24.32,66.818 a 37.795,37.795 0 0 0 35.516,50.722 h 72.08 a 9.449,9.449 0 0 1 0,18.898 h -72.08 a 56.693,56.693 0 0 1 -53.274,-76.083 l 24.323,-66.826 a 9.449,9.449 0 0 1 17.755,6.471 z" style="fill:#fff;stroke:#000"/><path d="m 195.773,883.258 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#fff;stroke:#000"/><path d="m 130.881,876.724 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:url(#fgr1);stroke:#000"/><path d="m 240.133,761.379 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#fff;stroke:#000"/><path d="m 317.5,740.871 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:url(#fgr2);stroke:#000"/></g></g></svg></div>
+    <span class="footer-copy">&copy; 2026 Hub⁴Fix — La STaTION, Viry-Chatillon · <a href="mailto:contact@hub4fix.com" style="color:var(--gold);text-decoration:none">contact@hub4fix.com</a></span>
+  </div>
+  <span class="footer-tagline">Un fichier numerique ne s'epuise jamais.</span>
+  <div style="width:100%;text-align:center;margin-top:.6rem;font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.06em"><a href="cgu.html" style="color:var(--stone,#A89F91);text-decoration:none">CGU</a> &middot; <a href="cgv.html" style="color:var(--stone,#A89F91);text-decoration:none">CGV</a></div>
+</footer>
+
+<script>
+// ═══ Header interactions ═══
+document.getElementById('accountBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('accountMenu').classList.toggle('visible');
+  document.getElementById('langDropdown').classList.remove('open');
+});
+document.addEventListener('click', () => { document.getElementById('accountMenu').classList.remove('visible'); document.getElementById('langDropdown').classList.remove('open'); });
+document.getElementById('langDropdownBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  document.getElementById('langDropdown').classList.toggle('open');
+  document.getElementById('accountMenu').classList.remove('visible');
+});
+document.getElementById('langDropdownList').addEventListener('click', e => {
+  const opt = e.target.closest('.lang-opt');
+  if (!opt) return;
+  document.getElementById('langDropdown').classList.remove('open');
+});
+document.querySelectorAll('.account-role.locked').forEach(el => {
+  el.addEventListener('click', e => e.preventDefault());
+});
+
+// Logo click suction effect
+(function(){
+  var brand = document.querySelector('.nav-brand');
+  if(!brand) return;
+  brand.addEventListener('click', function(e){
+    var href = brand.getAttribute('href') || 'index.html';
+    e.preventDefault();
+    document.body.style.transformOrigin = 'top center';
+    document.body.classList.add('page-sucking');
+    var navigated = false;
+    function go(){ if(!navigated){ navigated=true; window.location.assign(href); } }
+    document.body.addEventListener('animationend', go);
+    setTimeout(go, 800);
+  });
+})();
+</script>
+<script>
+(function(){var cvs=document.createElement('canvas');cvs.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none;';document.body.insertBefore(cvs,document.body.firstChild);var ctx=cvs.getContext('2d'),W,H,P=[],dpr;var DIST=130,SPD=0.35;function resize(){dpr=window.devicePixelRatio||1;W=window.innerWidth;H=window.innerHeight;cvs.width=W*dpr;cvs.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}function make(){P=[];var n=Math.min(Math.round(W*H/13000),80);for(var i=0;i<n;i++)P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*SPD,vy:(Math.random()-.5)*SPD,r:Math.random()*.7+.5});}function tick(){ctx.clearRect(0,0,W,H);for(var i=0;i<P.length;i++){for(var j=i+1;j<P.length;j++){var dx=P[i].x-P[j].x,dy=P[i].y-P[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<DIST){ctx.strokeStyle='rgba(168,159,145,'+(0.28*(1-d/DIST)).toFixed(3)+')';ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(P[i].x,P[i].y);ctx.lineTo(P[j].x,P[j].y);ctx.stroke();}}ctx.fillStyle='rgba(168,159,145,.3)';ctx.beginPath();ctx.arc(P[i].x,P[i].y,P[i].r,0,6.283);ctx.fill();P[i].x+=P[i].vx;P[i].y+=P[i].vy;if(P[i].x<0||P[i].x>W)P[i].vx*=-1;if(P[i].y<0||P[i].y>H)P[i].vy*=-1;}requestAnimationFrame(tick);}resize();make();tick();window.addEventListener('resize',function(){resize();make();});})();
+</script>
+<script src="/js/sphere-bg.js"></script>
+<script src="js/nav-mindmap.js"></script>
+</body>
+</html>

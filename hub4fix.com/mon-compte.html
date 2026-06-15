@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mon compte — Hub⁴Fix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/glass-sphere.css">
+<style>
+:root{--ivory:#FAF8F5;--warm-white:#F3EEE8;--cream:#EDE6DC;--sand:#D4C9B8;--stone:#A89F91;--earth:#7A7268;--charcoal:#3B3632;--night:#1C1A18;--gold:#B8963E;--gold-light:#D4B15F;--gold-pale:rgba(184,150,62,0.08);--gold-glow:rgba(184,150,62,0.15);--red:#C8102E;--red-soft:rgba(200,16,46,0.06);--red-medium:rgba(200,16,46,0.18);--green:#2D8B5E;--font-serif:'Cormorant Garamond',serif;--font-sans:'Karla',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--ivory);color:var(--charcoal);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+::selection{background:var(--gold-glow);color:var(--night)}
+
+/* ════ NAV ════ */
+nav{position:sticky;top:0;z-index:100;padding:.8rem 4rem;display:flex;justify-content:space-between;align-items:center;background:rgba(243,238,232,0.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(237,230,220,0.4)}
+.nav-brand{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo{width:auto;height:32px}
+.nav-wordmark{font-family:var(--font-serif);font-size:1.1rem;font-weight:500;color:var(--night);letter-spacing:.02em}
+.nav-wordmark sup{color:var(--red);font-size:.7em;vertical-align:super;line-height:0}
+.nav-right{display:flex;align-items:center;gap:1rem}
+.nav-back{text-decoration:none;color:var(--earth);font-size:.82rem;font-weight:500;display:flex;align-items:center;gap:.3rem;transition:color .2s}
+.nav-back:hover{color:var(--red)}
+.nav-account{position:relative}
+.nav-account-btn{display:flex;align-items:center;gap:.3rem;background:none;border:none;cursor:pointer;padding:.3rem;border-radius:2px;transition:background .2s}
+.nav-account-btn:hover{background:var(--cream)}
+.nav-account-icon{width:22px;height:22px;color:var(--charcoal)}
+.nav-token-badge{background:var(--red);color:white;font-size:.65rem;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;line-height:1}
+
+/* ════ LAYOUT ════ */
+.compte-layout{display:grid;grid-template-columns:auto 1fr;min-height:calc(100vh - 52px)}
+.compte-sidebar{position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto;border-right:1px solid var(--cream);background:var(--warm-white);padding:1.5rem 1rem 1.5rem .8rem;min-width:260px}
+.compte-content{padding:2.5rem 3.5rem;max-width:960px}
+
+/* ════ SIDEBAR MINDMAP ════ */
+.sb-header{display:flex;align-items:center;gap:.7rem;padding:0 .3rem .8rem;border-bottom:1px solid var(--cream);margin-bottom:1rem}
+.sb-avatar{width:40px;height:40px;border-radius:50%;background:var(--gold);color:white;display:flex;align-items:center;justify-content:center;font-family:var(--font-serif);font-size:1rem;font-weight:600;flex-shrink:0}
+.sb-info{display:flex;flex-direction:column;min-width:0}
+.sb-name{font-weight:600;font-size:.88rem;color:var(--night)}
+.sb-email{font-size:.68rem;color:var(--earth);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sb-tokens{display:flex;align-items:center;gap:.3rem;margin-left:auto;background:var(--red-soft);padding:3px 8px;border-radius:10px;flex-shrink:0}
+.sb-tokens .t-icon{font-size:.65rem;color:var(--red)}
+.sb-tokens strong{font-family:'Courier New',monospace;font-size:.85rem;color:var(--red)}
+
+/* Sidebar tree */
+.sb-tree{position:relative;padding:0 .2rem}
+.sb-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:visible}
+.sb-svg path{fill:none;stroke-width:1.5;stroke-linecap:round}
+.sb-svg circle{transition:opacity .2s}
+.sb-grid{display:grid;grid-template-columns:auto auto auto;gap:0 1.2rem;align-items:start}
+.sb-col{display:flex;flex-direction:column;gap:.25rem;z-index:1;padding:.1rem 0}
+.sb-col:empty{display:none}
+
+/* Category pills (level 0) */
+.sb-cat{padding:.4rem .7rem;font-size:.72rem;font-weight:600;letter-spacing:.02em;background:white;border:1.5px solid var(--cream);border-radius:14px;cursor:pointer;transition:all .25s;color:var(--charcoal);white-space:nowrap;position:relative;display:flex;align-items:center;gap:.35rem}
+.sb-cat svg{width:14px;height:14px;flex-shrink:0;opacity:.6}
+.sb-cat:hover{background:var(--gold-pale);color:var(--gold)}
+.sb-cat.active{color:white;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+.sb-cat.active svg{opacity:1}
+.sb-col.has-selection .sb-cat:not(.active){opacity:.35;transform:scale(.95)}
+
+/* Section pills (level 1) */
+.sb-sec{padding:.35rem .6rem;font-size:.7rem;font-weight:500;background:white;border:1.5px solid var(--cream);border-radius:12px;cursor:pointer;transition:all .25s;color:var(--earth);white-space:nowrap;display:flex;align-items:center;gap:.3rem}
+.sb-sec svg{width:13px;height:13px;flex-shrink:0;opacity:.5}
+.sb-sec:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-pale)}
+.sb-sec.active{color:white;background:var(--gold);border-color:var(--gold);font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.sb-sec.active svg{opacity:1}
+.sb-sec.locked{opacity:.45;cursor:default}
+.sb-sec.locked::after{content:'🔒';font-size:.55rem;margin-left:.2rem}
+
+/* Sub-branch pills (level 2 — e.g. Partenaire children) */
+.sb-sub{padding:.32rem .55rem;font-size:.68rem;font-weight:500;background:white;border:1.5px solid var(--cream);border-radius:11px;cursor:pointer;transition:all .25s;color:var(--earth);white-space:nowrap;display:flex;align-items:center;gap:.3rem}
+.sb-sub svg{width:12px;height:12px;flex-shrink:0;opacity:.5}
+.sb-sub:hover{border-color:#6b5b95;color:#6b5b95;background:rgba(107,91,149,.06)}
+.sb-sub.active{color:white;background:#6b5b95;border-color:#6b5b95;font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.sb-sub.active svg{opacity:1}
+/* Partenaire pill highlighted when its sub-branch is open */
+.sb-sec.has-branch{border-color:#6b5b95;color:#6b5b95;font-weight:600}
+
+/* Animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes sbFadeIn{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:translateX(0)}}
+.sb-anim{animation:sbFadeIn .2s ease both}
+
+/* ════ CONTENT SECTIONS ════ */
+.sec-title{font-family:var(--font-serif);font-size:1.8rem;font-weight:400;color:var(--night);margin-bottom:.3rem}
+.sec-overline{font-size:.65rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1.2rem;display:flex;align-items:center;gap:.8rem}
+.sec-overline::before{content:'';width:20px;height:1px;background:var(--gold)}
+.sec-desc{font-size:.88rem;color:var(--earth);line-height:1.7;margin-bottom:2rem;max-width:640px}
+
+/* Cards */
+.card{background:white;border:1px solid var(--cream);border-radius:16px;padding:1.4rem;margin-bottom:1rem;transition:box-shadow .2s}
+.card:hover{box-shadow:0 4px 16px rgba(0,0,0,.05)}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;margin-bottom:1.5rem}
+
+/* Table */
+.data-table{width:100%;border-collapse:collapse;font-size:.82rem;margin-bottom:1.5rem}
+.data-table th{text-align:left;font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--stone);padding:.6rem .8rem;border-bottom:2px solid var(--cream)}
+.data-table td{padding:.7rem .8rem;border-bottom:1px solid rgba(237,230,220,.5);color:var(--charcoal)}
+.data-table tr:hover td{background:var(--gold-pale)}
+.badge{display:inline-flex;align-items:center;padding:.2rem .6rem;border-radius:8px;font-size:.68rem;font-weight:600}
+.badge-gold{background:var(--gold-pale);color:var(--gold)}
+.badge-green{background:rgba(45,139,94,.08);color:var(--green)}
+.badge-red{background:var(--red-soft);color:var(--red)}
+.badge-stone{background:rgba(168,159,145,.1);color:var(--stone)}
+
+/* Forms */
+.form-group{margin-bottom:1.2rem}
+.form-label{display:block;font-size:.72rem;font-weight:600;letter-spacing:.04em;color:var(--earth);margin-bottom:.35rem}
+.form-input{width:100%;padding:.55rem .8rem;font-size:.85rem;font-family:var(--font-sans);border:1px solid var(--cream);border-radius:10px;background:white;color:var(--charcoal);transition:border-color .2s;outline:none}
+.form-input:focus{border-color:var(--gold)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.3rem;font-size:.78rem;font-weight:600;font-family:var(--font-sans);border:none;border-radius:10px;cursor:pointer;transition:all .2s}
+.btn-gold{background:var(--gold);color:white}
+.btn-gold:hover{background:#a08030}
+.btn-outline{background:transparent;border:1.5px solid var(--cream);color:var(--earth)}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+
+/* Token counter */
+.token-display{display:flex;align-items:center;gap:1rem;padding:1.5rem;background:linear-gradient(135deg,var(--gold-pale),rgba(184,150,62,.12));border-radius:16px;margin-bottom:1.5rem}
+.token-count{font-family:var(--font-serif);font-size:3rem;font-weight:600;color:var(--gold)}
+.token-label{font-size:.78rem;color:var(--earth)}
+.token-history{list-style:none}
+.token-history li{display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(237,230,220,.4);font-size:.82rem}
+.token-history .t-date{color:var(--stone);font-size:.72rem}
+.token-history .t-plus{color:var(--green);font-weight:600}
+.token-history .t-minus{color:var(--red);font-weight:600}
+
+/* Stats */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem}
+.stat-card{text-align:center;padding:1.2rem;background:white;border:1px solid var(--cream);border-radius:16px}
+.stat-val{font-family:var(--font-serif);font-size:1.8rem;font-weight:500;color:var(--night)}
+.stat-label{font-size:.68rem;color:var(--stone);margin-top:.2rem}
+
+/* Progress bar */
+.progress{height:6px;background:var(--cream);border-radius:3px;overflow:hidden;margin:.4rem 0}
+.progress-fill{height:100%;border-radius:3px;transition:width .5s}
+
+/* Toggle */
+.toggle-row{display:flex;justify-content:space-between;align-items:center;padding:.7rem 0;border-bottom:1px solid rgba(237,230,220,.4)}
+.toggle-label{font-size:.85rem;color:var(--charcoal)}
+.toggle-sub{font-size:.7rem;color:var(--stone)}
+.toggle{width:40px;height:22px;background:var(--cream);border-radius:11px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.toggle.on{background:var(--gold)}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;background:white;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.toggle.on::after{transform:translateX(18px)}
+
+/* Alert items */
+.alert-item{display:flex;gap:.8rem;padding:.8rem;border-radius:12px;background:white;border:1px solid var(--cream);margin-bottom:.6rem;align-items:center}
+.alert-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.alert-dot.new{background:var(--red)}
+.alert-dot.read{background:var(--cream)}
+.alert-text{flex:1;font-size:.82rem;line-height:1.4}
+.alert-date{font-size:.68rem;color:var(--stone);white-space:nowrap}
+
+/* Upload area */
+.upload-zone{border:2px dashed var(--cream);border-radius:16px;padding:2rem;text-align:center;cursor:pointer;transition:border-color .2s;margin-bottom:1.5rem}
+.upload-zone:hover{border-color:var(--gold)}
+.upload-icon{font-size:2rem;margin-bottom:.5rem;opacity:.4}
+.upload-text{font-size:.82rem;color:var(--stone)}
+
+/* Royalty bar */
+.royalty-bar{display:flex;align-items:center;gap:.6rem;font-size:.82rem;margin-bottom:.5rem}
+.royalty-bar .r-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.royalty-bar .r-amount{font-weight:600;color:var(--gold);white-space:nowrap}
+
+/* ════ RESPONSIVE ════ */
+@media(max-width:768px){
+  nav{padding:.7rem 1.2rem}
+  .compte-layout{grid-template-columns:1fr}
+  .compte-sidebar{position:relative;top:0;height:auto;border-right:none;border-bottom:1px solid var(--cream);padding:.8rem}
+  .sb-grid{display:flex;flex-wrap:wrap;gap:.35rem}
+  .sb-col{flex-direction:row;flex-wrap:wrap;gap:.3rem}
+  .sb-svg{display:none}
+  .sb-col.has-selection .sb-cat:not(.active){opacity:1;transform:none}
+  .compte-content{padding:1.5rem 1.2rem}
+  .form-row{grid-template-columns:1fr}
+  .stat-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-brand">
+    <svg class="nav-logo" viewBox="0 0 202.6 265.4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><linearGradient id="lg1"><stop style="stop-color:#2a00fe" offset="0.336"/><stop style="stop-color:#fff" offset="1"/></linearGradient><linearGradient id="lg2"><stop style="stop-color:#fff" offset="0.107"/><stop style="stop-color:#fe0000" offset="0.684"/></linearGradient><linearGradient xlink:href="#lg1" id="grad1" x1="129.89" y1="808.83" x2="194.31" y2="808.83" gradientUnits="userSpaceOnUse"/><linearGradient xlink:href="#lg2" id="grad2" x1="271.02" y1="731.42" x2="327.45" y2="731.42" gradientUnits="userSpaceOnUse" spreadMethod="pad"/></defs><g transform="translate(-129.894,-634.847)"><g transform="translate(-114.063,-139.373)"><path d="m 353.331,791.185 -24.32,66.818 c -8.972,24.651 9.283,50.722 35.516,50.722 h 72.08 c 5.218,0 9.449,4.23 9.449,9.449 0,5.218 -4.231,9.449 -9.449,9.449 h -72.08 c -39.35,0 -66.732,-39.106 -53.274,-76.083 l 7.123,-19.57 17.2,-47.256 c 1.787,-4.903 7.21,-7.428 12.113,-5.642 4.903,1.787 7.429,7.21 5.643,12.112 z" style="fill:#000;stroke:#000"/><path d="m 314.879,1026.411 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#000;stroke:#000"/><path d="m 249.987,1019.877 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:#000;stroke:#000"/><path d="m 359.24,904.532 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#000;stroke:#000"/><path d="m 436.607,884.024 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:#000;stroke:#000"/></g><g><path d="m 234.225,648.032 -24.32,66.818 a 37.795,37.795 0 0 0 35.516,50.722 h 72.08 a 9.449,9.449 0 0 1 0,18.898 h -72.08 a 56.693,56.693 0 0 1 -53.274,-76.083 l 24.323,-66.826 a 9.449,9.449 0 0 1 17.755,6.471 z" style="fill:#fff;stroke:#000"/><path d="m 195.773,883.258 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#fff;stroke:#000"/><path d="m 130.881,876.724 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:url(#grad1);stroke:#000"/><path d="m 240.133,761.379 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#fff;stroke:#000"/><path d="m 317.5,740.871 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:url(#grad2);stroke:#000"/></g></g></svg>
+    <span class="nav-wordmark">Hub<sup>4</sup>Fix</span>
+  </a>
+  <div class="nav-right">
+    <a href="produit.html" class="nav-back"><span>← Retour</span></a>
+    <div class="nav-account" id="navAccount">
+      <button class="nav-account-btn" id="accountBtn">
+        <svg class="nav-account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0112 0v1"/></svg>
+        <span class="nav-token-badge" id="tokenBadge">5</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- LAYOUT -->
+<div class="compte-layout">
+  <aside class="compte-sidebar" id="compteSidebar">
+    <div class="sb-header">
+      <div class="sb-avatar">JD</div>
+      <div class="sb-info">
+        <span class="sb-name">Julien D.</span>
+        <span class="sb-email">demo@hub4fix.com</span>
+      </div>
+      <div class="sb-tokens"><span class="t-icon">&#x2B21;</span><strong>5</strong></div>
+    </div>
+    <div class="sb-tree" id="sbTree">
+      <svg class="sb-svg" id="sbSvg"></svg>
+      <div class="sb-grid" id="sbGrid">
+        <!-- Generated by JS -->
+      </div>
+    </div>
+  </aside>
+  <main class="compte-content" id="compteContent">
+    <!-- Section content rendered by JS -->
+  </main>
+</div>
+
+<script>
+(function(){
+  /* ════════════════════════════════════════════
+     DEMO USER & TREE DATA
+     ════════════════════════════════════════════ */
+  var USER = { name:'Julien D.', email:'demo@hub4fix.com', tokens:5, roles:['client','printer'] };
+
+  var IC = {
+    user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0112 0v1"/></svg>',
+    package:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12"/></svg>',
+    hex:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4.5v7L12 22l-8-8.5v-7L12 2z"/></svg>',
+    book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>',
+    layers:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
+    bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>',
+    settings:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>',
+    target:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+    dollar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>',
+    file3d:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6l-4 3 4 3z"/></svg>',
+    flame:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 11-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg>',
+    coins:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1110.34 18"/><line x1="7" y1="6" x2="7.01" y2="6"/><line x1="16" y1="14" x2="16.01" y2="14"/></svg>',
+    wrench:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>',
+    printer:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="20" width="18" height="2" rx=".5"/><path d="M7 20v-5h10v5"/><path d="M12 4v6"/><path d="M9.5 10h5L12 15.5 9.5 10z"/></svg>',
+    cube:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 7v4l9 5 9-5V7l-9-5z"/><path d="M12 22V12"/><path d="M3 7l9 5 9-5"/><path d="M21 11v6l-9 5-9-5v-6"/></svg>',
+    handshake:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 17l-1.5 1.5a2.12 2.12 0 01-3-3L10 12"/><path d="M15.5 6.5L18 4a2.12 2.12 0 013 3l-3.5 3.5"/><path d="M6 6l4.5 4.5"/><path d="M13.5 13.5L18 18"/><path d="M2 12h3"/><path d="M19 12h3"/><path d="M10 16l-2 2"/><path d="M14 8l2-2"/></svg>'
+  };
+
+  var TREE = [
+    { id:'compte', label:'Mon compte', icon:'wrench', color:'#B8963E', children:[
+      { id:'profil', label:'Profil', icon:'user' },
+      { id:'commandes', label:'Commandes', icon:'package' },
+      { id:'tokens', label:'Tokens', icon:'hex' },
+      { id:'bibliotheque', label:'Bibliotheque', icon:'book' },
+      { id:'impressions', label:'Impressions', icon:'layers' },
+      { id:'alertes', label:'Alertes', icon:'bell' },
+      { id:'partenaire', label:'Partenaire', icon:'handshake', branch:true, branchColor:'#6b5b95', children:[
+        { id:'postuler-printer', label:'Devenir Printer', icon:'printer' },
+        { id:'postuler-modelisateur', label:'Devenir Modelisateur', icon:'cube' }
+      ]},
+      { id:'parametres', label:'Parametres', icon:'settings' }
+    ]},
+    { id:'printer', label:'Printer', icon:'printer', color:'#2c6e9b', role:'printer', children:[
+      { id:'missions', label:'Missions', icon:'target' },
+      { id:'gains', label:'Gains', icon:'dollar' }
+    ]},
+    { id:'modelisateur', label:'Modelisateur', icon:'cube', color:'#a0522d', role:'modelisateur', children:[
+      { id:'fichiers', label:'Fichiers', icon:'file3d' },
+      { id:'hotlist', label:'Hot List', icon:'flame' },
+      { id:'royalties', label:'Royalties', icon:'coins' }
+    ]}
+  ];
+
+  var CC = ['#B8963E','#2c6e9b','#a0522d'];
+  var currentCat = null, currentSec = null;
+  var sbTree = document.getElementById('sbTree');
+  var sbGrid = document.getElementById('sbGrid');
+  var sbSvg = document.getElementById('sbSvg');
+
+  /* ════ SVG helpers (same as produit.html) ════ */
+  function svgC(x1,y1,x2,y2,col,op){
+    var dx=x2-x1, cp=Math.min(Math.abs(dx)*.5,40);
+    return '<path d="M'+x1+','+y1+' C'+(x1+cp)+','+y1+' '+(x2-cp)+','+y2+' '+x2+','+y2+'" stroke="'+col+'" opacity="'+(op||.4)+'"/>';
+  }
+  function svgD(x,y,r,col){ return '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+col+'"/>'; }
+
+  function alignCol(colId, parentEl){
+    var col = document.getElementById(colId);
+    if(!col) return;
+    col.style.paddingTop = '';
+    if(!parentEl || !col.firstElementChild) return;
+    var pR = parentEl.getBoundingClientRect();
+    var cR = col.firstElementChild.getBoundingClientRect();
+    var diff = (pR.top + pR.height/2) - (cR.top + cR.height/2);
+    if(diff > 4) col.style.paddingTop = (parseFloat(getComputedStyle(col).paddingTop) + diff) + 'px';
+  }
+
+  function drawWires(){
+    if(!sbSvg || !sbTree) return;
+    var box = sbTree.getBoundingClientRect();
+    var p = '';
+    var activeCat = sbTree.querySelector('.sb-cat.active');
+    if(activeCat){
+      var aR = activeCat.getBoundingClientRect();
+      var ax = aR.right - box.left;
+      var ay = aR.top + aR.height/2 - box.top;
+      var ci = parseInt(activeCat.dataset.idx);
+      var col = CC[ci] || CC[0];
+      // Wires: category → sections
+      sbTree.querySelectorAll('.sb-sec').forEach(function(sEl){
+        var sR = sEl.getBoundingClientRect();
+        if(sR.height === 0) return;
+        var sx = sR.left - box.left;
+        var sy = sR.top + sR.height/2 - box.top;
+        var isActive = sEl.classList.contains('active') || sEl.classList.contains('has-branch');
+        var op = isActive ? .5 : .25;
+        p += svgC(ax, ay, sx, sy, col, op);
+        p += svgD(sx, sy, isActive ? 3 : 1.5, col);
+      });
+      p += svgD(ax, ay, 3, col);
+      // Wires: branch section → sub-branches
+      var branchEl = sbTree.querySelector('.sb-sec.has-branch');
+      if(branchEl){
+        var bR = branchEl.getBoundingClientRect();
+        var bx = bR.right - box.left;
+        var by = bR.top + bR.height/2 - box.top;
+        var bCol = '#6b5b95';
+        sbTree.querySelectorAll('.sb-sub').forEach(function(subEl){
+          var subR = subEl.getBoundingClientRect();
+          if(subR.height === 0) return;
+          var subx = subR.left - box.left;
+          var suby = subR.top + subR.height/2 - box.top;
+          var isA = subEl.classList.contains('active');
+          p += svgC(bx, by, subx, suby, bCol, isA ? .5 : .3);
+          p += svgD(subx, suby, isA ? 3 : 1.5, bCol);
+        });
+        p += svgD(bx, by, 2.5, bCol);
+      }
+    }
+    sbSvg.innerHTML = p;
+  }
+
+  /* ════ RENDER SIDEBAR ════ */
+  function renderSidebar(){
+    var html = '<div class="sb-col" id="sbCatsCol">';
+    TREE.forEach(function(cat, i){
+      var locked = cat.role && USER.roles.indexOf(cat.role) === -1;
+      html += '<div class="sb-cat'+(locked?' locked':'')+'" data-idx="'+i+'" data-id="'+cat.id+'" style="border-color:'+CC[i]+'30;color:'+CC[i]+'">';
+      html += IC[cat.icon] || '';
+      html += cat.label;
+      if(locked) html += '<span style="font-size:.55rem;margin-left:.2rem">&#x1F512;</span>';
+      html += '</div>';
+    });
+    html += '</div>';
+    html += '<div class="sb-col" id="sbSecsCol"></div>';
+    html += '<div class="sb-col" id="sbSubsCol"></div>';
+    sbGrid.innerHTML = html;
+
+    sbTree.querySelectorAll('.sb-cat').forEach(function(el){
+      el.addEventListener('click', function(){
+        var idx = parseInt(this.dataset.idx);
+        if(this.classList.contains('locked')) return;
+        selectCat(idx);
+      });
+    });
+    drawWires();
+  }
+
+  function selectCat(idx){
+    currentCat = idx;
+    var cat = TREE[idx];
+    var col = CC[idx];
+
+    var catsCol = document.getElementById('sbCatsCol');
+    catsCol.classList.add('has-selection');
+    sbTree.querySelectorAll('.sb-cat').forEach(function(el, i){
+      el.classList.toggle('active', i === idx);
+      el.style.background = (i === idx) ? col : '';
+      el.style.color = (i === idx) ? 'white' : CC[i];
+      el.style.borderColor = (i === idx) ? col : CC[i] + '30';
+    });
+
+    var secsCol = document.getElementById('sbSecsCol');
+    var html = '';
+    cat.children.forEach(function(sec, i){
+      var isActive = sec.id === currentSec;
+      var isBranch = sec.id === currentBranch;
+      var cls = 'sb-sec sb-anim';
+      if(isActive) cls += ' active';
+      if(isBranch) cls += ' has-branch';
+      html += '<div class="'+cls+'" data-id="'+sec.id+'"'+(sec.branch?' data-branch="1"':'')+' style="animation-delay:'+(i*40)+'ms">';
+      html += IC[sec.icon] || '';
+      html += sec.label + '</div>';
+    });
+    secsCol.innerHTML = html;
+    // Clear sub-branch column
+    var subsCol = document.getElementById('sbSubsCol');
+    subsCol.innerHTML = '';
+    subsCol.style.paddingTop = '';
+
+    alignCol('sbSecsCol', sbTree.querySelector('.sb-cat.active'));
+
+    secsCol.querySelectorAll('.sb-sec').forEach(function(el){
+      el.addEventListener('click', function(){
+        var secId = this.dataset.id;
+        if(this.dataset.branch){
+          openBranch(secId);
+        } else {
+          closeBranch();
+          navigateTo(secId);
+        }
+      });
+    });
+    drawWires();
+  }
+
+  var currentBranch = null;
+
+  function openBranch(secId){
+    currentBranch = secId;
+    // Find branch data in current category
+    var cat = TREE[currentCat];
+    var branchData = null;
+    for(var j = 0; j < cat.children.length; j++){
+      if(cat.children[j].id === secId){ branchData = cat.children[j]; break; }
+    }
+    if(!branchData || !branchData.children) return;
+
+    // Highlight branch pill
+    sbTree.querySelectorAll('.sb-sec').forEach(function(el){
+      el.classList.remove('active','has-branch');
+      if(el.dataset.id === secId) el.classList.add('has-branch');
+    });
+
+    // Populate sub-branch column
+    var subsCol = document.getElementById('sbSubsCol');
+    var html = '';
+    branchData.children.forEach(function(sub, i){
+      var isActive = sub.id === currentSec;
+      html += '<div class="sb-sub sb-anim'+(isActive?' active':'')+'" data-id="'+sub.id+'" style="animation-delay:'+(i*40)+'ms">';
+      html += IC[sub.icon] || '';
+      html += sub.label + '</div>';
+    });
+    subsCol.innerHTML = html;
+
+    alignCol('sbSubsCol', sbTree.querySelector('.sb-sec.has-branch'));
+
+    subsCol.querySelectorAll('.sb-sub').forEach(function(el){
+      el.addEventListener('click', function(){
+        navigateTo(this.dataset.id);
+      });
+    });
+    drawWires();
+  }
+
+  function closeBranch(){
+    currentBranch = null;
+    sbTree.querySelectorAll('.sb-sec').forEach(function(el){ el.classList.remove('has-branch'); });
+    var subsCol = document.getElementById('sbSubsCol');
+    subsCol.innerHTML = '';
+    subsCol.style.paddingTop = '';
+  }
+
+  /* ════ NAVIGATE ════ */
+  function navigateTo(sectionId){
+    currentSec = sectionId;
+    window.location.hash = sectionId;
+
+    // Find which category and possibly which branch this section belongs to
+    var found = false;
+    for(var i = 0; i < TREE.length; i++){
+      for(var j = 0; j < TREE[i].children.length; j++){
+        var sec = TREE[i].children[j];
+        if(sec.id === sectionId){
+          if(currentCat !== i) selectCat(i);
+          closeBranch();
+          found = true; break;
+        }
+        // Check sub-branches
+        if(sec.children){
+          for(var k = 0; k < sec.children.length; k++){
+            if(sec.children[k].id === sectionId){
+              if(currentCat !== i) selectCat(i);
+              openBranch(sec.id);
+              found = true; break;
+            }
+          }
+        }
+        if(found) break;
+      }
+      if(found) break;
+    }
+
+    // Highlight active section or sub
+    sbTree.querySelectorAll('.sb-sec').forEach(function(el){
+      if(!el.classList.contains('has-branch'))
+        el.classList.toggle('active', el.dataset.id === sectionId);
+    });
+    sbTree.querySelectorAll('.sb-sub').forEach(function(el){
+      el.classList.toggle('active', el.dataset.id === sectionId);
+    });
+    drawWires();
+
+    // Render content
+    var content = document.getElementById('compteContent');
+    var fn = SECTIONS[sectionId];
+    content.innerHTML = fn ? fn() : '<p>Section non disponible</p>';
+    content.scrollTop = 0;
+  }
+
+  /* ════ SECTION RENDERERS ════ */
+  var SECTIONS = {
+    profil: function(){
+      return '<div class="sec-overline">Profil</div><h1 class="sec-title">Mon profil</h1><p class="sec-desc">Gerez vos informations personnelles et vos preferences de livraison.</p>'+
+      '<div class="card"><div class="form-row"><div class="form-group"><label class="form-label">Prenom</label><input class="form-input" value="Julien"/></div><div class="form-group"><label class="form-label">Nom</label><input class="form-input" value="Dupont"/></div></div>'+
+      '<div class="form-group"><label class="form-label">Email</label><input class="form-input" value="demo@hub4fix.com" type="email"/></div>'+
+      '<div class="form-group"><label class="form-label">Adresse de livraison</label><input class="form-input" value="12 rue de la Republique, 69001 Lyon"/></div>'+
+      '<div class="form-group"><label class="form-label">Telephone</label><input class="form-input" value="+33 6 12 34 56 78"/></div>'+
+      '<div style="margin-top:1rem"><button class="btn btn-gold">Sauvegarder</button></div></div>';
+    },
+    commandes: function(){
+      return '<div class="sec-overline">Commandes</div><h1 class="sec-title">Mes commandes</h1><p class="sec-desc">Historique de vos achats de fichiers et impressions physiques.</p>'+
+      '<table class="data-table"><thead><tr><th>Ref</th><th>Piece</th><th>Type</th><th>Date</th><th>Statut</th><th>Montant</th></tr></thead><tbody>'+
+      '<tr><td>#H4F-2024</td><td>Levier Senseo HD7810</td><td><span class="badge badge-gold">Fichier</span></td><td>04/06/2026</td><td><span class="badge badge-green">Livre</span></td><td>3 tokens</td></tr>'+
+      '<tr><td>#H4F-2019</td><td>Charniere Bosch SMV</td><td><span class="badge badge-stone">Impression</span></td><td>01/06/2026</td><td><span class="badge badge-gold">En cours</span></td><td>12,50 EUR</td></tr>'+
+      '<tr><td>#H4F-2015</td><td>Entraine-pale Actifry</td><td><span class="badge badge-gold">Fichier</span></td><td>28/05/2026</td><td><span class="badge badge-green">Livre</span></td><td>2 tokens</td></tr>'+
+      '<tr><td>#H4F-2011</td><td>Poignee hublot Candy</td><td><span class="badge badge-stone">Impression</span></td><td>22/05/2026</td><td><span class="badge badge-green">Livre</span></td><td>8,90 EUR</td></tr>'+
+      '</tbody></table>';
+    },
+    tokens: function(){
+      return '<div class="sec-overline">Tokens</div><h1 class="sec-title">Mes tokens H4F</h1><p class="sec-desc">Les tokens sont votre monnaie interne pour acheter des fichiers 3D. 5 tokens offerts a l\'inscription.</p>'+
+      '<div class="token-display"><div><div class="token-count">'+USER.tokens+'</div><div class="token-label">tokens disponibles</div></div><button class="btn btn-gold" style="margin-left:auto">Acheter des tokens</button></div>'+
+      '<h3 style="font-size:.88rem;font-weight:600;margin-bottom:.8rem">Historique</h3>'+
+      '<ul class="token-history">'+
+      '<li><div><strong>Inscription</strong><br><span class="t-date">15/05/2026</span></div><span class="t-plus">+5</span></li>'+
+      '<li><div><strong>Achat Levier Senseo</strong><br><span class="t-date">04/06/2026</span></div><span class="t-minus">-3</span></li>'+
+      '<li><div><strong>Achat Entraine-pale Actifry</strong><br><span class="t-date">28/05/2026</span></div><span class="t-minus">-2</span></li>'+
+      '<li><div><strong>Parrainage Thomas M.</strong><br><span class="t-date">02/06/2026</span></div><span class="t-plus">+3</span></li>'+
+      '<li><div><strong>Repair Together bonus</strong><br><span class="t-date">30/05/2026</span></div><span class="t-plus">+2</span></li>'+
+      '</ul>';
+    },
+    bibliotheque: function(){
+      return '<div class="sec-overline">Bibliotheque</div><h1 class="sec-title">Ma bibliotheque</h1><p class="sec-desc">Fichiers GCODE achetes, prets a imprimer. Le fichier source n\'est jamais distribue.</p>'+
+      '<div class="card-grid">'+
+      '<div class="card"><strong style="font-size:.88rem">Levier Senseo HD7810</strong><div style="font-size:.72rem;color:var(--stone);margin:.3rem 0">GCODE Bambu Lab X1C | PLA Blanc | 0.4mm</div><div class="progress"><div class="progress-fill" style="width:100%;background:var(--green)"></div></div><div style="font-size:.68rem;color:var(--green)">Telecharge le 04/06</div></div>'+
+      '<div class="card"><strong style="font-size:.88rem">Entraine-pale Actifry FZ7000</strong><div style="font-size:.72rem;color:var(--stone);margin:.3rem 0">GCODE Prusa MK4 | PETG Noir | 0.4mm</div><div class="progress"><div class="progress-fill" style="width:100%;background:var(--green)"></div></div><div style="font-size:.68rem;color:var(--green)">Telecharge le 28/05</div></div>'+
+      '<div class="card"><strong style="font-size:.88rem">Roulette panier Bosch SMV</strong><div style="font-size:.72rem;color:var(--stone);margin:.3rem 0">GCODE Creality K1 | PLA Gris | 0.4mm</div><div class="progress"><div class="progress-fill" style="width:65%;background:var(--gold)"></div></div><div style="font-size:.68rem;color:var(--gold)">En preparation...</div></div>'+
+      '</div>';
+    },
+    impressions: function(){
+      return '<div class="sec-overline">Impressions</div><h1 class="sec-title">Mes impressions</h1><p class="sec-desc">Suivi de vos commandes d\'impression physique. Piece imprimee et livree par un printer du reseau H4F.</p>'+
+      '<div class="card" style="margin-bottom:1rem"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem"><strong style="font-size:.88rem">Charniere Bosch SMV — #H4F-2019</strong><span class="badge badge-gold">En impression</span></div>'+
+      '<div style="font-size:.78rem;color:var(--earth);margin-bottom:.6rem">Printer : MakerLyon69 (4.8 &#9733;) — 24km de vous</div>'+
+      '<div class="progress" style="height:8px"><div class="progress-fill" style="width:45%;background:var(--gold)"></div></div>'+
+      '<div style="display:flex;justify-content:space-between;font-size:.68rem;color:var(--stone);margin-top:.3rem"><span>Etape 3/6 — Impression en cours</span><span>Livraison estimee : 08/06</span></div></div>'+
+      '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem"><strong style="font-size:.88rem">Poignee hublot Candy — #H4F-2011</strong><span class="badge badge-green">Livre</span></div>'+
+      '<div style="font-size:.78rem;color:var(--earth)">Imprime par Print3Dfrance (4.9 &#9733;) — Livre le 25/05</div></div>';
+    },
+    alertes: function(){
+      return '<div class="sec-overline">Alertes</div><h1 class="sec-title">Mes alertes</h1><p class="sec-desc">Soyez notifie quand une piece que vous suivez est disponible ou en promotion.</p>'+
+      '<div class="alert-item"><span class="alert-dot new"></span><div class="alert-text"><strong>Knee-lever Krups Nespresso</strong> est maintenant disponible en fichier GCODE.</div><span class="alert-date">05/06</span></div>'+
+      '<div class="alert-item"><span class="alert-dot new"></span><div class="alert-text">Votre impression <strong>#H4F-2019</strong> est en cours chez MakerLyon69.</div><span class="alert-date">04/06</span></div>'+
+      '<div class="alert-item"><span class="alert-dot read"></span><div class="alert-text">Nouveau modelisateur pour le <strong>Levier Senseo HD7864</strong> (Quadrante).</div><span class="alert-date">02/06</span></div>'+
+      '<div class="alert-item"><span class="alert-dot read"></span><div class="alert-text">Thomas M. a utilise votre lien de parrainage. <strong>+3 tokens</strong> credites.</div><span class="alert-date">02/06</span></div>'+
+      '<div class="alert-item"><span class="alert-dot read"></span><div class="alert-text">Votre piece <strong>Entraine-pale Actifry</strong> a ete telechargee 12 fois ce mois.</div><span class="alert-date">01/06</span></div>';
+    },
+    parametres: function(){
+      return '<div class="sec-overline">Parametres</div><h1 class="sec-title">Parametres</h1><p class="sec-desc">Configurez vos preferences de notification et d\'affichage.</p>'+
+      '<div class="card"><h3 style="font-size:.85rem;font-weight:600;margin-bottom:.8rem">Notifications</h3>'+
+      '<div class="toggle-row"><div><div class="toggle-label">Alertes email</div><div class="toggle-sub">Recevoir les notifications par email</div></div><div class="toggle on" onclick="this.classList.toggle(\'on\')"></div></div>'+
+      '<div class="toggle-row"><div><div class="toggle-label">Alertes pieces suivies</div><div class="toggle-sub">Notification quand une piece surveillee est disponible</div></div><div class="toggle on" onclick="this.classList.toggle(\'on\')"></div></div>'+
+      '<div class="toggle-row"><div><div class="toggle-label">Newsletter Hub4Fix</div><div class="toggle-sub">Actualites et nouvelles pieces chaque semaine</div></div><div class="toggle" onclick="this.classList.toggle(\'on\')"></div></div></div>'+
+      '<div class="card" style="margin-top:1rem"><h3 style="font-size:.85rem;font-weight:600;margin-bottom:.8rem">Compte</h3>'+
+      '<div class="toggle-row"><div><div class="toggle-label">Mode sombre</div><div class="toggle-sub">Interface en couleurs sombres (bientot)</div></div><div class="toggle" onclick="this.classList.toggle(\'on\')" style="opacity:.4;pointer-events:none"></div></div>'+
+      '<div style="margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--cream)"><button class="btn btn-outline" style="color:var(--red);border-color:var(--red-medium)">Deconnexion</button></div></div>';
+    },
+    missions: function(){
+      return '<div class="sec-overline">Printer — Missions</div><h1 class="sec-title">Mes missions</h1><p class="sec-desc">Impressions attribuees par le systeme FIFO aux 5 printers les plus proches du client.</p>'+
+      '<div class="stat-grid"><div class="stat-card"><div class="stat-val">3</div><div class="stat-label">En attente</div></div><div class="stat-card"><div class="stat-val">1</div><div class="stat-label">En cours</div></div><div class="stat-card"><div class="stat-val">14</div><div class="stat-label">Terminees</div></div></div>'+
+      '<table class="data-table"><thead><tr><th>Ref</th><th>Piece</th><th>Client</th><th>Distance</th><th>Statut</th><th>Gain</th></tr></thead><tbody>'+
+      '<tr><td>#M-0089</td><td>Charniere Bosch SMV</td><td>Lyon 3e</td><td>4.2 km</td><td><span class="badge badge-gold">En impression</span></td><td>4,50 EUR</td></tr>'+
+      '<tr><td>#M-0092</td><td>Roulette Electrolux</td><td>Villeurbanne</td><td>6.1 km</td><td><span class="badge badge-stone">En attente</span></td><td>3,20 EUR</td></tr>'+
+      '<tr><td>#M-0093</td><td>Cache-valve Cookeo</td><td>Lyon 7e</td><td>2.8 km</td><td><span class="badge badge-stone">En attente</span></td><td>2,80 EUR</td></tr>'+
+      '</tbody></table>';
+    },
+    gains: function(){
+      return '<div class="sec-overline">Printer — Gains</div><h1 class="sec-title">Mes gains</h1><p class="sec-desc">Revenus de vos impressions pour le reseau Hub4Fix.</p>'+
+      '<div class="stat-grid"><div class="stat-card"><div class="stat-val" style="color:var(--green)">67,40 EUR</div><div class="stat-label">Total cumule</div></div><div class="stat-card"><div class="stat-val">18</div><div class="stat-label">Pieces imprimees</div></div><div class="stat-card"><div class="stat-val">4.8 &#9733;</div><div class="stat-label">Note moyenne</div></div></div>'+
+      '<div class="card"><h3 style="font-size:.85rem;font-weight:600;margin-bottom:.8rem">Dernieres impressions</h3>'+
+      '<div class="royalty-bar"><span class="r-name">Poignee hublot Candy</span><span class="badge badge-green">Livre</span><span class="r-amount">+3,80 EUR</span></div>'+
+      '<div class="royalty-bar"><span class="r-name">Levier Senseo HD7810</span><span class="badge badge-green">Livre</span><span class="r-amount">+4,20 EUR</span></div>'+
+      '<div class="royalty-bar"><span class="r-name">Roulette Bosch LV (x4)</span><span class="badge badge-green">Livre</span><span class="r-amount">+5,60 EUR</span></div>'+
+      '<div class="royalty-bar"><span class="r-name">Charniere Indesit IWC</span><span class="badge badge-green">Livre</span><span class="r-amount">+4,50 EUR</span></div>'+
+      '</div>';
+    },
+    fichiers: function(){
+      return '<div class="sec-overline">Modelisateur — Fichiers</div><h1 class="sec-title">Mes fichiers</h1><p class="sec-desc">Vos modeles 3D soumis a la marketplace. Le fichier source reste protege — seul le GCODE cloud est distribue.</p>'+
+      '<div class="upload-zone"><div class="upload-icon">&#128196;</div><div class="upload-text">Glissez un fichier STL/3MF ou cliquez pour uploader</div></div>'+
+      '<table class="data-table"><thead><tr><th>Fichier</th><th>Piece</th><th>Statut</th><th>Telecharges</th><th>Revenus</th></tr></thead><tbody>'+
+      '<tr><td>senseo_lever_v3.3mf</td><td>Levier Senseo HD7810</td><td><span class="badge badge-green">Valide</span></td><td>47</td><td>15,70 EUR</td></tr>'+
+      '<tr><td>actifry_pale_v2.stl</td><td>Entraine-pale Actifry</td><td><span class="badge badge-green">Valide</span></td><td>31</td><td>10,30 EUR</td></tr>'+
+      '<tr><td>bosch_charniere_v1.3mf</td><td>Charniere Bosch LV</td><td><span class="badge badge-gold">En review</span></td><td>—</td><td>—</td></tr>'+
+      '</tbody></table>';
+    },
+    hotlist: function(){
+      return '<div class="sec-overline">Modelisateur — Hot List</div><h1 class="sec-title">Hot List</h1><p class="sec-desc">Pieces les plus demandees par la communaute. Modelisez-les pour toucher des royalties et une avance mensuelle (+1 EUR/mois, jusqu\'a +6 EUR apres 6 mois).</p>'+
+      '<div class="card-grid">'+
+      '<div class="card"><div style="display:flex;justify-content:space-between;align-items:start"><strong style="font-size:.85rem">Knee-lever Krups Nespresso</strong><span class="badge badge-red">17 demandes</span></div><div style="font-size:.72rem;color:var(--stone);margin:.4rem 0">Levier verrouillage capsule — Citiz, U, Inissia</div><button class="btn btn-outline" style="font-size:.7rem;padding:.35rem .8rem">Modeliser</button></div>'+
+      '<div class="card"><div style="display:flex;justify-content:space-between;align-items:start"><strong style="font-size:.85rem">Entraineur Moulinex Companion</strong><span class="badge badge-red">12 demandes</span></div><div style="font-size:.72rem;color:var(--stone);margin:.4rem 0">Coupleur axe moteur — HF800/HF90x</div><button class="btn btn-outline" style="font-size:.7rem;padding:.35rem .8rem">Modeliser</button></div>'+
+      '<div class="card"><div style="display:flex;justify-content:space-between;align-items:start"><strong style="font-size:.85rem">Poignee hublot Candy LL</strong><span class="badge badge-gold">12 demandes</span></div><div style="font-size:.72rem;color:var(--stone);margin:.4rem 0">Clip plastique + crochet — ref 43011740</div><button class="btn btn-outline" style="font-size:.7rem;padding:.35rem .8rem">Modeliser</button></div>'+
+      '<div class="card"><div style="display:flex;justify-content:space-between;align-items:start"><strong style="font-size:.85rem">Charniere porte Bosch LV</strong><span class="badge badge-gold">12 demandes</span></div><div style="font-size:.72rem;color:var(--stone);margin:.4rem 0">Systeme ressort + cable — SMI/SMS/SBV</div><button class="btn btn-outline" style="font-size:.7rem;padding:.35rem .8rem">Modeliser</button></div>'+
+      '</div>';
+    },
+    royalties: function(){
+      return '<div class="sec-overline">Modelisateur — Royalties</div><h1 class="sec-title">Royalties</h1><p class="sec-desc">Revenue : 1/3 modelisateur, 1/3 frais plateforme, 1/3 Hub4Fix. Avance Hot List : +1 EUR/mois si la piece est en Hot List.</p>'+
+      '<div class="stat-grid"><div class="stat-card"><div class="stat-val" style="color:var(--green)">26,00 EUR</div><div class="stat-label">Royalties totales</div></div><div class="stat-card"><div class="stat-val">78</div><div class="stat-label">Fichiers telecharges</div></div><div class="stat-card"><div class="stat-val">+3,00 EUR</div><div class="stat-label">Avance Hot List / mois</div></div></div>'+
+      '<div class="card"><h3 style="font-size:.85rem;font-weight:600;margin-bottom:.8rem">Detail par fichier</h3>'+
+      '<div class="royalty-bar"><span class="r-name">Levier Senseo HD7810</span><span style="font-size:.72rem;color:var(--stone)">47 DL</span><span class="r-amount">15,70 EUR</span></div>'+
+      '<div class="royalty-bar"><span class="r-name">Entraine-pale Actifry</span><span style="font-size:.72rem;color:var(--stone)">31 DL</span><span class="r-amount">10,30 EUR</span></div>'+
+      '<div style="margin-top:1rem;padding-top:.8rem;border-top:1px solid var(--cream);font-size:.82rem;display:flex;justify-content:space-between"><span style="color:var(--earth)">Total</span><strong style="color:var(--green)">26,00 EUR</strong></div></div>';
+    },
+    'postuler-printer': function(){
+      return '<div class="sec-overline">Partenaire</div><h1 class="sec-title">Devenir Printer</h1><p class="sec-desc">Rejoignez le reseau de printers Hub4Fix. Imprimez des pieces pour les clients proches de chez vous et generez un revenu complementaire. Attribution FIFO aux 5 printers les plus proches.</p>'+
+      '<div class="stat-grid"><div class="stat-card"><div class="stat-val" style="color:var(--green)">3,74 EUR</div><div class="stat-label">Gain moyen / piece</div></div><div class="stat-card"><div class="stat-val">24-72h</div><div class="stat-label">Delai de livraison</div></div><div class="stat-card"><div class="stat-val">FIFO</div><div class="stat-label">Attribution auto</div></div></div>'+
+      '<div class="card"><h3 style="font-size:.85rem;font-weight:600;margin-bottom:.8rem">Conditions requises</h3>'+
+      '<ul style="font-size:.82rem;color:var(--earth);line-height:2;padding-left:1.2rem">'+
+      '<li>Posseder une imprimante 3D FDM fonctionnelle</li>'+
+      '<li>Etre disponible pour imprimer sous 48h</li>'+
+      '<li>Disposer d\'un espace de stockage pour le filament</li>'+
+      '<li>Accepter le controle qualite Hub4Fix (photo avant envoi)</li>'+
+      '</ul></div>'+
+      '<div class="card"><h3 style="font-size:.85rem;font-weight:600;margin-bottom:.8rem">Votre candidature</h3>'+
+      '<div class="form-group"><label class="form-label">Votre imprimante</label><input class="form-input" placeholder="Ex: Bambu Lab X1 Carbon"/></div>'+
+      '<div class="form-row"><div class="form-group"><label class="form-label">Ville</label><input class="form-input" placeholder="Ex: Lyon"/></div><div class="form-group"><label class="form-label">Code postal</label><input class="form-input" placeholder="Ex: 69001"/></div></div>'+
+      '<div class="form-group"><label class="form-label">Materiaux disponibles</label><input class="form-input" placeholder="Ex: PLA, PETG, ABS"/></div>'+
+      '<div class="form-group"><label class="form-label">Motivation (optionnel)</label><textarea class="form-input" rows="3" placeholder="Pourquoi voulez-vous rejoindre le reseau ?"></textarea></div>'+
+      '<div style="margin-top:1rem"><button class="btn btn-gold">Envoyer ma candidature</button></div></div>';
+    },
+    'postuler-modelisateur': function(){
+      return '<div class="sec-overline">Partenaire</div><h1 class="sec-title">Devenir Modelisateur</h1><p class="sec-desc">Creez les pieces 3D pour Hub4Fix. Touchez des royalties sur chaque telechargement (1/3 du prix) et une avance mensuelle pour les pieces en Hot List (+1 EUR/mois, jusqu\'a +6 EUR apres 6 mois).</p>'+
+      '<div class="stat-grid"><div class="stat-card"><div class="stat-val" style="color:var(--green)">1/3</div><div class="stat-label">Royalties / vente</div></div><div class="stat-card"><div class="stat-val">+6 EUR</div><div class="stat-label">Avance Hot List max</div></div><div class="stat-card"><div class="stat-val">100%</div><div class="stat-label">Droits Repair Together</div></div></div>'+
+      '<div class="card"><h3 style="font-size:.85rem;font-weight:600;margin-bottom:.8rem">Profil recherche</h3>'+
+      '<ul style="font-size:.82rem;color:var(--earth);line-height:2;padding-left:1.2rem">'+
+      '<li>Maitrise d\'un logiciel de CAO (Fusion 360, FreeCAD, SolidWorks...)</li>'+
+      '<li>Experience en impression 3D (tolerances, contraintes mecaniques)</li>'+
+      '<li>Capacite a travailler a partir de vues eclatees et photos</li>'+
+      '<li>Rigueur sur les cotes (piece fonctionnelle, pas decorative)</li>'+
+      '</ul></div>'+
+      '<div class="card"><h3 style="font-size:.85rem;font-weight:600;margin-bottom:.8rem">Votre candidature</h3>'+
+      '<div class="form-group"><label class="form-label">Logiciel(s) de CAO</label><input class="form-input" placeholder="Ex: Fusion 360, FreeCAD"/></div>'+
+      '<div class="form-group"><label class="form-label">Portfolio / lien(s)</label><input class="form-input" placeholder="Ex: printables.com/@votre-profil, cults3d.com/..."/></div>'+
+      '<div class="form-row"><div class="form-group"><label class="form-label">Annees d\'experience CAO</label><input class="form-input" type="number" placeholder="Ex: 3"/></div><div class="form-group"><label class="form-label">Annees d\'experience impression 3D</label><input class="form-input" type="number" placeholder="Ex: 2"/></div></div>'+
+      '<div class="form-group"><label class="form-label">Motivation (optionnel)</label><textarea class="form-input" rows="3" placeholder="Parlez-nous de votre experience en modelisation de pieces fonctionnelles..."></textarea></div>'+
+      '<div style="margin-top:1rem"><button class="btn btn-gold">Envoyer ma candidature</button></div></div>';
+    }
+  };
+
+  /* ════ INIT ════ */
+  renderSidebar();
+  var hash = window.location.hash.slice(1);
+  if(!hash || !SECTIONS[hash]) hash = 'profil';
+  // Find category for this section and open it
+  for(var i = 0; i < TREE.length; i++){
+    for(var j = 0; j < TREE[i].children.length; j++){
+      if(TREE[i].children[j].id === hash){
+        selectCat(i);
+        break;
+      }
+    }
+  }
+  navigateTo(hash);
+
+  window.addEventListener('hashchange', function(){
+    var h = window.location.hash.slice(1);
+    if(h && SECTIONS[h]) navigateTo(h);
+  });
+
+  // Redraw wires on resize
+  var _resizeTimer;
+  window.addEventListener('resize', function(){
+    clearTimeout(_resizeTimer);
+    _resizeTimer = setTimeout(drawWires, 200);
+  });
+
+})();
+</script>
+<script src="js/nav-mindmap.js"></script>
+<footer style="border-top:.5px solid rgba(28,26,22,0.08);padding:1.2rem 2rem;display:flex;align-items:center;justify-content:center;gap:1.5rem;font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.06em"><a href="cgu.html" style="color:var(--stone,#A89F91);text-decoration:none">CGU</a> <span style="opacity:.3">&middot;</span> <a href="cgv.html" style="color:var(--stone,#A89F91);text-decoration:none">CGV</a></footer>
+</body>
+</html>

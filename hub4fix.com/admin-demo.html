@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hub4Fix — Preparation Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/glass-sphere.css">
+<style>
+:root{--ivory:#FAF8F5;--warm-white:#F3EEE8;--cream:#EDE6DC;--sand:#D4C9B8;--stone:#A89F91;--earth:#7A7268;--charcoal:#3B3632;--night:#1C1A18;--gold:#B8963E;--gold-light:#D4B15F;--gold-pale:rgba(184,150,62,0.08);--gold-glow:rgba(184,150,62,0.15);--red:#C8102E;--red-soft:rgba(200,16,46,0.06);--red-medium:rgba(200,16,46,0.18);--green:#2D8B5E;--font-serif:'Cormorant Garamond',serif;--font-sans:'Karla',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);background:var(--ivory);color:var(--charcoal);-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem 1rem}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+::selection{background:var(--gold-glow);color:var(--night)}
+
+/* Card */
+.card{width:100%;max-width:520px;background:white;border:1px solid var(--cream);border-radius:6px;box-shadow:0 8px 32px rgba(0,0,0,.06);padding:2.5rem 2.5rem 2rem;position:relative}
+@media(max-width:560px){.card{padding:2rem 1.5rem 1.5rem}}
+
+/* Logo */
+.logo{text-align:center;margin-bottom:.5rem}
+.logo-text{font-family:var(--font-serif);font-size:1.6rem;font-weight:500;color:var(--night);letter-spacing:.02em;text-decoration:none}
+.logo-text sup{color:var(--red);font-size:.65em;vertical-align:super;line-height:0}
+.page-title{font-family:var(--font-serif);text-align:center;font-size:1.8rem;font-weight:400;color:var(--night);margin-bottom:2rem;letter-spacing:.01em}
+
+/* Form */
+.form-group{margin-bottom:1.2rem}
+.form-label{display:block;font-size:.72rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--earth);margin-bottom:.4rem}
+.form-input,.form-select{width:100%;padding:.7rem .9rem;font-family:var(--font-sans);font-size:.88rem;color:var(--charcoal);background:var(--ivory);border:1px solid var(--sand);border-radius:3px;outline:none;transition:border-color .2s,box-shadow .2s}
+.form-input::placeholder{color:var(--stone);font-weight:300}
+.form-input:focus,.form-select:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-pale)}
+.form-select{appearance:none;-webkit-appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23A89F91' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .9rem center}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:480px){.form-row{grid-template-columns:1fr}}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.75rem 1.8rem;font-family:var(--font-sans);font-size:.78rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;border:none;border-radius:3px;cursor:pointer;transition:all .25s;width:100%}
+.btn-primary{background:var(--gold);color:white}
+.btn-primary:hover{background:var(--gold-light);transform:translateY(-1px);box-shadow:0 4px 12px rgba(184,150,62,.25)}
+.btn-secondary{background:none;border:1px solid var(--sand);color:var(--earth)}
+.btn-secondary:hover{border-color:var(--stone);color:var(--charcoal);background:var(--warm-white)}
+.btn-copy{background:none;border:1px solid var(--gold);color:var(--gold);padding:.5rem 1rem;font-size:.72rem}
+.btn-copy:hover{background:var(--gold-pale)}
+.btn-copy.copied{background:var(--green);border-color:var(--green);color:white}
+
+/* Confirmation panel */
+.confirmation{display:none}
+.confirmation.visible{display:block}
+.conf-section{margin-bottom:1.5rem}
+.conf-section-title{font-family:var(--font-serif);font-size:1.1rem;font-weight:500;color:var(--night);margin-bottom:.8rem;padding-bottom:.4rem;border-bottom:1px solid var(--cream)}
+.conf-row{display:flex;justify-content:space-between;align-items:center;padding:.35rem 0;font-size:.85rem}
+.conf-row .label{color:var(--earth);font-weight:400}
+.conf-row .value{color:var(--night);font-weight:500;text-align:right}
+.credential-box{background:var(--ivory);border:1px solid var(--cream);border-radius:4px;padding:.8rem 1rem;margin-bottom:.6rem;display:flex;justify-content:space-between;align-items:center}
+.credential-box .cred-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--earth);font-weight:600;margin-bottom:.2rem}
+.credential-box .cred-value{font-family:'Courier New',monospace;font-size:.95rem;color:var(--night);font-weight:600}
+.credential-left{display:flex;flex-direction:column}
+.btn-actions{display:flex;gap:.8rem;margin-top:1.5rem}
+.btn-actions .btn{flex:1}
+
+/* Password modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(28,26,24,.6);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.hidden{display:none}
+.modal{background:white;border:1px solid var(--cream);border-radius:6px;box-shadow:0 16px 48px rgba(0,0,0,.15);padding:2.5rem;width:100%;max-width:380px;text-align:center}
+.modal .logo{margin-bottom:1rem}
+.modal-title{font-family:var(--font-serif);font-size:1.4rem;font-weight:400;color:var(--night);margin-bottom:.5rem}
+.modal-subtitle{font-size:.82rem;color:var(--earth);margin-bottom:1.5rem}
+.modal .form-input{text-align:center;margin-bottom:1rem}
+.modal .btn{margin-bottom:.5rem}
+.error-msg{font-size:.78rem;color:var(--red);min-height:1.2rem;margin-bottom:.5rem}
+
+/* Fade animation */
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.card{animation:fadeUp .4s ease}
+</style>
+</head>
+<body>
+
+<!-- Password Modal -->
+<div class="modal-overlay" id="passwordModal">
+  <div class="modal">
+    <div class="logo"><span class="logo-text">Hub<sup>4</sup>Fix</span></div>
+    <h2 class="modal-title">Acces admin</h2>
+    <p class="modal-subtitle">Entrez le mot de passe pour acceder a la preparation demo.</p>
+    <input type="password" class="form-input" id="passwordInput" placeholder="Mot de passe" autocomplete="off">
+    <div class="error-msg" id="errorMsg"></div>
+    <button class="btn btn-primary" id="passwordSubmit">Entrer</button>
+  </div>
+</div>
+
+<!-- Main Card -->
+<div class="card" id="mainCard" style="display:none">
+  <div class="logo"><span class="logo-text">Hub<sup>4</sup>Fix</span></div>
+  <h1 class="page-title">Preparation Demo</h1>
+
+  <!-- Form -->
+  <form id="demoForm" class="form-section">
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="prenom">Prenom</label>
+        <input type="text" class="form-input" id="prenom" placeholder="Sophie" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="nom">Nom</label>
+        <input type="text" class="form-input" id="nom" placeholder="Marchand" required>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="entreprise">Entreprise</label>
+        <input type="text" class="form-input" id="entreprise" placeholder="Darty Pro" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="ville">Ville</label>
+        <input type="text" class="form-input" id="ville" placeholder="Rouen" required>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="produit">Piece a presenter</label>
+      <select class="form-select" id="produit">
+        <option value="dyson">Tete d'aspirateur rotative — Dyson V7/V8/V10/V11 (PETG)</option>
+        <option value="roulette">Roulette de panier — Lave-vaisselle universel (PLA)</option>
+        <option value="magimix">Poussoir — Magimix 3200XL (PETG)</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Generer la session</button>
+  </form>
+
+  <!-- Confirmation -->
+  <div class="confirmation" id="confirmation">
+    <div class="conf-section">
+      <div class="conf-section-title">Session demo</div>
+      <div class="conf-row"><span class="label">Nom</span><span class="value" id="confNom"></span></div>
+      <div class="conf-row"><span class="label">Entreprise</span><span class="value" id="confEntreprise"></span></div>
+      <div class="conf-row"><span class="label">Ville</span><span class="value" id="confVille"></span></div>
+      <div class="conf-row"><span class="label">Machine</span><span class="value" id="confMachine"></span></div>
+      <div class="conf-row"><span class="label">Piece</span><span class="value" id="confPiece"></span></div>
+      <div class="conf-row"><span class="label">Filament</span><span class="value" id="confFilament"></span></div>
+    </div>
+
+    <div class="conf-section">
+      <div class="conf-section-title">Identifiants demo</div>
+      <div class="credential-box">
+        <div class="credential-left">
+          <span class="cred-label">Email</span>
+          <span class="cred-value" id="confEmail"></span>
+        </div>
+        <button type="button" class="btn btn-copy" onclick="copyText(this, 'confEmail')">Copier</button>
+      </div>
+      <div class="credential-box">
+        <div class="credential-left">
+          <span class="cred-label">Mot de passe</span>
+          <span class="cred-value" id="confPassword"></span>
+        </div>
+        <button type="button" class="btn btn-copy" onclick="copyText(this, 'confPassword')">Copier</button>
+      </div>
+    </div>
+
+    <div class="btn-actions">
+      <button type="button" class="btn btn-secondary" id="btnNouvelle">Nouvelle session</button>
+      <button type="button" class="btn btn-primary" id="btnCopyLink">Copier le lien demo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const ADMIN_PASSWORD = 'hub4fix_admin_2026';
+  const AUTH_KEY = 'h4f_admin_auth';
+
+  // Elements
+  const modal = document.getElementById('passwordModal');
+  const mainCard = document.getElementById('mainCard');
+  const passwordInput = document.getElementById('passwordInput');
+  const passwordSubmit = document.getElementById('passwordSubmit');
+  const errorMsg = document.getElementById('errorMsg');
+  const demoForm = document.getElementById('demoForm');
+  const confirmation = document.getElementById('confirmation');
+
+  // Check sessionStorage auth
+  if (sessionStorage.getItem(AUTH_KEY) === 'true') {
+    showAdmin();
+  }
+
+  // Password submit
+  passwordSubmit.addEventListener('click', checkPassword);
+  passwordInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') checkPassword();
+  });
+
+  function checkPassword() {
+    if (passwordInput.value === ADMIN_PASSWORD) {
+      sessionStorage.setItem(AUTH_KEY, 'true');
+      showAdmin();
+    } else {
+      errorMsg.textContent = 'Mot de passe incorrect.';
+      passwordInput.value = '';
+      passwordInput.focus();
+    }
+  }
+
+  function showAdmin() {
+    modal.classList.add('hidden');
+    mainCard.style.display = 'block';
+  }
+
+  // Remove accents
+  function removeAccents(str) {
+    return str.normalize('NFD').replace(/[̀-ͯ]/g, '');
+  }
+
+  // Slugify for email domain
+  function slugify(str) {
+    return removeAccents(str).toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+  }
+
+  // Generate email
+  function generateEmail(prenom, nom, entreprise) {
+    var p = removeAccents(prenom).toLowerCase().replace(/\s+/g, '');
+    var n = removeAccents(nom).toLowerCase().replace(/\s+/g, '');
+    var e = slugify(entreprise);
+    return p + '.' + n + '@' + e + '.com';
+  }
+
+  // Generate password
+  function generatePassword(entreprise) {
+    var first = entreprise.trim().charAt(0).toUpperCase();
+    return first + '@rty2026!';
+  }
+
+  // Catalogue produits
+  var PRODUITS = {
+    dyson: { piece: "Tete d'aspirateur rotative", machine: "Dyson V7/V8/V10/V11", filament: "PETG", photo: "images/dyson.png" },
+    roulette: { piece: "Roulette de panier", machine: "Lave-vaisselle universel", filament: "PLA", photo: "images/roulette.png" },
+    magimix: { piece: "Poussoir", machine: "Magimix 3200XL", filament: "PETG", photo: "images/magimix.png" }
+  };
+
+  // Form submit
+  demoForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    var prenom = document.getElementById('prenom').value.trim();
+    var nom = document.getElementById('nom').value.trim();
+    var entreprise = document.getElementById('entreprise').value.trim();
+    var ville = document.getElementById('ville').value.trim();
+    var produitKey = document.getElementById('produit').value;
+    var produit = PRODUITS[produitKey];
+    var machine = produit.machine;
+    var piece = produit.piece;
+    var filament = produit.filament;
+
+    var email = generateEmail(prenom, nom, entreprise);
+    var password = generatePassword(entreprise);
+
+    var session = {
+      prenom: prenom,
+      nom: nom,
+      entreprise: entreprise,
+      ville: ville,
+      email: email,
+      password_display: password,
+      machine: machine,
+      piece: piece,
+      filament: filament,
+      photo: produit.photo,
+      created_at: new Date().toISOString().replace(/\.\d{3}Z$/, '')
+    };
+
+    localStorage.setItem('demoSession', JSON.stringify(session));
+
+    // Fill confirmation
+    document.getElementById('confNom').textContent = prenom + ' ' + nom;
+    document.getElementById('confEntreprise').textContent = entreprise;
+    document.getElementById('confVille').textContent = ville;
+    document.getElementById('confMachine').textContent = machine;
+    document.getElementById('confPiece').textContent = piece;
+    document.getElementById('confFilament').textContent = filament;
+    document.getElementById('confEmail').textContent = email;
+    document.getElementById('confPassword').textContent = password;
+
+    // Show confirmation, hide form
+    demoForm.style.display = 'none';
+    confirmation.classList.add('visible');
+  });
+
+  // Copy text helper
+  window.copyText = function(btn, sourceId) {
+    var text = document.getElementById(sourceId).textContent;
+    navigator.clipboard.writeText(text).then(function() {
+      btn.textContent = 'Copie !';
+      btn.classList.add('copied');
+      setTimeout(function() {
+        btn.textContent = 'Copier';
+        btn.classList.remove('copied');
+      }, 1500);
+    });
+  };
+
+  // Copy demo link
+  document.getElementById('btnCopyLink').addEventListener('click', function() {
+    var base = window.location.href.replace(/[^/]*$/, '');
+    var link = base + 'demo-login.html';
+    navigator.clipboard.writeText(link).then(function() {
+      var btn = document.getElementById('btnCopyLink');
+      btn.textContent = 'Lien copie !';
+      setTimeout(function() {
+        btn.textContent = 'Copier le lien demo';
+      }, 1500);
+    });
+  });
+
+  // Nouvelle session
+  document.getElementById('btnNouvelle').addEventListener('click', function() {
+    localStorage.removeItem('demoSession');
+    demoForm.reset();
+    demoForm.style.display = 'block';
+    confirmation.classList.remove('visible');
+  });
+})();
+</script>
+<script>
+(function(){var cvs=document.createElement('canvas');cvs.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none;';document.body.insertBefore(cvs,document.body.firstChild);var ctx=cvs.getContext('2d'),W,H,P=[],dpr;var DIST=130,SPD=0.35;function resize(){dpr=window.devicePixelRatio||1;W=window.innerWidth;H=window.innerHeight;cvs.width=W*dpr;cvs.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}function make(){P=[];var n=Math.min(Math.round(W*H/13000),80);for(var i=0;i<n;i++)P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*SPD,vy:(Math.random()-.5)*SPD,r:Math.random()*.7+.5});}function tick(){ctx.clearRect(0,0,W,H);for(var i=0;i<P.length;i++){for(var j=i+1;j<P.length;j++){var dx=P[i].x-P[j].x,dy=P[i].y-P[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<DIST){ctx.strokeStyle='rgba(168,159,145,'+(0.28*(1-d/DIST)).toFixed(3)+')';ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(P[i].x,P[i].y);ctx.lineTo(P[j].x,P[j].y);ctx.stroke();}}ctx.fillStyle='rgba(168,159,145,.3)';ctx.beginPath();ctx.arc(P[i].x,P[i].y,P[i].r,0,6.283);ctx.fill();P[i].x+=P[i].vx;P[i].y+=P[i].vy;if(P[i].x<0||P[i].x>W)P[i].vx*=-1;if(P[i].y<0||P[i].y>H)P[i].vy*=-1;}requestAnimationFrame(tick);}resize();make();tick();window.addEventListener('resize',function(){resize();make();});})();
+</script>
+<script src="/js/sphere-bg.js"></script>
+</body>
+</html>

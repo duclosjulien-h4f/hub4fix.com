@@ -1,0 +1,250 @@
+/* Hub4Fix — Frosted glass-sphere effect
+   Radial gradient convexe + givré + inner shadow depth */
+
+/* ─── Shared sphere mixin via selectors ─── */
+.flux-card,
+.hotlist-card,
+.maillage-card,
+.partenaire-card,
+.demo-preview-card,
+.content-card,
+.territory-card,
+.maillage-aside {
+  background:
+    radial-gradient(ellipse 130% 80% at 22% 12%, rgba(255,255,255,0.22) 0%, transparent 55%),
+    radial-gradient(ellipse 90% 70% at 80% 90%, rgba(0,0,0,0.05) 0%, transparent 50%),
+    linear-gradient(168deg, rgba(255,255,255,0.14) 0%, transparent 35%) !important;
+  background-color: rgba(255,255,255,0.38) !important;
+  backdrop-filter: blur(22px) saturate(1.15) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.15) !important;
+  border: 1px solid rgba(255,255,255,0.28) !important;
+  border-radius: 18px !important;
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.28),
+    inset 0 -2px 8px rgba(0,0,0,0.04),
+    0 4px 20px rgba(0,0,0,0.06) !important;
+}
+
+/* Frost sheen on top half */
+.flux-card::after,
+.hotlist-card::after,
+.demo-preview-card::after,
+.content-card::after,
+.territory-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 38%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.10) 0%, transparent 100%);
+  border-radius: 18px 18px 0 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Hover — sphere lifts */
+.flux-card:hover,
+.hotlist-card:hover,
+.maillage-card:hover,
+.partenaire-card:hover,
+.demo-preview-card:hover,
+.content-card:hover,
+.territory-card:hover {
+  box-shadow:
+    inset 0 1px 2px rgba(255,255,255,0.35),
+    inset 0 -3px 10px rgba(0,0,0,0.06),
+    0 10px 44px rgba(0,0,0,0.10) !important;
+  border-color: rgba(255,255,255,0.40) !important;
+}
+
+/* ─── Color-tinted variants (preserve panel identity) ─── */
+
+/* Flux Numérique — gold */
+.flux-card-num {
+  background-color: rgba(184,150,62,0.06) !important;
+  border-color: rgba(184,150,62,0.18) !important;
+}
+.flux-card-num:hover { border-color: rgba(184,150,62,0.32) !important; }
+
+/* Flux Physique — red */
+.flux-card-phys {
+  background-color: rgba(200,16,46,0.05) !important;
+  border-color: rgba(200,16,46,0.15) !important;
+}
+.flux-card-phys:hover { border-color: rgba(200,16,46,0.28) !important; }
+
+/* Flux Résilient — green */
+.flux-card-res {
+  background-color: rgba(45,139,94,0.05) !important;
+  border-color: rgba(45,139,94,0.15) !important;
+}
+.flux-card-res:hover { border-color: rgba(45,139,94,0.28) !important; }
+
+/* Hotlist cards — keep left border colors */
+.hotlist-card {
+  border-left: 2px solid var(--sand) !important;
+}
+.hotlist-card:hover {
+  border-left-color: var(--gold) !important;
+}
+
+/* Maillage cards — keep tricolor top bars (::before) */
+.maillage-card {
+  overflow: hidden !important;
+}
+.maillage-card::before {
+  z-index: 1;
+  border-radius: 0;
+}
+
+/* Maillage aside — dark sphere */
+.maillage-aside {
+  background-color: rgba(28,26,24,0.92) !important;
+  border-color: rgba(200,16,46,0.25) !important;
+  border-left: 2px solid var(--red) !important;
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.06),
+    inset 0 -2px 8px rgba(0,0,0,0.25),
+    0 4px 20px rgba(0,0,0,0.20) !important;
+}
+
+/* Partenaire cards — keep top accent bars */
+.partenaire-card {
+  overflow: hidden !important;
+}
+
+/* Partenaire gold hover */
+.partenaire-card:hover {
+  border-color: rgba(184,150,62,0.25) !important;
+}
+.partenaire-card-red:hover {
+  border-color: rgba(200,16,46,0.25) !important;
+}
+
+/* ─── Dark page (econologique) — circle-card + territory-card ─── */
+.circle-card {
+  background:
+    radial-gradient(ellipse 130% 80% at 22% 12%, rgba(255,255,255,0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 90% 70% at 80% 90%, rgba(0,0,0,0.10) 0%, transparent 50%),
+    linear-gradient(168deg, rgba(255,255,255,0.04) 0%, transparent 35%) !important;
+  background-color: rgba(245,240,232,0.04) !important;
+  backdrop-filter: blur(22px) saturate(1.15) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.15) !important;
+  border: 1px solid rgba(245,240,232,0.10) !important;
+  border-radius: 18px !important;
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.07),
+    inset 0 -2px 8px rgba(0,0,0,0.18),
+    0 4px 20px rgba(0,0,0,0.22) !important;
+  overflow: hidden;
+}
+
+.circle-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 38%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, transparent 100%);
+  border-radius: 18px 18px 0 0;
+  pointer-events: none;
+}
+
+.circle-card:hover {
+  background-color: rgba(245,240,232,0.07) !important;
+  box-shadow:
+    inset 0 1px 2px rgba(255,255,255,0.10),
+    inset 0 -3px 10px rgba(0,0,0,0.22),
+    0 10px 44px rgba(0,0,0,0.28) !important;
+  border-color: rgba(245,240,232,0.18) !important;
+}
+
+/* Territory cards on dark page */
+.territory-card {
+  background:
+    radial-gradient(ellipse 130% 80% at 22% 12%, rgba(255,255,255,0.08) 0%, transparent 55%),
+    radial-gradient(ellipse 90% 70% at 80% 90%, rgba(0,0,0,0.08) 0%, transparent 50%),
+    linear-gradient(168deg, rgba(255,255,255,0.05) 0%, transparent 35%) !important;
+  background-color: rgba(255,255,255,0.06) !important;
+  border-color: rgba(245,240,232,0.12) !important;
+  border-radius: 18px !important;
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.08),
+    inset 0 -2px 6px rgba(0,0,0,0.15),
+    0 4px 16px rgba(0,0,0,0.18) !important;
+  border-left: 3px solid transparent !important;
+}
+
+.territory-card:hover {
+  border-left-color: var(--rouge) !important;
+  box-shadow:
+    inset 0 1px 2px rgba(255,255,255,0.12),
+    inset 0 -3px 8px rgba(0,0,0,0.18),
+    0 8px 32px rgba(0,0,0,0.22) !important;
+}
+
+/* ─── Hotlist page (hotlist.html) specific cards ─── */
+.hl-card {
+  background:
+    radial-gradient(ellipse 130% 80% at 22% 12%, rgba(255,255,255,0.22) 0%, transparent 55%),
+    radial-gradient(ellipse 90% 70% at 80% 90%, rgba(0,0,0,0.05) 0%, transparent 50%),
+    linear-gradient(168deg, rgba(255,255,255,0.14) 0%, transparent 35%) !important;
+  background-color: rgba(255,255,255,0.38) !important;
+  backdrop-filter: blur(22px) saturate(1.15) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(1.15) !important;
+  border: 1px solid rgba(255,255,255,0.28) !important;
+  border-radius: 18px !important;
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.28),
+    inset 0 -2px 8px rgba(0,0,0,0.04),
+    0 4px 20px rgba(0,0,0,0.06) !important;
+}
+
+.hl-card:hover {
+  box-shadow:
+    inset 0 1px 2px rgba(255,255,255,0.35),
+    inset 0 -3px 10px rgba(0,0,0,0.06),
+    0 10px 44px rgba(0,0,0,0.10) !important;
+  border-color: rgba(255,255,255,0.40) !important;
+}
+
+/* ─── Global rounded corners (16px) on all card-like elements ─── */
+.stat-card,
+.subvention-control,
+.table-section,
+.info-banner-inner,
+.cta-card,
+.roi-rec,
+.roi-calculator,
+.flux-band,
+.flux-band-body,
+.phys-quote-card,
+.digital-form,
+.field-select,
+.nav-account-menu,
+.modal-box,
+.login-card,
+.piece-card,
+.filter-search,
+.filter-tab,
+.list-toggle-btn,
+.hl-sub-badge,
+.hl-status,
+.hl-tag,
+.badge-pro,
+.badge-sub {
+  border-radius: 16px !important;
+}
+
+/* Smaller roundings for tiny UI elements */
+.btn, .btn-add, .btn-login, .btn-download, .btn-acquire, .btn-icon,
+.form-input, .form-select, .subvention-input, .table-search,
+.nav-cta, .nav-cta-link, .cta-btn,
+.lang-dropdown-btn, .lang-dropdown-list, .lang-opt {
+  border-radius: 10px !important;
+}
+
+/* Badges & tags — medium rounding */
+.piece-status, .piece-filament, .demand-bar-track,
+.progress-bar-track, .progress-bar-fill, .demand-bar-fill,
+.gcode-success, .forgot-link .tooltip {
+  border-radius: 8px !important;
+}

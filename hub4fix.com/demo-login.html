@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hub4Fix — Connexion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/glass-sphere.css">
+<style>
+:root{--ivory:#FAF8F5;--warm-white:#F3EEE8;--cream:#EDE6DC;--sand:#D4C9B8;--stone:#A89F91;--earth:#7A7268;--charcoal:#3B3632;--night:#1C1A18;--gold:#B8963E;--gold-light:#D4B15F;--gold-pale:rgba(184,150,62,0.08);--gold-glow:rgba(184,150,62,0.15);--red:#C8102E;--red-soft:rgba(200,16,46,0.06);--red-medium:rgba(200,16,46,0.18);--green:#2D8B5E;--font-serif:'Cormorant Garamond',serif;--font-sans:'Karla',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);background:var(--ivory);color:var(--charcoal);-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+::selection{background:var(--gold-glow);color:var(--night)}
+
+/* No-session message */
+.no-session{text-align:center;max-width:400px;animation:fadeUp .4s ease}
+.no-session-title{font-family:var(--font-serif);font-size:1.6rem;font-weight:400;color:var(--night);margin-bottom:1rem;line-height:1.3}
+.no-session-text{font-size:.88rem;color:var(--earth);margin-bottom:1.5rem;line-height:1.6}
+.no-session-link{display:inline-flex;align-items:center;gap:.4rem;font-size:.78rem;font-weight:600;letter-spacing:.04em;color:var(--gold);text-decoration:none;transition:color .2s}
+.no-session-link:hover{color:var(--gold-light)}
+.no-session-link svg{width:14px;height:14px}
+
+/* Card */
+.card{width:100%;max-width:440px;background:white;border:1px solid var(--cream);border-radius:6px;box-shadow:0 8px 32px rgba(0,0,0,.06);padding:2.5rem 2.5rem 2rem;position:relative;animation:fadeUp .5s ease}
+@media(max-width:480px){.card{padding:2rem 1.5rem 1.5rem}}
+
+/* Logo */
+.logo{text-align:center;margin-bottom:1.8rem}
+.logo svg{width:auto;height:64px}
+
+/* Title */
+.login-title{font-family:var(--font-serif);text-align:center;font-size:1.5rem;font-weight:400;color:var(--night);margin-bottom:.4rem;letter-spacing:.01em;line-height:1.3}
+.login-subtitle{text-align:center;font-size:.82rem;color:var(--earth);margin-bottom:2rem;font-weight:300}
+
+/* Form */
+.form-group{margin-bottom:1.2rem}
+.form-label{display:block;font-size:.72rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--earth);margin-bottom:.4rem}
+.form-input{width:100%;padding:.75rem .9rem;font-family:var(--font-sans);font-size:.88rem;color:var(--charcoal);background:var(--ivory);border:1px solid var(--sand);border-radius:3px;outline:none;transition:border-color .2s,box-shadow .2s,background .2s}
+.form-input::placeholder{color:var(--stone);font-weight:300}
+.form-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-pale);background:white}
+.form-input.prefilled{background:var(--warm-white)}
+
+/* Password wrapper */
+.password-wrapper{position:relative}
+.password-wrapper .form-input{padding-right:2.8rem}
+.toggle-password{position:absolute;right:.7rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--stone);padding:.2rem;transition:color .2s}
+.toggle-password:hover{color:var(--charcoal)}
+.toggle-password svg{width:18px;height:18px;display:block}
+
+/* Forgot link */
+.forgot-row{text-align:right;margin-bottom:1.5rem;margin-top:-.4rem}
+.forgot-link{font-size:.75rem;color:var(--stone);text-decoration:none;transition:color .2s;position:relative;cursor:default}
+.forgot-link:hover{color:var(--earth)}
+.forgot-link .tooltip{position:absolute;bottom:calc(100% + 6px);right:0;background:var(--night);color:white;font-size:.7rem;padding:.35rem .6rem;border-radius:3px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;font-weight:400}
+.forgot-link .tooltip::after{content:'';position:absolute;top:100%;right:12px;border:4px solid transparent;border-top-color:var(--night)}
+.forgot-link:hover .tooltip{opacity:1}
+
+/* Button */
+.btn-login{display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.85rem 1.8rem;font-family:var(--font-sans);font-size:.78rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:var(--red);color:white;border:none;border-radius:3px;cursor:pointer;transition:all .25s;min-height:48px}
+.btn-login:hover:not(:disabled){background:#a80d26;transform:translateY(-1px);box-shadow:0 4px 16px rgba(200,16,46,.25)}
+.btn-login:disabled{cursor:not-allowed;opacity:.85}
+
+/* Spinner */
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .6s linear infinite;display:none}
+.btn-login.loading .spinner{display:block}
+.btn-login.loading .btn-text{display:none}
+.loading-text{display:none;font-size:.78rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.btn-login.loading .loading-text{display:inline}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Footer */
+.page-footer{margin-top:1.5rem;font-size:.72rem;color:var(--stone);letter-spacing:.03em;animation:fadeUp .5s ease .1s both}
+
+/* Animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* Hidden */
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<!-- No session message -->
+<div class="no-session hidden" id="noSession">
+  <div class="no-session-title">Demo non disponible</div>
+  <p class="no-session-text">Contactez votre representant Hub4Fix pour obtenir un acces a la demonstration.</p>
+  <a href="index.html" class="no-session-link">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+    Retour au site
+  </a>
+</div>
+
+<!-- Login card -->
+<div class="card hidden" id="loginCard">
+  <div class="logo">
+    <svg viewBox="0 0 202.6 265.4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><linearGradient id="lg1"><stop style="stop-color:#2a00fe" offset="0.336"/><stop style="stop-color:#fff" offset="1"/></linearGradient><linearGradient id="lg2"><stop style="stop-color:#fff" offset="0.107"/><stop style="stop-color:#fe0000" offset="0.684"/></linearGradient><linearGradient xlink:href="#lg1" id="grad1" x1="129.89" y1="808.83" x2="194.31" y2="808.83" gradientUnits="userSpaceOnUse"/><linearGradient xlink:href="#lg2" id="grad2" x1="271.02" y1="731.42" x2="327.45" y2="731.42" gradientUnits="userSpaceOnUse" spreadMethod="pad"/></defs><g transform="translate(-129.894,-634.847)"><g transform="translate(-114.063,-139.373)"><path d="m 353.331,791.185 -24.32,66.818 c -8.972,24.651 9.283,50.722 35.516,50.722 h 72.08 c 5.218,0 9.449,4.23 9.449,9.449 0,5.218 -4.231,9.449 -9.449,9.449 h -72.08 c -39.35,0 -66.732,-39.106 -53.274,-76.083 l 7.123,-19.57 17.2,-47.256 c 1.787,-4.903 7.21,-7.428 12.113,-5.642 4.903,1.787 7.429,7.21 5.643,12.112 z" style="fill:#000;stroke:#000"/><path d="m 314.879,1026.411 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#000;stroke:#000"/><path d="m 249.987,1019.877 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:#000;stroke:#000"/><path d="m 359.24,904.532 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#000;stroke:#000"/><path d="m 436.607,884.024 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:#000;stroke:#000"/></g><g><path d="m 234.225,648.032 -24.32,66.818 a 37.795,37.795 0 0 0 35.516,50.722 h 72.08 a 9.449,9.449 0 0 1 0,18.898 h -72.08 a 56.693,56.693 0 0 1 -53.274,-76.083 l 24.323,-66.826 a 9.449,9.449 0 0 1 17.755,6.471 z" style="fill:#fff;stroke:#000"/><path d="m 195.773,883.258 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#fff;stroke:#000"/><path d="m 130.881,876.724 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:url(#grad1);stroke:#000"/><path d="m 240.133,761.379 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#fff;stroke:#000"/><path d="m 317.5,740.871 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:url(#grad2);stroke:#000"/></g></g></svg>
+  </div>
+  <h1 class="login-title">Bienvenue sur votre espace Hub<sup style="color:var(--red);font-size:.65em">4</sup>Fix</h1>
+  <p class="login-subtitle">Connectez-vous pour acceder a votre bibliotheque</p>
+
+  <form id="loginForm" autocomplete="off">
+    <div class="form-group">
+      <label class="form-label" for="email">Adresse e-mail</label>
+      <input type="email" class="form-input prefilled" id="email" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="password">Mot de passe</label>
+      <div class="password-wrapper">
+        <input type="password" class="form-input prefilled" id="password" autocomplete="off">
+        <button type="button" class="toggle-password" id="togglePassword" aria-label="Afficher le mot de passe">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-icon">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-off-icon" style="display:none">
+            <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="forgot-row">
+      <a href="javascript:void(0)" class="forgot-link">
+        Mot de passe oublie ?
+        <span class="tooltip">Fonctionnalite demo</span>
+      </a>
+    </div>
+    <button type="submit" class="btn-login" id="loginBtn">
+      <span class="btn-text">Acceder a ma bibliotheque</span>
+      <span class="spinner"></span>
+      <span class="loading-text">Connexion en cours...</span>
+    </button>
+  </form>
+</div>
+
+<div class="page-footer hidden" id="pageFooter">Hub4Fix SAS — Demo</div>
+
+<script>
+(function(){
+  var raw = localStorage.getItem('demoSession');
+  var noSession = document.getElementById('noSession');
+  var loginCard = document.getElementById('loginCard');
+  var pageFooter = document.getElementById('pageFooter');
+
+  if (!raw) {
+    noSession.classList.remove('hidden');
+    return;
+  }
+
+  var session;
+  try { session = JSON.parse(raw); } catch(e) {
+    noSession.classList.remove('hidden');
+    return;
+  }
+
+  loginCard.classList.remove('hidden');
+  pageFooter.classList.remove('hidden');
+
+  // Pre-fill fields
+  var emailInput = document.getElementById('email');
+  var passwordInput = document.getElementById('password');
+  if (session.email) emailInput.value = session.email;
+  if (session.password_display) passwordInput.value = session.password_display;
+
+  // Toggle password visibility
+  var toggleBtn = document.getElementById('togglePassword');
+  var eyeIcon = toggleBtn.querySelector('.eye-icon');
+  var eyeOffIcon = toggleBtn.querySelector('.eye-off-icon');
+
+  toggleBtn.addEventListener('click', function(){
+    var isPassword = passwordInput.type === 'password';
+    passwordInput.type = isPassword ? 'text' : 'password';
+    eyeIcon.style.display = isPassword ? 'none' : 'block';
+    eyeOffIcon.style.display = isPassword ? 'block' : 'none';
+  });
+
+  // Login form
+  var loginForm = document.getElementById('loginForm');
+  var loginBtn = document.getElementById('loginBtn');
+
+  loginForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    loginBtn.classList.add('loading');
+    loginBtn.disabled = true;
+    setTimeout(function(){
+      window.location.href = 'demo-bibliotheque.html';
+    }, 1500);
+  });
+})();
+</script>
+<script>
+(function(){var cvs=document.createElement('canvas');cvs.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none;';document.body.insertBefore(cvs,document.body.firstChild);var ctx=cvs.getContext('2d'),W,H,P=[],dpr;var DIST=130,SPD=0.35;function resize(){dpr=window.devicePixelRatio||1;W=window.innerWidth;H=window.innerHeight;cvs.width=W*dpr;cvs.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}function make(){P=[];var n=Math.min(Math.round(W*H/13000),80);for(var i=0;i<n;i++)P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*SPD,vy:(Math.random()-.5)*SPD,r:Math.random()*.7+.5});}function tick(){ctx.clearRect(0,0,W,H);for(var i=0;i<P.length;i++){for(var j=i+1;j<P.length;j++){var dx=P[i].x-P[j].x,dy=P[i].y-P[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<DIST){ctx.strokeStyle='rgba(168,159,145,'+(0.28*(1-d/DIST)).toFixed(3)+')';ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(P[i].x,P[i].y);ctx.lineTo(P[j].x,P[j].y);ctx.stroke();}}ctx.fillStyle='rgba(168,159,145,.3)';ctx.beginPath();ctx.arc(P[i].x,P[i].y,P[i].r,0,6.283);ctx.fill();P[i].x+=P[i].vx;P[i].y+=P[i].vy;if(P[i].x<0||P[i].x>W)P[i].vx*=-1;if(P[i].y<0||P[i].y>H)P[i].vy*=-1;}requestAnimationFrame(tick);}resize();make();tick();window.addEventListener('resize',function(){resize();make();});})();
+</script>
+<script src="/js/sphere-bg.js"></script>
+</body>
+</html>

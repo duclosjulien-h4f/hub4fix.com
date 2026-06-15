@@ -1,0 +1,76 @@
+# Fichiers temporaires Word/Excel
+~$*
+~WRL*.tmp
+
+# OS
+desktop.ini
+Thumbs.db
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Node
+node_modules/
+dist/
+build/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Docker
+.docker/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Claude Code (settings locaux - ne pas partager)
+.claude/settings.local.json
+
+# ============================================================
+# CONFIDENTIEL — ce depot est PUBLIC (deploiement du site).
+# Ne JAMAIS committer ici : documents business, data, IP, instructions.
+# Ces fichiers restent sur le disque, simplement hors du suivi git.
+# ============================================================
+# Documents bureautiques
+*.docx
+*.xlsx
+*.xlsm
+*.pptx
+*.pdf
+# Dossiers internes
+documents/
+context/
+cloud-slicer/
+leads-buffer/
+input/
+output/
+images_pieces_detachees/
+files/
+2files/
+# Data / sauvegardes / sources
+*.zip
+*.3mf
+*.dxf
+*.bak*
+veille_casse*
+hub4fix_veille_casse*
+synthese*
+synthese_hebdo*
+speech*
+# Images de recherche / generees (racine uniquement — pas les assets du site)
+/Gemini_*
+/dyson.png
+/magimix.png
+/roulette.png
+/kenwood*
+# Instructions internes Claude Code (gardees en local, pas en public)
+CLAUDE.md
+CLAUDE_CODE_BRIEFING.md
+DEMO_SPEC.md

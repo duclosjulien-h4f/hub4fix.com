@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hub⁴Fix — Trouvez votre pièce</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Karla:wght@300;400;500;600&family=Noto+Sans+SC:wght@300;400;500;600&family=Noto+Serif+SC:wght@400;500&family=Noto+Sans+Devanagari:wght@300;400;500;600&family=Noto+Serif+Devanagari:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/glass-sphere.css">
+<style>
+:root{
+  --ivory:#FAF8F5;--warm-white:#F3EEE8;--cream:#EDE6DC;--sand:#D4C9B8;
+  --stone:#A89F91;--earth:#7A7268;--charcoal:#3B3632;--night:#1C1A18;
+  --gold:#B8963E;--gold-light:#D4B15F;--gold-pale:rgba(184,150,62,0.08);--gold-glow:rgba(184,150,62,0.15);
+  --red:#C8102E;--red-soft:rgba(200,16,46,0.06);--red-medium:rgba(200,16,46,0.18);
+  --green:#2D8B5E;
+  --font-serif:'Cormorant Garamond',serif;--font-sans:'Karla',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);background:var(--ivory);color:var(--charcoal);-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+::selection{background:var(--gold-glow);color:var(--night)}
+
+body[data-lang="zh"]{font-family:'Noto Sans SC',var(--font-sans)}
+body[data-lang="zh"] .font-serif,body[data-lang="zh"] h1,body[data-lang="zh"] h2,body[data-lang="zh"] h3,body[data-lang="zh"] .nav-wordmark{font-family:'Noto Serif SC',serif}
+body[data-lang="hi"]{font-family:'Noto Sans Devanagari',var(--font-sans)}
+body[data-lang="hi"] .font-serif,body[data-lang="hi"] h1,body[data-lang="hi"] h2,body[data-lang="hi"] h3,body[data-lang="hi"] .nav-wordmark{font-family:'Noto Serif Devanagari',serif}
+
+/* ════ NAV ════ */
+nav{position:sticky;top:0;z-index:100;padding:1rem 4rem;display:flex;justify-content:space-between;align-items:center;background:var(--warm-white);border-bottom:1px solid var(--cream)}
+.nav-brand{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo{width:auto;height:36px;transition:transform .5s cubic-bezier(.25,.46,.45,.94);transform-origin:center center;position:relative;z-index:101}
+.nav-brand:hover .nav-logo{transform:scale(3);filter:drop-shadow(0 8px 24px rgba(0,0,0,.2))}
+@keyframes suckIn{0%{transform:scale(1);opacity:1;filter:blur(0)}60%{transform:scale(.3) translate(0,-30vh);opacity:.6;filter:blur(2px)}100%{transform:scale(0) translate(0,-40vh);opacity:0;filter:blur(8px)}}
+.page-sucking{animation:suckIn .7s cubic-bezier(.55,.06,.68,.19) forwards;pointer-events:none}
+.nav-wordmark{font-family:var(--font-serif);font-size:1.15rem;font-weight:500;color:var(--night);letter-spacing:.02em}
+.nav-wordmark sup{color:var(--red);font-size:.7em;vertical-align:super;line-height:0}
+.nav-right{display:flex;align-items:center;gap:1rem}
+.nav-back{font-size:.78rem;font-weight:500;color:var(--earth);text-decoration:none;letter-spacing:.04em;display:flex;align-items:center;gap:.4rem;transition:color .3s}
+.nav-back:hover{color:var(--red)}
+.lang-dropdown{position:relative}
+.lang-dropdown-btn{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;justify-content:center;width:34px;height:23px;padding:0;background:white;border:1px solid rgba(212,201,184,0.4);border-radius:4px;cursor:pointer;font-size:0;color:transparent;transition:all .25s ease;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.lang-dropdown-btn .flag{display:none}
+.lang-dropdown-btn::before{content:'';position:absolute;inset:0;border-radius:3px;background-size:contain;background-position:center;background-repeat:no-repeat;opacity:1;z-index:0}
+.lang-dropdown-btn:hover{box-shadow:0 2px 8px rgba(0,0,0,.12);transform:scale(1.08)}
+.lang-dropdown.open .lang-dropdown-btn{box-shadow:0 2px 10px rgba(0,0,0,.15);transform:scale(1.08)}
+.lang-dropdown-btn[data-lang="fr"]::before{background-image:url(https://flagcdn.com/w80/fr.png)}
+.lang-dropdown-btn[data-lang="en"]::before{background-image:url(https://flagcdn.com/w80/gb.png)}
+.lang-dropdown-btn[data-lang="de"]::before{background-image:url(https://flagcdn.com/w80/de.png)}
+.lang-dropdown-btn[data-lang="es"]::before{background-image:url(https://flagcdn.com/w80/es.png)}
+.lang-dropdown-btn[data-lang="it"]::before{background-image:url(https://flagcdn.com/w80/it.png)}
+.lang-dropdown-btn[data-lang="pt"]::before{background-image:url(https://flagcdn.com/w80/pt.png)}
+.lang-dropdown-btn[data-lang="zh"]::before{background-image:url(https://flagcdn.com/w80/cn.png)}
+.lang-dropdown-btn[data-lang="hi"]::before{background-image:url(https://flagcdn.com/w80/in.png)}
+.lang-dropdown-btn .lang-arrow{display:none}
+.lang-dropdown-list{position:absolute;top:calc(100% + 6px);right:0;background:rgba(255,255,255,0.97);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(212,201,184,0.3);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.08),0 2px 8px rgba(0,0,0,.04);display:none;z-index:210;min-width:155px;padding:6px;transform-origin:top right}
+.lang-dropdown.open .lang-dropdown-list{display:block;animation:langDropIn .25s cubic-bezier(.22,.61,.36,1)}
+@keyframes langDropIn{from{opacity:0;transform:scale(.95) translateY(-4px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.lang-opt{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:8px 12px;cursor:pointer;font-size:.78rem;font-weight:500;color:var(--charcoal);font-family:var(--font-sans);border-radius:8px;transition:all .2s ease}
+.lang-opt .flag{display:none}
+.lang-opt::before{content:'';position:absolute;inset:0;background-size:contain;background-position:right center;background-repeat:no-repeat;border-radius:8px;opacity:0;transition:opacity .25s ease;z-index:-1}
+.lang-opt:hover{transform:translateX(2px);text-shadow:0 0 8px rgba(255,255,255,1),0 0 16px rgba(255,255,255,1),0 0 2px rgba(255,255,255,1)}
+.lang-opt:hover::before{opacity:.9}
+.lang-opt.active{font-weight:700;text-shadow:0 0 8px rgba(255,255,255,1),0 0 16px rgba(255,255,255,1),0 0 2px rgba(255,255,255,1)}
+.lang-opt.active::before{opacity:.85}
+.lang-opt[data-lang="fr"]::before{background:url(https://flagcdn.com/w160/fr.png) no-repeat right center / contain,#002654}
+.lang-opt[data-lang="en"]::before{background:url(https://flagcdn.com/w160/gb.png) no-repeat right center / contain,linear-gradient(to bottom,#012169 33%,#FFF 33% 40%,#C8102E 40% 60%,#FFF 60% 67%,#012169 67%)}
+.lang-opt[data-lang="de"]::before{background:url(https://flagcdn.com/w160/de.png) no-repeat right center / contain,linear-gradient(to bottom,#000 33%,#DD0000 33% 66%,#FFCC00 66%)}
+.lang-opt[data-lang="es"]::before{background:url(https://flagcdn.com/w160/es.png) no-repeat right center / auto 100%,linear-gradient(to bottom,#ad1519 25%,#fabd00 25% 75%,#ad1519 75%)}
+.lang-opt[data-lang="it"]::before{background:url(https://flagcdn.com/w160/it.png) no-repeat right center / contain,#009246}
+.lang-opt[data-lang="pt"]::before{background:url(https://flagcdn.com/w160/pt.png) no-repeat right center / contain,#006600}
+.lang-opt[data-lang="zh"]::before{background:url(https://flagcdn.com/w160/cn.png) no-repeat right center / contain,#EE1C25}
+.lang-opt[data-lang="hi"]::before{background:url(https://flagcdn.com/w160/in.png) no-repeat right center / contain,linear-gradient(to bottom,#ff6820 33%,#FFF 33% 66%,#046a38 66%)}
+.lang-opt::after{content:'';position:absolute;left:0;top:4px;bottom:4px;width:3px;border-radius:2px;z-index:1;transition:opacity .2s ease;opacity:.7}
+.lang-opt:hover::after,.lang-opt.active::after{opacity:1}
+.lang-opt[data-lang="fr"]::after{background:#002395}
+.lang-opt[data-lang="en"]::after{background:#012169}
+.lang-opt[data-lang="de"]::after{background:linear-gradient(to bottom,#000 33%,#DD0000 33% 66%,#FFCC00 66%)}
+.lang-opt[data-lang="es"]::after{background:linear-gradient(to bottom,#AA151B 25%,#F1BF00 25% 75%,#AA151B 75%)}
+.lang-opt[data-lang="it"]::after{background:#008C45}
+.lang-opt[data-lang="pt"]::after{background:#006600}
+.lang-opt[data-lang="zh"]::after{background:#DE2910}
+.lang-opt[data-lang="hi"]::after{background:linear-gradient(to bottom,#ff6820 33%,#FFF 33% 66%,#046a38 66%)}
+.nav-account{position:relative}
+.nav-account-btn{display:flex;align-items:center;gap:.3rem;background:none;border:none;cursor:pointer;padding:.3rem;border-radius:2px;transition:background .2s}
+.nav-account-btn:hover{background:var(--cream)}
+.nav-account-icon{width:22px;height:22px;color:var(--charcoal)}
+.nav-token-badge{background:var(--red);color:white;font-size:.65rem;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;line-height:1}
+.nav-account-menu{position:absolute;top:calc(100% + 8px);right:0;width:340px;background:white;border:1px solid var(--cream);border-radius:4px;box-shadow:0 16px 48px rgba(0,0,0,.12);display:none;z-index:200}
+.nav-account-menu.visible{display:block;animation:fadeUp .25s}
+.account-menu-header{padding:1rem 1.2rem;border-bottom:1px solid var(--cream);display:flex;justify-content:space-between;align-items:center}
+.account-menu-header-left{display:flex;flex-direction:column}
+.account-menu-name{font-weight:600;font-size:.9rem;color:var(--night)}
+.account-menu-email{font-size:.72rem;color:var(--earth);margin-top:.15rem}
+.account-menu-tokens-inline{display:flex;align-items:center;gap:.3rem;background:var(--red-soft);padding:4px 10px;border-radius:12px}
+.account-menu-tokens-inline .token-icon{font-size:.75rem;color:var(--red)}
+.account-menu-tokens-inline strong{font-family:'Courier New',monospace;font-size:1rem;color:var(--red)}
+.account-roles{padding:.8rem;display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;border-bottom:1px solid var(--cream)}
+.account-role{display:flex;flex-direction:column;align-items:center;gap:.4rem;padding:.8rem .4rem;border-radius:4px;cursor:pointer;border:2px solid transparent;transition:all .2s;text-decoration:none}
+.account-role:hover{transform:translateY(-1px)}
+.account-role-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem}
+.account-role-label{font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-align:center}
+.account-role-sub{font-size:.6rem;color:var(--earth);text-align:center;line-height:1.2}
+.account-role-client .account-role-icon{background:var(--red-soft);color:var(--red)}
+.account-role-client .account-role-label{color:var(--red)}
+.account-role-client.active{border-color:var(--red);background:var(--red-soft)}
+.account-role-printer .account-role-icon{background:#1a2a3a;color:#5ba8d4}
+.account-role-printer .account-role-label{color:#2c6e9b}
+.account-role-printer.active{border-color:#2c6e9b;background:#e8f1f8}
+.account-role-printer:hover{background:#e8f1f8}
+.account-role-modeler .account-role-icon{background:#2a1f1a;color:#d4845b}
+.account-role-modeler .account-role-label{color:#a0522d}
+.account-role-modeler.active{border-color:#a0522d;background:#f5ece5}
+.account-role-modeler:hover{background:#f5ece5}
+.account-role.locked{opacity:.5;pointer-events:auto;position:relative}
+.account-role.locked .account-role-icon{filter:grayscale(.6)}
+.account-role-lock{font-size:.6rem;margin-top:-.1rem}
+.account-role.locked:hover{opacity:.75}
+.account-role.locked:hover .account-role-sub{display:none}
+.account-role.locked:hover::after{content:'Inscription requise';font-size:.55rem;color:var(--earth);text-align:center}
+.account-menu-links{padding:.3rem 0}
+.account-menu-item{display:flex;align-items:center;gap:.6rem;padding:.6rem 1.2rem;font-size:.82rem;color:var(--charcoal);text-decoration:none;transition:background .15s}
+.account-menu-item:hover{background:var(--warm-white)}
+.account-menu-item svg{width:16px;height:16px;color:var(--stone);flex-shrink:0}
+.account-menu-logout{color:var(--earth);border-top:1px solid var(--cream)}
+
+/* ════ HERO / SEARCH ════ */
+.search-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6rem 2rem 4rem;text-align:center}
+.search-overline{font-size:.68rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1.2rem;display:inline-flex;align-items:center;gap:.8rem}
+.search-overline::before,.search-overline::after{content:'';width:24px;height:1px;background:var(--gold)}
+body[data-lang="zh"] .search-overline,body[data-lang="hi"] .search-overline{text-transform:none;letter-spacing:.06em}
+.search-title{font-family:var(--font-serif);font-size:clamp(2.2rem,4.5vw,3.6rem);font-weight:300;color:var(--night);line-height:1.15;margin-bottom:1rem;max-width:780px}
+.search-title em{font-style:italic;font-weight:400;color:var(--red)}
+.search-sub{font-size:1rem;line-height:1.7;color:var(--earth);font-weight:300;max-width:540px;margin:0 auto 3rem}
+
+.search-box{position:relative;width:100%;max-width:680px;margin:0 auto}
+.search-input{width:100%;padding:1.4rem 4.5rem 1.4rem 1.6rem;font-family:var(--font-sans);font-size:1.05rem;color:var(--night);background:white;border:1px solid var(--cream);border-radius:3px;outline:none;transition:all .3s;box-shadow:0 2px 20px rgba(0,0,0,.02)}
+.search-input::placeholder{color:var(--stone);font-weight:300}
+.search-input:focus{border-color:var(--red);box-shadow:0 4px 30px rgba(200,16,46,.08)}
+.search-submit{position:absolute;right:.5rem;top:50%;transform:translateY(-50%);background:var(--red);color:white;border:none;border-radius:2px;padding:.85rem 1.2rem;cursor:pointer;font-family:var(--font-sans);font-size:.78rem;font-weight:600;letter-spacing:.06em;transition:all .25s;display:flex;align-items:center;gap:.5rem}
+.search-submit:hover{background:var(--night)}
+.search-submit:disabled{background:var(--stone);cursor:wait}
+.search-icon{width:14px;height:14px}
+
+.search-hints{margin-top:1.5rem;display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;max-width:680px}
+.hint-label{font-size:.78rem;color:var(--stone);font-style:italic;width:100%;margin-bottom:.3rem}
+.hint{padding:.4rem 1rem;background:white;border:1px solid var(--cream);border-radius:20px;font-size:.78rem;color:var(--charcoal);cursor:pointer;transition:all .25s;font-family:inherit}
+.hint:hover{border-color:var(--red);color:var(--red)}
+
+/* ════ AI ANALYSIS PHASE ════ */
+.ai-phase{display:none;width:100%;max-width:680px;margin:2rem auto 0;padding:2rem;background:white;border:1px solid var(--cream);border-radius:3px;text-align:left;animation:fadeUp .5s cubic-bezier(.22,1,.36,1)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.ai-phase.visible{display:block}
+.ai-header{display:flex;align-items:center;gap:.8rem;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--cream)}
+.ai-pulse{width:10px;height:10px;border-radius:50%;background:var(--red);position:relative}
+.ai-pulse::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--red);opacity:.4;animation:pulse 1.5s infinite}
+@keyframes pulse{0%{transform:scale(1);opacity:.4}100%{transform:scale(2);opacity:0}}
+.ai-label{font-size:.7rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--red)}
+body[data-lang="zh"] .ai-label,body[data-lang="hi"] .ai-label{text-transform:none;letter-spacing:.05em}
+.ai-query{font-family:var(--font-serif);font-size:1.15rem;font-style:italic;color:var(--earth);margin-top:.3rem;font-weight:300}
+.ai-steps{display:flex;flex-direction:column;gap:.8rem}
+.ai-step{display:flex;align-items:flex-start;gap:.7rem;font-size:.92rem;color:var(--charcoal);opacity:0;transform:translateX(-10px);transition:all .4s}
+.ai-step.shown{opacity:1;transform:translateX(0)}
+.ai-step-icon{width:18px;height:18px;flex-shrink:0;margin-top:2px;color:var(--gold)}
+.ai-step-done .ai-step-icon{color:var(--green)}
+.ai-step-text strong{font-weight:500;color:var(--night)}
+
+/* ════ RÉSULTATS ════ */
+.results{display:none;width:100%;max-width:1100px;margin:3rem auto 0;padding:0 2rem;animation:fadeUp .6s cubic-bezier(.22,1,.36,1)}
+.results.visible{display:block}
+.results-header{margin-bottom:2rem;text-align:left}
+.results-count{font-size:.78rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem}
+body[data-lang="zh"] .results-count,body[data-lang="hi"] .results-count{text-transform:none;letter-spacing:.04em}
+.results-title{font-family:var(--font-serif);font-size:1.8rem;font-weight:400;color:var(--night)}
+.results-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+
+.piece-card{background:white;border:1px solid var(--cream);border-radius:3px;overflow:hidden;text-decoration:none;color:inherit;display:flex;flex-direction:column;transition:all .4s ease;position:relative;z-index:1}
+.piece-card:hover{box-shadow:0 12px 40px rgba(0,0,0,.08);transform:translateY(-3px);border-color:var(--gold);z-index:10}
+.piece-photo{height:220px;background:var(--warm-white);display:flex;align-items:center;justify-content:center;overflow:visible;position:relative;perspective:600px}
+.piece-photo img{width:100%;height:100%;object-fit:cover;display:block;border-radius:3px 3px 0 0;transition:transform .5s cubic-bezier(.25,.46,.45,.94),box-shadow .5s ease;transform-origin:center center;will-change:transform}
+.piece-card:hover .piece-photo img{transform:scale(1.18) translateZ(30px);box-shadow:0 18px 50px rgba(0,0,0,.18),0 5px 15px rgba(0,0,0,.1);border-radius:4px}
+.piece-photo::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 60%,rgba(0,0,0,.08));pointer-events:none;z-index:2;transition:opacity .4s}
+.piece-card:hover .piece-photo::after{opacity:0}
+.piece-body{padding:1.5rem;flex:1;display:flex;flex-direction:column}
+.piece-match{display:inline-flex;align-items:center;gap:.4rem;font-size:.65rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:.6rem}
+body[data-lang="zh"] .piece-match,body[data-lang="hi"] .piece-match{text-transform:none;letter-spacing:.04em}
+.piece-match::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green)}
+.piece-name{font-family:var(--font-serif);font-size:1.2rem;font-weight:500;color:var(--night);margin-bottom:.3rem;line-height:1.25}
+.piece-machine{font-size:.82rem;color:var(--stone);font-style:italic;margin-bottom:1rem}
+.piece-meta{display:flex;justify-content:space-between;align-items:flex-end;margin-top:auto;padding-top:1rem;border-top:1px solid var(--cream)}
+.piece-meta-info{font-size:.72rem;color:var(--earth);line-height:1.5}
+.piece-meta-info strong{color:var(--night);font-weight:600}
+.piece-price{font-family:var(--font-serif);font-size:1.3rem;font-weight:500;color:var(--red)}
+.piece-arrow{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.5rem;background:var(--warm-white);border-top:1px solid var(--cream);font-size:.78rem;font-weight:500;color:var(--earth);transition:all .25s}
+.piece-card:hover .piece-arrow{background:var(--red);color:white}
+.piece-arrow-icon{transition:transform .25s}
+.piece-card:hover .piece-arrow-icon{transform:translateX(4px)}
+
+/* ════ NO RESULTS ════ */
+.no-results{display:none;max-width:680px;margin:2rem auto 0;padding:3rem 2rem;text-align:center;background:var(--warm-white);border:1px dashed var(--sand);border-radius:3px;animation:fadeUp .5s}
+.no-results.visible{display:block}
+.no-results-icon{font-size:2rem;margin-bottom:1rem;color:var(--gold)}
+.no-results h3{font-family:var(--font-serif);font-size:1.4rem;font-weight:500;color:var(--night);margin-bottom:.5rem}
+.no-results p{font-size:.92rem;color:var(--earth);line-height:1.7;margin-bottom:1.2rem;font-weight:300}
+
+/* ════ DEMO BADGE ════ */
+.demo-banner{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:90;padding:.6rem 1.2rem;background:rgba(28,26,24,.92);backdrop-filter:blur(8px);color:white;border-radius:3px;font-size:.72rem;font-weight:500;letter-spacing:.04em;display:flex;align-items:center;gap:.5rem}
+.demo-banner::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulse-soft 2s infinite}
+@keyframes pulse-soft{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ════ RESPONSIVE ════ */
+@media(max-width:900px){
+  nav{padding:1rem 1.5rem}
+  .nav-back span:not(.nav-back-arrow){display:none}
+  .nav-right{gap:.8rem}
+  .search-wrap{padding:5rem 1.2rem 3rem}
+  .search-input{padding:1.1rem 4rem 1.1rem 1.2rem;font-size:.95rem}
+  .search-submit{padding:.7rem 1rem;font-size:.72rem}
+  .results{padding:0 1.2rem}
+  .results-grid{grid-template-columns:1fr;gap:1.2rem}
+  .ai-phase{padding:1.5rem;margin:1.5rem 1rem 0}
+  .demo-banner{bottom:1rem;font-size:.68rem;padding:.5rem 1rem}
+}
+
+/* ════ MOBILE 600px ════ */
+@media(max-width:600px){
+  nav{padding:.6rem 1rem}
+  .nav-wordmark{font-size:1.1rem}
+  .nav-right{gap:.5rem}
+  .nav-account-menu{width:calc(100vw - 2rem);max-width:340px;right:0}
+  .lang-dropdown-list{right:0;min-width:140px}
+  .lang-dropdown-btn{width:28px;height:19px}
+  .search-wrap{padding:3.5rem 1rem 2rem;min-height:auto}
+  .search-title{font-size:clamp(1.6rem,5vw,2.2rem)}
+  .search-sub{font-size:.9rem;margin-bottom:2rem}
+  .search-overline{font-size:.6rem;letter-spacing:.12em}
+  .search-box{max-width:100%}
+  .search-input{padding:1rem 3.5rem 1rem 1rem;font-size:.9rem}
+  .search-submit{padding:.6rem .8rem;font-size:.68rem}
+  .search-submit span{display:none}
+  .search-hints{gap:.4rem}
+  .hint{padding:.35rem .8rem;font-size:.72rem}
+  .hint-label{font-size:.72rem}
+  .ai-phase{padding:1.2rem;margin:1rem .5rem 0}
+  .ai-label{font-size:.65rem}
+  .ai-query{font-size:1rem}
+  .ai-step{font-size:.85rem}
+  .results{padding:0 1rem;margin-top:2rem}
+  .results-title{font-size:1.4rem}
+  .results-count{font-size:.7rem}
+  .results-grid{grid-template-columns:1fr;gap:1rem}
+  .piece-photo{height:180px}
+  .piece-body{padding:1.2rem}
+  .piece-name{font-size:1.05rem}
+  .piece-price{font-size:1.1rem}
+  .piece-arrow{padding:.7rem 1.2rem;font-size:.72rem}
+  .no-results{padding:2rem 1rem;margin:1.5rem .5rem 0}
+  .no-results h3{font-size:1.2rem}
+  .no-results p{font-size:.85rem}
+  .demo-banner{bottom:.8rem;font-size:.62rem;padding:.4rem .8rem}
+}
+
+/* ════ MOBILE 480px ════ */
+@media(max-width:480px){
+  .search-title{font-size:1.5rem;letter-spacing:-.01em}
+  .search-sub{font-size:.85rem;line-height:1.6}
+  .search-input{padding:.9rem 3rem .9rem .8rem;font-size:.85rem}
+  .search-submit{padding:.55rem .7rem}
+  .hint{font-size:.68rem;padding:.3rem .6rem}
+  .piece-photo{height:150px}
+  .piece-body{padding:1rem}
+  .piece-name{font-size:1rem}
+  .piece-meta{flex-direction:column;align-items:flex-start;gap:.5rem}
+}
+
+/* ════ WATERMARK SLOGANS ════ */
+.section-watermark{position:relative;overflow:hidden}
+.section-watermark::before{content:attr(data-watermark);position:absolute;font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,6vw,5rem);font-weight:300;font-style:italic;color:rgba(180,160,130,.07);white-space:nowrap;pointer-events:none;z-index:0;top:50%;left:50%;transform:translate(-50%,-50%);width:max-content}
+.section-watermark>*{position:relative;z-index:1}
+</style>
+</head>
+<body data-lang="fr">
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-brand">
+    <svg class="nav-logo" viewBox="0 0 202.6 265.4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><linearGradient id="lg1"><stop style="stop-color:#2a00fe" offset="0.336"/><stop style="stop-color:#fff" offset="1"/></linearGradient><linearGradient id="lg2"><stop style="stop-color:#fff" offset="0.107"/><stop style="stop-color:#fe0000" offset="0.684"/></linearGradient><linearGradient xlink:href="#lg1" id="grad1" x1="129.89" y1="808.83" x2="194.31" y2="808.83" gradientUnits="userSpaceOnUse"/><linearGradient xlink:href="#lg2" id="grad2" x1="271.02" y1="731.42" x2="327.45" y2="731.42" gradientUnits="userSpaceOnUse" spreadMethod="pad"/></defs><g transform="translate(-129.894,-634.847)"><g transform="translate(-114.063,-139.373)"><path d="m 353.331,791.185 -24.32,66.818 c -8.972,24.651 9.283,50.722 35.516,50.722 h 72.08 c 5.218,0 9.449,4.23 9.449,9.449 0,5.218 -4.231,9.449 -9.449,9.449 h -72.08 c -39.35,0 -66.732,-39.106 -53.274,-76.083 l 7.123,-19.57 17.2,-47.256 c 1.787,-4.903 7.21,-7.428 12.113,-5.642 4.903,1.787 7.429,7.21 5.643,12.112 z" style="fill:#000;stroke:#000"/><path d="m 314.879,1026.411 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#000;stroke:#000"/><path d="m 249.987,1019.877 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:#000;stroke:#000"/><path d="m 359.24,904.532 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#000;stroke:#000"/><path d="m 436.607,884.024 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:#000;stroke:#000"/></g><g><path d="m 234.225,648.032 -24.32,66.818 a 37.795,37.795 0 0 0 35.516,50.722 h 72.08 a 9.449,9.449 0 0 1 0,18.898 h -72.08 a 56.693,56.693 0 0 1 -53.274,-76.083 l 24.323,-66.826 a 9.449,9.449 0 0 1 17.755,6.471 z" style="fill:#fff;stroke:#000"/><path d="m 195.773,883.258 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#fff;stroke:#000"/><path d="m 130.881,876.724 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:url(#grad1);stroke:#000"/><path d="m 240.133,761.379 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#fff;stroke:#000"/><path d="m 317.5,740.871 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:url(#grad2);stroke:#000"/></g></g></svg>
+    <span class="nav-wordmark">Hub<sup>4</sup>Fix</span>
+  </a>
+  <div class="nav-right">
+    <a href="index.html" class="nav-back"><span class="nav-back-arrow">←</span></a>
+    <div class="lang-dropdown" id="langDropdown">
+      <button class="lang-dropdown-btn" id="langDropdownBtn" data-lang="fr"></button>
+      <div class="lang-dropdown-list" id="langDropdownList">
+        <button class="lang-opt active" data-lang="fr"><span class="flag">🇫🇷</span> Francais</button>
+        <button class="lang-opt" data-lang="en"><span class="flag">🇬🇧</span> English</button>
+        <button class="lang-opt" data-lang="de"><span class="flag">🇩🇪</span> Deutsch</button>
+        <button class="lang-opt" data-lang="es"><span class="flag">🇪🇸</span> Espanol</button>
+        <button class="lang-opt" data-lang="it"><span class="flag">🇮🇹</span> Italiano</button>
+        <button class="lang-opt" data-lang="pt"><span class="flag">🇵🇹</span> Portugues</button>
+        <button class="lang-opt" data-lang="zh"><span class="flag">🇨🇳</span> 中文</button>
+        <button class="lang-opt" data-lang="hi"><span class="flag">🇮🇳</span> हिन्दी</button>
+      </div>
+    </div>
+    <div class="nav-account" id="navAccount">
+      <button class="nav-account-btn" id="accountBtn">
+        <svg class="nav-account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0112 0v1"/></svg>
+        <span class="nav-token-badge" id="tokenBadge">5</span>
+      </button>
+      <div class="nav-account-menu" id="accountMenu">
+        <div class="account-menu-header">
+          <div class="account-menu-header-left">
+            <span class="account-menu-name">Julien D.</span>
+            <span class="account-menu-email">demo@hub4fix.com</span>
+          </div>
+          <div class="account-menu-tokens-inline">
+            <span class="token-icon">⬡</span>
+            <strong id="accountTokenCount">5</strong>
+          </div>
+        </div>
+        <div class="account-roles">
+          <a href="#" class="account-role account-role-client active">
+            <div class="account-role-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            <span class="account-role-label">Reparer</span>
+            <span class="account-role-sub">Trouver sa piece</span>
+          </a>
+          <a href="printer.html" class="account-role account-role-printer locked">
+            <div class="account-role-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="20" width="18" height="2" rx=".5"/><path d="M7 20v-5h10v5"/><path d="M12 4v6"/><path d="M9.5 10h5L12 15.5 9.5 10z"/></svg>
+            </div>
+            <span class="account-role-label">Printer</span>
+            <span class="account-role-sub">Devenir printer</span>
+            <span class="account-role-lock">🔒</span>
+          </a>
+          <a href="modelisateur.html" class="account-role account-role-modeler locked">
+            <div class="account-role-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 7v4l9 5 9-5V7l-9-5z"/><path d="M12 22V12"/><path d="M3 7l9 5 9-5"/><path d="M21 11v6l-9 5-9-5v-6"/></svg>
+            </div>
+            <span class="account-role-label">Modelisateur</span>
+            <span class="account-role-sub">Devenir modelisateur</span>
+            <span class="account-role-lock">🔒</span>
+          </a>
+        </div>
+        <div class="account-menu-links">
+          <a href="#" class="account-menu-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+            <span>Ma bibliotheque</span>
+          </a>
+          <a href="#" class="account-menu-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            <span>Parametres</span>
+          </a>
+          <a href="#" class="account-menu-item account-menu-logout">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span>Deconnexion</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- SEARCH WRAP -->
+<div class="search-wrap section-watermark" id="searchWrap" data-watermark="L'intelligence numérique au service de la réparation physique.">
+  <div class="search-overline" data-i18n="overline">Démo · Test marchand</div>
+  <h1 class="search-title" data-i18n-html="title">Décrivez votre panne.<br>L'IA <em>trouve</em> la pièce.</h1>
+  <p class="search-sub" data-i18n="subtitle">Tapez ce que vous cherchez en langage naturel. Notre moteur d'intention identifie la pièce qui correspond à votre besoin.</p>
+
+  <form class="search-box" id="searchForm" onsubmit="return false;">
+    <input
+      type="text"
+      class="search-input"
+      id="searchInput"
+      data-i18n-placeholder="placeholder"
+      placeholder="Ex : « Ma tête d'aspirateur Dyson fait du bruit »"
+      autocomplete="off">
+    <button type="submit" class="search-submit" id="searchSubmit">
+      <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span data-i18n="search_btn">Chercher</span>
+    </button>
+  </form>
+
+  <div class="search-hints">
+    <span class="hint-label" data-i18n="hints_label">Quelques exemples :</span>
+    <button class="hint" data-hint="0"></button>
+    <button class="hint" data-hint="1"></button>
+    <button class="hint" data-hint="2"></button>
+    <button class="hint" data-hint="3"></button>
+  </div>
+
+  <!-- AI ANALYSIS PHASE -->
+  <div class="ai-phase" id="aiPhase">
+    <div class="ai-header">
+      <div class="ai-pulse"></div>
+      <div>
+        <div class="ai-label" data-i18n="ai_label">Moteur d'intention</div>
+        <div class="ai-query" id="aiQuery">« ... »</div>
+      </div>
+    </div>
+    <div class="ai-steps" id="aiSteps"></div>
+  </div>
+</div>
+
+<!-- RÉSULTATS -->
+<section class="results section-watermark" id="results" data-watermark="La technologie au service du geste juste.">
+  <div class="results-header">
+    <div class="results-count" id="resultsCount">3 RÉSULTATS</div>
+    <h2 class="results-title" data-i18n="results_title">Pièces compatibles</h2>
+  </div>
+  <div class="results-grid" id="resultsGrid"></div>
+</section>
+
+<!-- NO RESULTS -->
+<div class="no-results" id="noResults">
+  <div class="no-results-icon">⌕</div>
+  <h3 data-i18n="noresults_title">Pas encore dans notre catalogue</h3>
+  <p data-i18n="noresults_text">Cette pièce n'est pas encore modélisée. Inscrivez-vous à la liste d'attente — chaque demande accélère sa production.</p>
+</div>
+
+<!-- DEMO BANNER -->
+<div class="demo-banner" data-i18n="demo_banner">Démo · Aucune commande réelle</div>
+
+<script>
+// ════════════════════════════════════════════════
+// CATALOGUE DES PIÈCES + MOTS-CLÉS DE MATCHING
+// ════════════════════════════════════════════════
+
+const CATALOG = [
+  {
+    id: 'dyson',
+    photo: 'images/dyson.png',
+    // Mots-clés multi-langues pour le matching IA simulé
+    keywords: [
+      'dyson','aspirateur','aspirador','vacuum','staubsauger','aspirapolvere',
+      'tête','head','testa','cabezal','kopf','cabeça',
+      'brosse','brush','spazzola','cepillo','bürste',
+      'rouleau','roller','rotation','rotativ','rotation',
+      'roulement','bearing','rodamiento','cuscinetto',
+      'v7','v8','v10','v11','v15','v-series','série v',
+      '吸尘器','戴森','刷头','滚刷','轴承',
+      'वैक्यूम','डायसन','ब्रश'
+    ]
+  },
+  {
+    id: 'roulette',
+    photo: 'images/roulette.png',
+    keywords: [
+      'roulette','wheel','rueda','ruota','rolle','roda',
+      'lave-vaisselle','lave vaisselle','dishwasher','lavavajillas','lavastoviglie','geschirrspüler','spülmaschine',
+      'panier','basket','cesto','cestillo','korb','cesta',
+      'rail','glissière','slide','rieles','schiene','guida',
+      'bosch','siemens','whirlpool','miele','samsung','beko','candy',
+      'tiroir','drawer','cajón','cassetto','schublade',
+      '洗碗机','滚轮','轮子','篮','导轨',
+      'डिशवॉशर','पहिया','रोलर','टोकरी'
+    ]
+  },
+  {
+    id: 'magimix',
+    photo: 'images/magimix.png',
+    keywords: [
+      'magimix','poussoir','pusher','pulsador','spintore','stößel',
+      'robot','processor','procesador','küchenmaschine',
+      'cuisine','cooking','système','5200','4200','3200','xl',
+      'cheminée','chute','tubo','condotto','schacht',
+      'aliments','food','alimentos','cibo','lebensmittel',
+      'mélangeur','mixer','blender','batidora','frullatore',
+      '料理机','推料器','食物加工机',
+      'खाद्य प्रोसेसर','पुशर','मैगिमिक्स'
+    ]
+  },
+  {
+    id: 'kenwood_couvercle',
+    photo: 'images/kenwood-couvercle.png',
+    keywords: [
+      'kenwood','chef','km28','km20','km24','couvercle','cover','deckel','tapa','coperchio',
+      'sortie','exit','ausgang','salida','uscita',
+      'élevée','raised','high','erhöht','elevada','rialzata',
+      'robot','pâtissier','mixer','stand mixer','küchenmaschine','batidora','impastatrice',
+      '厨师机','盖子','出口',
+      'मिक्सर','कवर','केनवुड'
+    ]
+  },
+  {
+    id: 'kenwood_protection',
+    photo: 'images/kenwood-protection.png',
+    keywords: [
+      'kenwood','chef','km28','km20','km24','protection','anti-projection','splash','guard','spritzschutz','antisalpicaduras','antischizzi',
+      'disque','disc','disk','scheibe','disco',
+      'projection','splatter','spritzer','salpicadura','schizzo',
+      'pétrissage','kneading','kneten','amasado','impasto',
+      '防溅','保护罩','搅拌',
+      'स्प्लैश','गार्ड','सुरक्षा'
+    ]
+  }
+];
+
+// ════════════════════════════════════════════════
+// CONTENU MULTILINGUE
+// ════════════════════════════════════════════════
+
+const I18N = {
+  fr: {
+    nav_back: "Retour",
+    overline: "Démo · Test marchand",
+    title: "Décrivez votre panne.<br>L'IA <em>trouve</em> la pièce.",
+    subtitle: "Tapez ce que vous cherchez en langage naturel. Notre moteur d'intention identifie la pièce qui correspond à votre besoin.",
+    placeholder: "Ex : « Ma tête d'aspirateur Dyson fait du bruit »",
+    search_btn: "Chercher",
+    hints_label: "Quelques exemples :",
+    hints: [
+      "Mon Dyson V8 tourne dans le vide",
+      "Roulette du panier de lave-vaisselle cassée",
+      "Poussoir Magimix perdu",
+      "Couvercle du Kenwood Chef cassé"
+    ],
+    ai_label: "Moteur d'intention",
+    ai_steps: [
+      "Lecture de votre requête",
+      "Identification de l'appareil concerné",
+      "Croisement avec le catalogue",
+      "Tri par pertinence"
+    ],
+    ai_steps_done: [
+      "Requête analysée : <strong>{intent}</strong>",
+      "Appareil détecté : <strong>{device}</strong>",
+      "<strong>{count}</strong> pièce(s) correspondante(s) trouvée(s)",
+      "Résultats prêts"
+    ],
+    results_title: "Pièces compatibles",
+    results_count: "RÉSULTATS",
+    noresults_title: "Pas encore dans notre catalogue",
+    noresults_text: "Cette pièce n'est pas encore modélisée. Inscrivez-vous à la liste d'attente — chaque demande accélère sa production.",
+    demo_banner: "Démo · Aucune commande réelle",
+    match_label: "Correspondance forte",
+    pieces: {
+      dyson: { name:"Tête d'aspirateur rotative", machine:"Compatible Dyson V7 / V8 / V10 / V11", price:"3,00 €", time:"2h30", weight:"150 g" },
+      roulette: { name:"Roulette de panier", machine:"Compatible Bosch / Siemens / Whirlpool", price:"3,00 €", time:"25 min", weight:"15 g" },
+      magimix: { name:"Poussoir multifonction", machine:"Compatible Cuisine Système 5200 XL", price:"3,00 €", time:"1h00", weight:"50 g" },
+      kenwood_couvercle: { name:"Couvercle sortie élevée", machine:"Compatible Kenwood Chef KM28", price:"3,00 €", time:"1h45", weight:"45 g" },
+      kenwood_protection: { name:"Protection anti-projection", machine:"Compatible Kenwood Chef KM28", price:"3,00 €", time:"1h30", weight:"60 g" }
+    },
+    intents: { dyson:"panne aspirateur Dyson", roulette:"roulette lave-vaisselle", magimix:"accessoire robot Magimix", kenwood_couvercle:"couvercle robot Kenwood", kenwood_protection:"protection robot Kenwood" },
+    devices: { dyson:"Aspirateur sans fil Dyson", roulette:"Lave-vaisselle multimarque", magimix:"Robot multifonction Magimix", kenwood_couvercle:"Robot pâtissier Kenwood Chef", kenwood_protection:"Robot pâtissier Kenwood Chef" }
+  },
+  en: {
+    nav_back: "Back",
+    overline: "Demo · Marketplace test",
+    title: "Describe your breakdown.<br>AI <em>finds</em> the part.",
+    subtitle: "Type what you're looking for in natural language. Our intent engine identifies the part that matches your need.",
+    placeholder: "E.g. \"My Dyson vacuum head is making noise\"",
+    search_btn: "Search",
+    hints_label: "A few examples:",
+    hints: [
+      "My Dyson V8 spins empty",
+      "Broken dishwasher basket wheel",
+      "Lost Magimix pusher",
+      "Kenwood Chef cover broken"
+    ],
+    ai_label: "Intent engine",
+    ai_steps: ["Reading your query","Identifying the appliance","Cross-referencing catalog","Ranking by relevance"],
+    ai_steps_done: ["Query analyzed: <strong>{intent}</strong>","Detected device: <strong>{device}</strong>","<strong>{count}</strong> matching part(s) found","Results ready"],
+    results_title: "Matching parts",
+    results_count: "RESULTS",
+    noresults_title: "Not yet in our catalog",
+    noresults_text: "This part hasn't been modeled yet. Join the waiting list — every request speeds up its production.",
+    demo_banner: "Demo · No real orders",
+    match_label: "Strong match",
+    pieces: {
+      dyson: { name:"Rotating vacuum head", machine:"Compatible Dyson V7 / V8 / V10 / V11", price:"€3.00", time:"2h30", weight:"150 g" },
+      roulette: { name:"Basket wheel", machine:"Compatible Bosch / Siemens / Whirlpool", price:"€3.00", time:"25 min", weight:"15 g" },
+      magimix: { name:"Multipurpose pusher", machine:"Compatible Cuisine System 5200 XL", price:"€3.00", time:"1h00", weight:"50 g" },
+      kenwood_couvercle: { name:"High exit cover", machine:"Compatible Kenwood Chef KM28", price:"€3.00", time:"1h45", weight:"45 g" },
+      kenwood_protection: { name:"Splash guard", machine:"Compatible Kenwood Chef KM28", price:"€3.00", time:"1h30", weight:"60 g" }
+    },
+    intents: { dyson:"Dyson vacuum issue", roulette:"dishwasher wheel", magimix:"Magimix accessory", kenwood_couvercle:"Kenwood mixer cover", kenwood_protection:"Kenwood mixer guard" },
+    devices: { dyson:"Dyson cordless vacuum", roulette:"Multi-brand dishwasher", magimix:"Magimix food processor", kenwood_couvercle:"Kenwood Chef stand mixer", kenwood_protection:"Kenwood Chef stand mixer" }
+  },
+  de: {
+    nav_back: "Zurück",
+    overline: "Demo · Markt-Test",
+    title: "Beschreiben Sie den Schaden.<br>Die KI <em>findet</em> das Teil.",
+    subtitle: "Tippen Sie in natürlicher Sprache, was Sie suchen. Unsere Intent-Engine identifiziert das passende Teil.",
+    placeholder: "z.B. „Mein Dyson-Saugkopf macht Geräusche\"",
+    search_btn: "Suchen",
+    hints_label: "Ein paar Beispiele:",
+    hints: [
+      "Mein Dyson V8 dreht leer",
+      "Korbrolle vom Geschirrspüler kaputt",
+      "Magimix-Stößel verloren",
+      "Kenwood Chef Deckel kaputt"
+    ],
+    ai_label: "Intent-Engine",
+    ai_steps: ["Anfrage wird gelesen","Gerät wird identifiziert","Katalogabgleich","Sortierung nach Relevanz"],
+    ai_steps_done: ["Anfrage analysiert: <strong>{intent}</strong>","Gerät erkannt: <strong>{device}</strong>","<strong>{count}</strong> passende(s) Teil(e) gefunden","Ergebnisse bereit"],
+    results_title: "Passende Teile",
+    results_count: "ERGEBNISSE",
+    noresults_title: "Noch nicht im Katalog",
+    noresults_text: "Dieses Teil ist noch nicht modelliert. Tragen Sie sich in die Warteliste ein — jede Anfrage beschleunigt die Produktion.",
+    demo_banner: "Demo · Keine echten Bestellungen",
+    match_label: "Starke Übereinstimmung",
+    pieces: {
+      dyson: { name:"Rotierender Saugkopf", machine:"Kompatibel Dyson V7 / V8 / V10 / V11", price:"3,00 €", time:"2h30", weight:"150 g" },
+      roulette: { name:"Korb-Rolle", machine:"Kompatibel Bosch / Siemens / Whirlpool", price:"3,00 €", time:"25 min", weight:"15 g" },
+      magimix: { name:"Multifunktions-Stößel", machine:"Kompatibel Cuisine System 5200 XL", price:"3,00 €", time:"1h00", weight:"50 g" },
+      kenwood_couvercle: { name:"Hochausgangsdeckel", machine:"Kompatibel Kenwood Chef KM28", price:"3,00 €", time:"1h45", weight:"45 g" },
+      kenwood_protection: { name:"Spritzschutz", machine:"Kompatibel Kenwood Chef KM28", price:"3,00 €", time:"1h30", weight:"60 g" }
+    },
+    intents: { dyson:"Dyson-Staubsauger-Problem", roulette:"Geschirrspüler-Rolle", magimix:"Magimix-Zubehör", kenwood_couvercle:"Kenwood-Mixer-Deckel", kenwood_protection:"Kenwood-Mixer-Schutz" },
+    devices: { dyson:"Dyson Akku-Staubsauger", roulette:"Multimarken-Geschirrspüler", magimix:"Magimix Küchenmaschine", kenwood_couvercle:"Kenwood Chef Küchenmaschine", kenwood_protection:"Kenwood Chef Küchenmaschine" }
+  },
+  es: {
+    nav_back: "Volver",
+    overline: "Demo · Test de mercado",
+    title: "Describe tu avería.<br>La IA <em>encuentra</em> la pieza.",
+    subtitle: "Escribe lo que buscas en lenguaje natural. Nuestro motor de intención identifica la pieza que corresponde a tu necesidad.",
+    placeholder: "Ej.: «Mi cabezal de aspirador Dyson hace ruido»",
+    search_btn: "Buscar",
+    hints_label: "Algunos ejemplos:",
+    hints: [
+      "Mi Dyson V8 gira en vacío",
+      "Ruedecilla del cestillo del lavavajillas rota",
+      "Empujador Magimix perdido",
+      "Tapa del Kenwood Chef rota"
+    ],
+    ai_label: "Motor de intención",
+    ai_steps: ["Leyendo tu consulta","Identificando el aparato","Cruzando con el catálogo","Ordenando por relevancia"],
+    ai_steps_done: ["Consulta analizada: <strong>{intent}</strong>","Aparato detectado: <strong>{device}</strong>","<strong>{count}</strong> pieza(s) compatible(s) encontrada(s)","Resultados listos"],
+    results_title: "Piezas compatibles",
+    results_count: "RESULTADOS",
+    noresults_title: "Aún no en nuestro catálogo",
+    noresults_text: "Esta pieza aún no está modelada. Inscríbete en la lista de espera — cada solicitud acelera su producción.",
+    demo_banner: "Demo · Sin pedidos reales",
+    match_label: "Coincidencia fuerte",
+    pieces: {
+      dyson: { name:"Cabezal aspirador rotatorio", machine:"Compatible Dyson V7 / V8 / V10 / V11", price:"3,00 €", time:"2h30", weight:"150 g" },
+      roulette: { name:"Ruedecilla de cestillo", machine:"Compatible Bosch / Siemens / Whirlpool", price:"3,00 €", time:"25 min", weight:"15 g" },
+      magimix: { name:"Empujador multifuncional", machine:"Compatible Cuisine System 5200 XL", price:"3,00 €", time:"1h00", weight:"50 g" },
+      kenwood_couvercle: { name:"Tapa salida elevada", machine:"Compatible Kenwood Chef KM28", price:"3,00 €", time:"1h45", weight:"45 g" },
+      kenwood_protection: { name:"Protección antisalpicaduras", machine:"Compatible Kenwood Chef KM28", price:"3,00 €", time:"1h30", weight:"60 g" }
+    },
+    intents: { dyson:"avería aspirador Dyson", roulette:"ruedecilla lavavajillas", magimix:"accesorio robot Magimix", kenwood_couvercle:"tapa robot Kenwood", kenwood_protection:"protección robot Kenwood" },
+    devices: { dyson:"Aspirador sin cable Dyson", roulette:"Lavavajillas multimarca", magimix:"Robot de cocina Magimix", kenwood_couvercle:"Robot de cocina Kenwood Chef", kenwood_protection:"Robot de cocina Kenwood Chef" }
+  },
+  it: {
+    nav_back: "Indietro",
+    overline: "Demo · Test commerciale",
+    title: "Descrivi il guasto.<br>L'IA <em>trova</em> il pezzo.",
+    subtitle: "Scrivi ciò che cerchi in linguaggio naturale. Il nostro motore di intent identifica il pezzo che corrisponde al tuo bisogno.",
+    placeholder: "Es.: «La testa del mio aspirapolvere Dyson fa rumore»",
+    search_btn: "Cerca",
+    hints_label: "Alcuni esempi:",
+    hints: [
+      "Il mio Dyson V8 gira a vuoto",
+      "Rotella del cestello lavastoviglie rotta",
+      "Pestello Magimix perso",
+      "Coperchio del Kenwood Chef rotto"
+    ],
+    ai_label: "Motore di intent",
+    ai_steps: ["Lettura della richiesta","Identificazione dell'apparecchio","Confronto col catalogo","Ordinamento per rilevanza"],
+    ai_steps_done: ["Richiesta analizzata: <strong>{intent}</strong>","Apparecchio rilevato: <strong>{device}</strong>","<strong>{count}</strong> pezzo(i) compatibile(i) trovato(i)","Risultati pronti"],
+    results_title: "Pezzi compatibili",
+    results_count: "RISULTATI",
+    noresults_title: "Non ancora nel nostro catalogo",
+    noresults_text: "Questo pezzo non è ancora modellato. Iscriviti alla lista d'attesa — ogni richiesta accelera la sua produzione.",
+    demo_banner: "Demo · Nessun ordine reale",
+    match_label: "Forte corrispondenza",
+    pieces: {
+      dyson: { name:"Testa aspirapolvere rotante", machine:"Compatibile Dyson V7 / V8 / V10 / V11", price:"3,00 €", time:"2h30", weight:"150 g" },
+      roulette: { name:"Rotella del cestello", machine:"Compatibile Bosch / Siemens / Whirlpool", price:"3,00 €", time:"25 min", weight:"15 g" },
+      magimix: { name:"Pestello multifunzione", machine:"Compatibile Cuisine System 5200 XL", price:"3,00 €", time:"1h00", weight:"50 g" },
+      kenwood_couvercle: { name:"Coperchio uscita rialzata", machine:"Compatibile Kenwood Chef KM28", price:"3,00 €", time:"1h45", weight:"45 g" },
+      kenwood_protection: { name:"Protezione antischizzi", machine:"Compatibile Kenwood Chef KM28", price:"3,00 €", time:"1h30", weight:"60 g" }
+    },
+    intents: { dyson:"guasto aspirapolvere Dyson", roulette:"rotella lavastoviglie", magimix:"accessorio robot Magimix", kenwood_couvercle:"coperchio robot Kenwood", kenwood_protection:"protezione robot Kenwood" },
+    devices: { dyson:"Aspirapolvere senza filo Dyson", roulette:"Lavastoviglie multimarca", magimix:"Robot multifunzione Magimix", kenwood_couvercle:"Robot da cucina Kenwood Chef", kenwood_protection:"Robot da cucina Kenwood Chef" }
+  },
+  zh: {
+    nav_back: "返回",
+    overline: "演示 · 市场测试",
+    title: "描述您的故障。<br>AI <em>找到</em>配件。",
+    subtitle: "用自然语言输入您要找的东西。我们的意图引擎会识别匹配您需求的配件。",
+    placeholder: "例如：「我的戴森吸尘器刷头有噪音」",
+    search_btn: "搜索",
+    hints_label: "几个示例：",
+    hints: [
+      "我的戴森 V8 空转",
+      "洗碗机篮子滚轮坏了",
+      "丢失的 Magimix 推料器",
+      "Kenwood Chef 盖子坏了"
+    ],
+    ai_label: "意图引擎",
+    ai_steps: ["正在读取您的查询","识别相关设备","与目录交叉检索","按相关性排序"],
+    ai_steps_done: ["查询已分析：<strong>{intent}</strong>","检测到设备：<strong>{device}</strong>","找到 <strong>{count}</strong> 个匹配配件","结果已就绪"],
+    results_title: "兼容配件",
+    results_count: "结果",
+    noresults_title: "尚未在我们的目录中",
+    noresults_text: "此配件尚未建模。加入等候名单 — 每个请求都会加速其生产。",
+    demo_banner: "演示 · 无真实订单",
+    match_label: "高度匹配",
+    pieces: {
+      dyson: { name:"旋转吸尘器刷头", machine:"兼容戴森 V7 / V8 / V10 / V11", price:"€3.00", time:"2小时30分", weight:"150 克" },
+      roulette: { name:"碗篮滚轮", machine:"兼容博世 / 西门子 / 惠而浦", price:"€3.00", time:"25分钟", weight:"15 克" },
+      magimix: { name:"多用途推料器", machine:"兼容 Cuisine System 5200 XL", price:"€3.00", time:"1小时", weight:"50 克" },
+      kenwood_couvercle: { name:"高出口盖", machine:"兼容 Kenwood Chef KM28", price:"€3.00", time:"1小时45分", weight:"45 克" },
+      kenwood_protection: { name:"防溅保护罩", machine:"兼容 Kenwood Chef KM28", price:"€3.00", time:"1小时30分", weight:"60 克" }
+    },
+    intents: { dyson:"戴森吸尘器故障", roulette:"洗碗机滚轮", magimix:"Magimix 配件", kenwood_couvercle:"Kenwood 搅拌机盖", kenwood_protection:"Kenwood 搅拌机防溅罩" },
+    devices: { dyson:"戴森无线吸尘器", roulette:"多品牌洗碗机", magimix:"Magimix 多功能料理机", kenwood_couvercle:"Kenwood Chef 厨师机", kenwood_protection:"Kenwood Chef 厨师机" }
+  },
+  hi: {
+    nav_back: "वापस",
+    overline: "डेमो · बाज़ार परीक्षण",
+    title: "अपनी ख़राबी बताएँ।<br>AI <em>पुर्ज़ा</em> ढूँढती है।",
+    subtitle: "आप जो ढूँढ रहे हैं उसे प्राकृतिक भाषा में लिखें। हमारी इंटेंट इंजन आपकी ज़रूरत से मेल खाने वाला पुर्ज़ा पहचानती है।",
+    placeholder: "उदा.: «मेरे डायसन वैक्यूम का हेड शोर करता है»",
+    search_btn: "खोजें",
+    hints_label: "कुछ उदाहरण:",
+    hints: [
+      "मेरा डायसन V8 खाली घूमता है",
+      "डिशवॉशर की टोकरी का पहिया टूट गया",
+      "Magimix पुशर खो गया",
+      "Kenwood Chef का कवर टूट गया"
+    ],
+    ai_label: "इंटेंट इंजन",
+    ai_steps: ["आपकी क्वेरी पढ़ रहे हैं","उपकरण की पहचान","कैटलॉग से तुलना","प्रासंगिकता द्वारा क्रमबद्ध"],
+    ai_steps_done: ["क्वेरी का विश्लेषण: <strong>{intent}</strong>","पहचाना गया उपकरण: <strong>{device}</strong>","<strong>{count}</strong> मिलते पुर्ज़े मिले","परिणाम तैयार"],
+    results_title: "संगत पुर्ज़े",
+    results_count: "परिणाम",
+    noresults_title: "अभी हमारे कैटलॉग में नहीं",
+    noresults_text: "यह पुर्ज़ा अभी मॉडल नहीं किया गया है। प्रतीक्षा सूची में शामिल हों — हर अनुरोध इसके उत्पादन को तेज़ करता है।",
+    demo_banner: "डेमो · कोई वास्तविक ऑर्डर नहीं",
+    match_label: "मज़बूत मेल",
+    pieces: {
+      dyson: { name:"घूमने वाला वैक्यूम हेड", machine:"संगत Dyson V7 / V8 / V10 / V11", price:"€3.00", time:"2घं 30मि", weight:"150 ग्राम" },
+      roulette: { name:"टोकरी का पहिया", machine:"संगत Bosch / Siemens / Whirlpool", price:"€3.00", time:"25 मिनट", weight:"15 ग्राम" },
+      magimix: { name:"बहुउद्देशीय पुशर", machine:"संगत Cuisine System 5200 XL", price:"€3.00", time:"1घं", weight:"50 ग्राम" },
+      kenwood_couvercle: { name:"हाई एग्ज़िट कवर", machine:"संगत Kenwood Chef KM28", price:"€3.00", time:"1घं 45मि", weight:"45 ग्राम" },
+      kenwood_protection: { name:"स्प्लैश गार्ड", machine:"संगत Kenwood Chef KM28", price:"€3.00", time:"1घं 30मि", weight:"60 ग्राम" }
+    },
+    intents: { dyson:"डायसन वैक्यूम समस्या", roulette:"डिशवॉशर पहिया", magimix:"Magimix एक्सेसरी", kenwood_couvercle:"Kenwood मिक्सर कवर", kenwood_protection:"Kenwood मिक्सर गार्ड" },
+    devices: { dyson:"डायसन तार रहित वैक्यूम", roulette:"बहु-ब्रांड डिशवॉशर", magimix:"Magimix फ़ूड प्रोसेसर", kenwood_couvercle:"Kenwood Chef स्टैंड मिक्सर", kenwood_protection:"Kenwood Chef स्टैंड मिक्सर" }
+  }
+};
+
+const HINT_TO_PIECE = ['dyson','roulette','magimix','kenwood_couvercle']; // mapping hint → pièce
+
+let currentLang = 'fr';
+
+// ════════════════════════════════════════════════
+// MATCHING : trouve les pièces correspondant à une requête
+// ════════════════════════════════════════════════
+
+function findMatches(query) {
+  const q = query.toLowerCase().trim();
+  if (!q) return [];
+  const matches = [];
+  CATALOG.forEach(piece => {
+    let score = 0;
+    piece.keywords.forEach(kw => {
+      if (q.includes(kw.toLowerCase())) score++;
+    });
+    if (score > 0) matches.push({ piece, score });
+  });
+  matches.sort((a,b) => b.score - a.score);
+  return matches.map(m => m.piece);
+}
+
+// ════════════════════════════════════════════════
+// SIMULATION IA niveau B : délai + interprétation visible
+// ════════════════════════════════════════════════
+
+async function runAISearch(query) {
+  const data = I18N[currentLang];
+  const aiPhase = document.getElementById('aiPhase');
+  const aiQuery = document.getElementById('aiQuery');
+  const aiSteps = document.getElementById('aiSteps');
+  const submitBtn = document.getElementById('searchSubmit');
+  const results = document.getElementById('results');
+  const noResults = document.getElementById('noResults');
+
+  // Reset
+  results.classList.remove('visible');
+  noResults.classList.remove('visible');
+  submitBtn.disabled = true;
+  aiPhase.classList.add('visible');
+  aiQuery.textContent = `« ${query} »`;
+  aiSteps.innerHTML = '';
+
+  // Détermine les matches en avance
+  const matches = findMatches(query);
+  const primaryMatch = matches[0];
+
+  // Étapes d'analyse
+  const stepTexts = data.ai_steps;
+  const stepDoneTexts = data.ai_steps_done;
+
+  // Variables pour les remplacements
+  const intent = primaryMatch ? data.intents[primaryMatch.id] : query;
+  const device = primaryMatch ? data.devices[primaryMatch.id] : '—';
+  const count = matches.length;
+
+  for (let i = 0; i < stepTexts.length; i++) {
+    const stepEl = document.createElement('div');
+    stepEl.className = 'ai-step';
+    stepEl.innerHTML = `
+      <svg class="ai-step-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+      </svg>
+      <span class="ai-step-text">${stepTexts[i]}...</span>
+    `;
+    aiSteps.appendChild(stepEl);
+
+    await sleep(80);
+    stepEl.classList.add('shown');
+    await sleep(500 + Math.random() * 250);
+
+    // Marque comme fait + affiche le résultat
+    const doneText = stepDoneTexts[i]
+      .replace('{intent}', intent)
+      .replace('{device}', device)
+      .replace('{count}', count);
+    stepEl.classList.add('ai-step-done');
+    stepEl.querySelector('.ai-step-icon').innerHTML = '<polyline points="20 6 9 17 4 12"/>';
+    stepEl.querySelector('.ai-step-text').innerHTML = doneText;
+  }
+
+  await sleep(400);
+
+  // Affiche les résultats ou no-results
+  if (matches.length === 0) {
+    noResults.classList.add('visible');
+    setTimeout(() => noResults.scrollIntoView({ behavior:'smooth', block:'center' }), 100);
+  } else {
+    renderResults(matches);
+    results.classList.add('visible');
+    setTimeout(() => results.scrollIntoView({ behavior:'smooth', block:'start' }), 100);
+  }
+
+  submitBtn.disabled = false;
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// ════════════════════════════════════════════════
+// RENDU DES RÉSULTATS
+// ════════════════════════════════════════════════
+
+function renderResults(matches) {
+  const data = I18N[currentLang];
+  const grid = document.getElementById('resultsGrid');
+  const count = document.getElementById('resultsCount');
+
+  count.textContent = `${matches.length} ${data.results_count}`;
+
+  grid.innerHTML = matches.map(piece => {
+    const info = data.pieces[piece.id];
+    return `
+      <a href="produit.html?id=${piece.id}&lang=${currentLang}" class="piece-card">
+        <div class="piece-photo">
+          <img src="${piece.photo}" alt="${info.name}" loading="lazy">
+        </div>
+        <div class="piece-body">
+          <div class="piece-match">${data.match_label}</div>
+          <h3 class="piece-name">${info.name}</h3>
+          <div class="piece-machine">${info.machine}</div>
+          <div class="piece-meta">
+            <div class="piece-meta-info">
+              <strong>${info.time}</strong><br>${info.weight}
+            </div>
+            <div class="piece-price">${info.price}</div>
+          </div>
+        </div>
+        <div class="piece-arrow">
+          <span>${currentLang === 'fr' ? 'Voir la fiche' : currentLang === 'en' ? 'See details' : currentLang === 'de' ? 'Details anzeigen' : currentLang === 'es' ? 'Ver ficha' : currentLang === 'it' ? 'Vedi scheda' : currentLang === 'zh' ? '查看详情' : 'विवरण देखें'}</span>
+          <span class="piece-arrow-icon">→</span>
+        </div>
+      </a>
+    `;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════
+// I18N
+// ════════════════════════════════════════════════
+
+function applyLang(lang) {
+  if (!I18N[lang]) return;
+  currentLang = lang;
+  document.body.setAttribute('data-lang', lang);
+  document.documentElement.setAttribute('lang', lang);
+
+  const data = I18N[lang];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (data[key] !== undefined) el.textContent = data[key];
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.getAttribute('data-i18n-html');
+    if (data[key] !== undefined) el.innerHTML = data[key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (data[key] !== undefined) el.placeholder = data[key];
+  });
+
+  // Hints
+  document.querySelectorAll('.hint').forEach((el, i) => {
+    if (data.hints && data.hints[i]) el.textContent = data.hints[i];
+  });
+
+  document.querySelectorAll('.lang-opt').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('data-lang') === lang);
+  });
+
+  // Reset l'état de la recherche
+  document.getElementById('aiPhase').classList.remove('visible');
+  document.getElementById('results').classList.remove('visible');
+  document.getElementById('noResults').classList.remove('visible');
+}
+
+// ════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════
+
+// Form submit
+document.getElementById('searchForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const query = document.getElementById('searchInput').value.trim();
+  if (query.length > 1) runAISearch(query);
+});
+
+document.getElementById('searchSubmit').addEventListener('click', e => {
+  e.preventDefault();
+  const query = document.getElementById('searchInput').value.trim();
+  if (query.length > 1) runAISearch(query);
+});
+
+// Hints
+document.querySelectorAll('.hint').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const idx = parseInt(btn.dataset.hint);
+    const data = I18N[currentLang];
+    if (data.hints && data.hints[idx]) {
+      document.getElementById('searchInput').value = data.hints[idx];
+      runAISearch(data.hints[idx]);
+    }
+  });
+});
+
+// Lang dropdown + account menu
+document.getElementById('accountBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('accountMenu').classList.toggle('visible');
+  document.getElementById('langDropdown').classList.remove('open');
+});
+document.addEventListener('click', () => { document.getElementById('accountMenu').classList.remove('visible'); document.getElementById('langDropdown').classList.remove('open'); });
+document.getElementById('langDropdownBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  document.getElementById('langDropdown').classList.toggle('open');
+  document.getElementById('accountMenu').classList.remove('visible');
+});
+document.getElementById('langDropdownList').addEventListener('click', e => {
+  const opt = e.target.closest('.lang-opt');
+  if (!opt) return;
+  document.getElementById('langDropdown').classList.remove('open');
+  applyLang(opt.getAttribute('data-lang'));
+});
+document.querySelectorAll('.account-role.locked').forEach(el => {
+  el.addEventListener('click', e => e.preventDefault());
+});
+
+// Détection auto
+function detectLang() {
+  const navLang = (navigator.language || 'fr').slice(0,2).toLowerCase();
+  return I18N[navLang] ? navLang : 'fr';
+}
+
+applyLang(detectLang());
+
+// ════════ Auto-launch si ?q= dans l'URL (depuis la mini search de l'index) ════════
+(function(){
+  var params = new URLSearchParams(window.location.search);
+  var q = params.get('q');
+  if(q && q.trim().length > 1){
+    var input = document.getElementById('searchInput');
+    input.value = q;
+    // Petit délai pour laisser le DOM se stabiliser après applyLang
+    setTimeout(function(){ runAISearch(q); }, 250);
+  }
+})();
+
+// ════════ 3D Lenticular tilt effect on piece cards ════════
+document.addEventListener('mousemove', function(e) {
+  var cards = document.querySelectorAll('.piece-card');
+  cards.forEach(function(card) {
+    var photo = card.querySelector('.piece-photo');
+    var img = photo ? photo.querySelector('img') : null;
+    if (!img) return;
+    var rect = photo.getBoundingClientRect();
+    var isHover = e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom;
+    if (isHover) {
+      var x = (e.clientX - rect.left) / rect.width;
+      var y = (e.clientY - rect.top) / rect.height;
+      var rotY = (x - 0.5) * 14;
+      var rotX = (0.5 - y) * 10;
+      img.style.transform = 'scale(1.18) rotateX(' + rotX + 'deg) rotateY(' + rotY + 'deg) translateZ(30px)';
+    }
+  });
+});
+document.addEventListener('mouseleave', function() {
+  document.querySelectorAll('.piece-photo img').forEach(function(img) {
+    img.style.transform = '';
+  });
+}, true);
+
+// Logo click suction effect
+(function(){
+  var brand = document.querySelector('.nav-brand');
+  if(!brand) return;
+  brand.addEventListener('click', function(e){
+    var href = brand.getAttribute('href') || 'index.html';
+    e.preventDefault();
+    document.body.style.transformOrigin = 'top center';
+    document.body.classList.add('page-sucking');
+    var navigated = false;
+    function go(){ if(!navigated){ navigated=true; window.location.assign(href); } }
+    document.body.addEventListener('animationend', go);
+    setTimeout(go, 800);
+  });
+})();
+</script>
+<script>
+(function(){var cvs=document.createElement('canvas');cvs.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none;';document.body.insertBefore(cvs,document.body.firstChild);var ctx=cvs.getContext('2d'),W,H,P=[],dpr;var DIST=130,SPD=0.35;function resize(){dpr=window.devicePixelRatio||1;W=window.innerWidth;H=window.innerHeight;cvs.width=W*dpr;cvs.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}function make(){P=[];var n=Math.min(Math.round(W*H/13000),80);for(var i=0;i<n;i++)P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*SPD,vy:(Math.random()-.5)*SPD,r:Math.random()*.7+.5});}function tick(){ctx.clearRect(0,0,W,H);for(var i=0;i<P.length;i++){for(var j=i+1;j<P.length;j++){var dx=P[i].x-P[j].x,dy=P[i].y-P[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<DIST){ctx.strokeStyle='rgba(168,159,145,'+(0.28*(1-d/DIST)).toFixed(3)+')';ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(P[i].x,P[i].y);ctx.lineTo(P[j].x,P[j].y);ctx.stroke();}}ctx.fillStyle='rgba(168,159,145,.3)';ctx.beginPath();ctx.arc(P[i].x,P[i].y,P[i].r,0,6.283);ctx.fill();P[i].x+=P[i].vx;P[i].y+=P[i].vy;if(P[i].x<0||P[i].x>W)P[i].vx*=-1;if(P[i].y<0||P[i].y>H)P[i].vy*=-1;}requestAnimationFrame(tick);}resize();make();tick();window.addEventListener('resize',function(){resize();make();});})();
+</script>
+<script src="/js/sphere-bg.js"></script>
+<script src="js/nav-mindmap.js"></script>
+<footer style="border-top:.5px solid rgba(28,26,22,0.08);padding:1.2rem 2rem;display:flex;align-items:center;justify-content:center;gap:1.5rem;font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.06em"><a href="cgu.html" style="color:var(--stone,#A89F91);text-decoration:none">CGU</a> <span style="opacity:.3">&middot;</span> <a href="cgv.html" style="color:var(--stone,#A89F91);text-decoration:none">CGV</a></footer>
+</body>
+</html>

@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hot List — Hub⁴Fix</title>
+<meta name="description" content="Les pieces detachees les plus demandees par les utilisateurs Hub4Fix. Modelisateurs : consultez la Hot List et choisissez votre prochain projet.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/glass-sphere.css">
+<style>
+:root{--ivory:#FAF8F5;--warm-white:#F3EEE8;--cream:#EDE6DC;--sand:#D4C9B8;--stone:#A89F91;--earth:#7A7268;--charcoal:#3B3632;--night:#1C1A18;--gold:#B8963E;--gold-light:#D4B15F;--gold-pale:rgba(184,150,62,0.08);--gold-glow:rgba(184,150,62,0.15);--red:#C8102E;--red-soft:rgba(200,16,46,0.06);--red-medium:rgba(200,16,46,0.18);--green:#2D8B5E;--green-soft:rgba(45,139,94,0.08);--font-serif:'Cormorant Garamond',serif;--font-sans:'Karla',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);background:var(--ivory);color:var(--charcoal);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+::selection{background:var(--gold-glow);color:var(--night)}
+
+/* Nav */
+nav{position:sticky;top:0;z-index:100;padding:1rem 4rem;display:flex;justify-content:space-between;align-items:center;background:rgba(243,238,232,0.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(237,230,220,0.4)}
+.nav-brand{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo{width:auto;height:36px;transition:transform .5s cubic-bezier(.25,.46,.45,.94);transform-origin:center center;position:relative;z-index:101}
+.nav-brand:hover .nav-logo{transform:scale(3);filter:drop-shadow(0 8px 24px rgba(0,0,0,.2))}
+@keyframes suckIn{0%{transform:scale(1);opacity:1;filter:blur(0)}60%{transform:scale(.3) translate(0,-30vh);opacity:.6;filter:blur(2px)}100%{transform:scale(0) translate(0,-40vh);opacity:0;filter:blur(8px)}}
+.page-sucking{animation:suckIn .7s cubic-bezier(.55,.06,.68,.19) forwards;pointer-events:none}
+.nav-wordmark{font-family:var(--font-serif);font-size:1.15rem;font-weight:500;color:var(--night);letter-spacing:.02em}
+.nav-wordmark sup{color:var(--red);font-size:.7em;vertical-align:super;line-height:0}
+.nav-right{display:flex;align-items:center;gap:1.5rem}
+.nav-back{font-size:.78rem;font-weight:500;color:var(--earth);text-decoration:none;letter-spacing:.04em;display:flex;align-items:center;gap:.4rem;transition:color .3s}
+.nav-back:hover{color:var(--red)}
+.nav-cta{padding:.5rem 1.3rem;border:1px solid var(--gold);border-radius:2px;color:var(--gold);font-weight:600;letter-spacing:.06em;font-size:.72rem;text-transform:uppercase;text-decoration:none;transition:all .3s}
+.nav-cta:hover{background:var(--gold);color:white}
+.nav-account{position:relative}
+.nav-account-btn{display:flex;align-items:center;gap:.3rem;background:none;border:none;cursor:pointer;padding:.3rem;border-radius:2px;transition:background .2s}
+.nav-account-btn:hover{background:var(--cream)}
+.nav-account-icon{width:22px;height:22px;color:var(--charcoal)}
+.nav-token-badge{background:var(--red);color:white;font-size:.65rem;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;line-height:1}
+.nav-account-menu{position:absolute;top:calc(100% + 8px);right:0;width:340px;background:white;border:1px solid var(--cream);border-radius:4px;box-shadow:0 16px 48px rgba(0,0,0,.12);display:none;z-index:200}
+.nav-account-menu.visible{display:block;animation:fadeUp .25s}
+.account-menu-header{padding:1rem 1.2rem;border-bottom:1px solid var(--cream);display:flex;justify-content:space-between;align-items:center}
+.account-menu-header-left{display:flex;flex-direction:column}
+.account-menu-name{font-weight:600;font-size:.9rem;color:var(--night)}
+.account-menu-email{font-size:.72rem;color:var(--earth);margin-top:.15rem}
+.account-menu-tokens-inline{display:flex;align-items:center;gap:.3rem;background:var(--red-soft);padding:4px 10px;border-radius:12px}
+.account-menu-tokens-inline .token-icon{font-size:.75rem;color:var(--red)}
+.account-menu-tokens-inline strong{font-family:'Courier New',monospace;font-size:1rem;color:var(--red)}
+.account-roles{padding:.8rem;display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;border-bottom:1px solid var(--cream)}
+.account-role{display:flex;flex-direction:column;align-items:center;gap:.4rem;padding:.8rem .4rem;border-radius:4px;cursor:pointer;border:2px solid transparent;transition:all .2s;text-decoration:none}
+.account-role:hover{transform:translateY(-1px)}
+.account-role-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem}
+.account-role-label{font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-align:center}
+.account-role-sub{font-size:.6rem;color:var(--earth);text-align:center;line-height:1.2}
+.account-role-client .account-role-icon{background:var(--red-soft);color:var(--red)}
+.account-role-client .account-role-label{color:var(--red)}
+.account-role-client.active{border-color:var(--red);background:var(--red-soft)}
+.account-role-printer .account-role-icon{background:#1a2a3a;color:#5ba8d4}
+.account-role-printer .account-role-label{color:#2c6e9b}
+.account-role-printer.active{border-color:#2c6e9b;background:#e8f1f8}
+.account-role-printer:hover{background:#e8f1f8}
+.account-role-modeler .account-role-icon{background:#2a1f1a;color:#d4845b}
+.account-role-modeler .account-role-label{color:#a0522d}
+.account-role-modeler.active{border-color:#a0522d;background:#f5ece5}
+.account-role-modeler:hover{background:#f5ece5}
+.account-role.locked{opacity:.5;pointer-events:auto;position:relative}
+.account-role.locked .account-role-icon{filter:grayscale(.6)}
+.account-role-lock{font-size:.6rem;margin-top:-.1rem}
+.account-role.locked:hover{opacity:.75}
+.account-role.locked:hover .account-role-sub{display:none}
+.account-role.locked:hover::after{content:'Inscription requise';font-size:.55rem;color:var(--earth);text-align:center}
+.account-menu-links{padding:.3rem 0}
+.account-menu-item{display:flex;align-items:center;gap:.6rem;padding:.6rem 1.2rem;font-size:.82rem;color:var(--charcoal);text-decoration:none;transition:background .15s}
+.account-menu-item:hover{background:var(--warm-white)}
+.account-menu-item svg{width:16px;height:16px;color:var(--stone);flex-shrink:0}
+.account-menu-logout{color:var(--earth);border-top:1px solid var(--cream)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* Hero */
+.hero{position:relative;padding:4rem 4rem 3rem;max-width:1200px;margin:0 auto}
+.hero-overline{font-size:.68rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1.5rem;display:flex;align-items:center;gap:.8rem}
+.hero-overline::before{content:'';width:24px;height:1px;background:var(--gold)}
+.hero-title{font-family:var(--font-serif);font-size:clamp(2.2rem,4.5vw,3.5rem);font-weight:300;color:var(--night);line-height:1.1;margin-bottom:1.2rem}
+.hero-title em{font-style:italic;font-weight:400;color:var(--red)}
+.hero-intro{font-size:1rem;line-height:1.75;color:var(--earth);font-weight:300;max-width:680px;margin-bottom:1.5rem}
+.hero-stats{display:flex;gap:2.5rem;flex-wrap:wrap}
+.hero-stat{display:flex;flex-direction:column;align-items:flex-start}
+.hero-stat-value{font-family:var(--font-serif);font-size:2rem;font-weight:500;line-height:1}
+.hero-stat-value.gold{color:var(--gold)}
+.hero-stat-value.red{color:var(--red)}
+.hero-stat-value.green{color:var(--green)}
+.hero-stat-label{font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--earth);margin-top:.3rem}
+
+/* Info banner */
+.info-banner{max-width:1200px;margin:0 auto;padding:0 4rem}
+.info-banner-inner{background:rgba(255,255,255,0.45);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(237,230,220,0.5);border-radius:3px;padding:1.5rem 2rem;display:flex;align-items:center;gap:1.5rem;margin-bottom:2.5rem}
+.info-icon{width:44px;height:44px;border-radius:50%;background:var(--gold-pale);border:1px solid rgba(184,150,62,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.2rem}
+.info-text{flex:1}
+.info-text-title{font-size:.88rem;font-weight:600;color:var(--night);margin-bottom:.2rem}
+.info-text-body{font-size:.82rem;color:var(--earth);line-height:1.6;font-weight:300}
+.info-text-body strong{font-weight:600;color:var(--gold)}
+
+/* List toggle */
+.list-toggle{max-width:1200px;margin:0 auto;padding:0 4rem;display:flex;gap:0;margin-bottom:2rem}
+.list-toggle-btn{flex:1;padding:1rem;font-family:var(--font-sans);font-size:.82rem;font-weight:600;letter-spacing:.04em;border:1px solid rgba(237,230,220,0.5);background:rgba(255,255,255,0.4);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--earth);cursor:pointer;transition:all .3s;text-align:center}
+.list-toggle-btn:first-child{border-radius:3px 0 0 3px}
+.list-toggle-btn:last-child{border-radius:0 3px 3px 0}
+.list-toggle-btn.active{background:var(--night);color:white;border-color:var(--night)}
+.list-toggle-btn:not(.active):hover{background:var(--ivory)}
+
+/* Catalog status badges */
+.hl-status{display:inline-flex;align-items:center;gap:.3rem;font-size:.68rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:.25rem .6rem;border-radius:2px}
+.hl-status-available{background:rgba(45,139,94,.1);color:var(--green)}
+.hl-status-pending{background:rgba(184,150,62,.1);color:var(--gold)}
+.hl-repair-link{display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:500;color:var(--red);text-decoration:none;margin-top:.4rem;transition:gap .2s}
+.hl-repair-link:hover{gap:.6rem;text-decoration:underline}
+
+/* Catalog thumbnail */
+.hl-thumb{width:72px;height:72px;border-radius:4px;overflow:hidden;flex-shrink:0;background:var(--ivory);border:1px solid var(--cream);display:flex;align-items:center;justify-content:center}
+.hl-thumb img{width:100%;height:100%;object-fit:cover}
+.hl-thumb-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--sand);font-size:1.6rem}
+
+/* Filters */
+.filters-bar{max-width:1200px;margin:0 auto;padding:0 4rem .5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-bottom:1rem}
+.filters-left{display:flex;align-items:center;gap:1rem}
+.filter-search{padding:.55rem .9rem;font-family:var(--font-sans);font-size:.85rem;color:var(--charcoal);background:rgba(255,255,255,0.45);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(212,201,184,0.5);border-radius:3px;outline:none;width:260px;transition:border-color .2s}
+.filter-search:focus{border-color:var(--gold)}
+.filter-search::placeholder{color:var(--stone)}
+.filter-tabs{display:flex;gap:.4rem}
+.filter-tab{padding:.45rem 1rem;font-family:var(--font-sans);font-size:.75rem;font-weight:600;letter-spacing:.04em;color:var(--earth);background:rgba(255,255,255,0.4);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(237,230,220,0.5);border-radius:3px;cursor:pointer;transition:all .2s}
+.filter-tab:hover{border-color:var(--sand);background:var(--warm-white)}
+.filter-tab.active{background:var(--gold);color:white;border-color:var(--gold)}
+.filters-right{font-size:.78rem;color:var(--stone)}
+
+/* Product cards */
+.hotlist-grid{max-width:1200px;margin:0 auto;padding:0 4rem 4rem;display:flex;flex-direction:column;gap:1rem}
+
+.hl-card{background:rgba(255,255,255,0.45);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(237,230,220,0.5);border-radius:3px;display:grid;grid-template-columns:56px 1fr auto;align-items:center;gap:0;transition:all .3s;overflow:hidden;position:relative}
+.hl-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.05);transform:translateY(-1px)}
+.hl-card.subsidized{border-left:3px solid var(--gold)}
+.hl-card.subsidized .hl-rank{color:var(--gold)}
+
+.hl-rank{font-family:'Courier New',monospace;font-size:1.4rem;font-weight:700;color:var(--stone);text-align:center;padding:1.5rem .5rem;align-self:stretch;display:flex;align-items:center;justify-content:center;background:rgba(243,238,232,0.4);border-right:1px solid rgba(237,230,220,0.4);min-width:56px}
+
+.hl-content{padding:1.2rem 1.5rem;display:flex;align-items:center;gap:1.5rem;min-width:0}
+.hl-info{flex:1;min-width:0}
+.hl-name{font-family:var(--font-serif);font-size:1.15rem;font-weight:500;color:var(--night);margin-bottom:.25rem;line-height:1.3}
+.hl-machine{font-size:.82rem;color:var(--stone);font-style:italic;margin-bottom:.5rem}
+.hl-tags{display:flex;gap:.5rem;flex-wrap:wrap}
+.hl-tag{font-size:.62rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:2px;white-space:nowrap}
+.hl-tag-cat{color:var(--earth);background:var(--warm-white);border:1px solid var(--cream)}
+.hl-tag-demand{color:var(--red);background:var(--red-soft);border:1px solid var(--red-medium)}
+.hl-tag-sub{color:var(--gold);background:var(--gold-pale);border:1px solid rgba(184,150,62,.2)}
+.hl-tag-units{color:var(--earth);background:var(--warm-white);border:1px solid var(--cream)}
+
+.hl-right{display:flex;flex-direction:column;align-items:flex-end;gap:.6rem;padding:1.2rem 1.5rem;min-width:160px}
+.hl-demand-block{text-align:right}
+.hl-demand-value{font-family:var(--font-serif);font-size:1.6rem;font-weight:500;color:var(--red);line-height:1}
+.hl-demand-label{font-size:.65rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--earth);margin-top:.2rem}
+.hl-alerts{font-size:.78rem;color:var(--stone)}
+.hl-alerts strong{color:var(--charcoal);font-weight:600}
+.hl-sub-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .8rem;background:var(--gold);color:white;border-radius:2px;font-size:.68rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.hl-sub-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:white;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* CTA section */
+.cta-section{max-width:1200px;margin:0 auto;padding:0 4rem 4rem}
+.cta-card{background:var(--night);border-radius:3px;padding:3rem 4rem;display:flex;justify-content:space-between;align-items:center;gap:2rem;flex-wrap:wrap}
+.cta-left{max-width:560px}
+.cta-overline{font-size:.65rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;display:flex;align-items:center;gap:.6rem}
+.cta-overline::before{content:'';width:16px;height:1px;background:var(--gold)}
+.cta-title{font-family:var(--font-serif);font-size:clamp(1.5rem,3vw,2rem);font-weight:300;color:white;line-height:1.2;margin-bottom:.8rem}
+.cta-title em{font-style:italic;font-weight:400;color:var(--gold)}
+.cta-desc{font-size:.88rem;color:var(--sand);line-height:1.7;font-weight:300}
+.cta-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.8rem 2rem;font-family:var(--font-sans);font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;background:var(--red);color:white;border:none;border-radius:2px;text-decoration:none;cursor:pointer;transition:all .3s}
+.cta-btn:hover{background:#A00D24;transform:translateY(-1px);box-shadow:0 6px 20px rgba(200,16,46,.25)}
+.cta-btn::after{content:'\2192';font-size:.95rem}
+
+/* Footer */
+footer{padding:3rem 4rem;border-top:1px solid var(--cream);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.footer-copy{font-size:.78rem;color:var(--stone)}
+.footer-tagline{font-family:var(--font-serif);font-size:.85rem;font-style:italic;color:var(--sand)}
+
+/* Empty state */
+.empty-state{text-align:center;padding:4rem 2rem;color:var(--stone)}
+.empty-state-icon{font-size:2.5rem;margin-bottom:1rem;opacity:.4}
+.empty-state-title{font-family:var(--font-serif);font-size:1.4rem;font-weight:400;color:var(--night);margin-bottom:.5rem}
+.empty-state-desc{font-size:.88rem;color:var(--earth);font-weight:300}
+
+/* Animation */
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.hl-card{animation:fadeUp .4s ease both}
+
+/* Responsive */
+@media(max-width:900px){
+  nav{padding:1rem 1.5rem}
+  .hero{padding:3rem 1.5rem 2rem}
+  .info-banner{padding:0 1.5rem}
+  .filters-bar{padding:0 1.5rem .5rem}
+  .hotlist-grid{padding:0 1.5rem 3rem}
+  .cta-section{padding:0 1.5rem 3rem}
+  .cta-card{padding:2rem}
+  footer{padding:2rem 1.5rem}
+  .hl-card{grid-template-columns:48px 1fr}
+  .hl-right{grid-column:1/-1;flex-direction:row;justify-content:space-between;align-items:center;border-top:1px solid var(--cream);padding:.8rem 1.5rem}
+}
+@media(max-width:600px){
+  nav{padding:.6rem 1rem}
+  .nav-right{gap:.8rem}
+  .hero{padding:2rem 1rem 1.5rem}
+  .hero-title{font-size:clamp(1.8rem,5vw,2.5rem)}
+  .hero-stats{gap:1.5rem}
+  .hero-stat-value{font-size:1.5rem}
+  .info-banner{padding:0 1rem}
+  .info-banner-inner{padding:1rem;flex-direction:column;text-align:center;gap:1rem}
+  .filters-bar{padding:0 1rem .5rem;flex-direction:column;align-items:stretch}
+  .filters-left{flex-direction:column}
+  .filter-search{width:100%}
+  .filter-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .hotlist-grid{padding:0 1rem 2rem}
+  .hl-card{grid-template-columns:40px 1fr}
+  .hl-rank{font-size:1.1rem;min-width:40px}
+  .hl-content{padding:1rem;gap:1rem}
+  .hl-name{font-size:1rem}
+  .hl-right{padding:.6rem 1rem}
+  .hl-demand-value{font-size:1.3rem}
+  .cta-section{padding:0 1rem 2rem}
+  .cta-card{padding:1.5rem;flex-direction:column;text-align:center}
+  footer{padding:1.5rem 1rem;flex-direction:column;align-items:flex-start;gap:.8rem}
+}
+
+/* Section watermark */
+.section-watermark{position:relative;overflow:hidden}
+.section-watermark::before{content:attr(data-watermark);position:absolute;font-family:var(--font-serif);font-size:clamp(2.5rem,6vw,5rem);font-weight:300;font-style:italic;color:rgba(180,160,130,.05);white-space:nowrap;pointer-events:none;z-index:0;top:50%;left:50%;transform:translate(-50%,-50%);width:max-content}
+.section-watermark>*{position:relative;z-index:1}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand">
+    <svg class="nav-logo" viewBox="0 0 202.6 265.4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><linearGradient id="lg1"><stop style="stop-color:#2a00fe" offset="0.336"/><stop style="stop-color:#fff" offset="1"/></linearGradient><linearGradient id="lg2"><stop style="stop-color:#fff" offset="0.107"/><stop style="stop-color:#fe0000" offset="0.684"/></linearGradient><linearGradient xlink:href="#lg1" id="grad1" x1="129.89" y1="808.83" x2="194.31" y2="808.83" gradientUnits="userSpaceOnUse"/><linearGradient xlink:href="#lg2" id="grad2" x1="271.02" y1="731.42" x2="327.45" y2="731.42" gradientUnits="userSpaceOnUse" spreadMethod="pad"/></defs><g transform="translate(-129.894,-634.847)"><g transform="translate(-114.063,-139.373)"><path d="m 353.331,791.185 -24.32,66.818 c -8.972,24.651 9.283,50.722 35.516,50.722 h 72.08 c 5.218,0 9.449,4.23 9.449,9.449 0,5.218 -4.231,9.449 -9.449,9.449 h -72.08 c -39.35,0 -66.732,-39.106 -53.274,-76.083 l 7.123,-19.57 17.2,-47.256 c 1.787,-4.903 7.21,-7.428 12.113,-5.642 4.903,1.787 7.429,7.21 5.643,12.112 z" style="fill:#000;stroke:#000"/><path d="m 314.879,1026.411 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#000;stroke:#000"/><path d="m 249.987,1019.877 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:#000;stroke:#000"/><path d="m 359.24,904.532 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#000;stroke:#000"/><path d="m 436.607,884.024 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:#000;stroke:#000"/></g><g><path d="m 234.225,648.032 -24.32,66.818 a 37.795,37.795 0 0 0 35.516,50.722 h 72.08 a 9.449,9.449 0 0 1 0,18.898 h -72.08 a 56.693,56.693 0 0 1 -53.274,-76.083 l 24.323,-66.826 a 9.449,9.449 0 0 1 17.755,6.471 z" style="fill:#fff;stroke:#000"/><path d="m 195.773,883.258 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#fff;stroke:#000"/><path d="m 130.881,876.724 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:url(#grad1);stroke:#000"/><path d="m 240.133,761.379 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#fff;stroke:#000"/><path d="m 317.5,740.871 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:url(#grad2);stroke:#000"/></g></g></svg>
+    <span class="nav-wordmark">Hub<sup>4</sup>Fix</span>
+  </a>
+  <div class="nav-right">
+    <a href="modelisateur.html" class="nav-cta">Devenir modelisateur</a>
+    <a href="index.html" class="nav-back"><span>&larr;</span> Accueil</a>
+    <div class="nav-account" id="navAccount">
+      <button class="nav-account-btn" id="accountBtn">
+        <svg class="nav-account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0112 0v1"/></svg>
+        <span class="nav-token-badge" id="tokenBadge">5</span>
+      </button>
+      <div class="nav-account-menu" id="accountMenu">
+        <div class="account-menu-header">
+          <div class="account-menu-header-left">
+            <span class="account-menu-name">Julien D.</span>
+            <span class="account-menu-email">demo@hub4fix.com</span>
+          </div>
+          <div class="account-menu-tokens-inline">
+            <span class="token-icon">&#x2B21;</span>
+            <strong id="accountTokenCount">5</strong>
+          </div>
+        </div>
+        <div class="account-roles">
+          <a href="#" class="account-role account-role-client active">
+            <div class="account-role-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></div>
+            <span class="account-role-label">Reparer</span>
+            <span class="account-role-sub">Trouver sa piece</span>
+          </a>
+          <a href="printer.html" class="account-role account-role-printer locked">
+            <div class="account-role-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="20" width="18" height="2" rx=".5"/><path d="M7 20v-5h10v5"/><path d="M12 4v6"/><path d="M9.5 10h5L12 15.5 9.5 10z"/></svg></div>
+            <span class="account-role-label">Printer</span>
+            <span class="account-role-sub">Devenir printer</span>
+            <span class="account-role-lock">&#x1F512;</span>
+          </a>
+          <a href="modelisateur.html" class="account-role account-role-modeler locked">
+            <div class="account-role-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 7v4l9 5 9-5V7l-9-5z"/><path d="M12 22V12"/><path d="M3 7l9 5 9-5"/><path d="M21 11v6l-9 5-9-5v-6"/></svg></div>
+            <span class="account-role-label">Modelisateur</span>
+            <span class="account-role-sub">Devenir modelisateur</span>
+            <span class="account-role-lock">&#x1F512;</span>
+          </a>
+        </div>
+        <div class="account-menu-links">
+          <a href="mon-compte.html" class="account-menu-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><span>Ma bibliotheque</span></a>
+          <a href="mon-compte.html" class="account-menu-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span>Parametres</span></a>
+          <a href="#" class="account-menu-item account-menu-logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Deconnexion</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero section-watermark" data-watermark="Les pieces que le monde cherche.">
+  <div class="hero-overline">Catalogue Hub4Fix</div>
+  <h1 class="hero-title">Les pieces les plus <em>recherchees</em></h1>
+  <p class="hero-intro">
+    La Hot List repertorie les pieces detachees en <strong>cours d'acquisition</strong> par Hub4Fix — identifiees par notre veille automatique, classees par demande reelle. Les fichiers les plus demandes sont en tete. Certains sont deja disponibles, d'autres attendent un modelisateur.
+  </p>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-value red" id="heroTotal">—</div>
+      <div class="hero-stat-label">En cours d'acquisition</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-value gold" id="heroSub">—</div>
+      <div class="hero-stat-label">Boostees</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-value green" id="heroModeled">—</div>
+      <div class="hero-stat-label">Fichiers disponibles</div>
+    </div>
+  </div>
+</section>
+
+<!-- Tab toggle : 2 lists -->
+<div class="list-toggle" id="listToggle">
+  <button class="list-toggle-btn active" data-list="catalog">Catalogue general</button>
+  <button class="list-toggle-btn" data-list="hotlist">Hot List modelisateurs</button>
+</div>
+
+<!-- ═══ CATALOGUE GENERAL (clients) ═══ -->
+<div id="catalogSection">
+  <div class="info-banner">
+    <div class="info-banner-inner">
+      <div class="info-icon">&#128270;</div>
+      <div class="info-text">
+        <div class="info-text-title">Votre piece n'est pas encore disponible ?</div>
+        <div class="info-text-body">
+          Grace au programme <strong><a href="hub4fix_econologique.html" style="color:var(--red);text-decoration:underline">Repair Together</a></strong>, recevez votre premiere piece gratuitement (valeur &le; 15 EUR) en echange des droits sur le fichier 3D. Vous repartez repare, et des milliers d'autres proprietaires en profitent apres vous.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="filters-bar">
+    <div class="filters-left">
+      <input type="text" class="filter-search" id="catalogSearch" placeholder="Rechercher une piece ou un appareil...">
+      <div class="filter-tabs" id="catalogFilterTabs">
+        <button class="filter-tab active" data-filter="all">Toutes</button>
+        <button class="filter-tab" data-filter="available">Disponibles</button>
+        <button class="filter-tab" data-filter="pending">En cours d'acquisition</button>
+      </div>
+    </div>
+    <div class="filters-right" id="catalogResultCount"></div>
+  </div>
+
+  <div class="hotlist-grid" id="catalogGrid"></div>
+</div>
+
+<!-- ═══ HOT LIST MODELISATEURS ═══ -->
+<div id="hotlistSection" style="display:none">
+  <div class="info-banner">
+    <div class="info-banner-inner">
+      <div class="info-icon">&#9733;</div>
+      <div class="info-text">
+        <div class="info-text-title">Comment fonctionne le Boost ?</div>
+        <div class="info-text-body">
+          Les <strong>fichiers en tete de la Hot List</strong> beneficient d'une avance sur royalties de <strong>+1 EUR/mois</strong>, cumulative et sans plafond. Plus une piece reste en attente de modelisation, plus le Boost monte — et plus elle devient rentable pour le modelisateur qui la prend en charge. Quand le fichier est livre et valide, la piece quitte la liste et la suivante prend sa place.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="filters-bar">
+    <div class="filters-left">
+      <input type="text" class="filter-search" id="searchInput" placeholder="Rechercher une piece ou un appareil...">
+      <div class="filter-tabs" id="filterTabs">
+        <button class="filter-tab active" data-filter="all">Toutes</button>
+        <button class="filter-tab" data-filter="subsidized">Boostees</button>
+      </div>
+    </div>
+    <div class="filters-right" id="resultCount"></div>
+  </div>
+
+  <div class="hotlist-grid" id="hotlistGrid"></div>
+
+  <section class="cta-section">
+    <div class="cta-card">
+      <div class="cta-left">
+        <div class="cta-overline">Rejoindre le reseau</div>
+        <div class="cta-title">Vous maitrisez la CAO ? <em>Monetisez votre talent.</em></div>
+        <p class="cta-desc">Chaque fichier que vous livrez sauve des milliers d'appareils. Royalties a 33%, avances boostees, communaute active.</p>
+      </div>
+      <a href="modelisateur.html" class="cta-btn">Postuler</a>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <span class="footer-copy">Hub4Fix 2026 — Tous droits reserves</span>
+  <span class="footer-tagline">Dematerialiser le stock, rematerialiser l'objet.</span>
+  <div style="width:100%;text-align:center;margin-top:.6rem;font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.06em"><a href="cgu.html" style="color:var(--stone,#A89F91);text-decoration:none">CGU</a> &middot; <a href="cgv.html" style="color:var(--stone,#A89F91);text-decoration:none">CGV</a></div>
+</footer>
+
+<script>
+// Account menu toggle
+document.getElementById('accountBtn').addEventListener('click', function(e) {
+  e.stopPropagation();
+  document.getElementById('accountMenu').classList.toggle('visible');
+});
+document.addEventListener('click', function() { document.getElementById('accountMenu').classList.remove('visible'); });
+</script>
+<script>
+(function() {
+  var STORAGE_KEY = 'h4f_hotlist';
+  var SUB_KEY = 'h4f_hotlist_subvention';
+
+  var DEFAULT_PRODUCTS = [
+    { name: "Tete d'aspirateur rotative", machine: "Dyson V7/V8/V10/V11", category: "Electromenager", demand: 2340, alerts: 89, units: "1 200 000", age: 6, addedDate: "2026-01-15", modeled: false, thumb: "images/dyson.png" },
+    { name: "Roulette panier superieur", machine: "Bosch / Siemens lave-vaisselle", category: "Electromenager", demand: 1870, alerts: 72, units: "3 500 000", age: 8, addedDate: "2026-01-15", modeled: false, thumb: "images/roulette.png" },
+    { name: "Poussoir extracteur", machine: "Magimix 3200XL / 4200XL", category: "Cuisine", demand: 1540, alerts: 58, units: "800 000", age: 5, addedDate: "2026-02-01", modeled: false, thumb: "images/magimix.png" },
+    { name: "Charniere de porte", machine: "Samsung RF23M8090SR", category: "Refrigerateur", demand: 1320, alerts: 45, units: "600 000", age: 4, addedDate: "2026-02-10", modeled: false, thumb: "images/kenwood-couvercle.png" },
+    { name: "Bouton de commande", machine: "De'Longhi Magnifica S", category: "Cafe", demand: 1180, alerts: 41, units: "2 100 000", age: 7, addedDate: "2026-02-15", modeled: false, thumb: "images/kenwood-protection.png" },
+    { name: "Roue avant pivotante", machine: "Weber Q1200 / Q2200", category: "Barbecue", demand: 980, alerts: 34, units: "1 500 000", age: 5, addedDate: "2026-03-01", modeled: false, thumb: null },
+    { name: "Clip fixation filtre", machine: "Rowenta Silence Force", category: "Electromenager", demand: 870, alerts: 29, units: "900 000", age: 6, addedDate: "2026-03-10", modeled: false, thumb: null },
+    { name: "Patin anti-vibration", machine: "LG F4V5VYP2T", category: "Lave-linge", demand: 750, alerts: 22, units: "400 000", age: 3, addedDate: "2026-03-20", modeled: false, thumb: null },
+    { name: "Cache ampoule interieur", machine: "Whirlpool ARC4020", category: "Refrigerateur", demand: 620, alerts: 18, units: "350 000", age: 4, addedDate: "2026-04-01", modeled: false, thumb: null },
+    { name: "Verrou porte tambour", machine: "Miele W1 Classic", category: "Lave-linge", demand: 540, alerts: 15, units: "250 000", age: 5, addedDate: "2026-04-10", modeled: false, thumb: null }
+  ];
+
+  function loadProducts() {
+    var data = localStorage.getItem(STORAGE_KEY);
+    if (!data) return JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+    return JSON.parse(data);
+  }
+
+  function loadSubventionCount() {
+    var v = localStorage.getItem(SUB_KEY);
+    return v !== null ? parseInt(v, 10) : 5;
+  }
+
+  function monthsSince(dateStr) {
+    if (!dateStr) return 0;
+    var d = new Date(dateStr);
+    var now = new Date();
+    return Math.max(0, (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth()));
+  }
+
+  function subventionAmount(months) {
+    return Math.max(1, months);
+  }
+
+  function esc(s) {
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  var currentFilter = 'all';
+  var searchTerm = '';
+
+  function render() {
+    var products = loadProducts();
+    var subCount = loadSubventionCount();
+    var active = products.filter(function(p) { return !p.modeled; });
+    var modeled = products.filter(function(p) { return p.modeled; });
+    var subsidizedN = Math.min(subCount, active.length);
+
+    document.getElementById('heroTotal').textContent = active.length;
+    document.getElementById('heroSub').textContent = subsidizedN;
+    document.getElementById('heroModeled').textContent = modeled.length;
+
+    var grid = document.getElementById('hotlistGrid');
+    grid.innerHTML = '';
+
+    var rank = 0;
+    var shown = 0;
+
+    active.forEach(function(p) {
+      rank++;
+      var isSubsidized = rank <= subCount;
+      var months = monthsSince(p.addedDate);
+      var subAmt = subventionAmount(months);
+
+      if (searchTerm) {
+        var s = searchTerm.toLowerCase();
+        if ((p.name + ' ' + p.machine + ' ' + p.category).toLowerCase().indexOf(s) === -1) return;
+      }
+      if (currentFilter === 'subsidized' && !isSubsidized) return;
+      if (currentFilter !== 'all' && currentFilter !== 'subsidized') {
+        if (p.category.toLowerCase() !== currentFilter) return;
+      }
+
+      shown++;
+      var delay = Math.min(shown * 0.05, 0.5);
+
+      var card = document.createElement('div');
+      card.className = 'hl-card' + (isSubsidized ? ' subsidized' : '');
+      card.style.animationDelay = delay + 's';
+
+      card.innerHTML =
+        '<div class="hl-rank">' + rank + '</div>' +
+        '<div class="hl-content">' +
+          '<div class="hl-info">' +
+            '<div class="hl-name">' + esc(p.name) + '</div>' +
+            '<div class="hl-machine">' + esc(p.machine) + '</div>' +
+            '<div class="hl-tags">' +
+              '<span class="hl-tag hl-tag-cat">' + esc(p.category) + '</span>' +
+              '<span class="hl-tag hl-tag-units">' + esc(p.units) + ' unites</span>' +
+              (isSubsidized ? '<span class="hl-tag hl-tag-sub">Boost +' + subAmt + ' EUR/mois</span>' : '') +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="hl-right">' +
+          '<div class="hl-demand-block">' +
+            '<div class="hl-demand-value">' + p.demand.toLocaleString('fr-FR') + '</div>' +
+            '<div class="hl-demand-label">recherches / mois</div>' +
+          '</div>' +
+          '<div class="hl-alerts"><strong>' + p.alerts + '</strong> alertes actives</div>' +
+          (isSubsidized ? '<div class="hl-sub-badge">Boost +' + subAmt + ' EUR/mois</div>' : '') +
+        '</div>';
+
+      grid.appendChild(card);
+    });
+
+    document.getElementById('resultCount').textContent = shown + ' resultat' + (shown > 1 ? 's' : '');
+
+    if (shown === 0) {
+      grid.innerHTML =
+        '<div class="empty-state">' +
+          '<div class="empty-state-icon">&#128270;</div>' +
+          '<div class="empty-state-title">Aucune piece trouvee</div>' +
+          '<div class="empty-state-desc">Essayez de modifier vos filtres ou votre recherche.</div>' +
+        '</div>';
+    }
+
+    updateFilterTabs(active);
+  }
+
+  function updateFilterTabs(active) {
+    var categories = {};
+    active.forEach(function(p) {
+      var cat = p.category.toLowerCase();
+      categories[cat] = (categories[cat] || 0) + 1;
+    });
+
+    var tabsContainer = document.getElementById('filterTabs');
+    var existingTabs = tabsContainer.querySelectorAll('.filter-tab');
+    var staticFilters = ['all', 'subsidized'];
+
+    existingTabs.forEach(function(tab) {
+      var f = tab.getAttribute('data-filter');
+      if (staticFilters.indexOf(f) === -1) tab.remove();
+    });
+
+    Object.keys(categories).sort().forEach(function(cat) {
+      var existing = tabsContainer.querySelector('[data-filter="' + cat + '"]');
+      if (!existing) {
+        var btn = document.createElement('button');
+        btn.className = 'filter-tab' + (currentFilter === cat ? ' active' : '');
+        btn.setAttribute('data-filter', cat);
+        btn.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+        tabsContainer.appendChild(btn);
+      }
+    });
+  }
+
+  // Filter tabs
+  document.getElementById('filterTabs').addEventListener('click', function(e) {
+    var tab = e.target.closest('.filter-tab');
+    if (!tab) return;
+    currentFilter = tab.getAttribute('data-filter');
+    document.querySelectorAll('.filter-tab').forEach(function(t) { t.classList.remove('active'); });
+    tab.classList.add('active');
+    render();
+  });
+
+  // Search
+  document.getElementById('searchInput').addEventListener('input', function() {
+    searchTerm = this.value;
+    render();
+  });
+
+  render();
+
+  // ═══ CATALOGUE GENERAL ═══
+  var catalogFilter = 'all';
+  var catalogSearchTerm = '';
+
+  function renderCatalog() {
+    var products = loadProducts();
+    var grid = document.getElementById('catalogGrid');
+    grid.innerHTML = '';
+    var shown = 0;
+
+    // Sort: available first, then by demand
+    var sorted = products.slice().sort(function(a, b) {
+      if (a.modeled && !b.modeled) return -1;
+      if (!a.modeled && b.modeled) return 1;
+      return b.demand - a.demand;
+    });
+
+    sorted.forEach(function(p) {
+      var isAvailable = p.modeled;
+
+      if (catalogSearchTerm) {
+        var s = catalogSearchTerm.toLowerCase();
+        if ((p.name + ' ' + p.machine + ' ' + p.category).toLowerCase().indexOf(s) === -1) return;
+      }
+      if (catalogFilter === 'available' && !isAvailable) return;
+      if (catalogFilter === 'pending' && isAvailable) return;
+
+      shown++;
+      var delay = Math.min(shown * 0.05, 0.5);
+
+      var card = document.createElement('div');
+      card.className = 'hl-card';
+      card.style.animationDelay = delay + 's';
+
+      var statusHtml = isAvailable
+        ? '<span class="hl-status hl-status-available">Disponible</span>'
+        : '<span class="hl-status hl-status-pending">En cours d\'acquisition</span>';
+
+      var repairHtml = !isAvailable
+        ? '<a href="hub4fix_econologique.html" class="hl-repair-link">Repair Together — 1ere piece offerte &rarr;</a>'
+        : '';
+
+      var thumbHtml = p.thumb
+        ? '<div class="hl-thumb"><img src="' + p.thumb + '" alt="' + esc(p.name) + '"></div>'
+        : '<div class="hl-thumb"><div class="hl-thumb-placeholder"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></div></div>';
+
+      card.innerHTML =
+        thumbHtml +
+        '<div class="hl-content" style="flex:1">' +
+          '<div class="hl-info">' +
+            '<div class="hl-name">' + esc(p.name) + '</div>' +
+            '<div class="hl-machine">' + esc(p.machine) + '</div>' +
+            '<div class="hl-tags">' +
+              '<span class="hl-tag hl-tag-cat">' + esc(p.category) + '</span>' +
+              statusHtml +
+            '</div>' +
+            repairHtml +
+          '</div>' +
+        '</div>' +
+        '<div class="hl-right">' +
+          '<div class="hl-demand-block">' +
+            '<div class="hl-demand-value">' + p.demand.toLocaleString('fr-FR') + '</div>' +
+            '<div class="hl-demand-label">recherches / mois</div>' +
+          '</div>' +
+        '</div>';
+
+      grid.appendChild(card);
+    });
+
+    document.getElementById('catalogResultCount').textContent = shown + ' resultat' + (shown > 1 ? 's' : '');
+
+    if (shown === 0) {
+      grid.innerHTML =
+        '<div class="empty-state">' +
+          '<div class="empty-state-icon">&#128270;</div>' +
+          '<div class="empty-state-title">Aucune piece trouvee</div>' +
+          '<div class="empty-state-desc">Essayez de modifier vos filtres ou votre recherche.</div>' +
+        '</div>';
+    }
+  }
+
+  // Catalog filter tabs
+  document.getElementById('catalogFilterTabs').addEventListener('click', function(e) {
+    var tab = e.target.closest('.filter-tab');
+    if (!tab) return;
+    catalogFilter = tab.getAttribute('data-filter');
+    this.querySelectorAll('.filter-tab').forEach(function(t) { t.classList.remove('active'); });
+    tab.classList.add('active');
+    renderCatalog();
+  });
+
+  document.getElementById('catalogSearch').addEventListener('input', function() {
+    catalogSearchTerm = this.value;
+    renderCatalog();
+  });
+
+  // Toggle between lists
+  document.getElementById('listToggle').addEventListener('click', function(e) {
+    var btn = e.target.closest('.list-toggle-btn');
+    if (!btn) return;
+    var list = btn.getAttribute('data-list');
+    this.querySelectorAll('.list-toggle-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('catalogSection').style.display = list === 'catalog' ? '' : 'none';
+    document.getElementById('hotlistSection').style.display = list === 'hotlist' ? '' : 'none';
+    if (list === 'catalog') renderCatalog();
+    else render();
+  });
+
+  renderCatalog();
+})();
+
+// Logo click suction effect
+(function(){
+  var brand = document.querySelector('.nav-brand');
+  if(!brand) return;
+  brand.addEventListener('click', function(e){
+    var href = brand.getAttribute('href') || 'index.html';
+    e.preventDefault();
+    document.body.style.transformOrigin = 'top center';
+    document.body.classList.add('page-sucking');
+    var navigated = false;
+    function go(){ if(!navigated){ navigated=true; window.location.assign(href); } }
+    document.body.addEventListener('animationend', go);
+    setTimeout(go, 800);
+  });
+})();
+</script>
+<script>
+(function(){var cvs=document.createElement('canvas');cvs.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none;';document.body.insertBefore(cvs,document.body.firstChild);var ctx=cvs.getContext('2d'),W,H,P=[],dpr;var DIST=130,SPD=0.35;function resize(){dpr=window.devicePixelRatio||1;W=window.innerWidth;H=window.innerHeight;cvs.width=W*dpr;cvs.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}function make(){P=[];var n=Math.min(Math.round(W*H/13000),80);for(var i=0;i<n;i++)P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*SPD,vy:(Math.random()-.5)*SPD,r:Math.random()*.7+.5});}function tick(){ctx.clearRect(0,0,W,H);for(var i=0;i<P.length;i++){for(var j=i+1;j<P.length;j++){var dx=P[i].x-P[j].x,dy=P[i].y-P[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<DIST){ctx.strokeStyle='rgba(168,159,145,'+(0.28*(1-d/DIST)).toFixed(3)+')';ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(P[i].x,P[i].y);ctx.lineTo(P[j].x,P[j].y);ctx.stroke();}}ctx.fillStyle='rgba(168,159,145,.3)';ctx.beginPath();ctx.arc(P[i].x,P[i].y,P[i].r,0,6.283);ctx.fill();P[i].x+=P[i].vx;P[i].y+=P[i].vy;if(P[i].x<0||P[i].x>W)P[i].vx*=-1;if(P[i].y<0||P[i].y>H)P[i].vy*=-1;}requestAnimationFrame(tick);}resize();make();tick();window.addEventListener('resize',function(){resize();make();});})();
+</script>
+<script src="/js/sphere-bg.js"></script>
+<script src="js/nav-mindmap.js"></script>
+</body>
+</html>

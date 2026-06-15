@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Devenir printer — Hub⁴Fix</title>
+<meta name="description" content="Rentabilisez votre imprimante 3D en imprimant pour Hub⁴Fix. G-code prêt, zéro paramétrage, paiement au taux horaire par matériau.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/glass-sphere.css">
+<link rel="stylesheet" href="css/cgv-modal.css">
+<style>
+:root{--ivory:#FAF8F5;--warm-white:#F3EEE8;--cream:#EDE6DC;--sand:#D4C9B8;--stone:#A89F91;--earth:#7A7268;--charcoal:#3B3632;--night:#1C1A18;--gold:#B8963E;--gold-light:#D4B15F;--gold-pale:rgba(184,150,62,0.08);--red:#C8102E;--red-soft:rgba(200,16,46,0.06);--green:#2D8B5E}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'Karla',sans-serif;background:var(--ivory);color:var(--charcoal);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+::selection{background:rgba(184,150,62,0.15);color:var(--night)}
+
+/* ════ NAV ════ */
+nav{position:sticky;top:0;z-index:100;padding:1rem 4rem;display:flex;justify-content:space-between;align-items:center;background:rgba(243,238,232,0.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(237,230,220,0.4)}
+.nav-brand{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo{width:auto;height:36px;transition:transform .5s cubic-bezier(.25,.46,.45,.94);transform-origin:center center;position:relative;z-index:101}
+.nav-brand:hover .nav-logo{transform:scale(3);filter:drop-shadow(0 8px 24px rgba(0,0,0,.2))}
+@keyframes suckIn{0%{transform:scale(1);opacity:1;filter:blur(0)}60%{transform:scale(.3) translate(0,-30vh);opacity:.6;filter:blur(2px)}100%{transform:scale(0) translate(0,-40vh);opacity:0;filter:blur(8px)}}
+.page-sucking{animation:suckIn .7s cubic-bezier(.55,.06,.68,.19) forwards;pointer-events:none}
+.nav-wordmark{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:500;color:var(--night);letter-spacing:.02em}
+.nav-wordmark sup{color:var(--red);font-size:.7em;vertical-align:super;line-height:0}
+.nav-right{display:flex;align-items:center;gap:1rem}
+.nav-back{font-size:.78rem;font-weight:500;color:var(--earth);text-decoration:none;letter-spacing:.04em;display:flex;align-items:center;gap:.4rem;transition:color .3s}
+.nav-back:hover{color:var(--red)}
+.lang-dropdown{position:relative}
+.lang-dropdown-btn{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;justify-content:center;width:34px;height:23px;padding:0;background:white;border:1px solid rgba(212,201,184,0.4);border-radius:4px;cursor:pointer;font-size:0;color:transparent;transition:all .25s ease;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.lang-dropdown-btn .flag{display:none}
+.lang-dropdown-btn::before{content:'';position:absolute;inset:0;border-radius:3px;background-size:contain;background-position:center;background-repeat:no-repeat;opacity:1;z-index:0}
+.lang-dropdown-btn:hover{box-shadow:0 2px 8px rgba(0,0,0,.12);transform:scale(1.08)}
+.lang-dropdown.open .lang-dropdown-btn{box-shadow:0 2px 10px rgba(0,0,0,.15);transform:scale(1.08)}
+.lang-dropdown-btn[data-lang="fr"]::before{background-image:url(https://flagcdn.com/w80/fr.png)}
+.lang-dropdown-btn[data-lang="en"]::before{background-image:url(https://flagcdn.com/w80/gb.png)}
+.lang-dropdown-btn[data-lang="de"]::before{background-image:url(https://flagcdn.com/w80/de.png)}
+.lang-dropdown-btn[data-lang="es"]::before{background-image:url(https://flagcdn.com/w80/es.png)}
+.lang-dropdown-btn[data-lang="it"]::before{background-image:url(https://flagcdn.com/w80/it.png)}
+.lang-dropdown-btn[data-lang="pt"]::before{background-image:url(https://flagcdn.com/w80/pt.png)}
+.lang-dropdown-btn[data-lang="zh"]::before{background-image:url(https://flagcdn.com/w80/cn.png)}
+.lang-dropdown-btn[data-lang="hi"]::before{background-image:url(https://flagcdn.com/w80/in.png)}
+.lang-dropdown-btn .lang-arrow{display:none}
+.lang-dropdown-list{position:absolute;top:calc(100% + 6px);right:0;background:rgba(255,255,255,0.97);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(212,201,184,0.3);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.08),0 2px 8px rgba(0,0,0,.04);display:none;z-index:210;min-width:155px;padding:6px;transform-origin:top right}
+.lang-dropdown.open .lang-dropdown-list{display:block;animation:langDropIn .25s cubic-bezier(.22,.61,.36,1)}
+@keyframes langDropIn{from{opacity:0;transform:scale(.95) translateY(-4px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.lang-opt{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:8px 12px;cursor:pointer;font-size:.78rem;font-weight:500;color:var(--charcoal);font-family:'Karla',sans-serif;border-radius:8px;transition:all .2s ease}
+.lang-opt .flag{display:none}
+.lang-opt::before{content:'';position:absolute;inset:0;background-size:contain;background-position:right center;background-repeat:no-repeat;border-radius:8px;opacity:0;transition:opacity .25s ease;z-index:-1}
+.lang-opt:hover{transform:translateX(2px);text-shadow:0 0 8px rgba(255,255,255,1),0 0 16px rgba(255,255,255,1),0 0 2px rgba(255,255,255,1)}
+.lang-opt:hover::before{opacity:.9}
+.lang-opt.active{font-weight:700;text-shadow:0 0 8px rgba(255,255,255,1),0 0 16px rgba(255,255,255,1),0 0 2px rgba(255,255,255,1)}
+.lang-opt.active::before{opacity:.85}
+.lang-opt[data-lang="fr"]::before{background:url(https://flagcdn.com/w160/fr.png) no-repeat right center / contain,#002654}
+.lang-opt[data-lang="en"]::before{background:url(https://flagcdn.com/w160/gb.png) no-repeat right center / contain,linear-gradient(to bottom,#012169 33%,#FFF 33% 40%,#C8102E 40% 60%,#FFF 60% 67%,#012169 67%)}
+.lang-opt[data-lang="de"]::before{background:url(https://flagcdn.com/w160/de.png) no-repeat right center / contain,linear-gradient(to bottom,#000 33%,#DD0000 33% 66%,#FFCC00 66%)}
+.lang-opt[data-lang="es"]::before{background:url(https://flagcdn.com/w160/es.png) no-repeat right center / auto 100%,linear-gradient(to bottom,#ad1519 25%,#fabd00 25% 75%,#ad1519 75%)}
+.lang-opt[data-lang="it"]::before{background:url(https://flagcdn.com/w160/it.png) no-repeat right center / contain,#009246}
+.lang-opt[data-lang="pt"]::before{background:url(https://flagcdn.com/w160/pt.png) no-repeat right center / contain,#006600}
+.lang-opt[data-lang="zh"]::before{background:url(https://flagcdn.com/w160/cn.png) no-repeat right center / contain,#EE1C25}
+.lang-opt[data-lang="hi"]::before{background:url(https://flagcdn.com/w160/in.png) no-repeat right center / contain,linear-gradient(to bottom,#ff6820 33%,#FFF 33% 66%,#046a38 66%)}
+.lang-opt::after{content:'';position:absolute;left:0;top:4px;bottom:4px;width:3px;border-radius:2px;z-index:1;transition:opacity .2s ease;opacity:.7}
+.lang-opt:hover::after,.lang-opt.active::after{opacity:1}
+.lang-opt[data-lang="fr"]::after{background:#002395}
+.lang-opt[data-lang="en"]::after{background:#012169}
+.lang-opt[data-lang="de"]::after{background:linear-gradient(to bottom,#000 33%,#DD0000 33% 66%,#FFCC00 66%)}
+.lang-opt[data-lang="es"]::after{background:linear-gradient(to bottom,#AA151B 25%,#F1BF00 25% 75%,#AA151B 75%)}
+.lang-opt[data-lang="it"]::after{background:#008C45}
+.lang-opt[data-lang="pt"]::after{background:#006600}
+.lang-opt[data-lang="zh"]::after{background:#DE2910}
+.lang-opt[data-lang="hi"]::after{background:linear-gradient(to bottom,#ff6820 33%,#FFF 33% 66%,#046a38 66%)}
+.nav-account{position:relative}
+.nav-account-btn{display:flex;align-items:center;gap:.3rem;background:none;border:none;cursor:pointer;padding:.3rem;border-radius:2px;transition:background .2s}
+.nav-account-btn:hover{background:var(--cream)}
+.nav-account-icon{width:22px;height:22px;color:var(--charcoal)}
+.nav-token-badge{background:var(--red);color:white;font-size:.65rem;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;line-height:1}
+.nav-account-menu{position:absolute;top:calc(100% + 8px);right:0;width:340px;background:white;border:1px solid var(--cream);border-radius:4px;box-shadow:0 16px 48px rgba(0,0,0,.12);display:none;z-index:200}
+.nav-account-menu.visible{display:block;animation:fadeUp .25s}
+.account-menu-header{padding:1rem 1.2rem;border-bottom:1px solid var(--cream);display:flex;justify-content:space-between;align-items:center}
+.account-menu-header-left{display:flex;flex-direction:column}
+.account-menu-name{font-weight:600;font-size:.9rem;color:var(--night)}
+.account-menu-email{font-size:.72rem;color:var(--earth);margin-top:.15rem}
+.account-menu-tokens-inline{display:flex;align-items:center;gap:.3rem;background:var(--red-soft);padding:4px 10px;border-radius:12px}
+.account-menu-tokens-inline .token-icon{font-size:.75rem;color:var(--red)}
+.account-menu-tokens-inline strong{font-family:'Courier New',monospace;font-size:1rem;color:var(--red)}
+.account-roles{padding:.8rem;display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;border-bottom:1px solid var(--cream)}
+.account-role{display:flex;flex-direction:column;align-items:center;gap:.4rem;padding:.8rem .4rem;border-radius:4px;cursor:pointer;border:2px solid transparent;transition:all .2s;text-decoration:none}
+.account-role:hover{transform:translateY(-1px)}
+.account-role-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem}
+.account-role-label{font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-align:center}
+.account-role-sub{font-size:.6rem;color:var(--earth);text-align:center;line-height:1.2}
+.account-role-client .account-role-icon{background:var(--red-soft);color:var(--red)}
+.account-role-client .account-role-label{color:var(--red)}
+.account-role-client.active{border-color:var(--red);background:var(--red-soft)}
+.account-role-printer .account-role-icon{background:#1a2a3a;color:#5ba8d4}
+.account-role-printer .account-role-label{color:#2c6e9b}
+.account-role-printer.active{border-color:#2c6e9b;background:#e8f1f8}
+.account-role-printer:hover{background:#e8f1f8}
+.account-role-modeler .account-role-icon{background:#2a1f1a;color:#d4845b}
+.account-role-modeler .account-role-label{color:#a0522d}
+.account-role-modeler.active{border-color:#a0522d;background:#f5ece5}
+.account-role-modeler:hover{background:#f5ece5}
+.account-role.locked{opacity:.5;pointer-events:auto;position:relative}
+.account-role.locked .account-role-icon{filter:grayscale(.6)}
+.account-role-lock{font-size:.6rem;margin-top:-.1rem}
+.account-role.locked:hover{opacity:.75}
+.account-role.locked:hover .account-role-sub{display:none}
+.account-role.locked:hover::after{content:'Inscription requise';font-size:.55rem;color:var(--earth);text-align:center}
+.account-menu-links{padding:.3rem 0}
+.account-menu-item{display:flex;align-items:center;gap:.6rem;padding:.6rem 1.2rem;font-size:.82rem;color:var(--charcoal);text-decoration:none;transition:background .15s}
+.account-menu-item:hover{background:var(--warm-white)}
+.account-menu-item svg{width:16px;height:16px;color:var(--stone);flex-shrink:0}
+.account-menu-logout{color:var(--earth);border-top:1px solid var(--cream)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.page-hero{padding:4rem 4rem 4rem;max-width:900px;margin:0 auto}
+.page-overline{font-size:.68rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;margin-bottom:1.5rem;display:flex;align-items:center;gap:.8rem}
+.page-overline::before{content:'';width:24px;height:1px}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,5vw,4rem);font-weight:300;color:var(--night);line-height:1.1;margin-bottom:1.5rem}
+.page-title em{font-style:italic;font-weight:400}
+.page-intro{font-size:1.1rem;line-height:1.75;color:var(--earth);font-weight:300;max-width:680px;margin-bottom:2rem}
+
+.content-section{padding:3rem 4rem;max-width:900px;margin:0 auto}
+.content-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2rem;margin-bottom:3rem}
+.content-card{padding:2rem;border-radius:3px;background:rgba(255,255,255,0.45);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(237,230,220,0.5);transition:all .3s}
+.content-card:hover{box-shadow:0 4px 24px rgba(0,0,0,.04)}
+.content-card h4{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;color:var(--night);margin-bottom:.6rem}
+.content-card p{font-size:.92rem;line-height:1.7;color:var(--earth);font-weight:300}
+
+.rewards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-bottom:3rem}
+.reward{padding:2rem 1.5rem;text-align:center;border-radius:3px;background:rgba(255,255,255,0.45);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(237,230,220,0.5)}
+.reward-value{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:500;color:var(--gold);line-height:1;margin-bottom:.5rem}
+.reward-label{font-size:.88rem;color:var(--night);font-weight:500;margin-bottom:.3rem}
+.reward-detail{font-size:.78rem;color:var(--stone);font-style:italic}
+
+.requirements{padding:3rem;border-radius:3px;background:rgba(243,238,232,0.4);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);margin-bottom:3rem;border-left:3px solid var(--gold)}
+.requirements h3{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:500;color:var(--night);margin-bottom:1.5rem}
+.requirements ul{list-style:none;display:flex;flex-direction:column;gap:.8rem}
+.requirements li{display:flex;align-items:baseline;gap:.8rem;font-size:.92rem;line-height:1.6;color:var(--charcoal);font-weight:300}
+.requirements li::before{content:'✓';color:var(--gold);font-weight:600;flex-shrink:0}
+
+.form-section{padding:4rem;max-width:720px;margin:0 auto 4rem;background:rgba(255,255,255,0.45);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:3px;border:1px solid rgba(237,230,220,0.5)}
+.form-section h2{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--night);margin-bottom:.6rem}
+.form-section h2 em{font-style:italic;font-weight:400}
+.form-section .form-intro{font-size:.95rem;color:var(--earth);line-height:1.7;margin-bottom:2.5rem;font-weight:300}
+.form-group{margin-bottom:1.2rem}
+.form-group label{display:block;font-size:.78rem;font-weight:600;letter-spacing:.04em;color:var(--charcoal);margin-bottom:.5rem}
+.form-group input,.form-group textarea,.form-group select{width:100%;padding:.8rem 1rem;border-radius:2px;border:1px solid var(--cream);background:var(--ivory);color:var(--night);font-size:.92rem;font-family:'Karla',sans-serif;outline:none;transition:border-color .3s}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--gold)}
+.form-group textarea{min-height:100px;resize:vertical}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form-checkboxes{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:.5rem}
+.form-check{display:flex;align-items:center;gap:.5rem;padding:.5rem .9rem;border:1px solid var(--cream);border-radius:2px;cursor:pointer;transition:all .3s;font-size:.85rem}
+.form-check:hover{border-color:var(--sand)}
+.form-check input{width:16px;height:16px;margin:0;accent-color:var(--gold)}
+.form-check.checked{background:var(--gold-pale);border-color:var(--gold)}
+.machine-row{display:grid;grid-template-columns:2fr 1.3fr .7fr auto;gap:.5rem;align-items:center;margin-bottom:.5rem}
+.machine-row input,.machine-row select{width:100%;padding:.6rem .7rem;border:1px solid var(--cream);border-radius:2px;background:var(--ivory);color:var(--night);font-family:'Karla',sans-serif;font-size:.88rem;outline:none}
+.machine-row input:focus,.machine-row select:focus{border-color:var(--gold)}
+.machine-row .m-remove{border:none;background:none;color:var(--stone);font-size:1.4rem;cursor:pointer;line-height:1;padding:0 .3rem;transition:color .2s}
+.machine-row .m-remove:hover{color:var(--red)}
+.add-machine-btn{margin-top:.3rem;font-family:'Karla',sans-serif;font-size:.82rem;font-weight:600;color:var(--red);background:none;border:1px dashed var(--sand);border-radius:6px;padding:.5rem .9rem;cursor:pointer;transition:border-color .2s}
+.add-machine-btn:hover{border-color:var(--red)}
+@media(max-width:600px){.machine-row{grid-template-columns:1fr 1fr auto;gap:.4rem}.machine-row .m-modele{grid-column:1 / -1}}
+.form-submit{width:100%;margin-top:1.5rem;padding:1rem;background:var(--red);color:white;border:none;border-radius:2px;font-family:'Karla',sans-serif;font-size:.85rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.form-submit:hover{background:#A00D24;transform:translateY(-1px);box-shadow:0 6px 20px rgba(200,16,46,.2)}
+.form-note{font-size:.78rem;color:var(--stone);font-style:italic;text-align:center;margin-top:1rem}
+.form-success{text-align:center;padding:3rem}
+.form-success-icon{width:56px;height:56px;border-radius:50%;background:rgba(45,139,94,.1);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;margin:0 auto 1.5rem}
+.form-success h3{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:400;color:var(--night);margin-bottom:.8rem}
+.form-success p{font-size:.95rem;color:var(--earth);line-height:1.7;font-weight:300}
+
+footer{padding:3rem 4rem;border-top:1px solid var(--cream);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.footer-brand{display:flex;align-items:center;gap:.6rem}
+.footer-logo{width:auto;height:28px}.footer-logo svg{width:auto;height:100%}
+.footer-copy{font-size:.78rem;color:var(--stone)}
+.footer-tagline{font-family:'Cormorant Garamond',serif;font-size:.85rem;font-style:italic;color:var(--sand)}
+
+@media(max-width:900px){
+  nav{padding:1rem 1.5rem}
+  .page-hero{padding:6rem 1.5rem 2rem}
+  .content-section{padding:2rem 1.5rem}
+  .content-grid,.rewards-grid{grid-template-columns:1fr}
+  .requirements{padding:2rem 1.5rem}
+  .form-section{padding:2rem 1.5rem;margin:0 1rem 2rem}
+  .form-row{grid-template-columns:1fr}
+  footer{padding:2rem 1.5rem}
+}
+
+/* ════ MOBILE 600px ════ */
+@media(max-width:600px){
+  nav{padding:.6rem 1rem}
+  .nav-wordmark{font-size:1.1rem}
+  .nav-right{gap:.5rem}
+  .nav-account-menu{width:calc(100vw - 2rem);max-width:340px;right:0}
+  .lang-dropdown-list{right:0;min-width:140px}
+  .lang-dropdown-btn{width:28px;height:19px}
+  .page-hero{padding:3rem 1rem 1.5rem}
+  .page-title{font-size:clamp(1.8rem,5vw,2.5rem)}
+  .page-overline{font-size:.6rem;letter-spacing:.12em}
+  .page-intro{font-size:.95rem;line-height:1.6}
+  .content-section{padding:1.5rem 1rem}
+  .content-card{padding:1.5rem}
+  .content-card h4{font-size:1.05rem}
+  .content-card p{font-size:.85rem}
+  .content-grid{gap:1rem}
+  .rewards-grid{gap:1rem}
+  .reward{padding:1.5rem 1rem}
+  .reward-value{font-size:1.6rem}
+  .reward-label{font-size:.82rem}
+  .requirements{padding:1.5rem 1rem}
+  .requirements h3{font-size:1.15rem}
+  .requirements li{font-size:.85rem;gap:.6rem}
+  .form-section{padding:1.5rem 1rem;margin:0 .5rem 1.5rem}
+  .form-section h2{font-size:1.6rem}
+  .form-section .form-intro{font-size:.88rem;margin-bottom:1.5rem}
+  .form-group input,.form-group textarea,.form-group select{font-size:.88rem;padding:.7rem .8rem}
+  .form-checkboxes{gap:.5rem}
+  .form-check{padding:.4rem .7rem;font-size:.8rem}
+  .form-submit{font-size:.8rem;padding:.85rem}
+  footer{padding:1.5rem 1rem;flex-direction:column;align-items:flex-start;gap:.8rem}
+  .footer-copy{font-size:.72rem}
+  .footer-tagline{font-size:.78rem}
+}
+
+/* ════ MOBILE 480px ════ */
+@media(max-width:480px){
+  .page-title{font-size:1.6rem}
+  .page-intro{font-size:.9rem}
+  .content-card{padding:1.2rem}
+  .content-card h4{font-size:1rem}
+  .reward-value{font-size:1.4rem}
+  .form-section h2{font-size:1.4rem}
+  .form-check{font-size:.75rem;padding:.35rem .6rem}
+}
+
+/* ════ WATERMARK SLOGANS ════ */
+.section-watermark{position:relative;overflow:hidden}
+.section-watermark::before{content:attr(data-watermark);position:absolute;font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,6vw,5rem);font-weight:300;font-style:italic;color:rgba(180,160,130,.07);white-space:nowrap;pointer-events:none;z-index:0;top:50%;left:50%;transform:translate(-50%,-50%);width:max-content}
+.section-watermark>*{position:relative;z-index:1}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand">
+    <svg class="nav-logo" viewBox="0 0 202.6 265.4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><linearGradient id="lg1"><stop style="stop-color:#2a00fe" offset="0.336"/><stop style="stop-color:#fff" offset="1"/></linearGradient><linearGradient id="lg2"><stop style="stop-color:#fff" offset="0.107"/><stop style="stop-color:#fe0000" offset="0.684"/></linearGradient><linearGradient xlink:href="#lg1" id="grad1" x1="129.89" y1="808.83" x2="194.31" y2="808.83" gradientUnits="userSpaceOnUse"/><linearGradient xlink:href="#lg2" id="grad2" x1="271.02" y1="731.42" x2="327.45" y2="731.42" gradientUnits="userSpaceOnUse" spreadMethod="pad"/></defs><g transform="translate(-129.894,-634.847)"><g transform="translate(-114.063,-139.373)"><path d="m 353.331,791.185 -24.32,66.818 c -8.972,24.651 9.283,50.722 35.516,50.722 h 72.08 c 5.218,0 9.449,4.23 9.449,9.449 0,5.218 -4.231,9.449 -9.449,9.449 h -72.08 c -39.35,0 -66.732,-39.106 -53.274,-76.083 l 7.123,-19.57 17.2,-47.256 c 1.787,-4.903 7.21,-7.428 12.113,-5.642 4.903,1.787 7.429,7.21 5.643,12.112 z" style="fill:#000;stroke:#000"/><path d="m 314.879,1026.411 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#000;stroke:#000"/><path d="m 249.987,1019.877 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:#000;stroke:#000"/><path d="m 359.24,904.532 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#000;stroke:#000"/><path d="m 436.607,884.024 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:#000;stroke:#000"/></g><g><path d="m 234.225,648.032 -24.32,66.818 a 37.795,37.795 0 0 0 35.516,50.722 h 72.08 a 9.449,9.449 0 0 1 0,18.898 h -72.08 a 56.693,56.693 0 0 1 -53.274,-76.083 l 24.323,-66.826 a 9.449,9.449 0 0 1 17.755,6.471 z" style="fill:#fff;stroke:#000"/><path d="m 195.773,883.258 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#fff;stroke:#000"/><path d="m 130.881,876.724 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:url(#grad1);stroke:#000"/><path d="m 240.133,761.379 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#fff;stroke:#000"/><path d="m 317.5,740.871 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:url(#grad2);stroke:#000"/></g></g></svg>
+    <span class="nav-wordmark">Hub<sup>4</sup>Fix</span>
+  </a>
+  <div class="nav-right">
+    <a href="index.html" class="nav-back"><span class="nav-back-arrow">←</span></a>
+    <div class="lang-dropdown" id="langDropdown">
+      <button class="lang-dropdown-btn" id="langDropdownBtn" data-lang="fr"></button>
+      <div class="lang-dropdown-list" id="langDropdownList">
+        <button class="lang-opt active" data-lang="fr"><span class="flag">🇫🇷</span> Francais</button>
+        <button class="lang-opt" data-lang="en"><span class="flag">🇬🇧</span> English</button>
+        <button class="lang-opt" data-lang="de"><span class="flag">🇩🇪</span> Deutsch</button>
+        <button class="lang-opt" data-lang="es"><span class="flag">🇪🇸</span> Espanol</button>
+        <button class="lang-opt" data-lang="it"><span class="flag">🇮🇹</span> Italiano</button>
+        <button class="lang-opt" data-lang="pt"><span class="flag">🇵🇹</span> Portugues</button>
+        <button class="lang-opt" data-lang="zh"><span class="flag">🇨🇳</span> 中文</button>
+        <button class="lang-opt" data-lang="hi"><span class="flag">🇮🇳</span> हिन्दी</button>
+      </div>
+    </div>
+    <div class="nav-account" id="navAccount">
+      <button class="nav-account-btn" id="accountBtn">
+        <svg class="nav-account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0112 0v1"/></svg>
+        <span class="nav-token-badge" id="tokenBadge">5</span>
+      </button>
+      <div class="nav-account-menu" id="accountMenu">
+        <div class="account-menu-header">
+          <div class="account-menu-header-left">
+            <span class="account-menu-name">Julien D.</span>
+            <span class="account-menu-email">demo@hub4fix.com</span>
+          </div>
+          <div class="account-menu-tokens-inline">
+            <span class="token-icon">⬡</span>
+            <strong id="accountTokenCount">5</strong>
+          </div>
+        </div>
+        <div class="account-roles">
+          <a href="#" class="account-role account-role-client active">
+            <div class="account-role-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            <span class="account-role-label" data-i18n="account_repair">Reparer</span>
+            <span class="account-role-sub" data-i18n="account_repair_sub">Trouver sa piece</span>
+          </a>
+          <a href="printer.html" class="account-role account-role-printer locked">
+            <div class="account-role-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="20" width="18" height="2" rx=".5"/><path d="M7 20v-5h10v5"/><path d="M12 4v6"/><path d="M9.5 10h5L12 15.5 9.5 10z"/></svg>
+            </div>
+            <span class="account-role-label">Printer</span>
+            <span class="account-role-sub" data-i18n="account_printer_sub">Devenir printer</span>
+            <span class="account-role-lock">🔒</span>
+          </a>
+          <a href="modelisateur.html" class="account-role account-role-modeler locked">
+            <div class="account-role-icon">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 7v4l9 5 9-5V7l-9-5z"/><path d="M12 22V12"/><path d="M3 7l9 5 9-5"/><path d="M21 11v6l-9 5-9-5v-6"/></svg>
+            </div>
+            <span class="account-role-label" data-i18n="account_modeler">Modelisateur</span>
+            <span class="account-role-sub" data-i18n="account_modeler_sub">Devenir modelisateur</span>
+            <span class="account-role-lock">🔒</span>
+          </a>
+        </div>
+        <div class="account-menu-links">
+          <a href="#" class="account-menu-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+            <span data-i18n="account_library">Ma bibliotheque</span>
+          </a>
+          <a href="#" class="account-menu-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            <span data-i18n="account_settings">Parametres</span>
+          </a>
+          <a href="#" class="account-menu-item account-menu-logout">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span data-i18n="account_logout">Deconnexion</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<section class="page-hero section-watermark" data-watermark="Réparer local, produire durable.">
+  <div class="page-overline" style="color:var(--red)" data-i18n="hero_overline"><style>.page-hero .page-overline::before{background:var(--red)}</style>Pour les makers</div>
+  <h1 class="page-title" data-i18n-html="hero_title">Devenir <em style="color:var(--red)">printer</em><br>Hub⁴Fix</h1>
+  <p class="page-intro" data-i18n="hero_intro">Votre imprimante 3D dort 22h sur 24 ? Rentabilisez-la en imprimant pour vos voisins. Hub⁴Fix vous envoie des G-codes prêts à lancer, sans aucun paramétrage. Vous imprimez, vous déposez la pièce dans un locker proche, vous êtes payé. C'est tout.</p>
+</section>
+
+<section class="content-section section-watermark" data-watermark="L'industrie locale à portée de clic.">
+  <div class="content-grid">
+    <div class="content-card">
+      <h4 data-i18n="card_fifo_title">FIFO géographique</h4>
+      <p data-i18n="card_fifo_desc">Les commandes vous sont attribuées par proximité. Un client passe commande : les 5 printers les plus proches reçoivent la notification. Premier à accepter, premier servi. 12h pour répondre avant que la commande passe au pool suivant.</p>
+    </div>
+    <div class="content-card">
+      <h4 data-i18n="card_gcode_title">G-code prêt, zéro slicing</h4>
+      <p data-i18n="card_gcode_desc">Vous recevez directement le G-code optimisé pour votre machine via le CloudSlicer. Aucun paramétrage, aucun test, aucun support à générer. Vous chargez sur l'imprimante et vous lancez.</p>
+    </div>
+    <div class="content-card">
+      <h4 data-i18n="card_locker_title">Livraison locker</h4>
+      <p data-i18n="card_locker_desc">Vous déposez la pièce nue dans un locker proche (Mondial Relay). Pas d'emballage, pas de colissimo, pas de point relais. Simple dépôt sécurisé. Zéro manutention, zéro logistique.</p>
+    </div>
+    <div class="content-card">
+      <h4 data-i18n="card_payment_title">Paiement au taux horaire</h4>
+      <p data-i18n="card_payment_desc">Rémunération par heure d'impression, selon le matériau. Du PLA (3€/h) au nylon technique (7€/h) jusqu'à la résine (8€/h). Mensualisation des paiements, transparence totale via votre tableau de bord.</p>
+    </div>
+  </div>
+
+  <div class="requirements">
+    <h3 data-i18n="req_title">Profil recherché</h3>
+    <ul>
+      <li data-i18n-html="req_1">Posséder au minimum <strong>une imprimante 3D fonctionnelle</strong> (FDM ou résine)</li>
+      <li data-i18n="req_2">Espace de travail ventilé (obligatoire pour les résines et plastiques techniques)</li>
+      <li data-i18n="req_3">Connaissance de base : premier niveau de maintenance, résolution de problèmes d'impression courants</li>
+      <li data-i18n="req_4">Statut de freelance pour facturation (micro-entrepreneur minimum)</li>
+      <li data-i18n="req_5">Disponibilité régulière — vous devez pouvoir lancer une impression dans les 24h</li>
+      <li data-i18n="req_6">Un locker Mondial Relay accessible dans votre zone</li>
+    </ul>
+  </div>
+
+  <div class="rewards-grid">
+    <div class="reward" style="border-top:3px solid #86c66e">
+      <div class="reward-value" style="color:#86c66e">3€/h</div>
+      <div class="reward-label">PLA</div>
+      <div class="reward-detail" data-i18n="rate_pla_detail">50% du mix prévu</div>
+    </div>
+    <div class="reward" style="border-top:3px solid var(--gold)">
+      <div class="reward-value">4€/h</div>
+      <div class="reward-label">PETG</div>
+      <div class="reward-detail" data-i18n="rate_petg_detail">20% du mix</div>
+    </div>
+    <div class="reward" style="border-top:3px solid var(--red);border-color:var(--red)">
+      <div class="reward-value" style="color:var(--red)">5,50€/h</div>
+      <div class="reward-label">ABS / ASA</div>
+      <div class="reward-detail" data-i18n="rate_abs_detail">15% du mix</div>
+    </div>
+  </div>
+
+  <div class="rewards-grid">
+    <div class="reward">
+      <div class="reward-value">7€/h</div>
+      <div class="reward-label">PP / PC / Nylon</div>
+      <div class="reward-detail" data-i18n="rate_tech_detail">Matériaux techniques</div>
+    </div>
+    <div class="reward">
+      <div class="reward-value">8€/h</div>
+      <div class="reward-label" data-i18n="rate_resin_label">Résine</div>
+      <div class="reward-detail" data-i18n="rate_resin_detail">Finition premium</div>
+    </div>
+    <div class="reward">
+      <div class="reward-value">4</div>
+      <div class="reward-label" data-i18n="rate_rep_label">Niveaux de réputation</div>
+      <div class="reward-detail">Starter → Master</div>
+    </div>
+  </div>
+</section>
+
+<section class="form-section">
+  <h2 data-i18n-html="form_title">Inscription <em style="color:var(--red)">printer</em></h2>
+  <p class="form-intro" data-i18n="form_intro">Renseignez votre parc d'impression pour rejoindre le réseau. Nous vous contactons sous 5 jours pour finaliser votre intégration.</p>
+
+  <form id="printer-form" onsubmit="return submitPrintForm(event)">
+    <div class="form-row">
+      <div class="form-group">
+        <label data-i18n="label_prenom">Prénom *</label>
+        <input type="text" name="prenom" required>
+      </div>
+      <div class="form-group">
+        <label data-i18n="label_nom">Nom *</label>
+        <input type="text" name="nom" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label data-i18n="label_email">Email *</label>
+      <input type="email" name="email" required>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label data-i18n="label_tel">Téléphone *</label>
+        <input type="tel" name="tel" required>
+      </div>
+      <div class="form-group">
+        <label data-i18n="label_cp">Code postal *</label>
+        <input type="text" name="cp" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label data-i18n="label_ville">Ville *</label>
+      <input type="text" name="ville" required>
+    </div>
+
+    <div class="form-group">
+      <label data-i18n="label_statut">Statut professionnel</label>
+      <select name="statut">
+        <option value="" data-i18n="opt_select">— Sélectionnez —</option>
+        <option data-i18n="opt_micro">Micro-entrepreneur / Auto-entrepreneur</option>
+        <option data-i18n="opt_eurl">EURL / SASU</option>
+        <option data-i18n="opt_societe">Société (SARL, SAS…)</option>
+        <option data-i18n="opt_no_statut">Pas encore de statut (à créer)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Parc machines * <span style="font-weight:400;color:var(--stone);font-size:.72rem">— une ligne par imprimante (ou par lot identique). Le modèle exact nous sert à générer le bon G-code.</span></label>
+      <div id="machine-list"></div>
+      <button type="button" id="add-machine" class="add-machine-btn">+ Ajouter une machine</button>
+    </div>
+
+    <div class="form-group">
+      <label data-i18n="label_materials">Matériaux maîtrisés *</label>
+      <div class="form-checkboxes">
+        <label class="form-check"><input type="checkbox" name="materiaux" value="PLA"> PLA</label>
+        <label class="form-check"><input type="checkbox" name="materiaux" value="PETG"> PETG</label>
+        <label class="form-check"><input type="checkbox" name="materiaux" value="ABS"> ABS</label>
+        <label class="form-check"><input type="checkbox" name="materiaux" value="ASA"> ASA</label>
+        <label class="form-check"><input type="checkbox" name="materiaux" value="PP"> PP</label>
+        <label class="form-check"><input type="checkbox" name="materiaux" value="PC"> PC</label>
+        <label class="form-check"><input type="checkbox" name="materiaux" value="Nylon"> Nylon</label>
+        <label class="form-check"><input type="checkbox" name="materiaux" value="Résine standard"> Résine std.</label>
+        <label class="form-check"><input type="checkbox" name="materiaux" value="Résine technique"> Résine tech.</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label data-i18n="label_workspace">Votre espace de travail</label>
+      <select name="espace">
+        <option value="" data-i18n="opt_select3">— Sélectionnez —</option>
+        <option data-i18n="opt_atelier">Atelier dédié bien ventilé</option>
+        <option data-i18n="opt_piece">Pièce dédiée chez moi</option>
+        <option data-i18n="opt_garage">Garage / cave</option>
+        <option data-i18n="opt_fablab">Espace partagé (fablab…)</option>
+        <option data-i18n="opt_salon">Salon / chambre (usage mixte)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label data-i18n="label_availability">Disponibilité hebdomadaire estimée</label>
+      <select name="dispo">
+        <option value="" data-i18n="opt_select4">— Sélectionnez —</option>
+        <option data-i18n="opt_10h">Moins de 10h / semaine</option>
+        <option data-i18n="opt_10_20h">10 à 20h / semaine</option>
+        <option data-i18n="opt_20_40h">20 à 40h / semaine</option>
+        <option data-i18n="opt_40h">Plus de 40h / semaine</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label data-i18n="label_other">Autres informations</label>
+      <textarea name="message" data-i18n-placeholder="placeholder_other" placeholder="Locker Mondial Relay le plus proche, expérience en impression 3D, motivations…"></textarea>
+    </div>
+
+    <!-- honeypot anti-spam : invisible, doit rester vide -->
+    <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0;width:0">
+
+    <div class="form-group form-consent" id="print-consent" style="background:#faf7f2;border:1px solid #ede6dc;border-radius:8px;padding:1rem">
+      <p style="margin:0 0 .6rem;font-size:.85rem;color:#3d3a33">Avant de rejoindre le réseau, lisez et acceptez les conditions de partenariat.</p>
+      <button type="button" class="cgv-open-btn" data-cgv-accept="cgv-printer.html" data-cgv-title="CGV — Partenariat Printers" data-cgv-role="printer" data-cgv-version="1.0" style="font-family:'Karla',sans-serif;font-size:.8rem;font-weight:600;border:1px solid var(--red,#C8102E);color:var(--red,#C8102E);background:none;border-radius:6px;padding:.6rem 1rem;cursor:pointer">Lire et accepter les CGV Printers →</button>
+      <span id="print-consent-status" style="display:block;margin-top:.6rem;font-size:.78rem;color:#7a766c"></span>
+    </div>
+
+    <button type="submit" class="form-submit" data-i18n="form_submit" disabled>Rejoindre le réseau →</button>
+    <p class="form-error" id="print-error" style="display:none;color:#C8102E;font-size:.82rem;margin-top:.6rem"></p>
+    <p class="form-note" data-i18n="form_note">Vos données sont traitées conformément au RGPD. Nous revenons vers vous sous 5 jours.</p>
+  </form>
+
+  <div id="print-success" class="form-success" style="display:none">
+    <div class="form-success-icon">✓</div>
+    <h3 data-i18n="success_title">Bienvenue dans le réseau</h3>
+    <p data-i18n="success_msg">Merci pour votre inscription. Nous vérifions votre profil et revenons vers vous sous 5 jours pour finaliser votre intégration et vos premiers essais d'impression.</p>
+  </div>
+</section>
+
+<script src="js/collect-email.js"></script>
+<footer>
+  <div class="footer-brand">
+    <div class="footer-logo"><svg viewBox="0 0 202.6 265.4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><linearGradient id="flg1"><stop style="stop-color:#2a00fe" offset="0.336"/><stop style="stop-color:#fff" offset="1"/></linearGradient><linearGradient id="flg2"><stop style="stop-color:#fff" offset="0.107"/><stop style="stop-color:#fe0000" offset="0.684"/></linearGradient><linearGradient xlink:href="#flg1" id="fgr1" x1="129.89" y1="808.83" x2="194.31" y2="808.83" gradientUnits="userSpaceOnUse"/><linearGradient xlink:href="#flg2" id="fgr2" x1="271.02" y1="731.42" x2="327.45" y2="731.42" gradientUnits="userSpaceOnUse" spreadMethod="pad"/></defs><g transform="translate(-129.894,-634.847)"><g transform="translate(-114.063,-139.373)"><path d="m 353.331,791.185 -24.32,66.818 c -8.972,24.651 9.283,50.722 35.516,50.722 h 72.08 c 5.218,0 9.449,4.23 9.449,9.449 0,5.218 -4.231,9.449 -9.449,9.449 h -72.08 c -39.35,0 -66.732,-39.106 -53.274,-76.083 l 7.123,-19.57 17.2,-47.256 c 1.787,-4.903 7.21,-7.428 12.113,-5.642 4.903,1.787 7.429,7.21 5.643,12.112 z" style="fill:#000;stroke:#000"/><path d="m 314.879,1026.411 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#000;stroke:#000"/><path d="m 249.987,1019.877 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:#000;stroke:#000"/><path d="m 359.24,904.532 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#000;stroke:#000"/><path d="m 436.607,884.024 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:#000;stroke:#000"/></g><g><path d="m 234.225,648.032 -24.32,66.818 a 37.795,37.795 0 0 0 35.516,50.722 h 72.08 a 9.449,9.449 0 0 1 0,18.898 h -72.08 a 56.693,56.693 0 0 1 -53.274,-76.083 l 24.323,-66.826 a 9.449,9.449 0 0 1 17.755,6.471 z" style="fill:#fff;stroke:#000"/><path d="m 195.773,883.258 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#fff;stroke:#000"/><path d="m 130.881,876.724 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:url(#fgr1);stroke:#000"/><path d="m 240.133,761.379 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#fff;stroke:#000"/><path d="m 317.5,740.871 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:url(#fgr2);stroke:#000"/></g></g></svg></div>
+    <span class="footer-copy">© 2026 Hub⁴Fix — La STaTION, Viry-Châtillon · <a href="mailto:contact@hub4fix.com" style="color:var(--gold);text-decoration:none">contact@hub4fix.com</a></span>
+  </div>
+  <span class="footer-tagline" data-i18n="footer_tagline">Un fichier numérique ne s'épuise jamais.</span>
+  <div style="width:100%;text-align:center;margin-top:.6rem;font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.06em"><a href="cgu.html" style="color:var(--stone,#A89F91);text-decoration:none">CGU</a> &middot; <a href="cgv.html" style="color:var(--stone,#A89F91);text-decoration:none">CGV</a></div>
+</footer>
+
+<script>
+document.querySelectorAll('.form-check input').forEach(function(cb){
+  cb.addEventListener('change',function(){
+    cb.parentElement.classList.toggle('checked',cb.checked);
+  });
+});
+
+// ═══ Parc machines : lignes dynamiques (modèle + technologie + quantité) ═══
+function machineRow(){
+  var row=document.createElement('div');
+  row.className='machine-row';
+  row.innerHTML=
+    '<input type="text" class="m-modele" placeholder="Marque / modèle (ex : Bambu Lab X1C)">'+
+    '<select class="m-techno">'+
+      '<option value="">Technologie…</option>'+
+      '<option>FDM &lt; 250mm³</option>'+
+      '<option>FDM 250-400mm³</option>'+
+      '<option>FDM &gt; 400mm³</option>'+
+      '<option>Résine LCD</option>'+
+      '<option>Résine SLA</option>'+
+      '<option>SLS (poudre)</option>'+
+    '</select>'+
+    '<input type="number" class="m-qte" min="1" value="1" title="Quantité (lot identique)">'+
+    '<button type="button" class="m-remove" title="Retirer cette machine" aria-label="Retirer">&times;</button>';
+  row.querySelector('.m-remove').addEventListener('click',function(){
+    var list=document.getElementById('machine-list');
+    if(list.querySelectorAll('.machine-row').length>1){ row.remove(); }
+  });
+  return row;
+}
+(function(){
+  var list=document.getElementById('machine-list');
+  if(!list) return;
+  list.appendChild(machineRow());
+  document.getElementById('add-machine').addEventListener('click',function(){
+    list.appendChild(machineRow());
+  });
+})();
+function readMachines(){
+  var machines=[];
+  document.querySelectorAll('#machine-list .machine-row').forEach(function(r){
+    var modele=r.querySelector('.m-modele').value.trim();
+    if(!modele) return;
+    var techno=r.querySelector('.m-techno').value;
+    var qte=parseInt(r.querySelector('.m-qte').value,10)||1;
+    machines.push({ modele:modele, techno:techno||null, quantite:qte });
+  });
+  return machines;
+}
+// Le bouton reste desactive tant que les CGV ne sont pas acceptees
+document.addEventListener('cgv:accepted', function(e){
+  if(e.detail.role!=='printer') return;
+  var btn=document.querySelector('#printer-form .form-submit');
+  if(btn) btn.disabled=false;
+  var st=document.getElementById('print-consent-status');
+  if(st) st.innerHTML='✓ CGV Printers acceptées le '+new Date(e.detail.at).toLocaleString('fr-FR');
+  document.getElementById('print-consent').style.borderColor='#2D8B5E';
+});
+
+function submitPrintForm(e){
+  e.preventDefault();
+  const form=document.getElementById('printer-form');
+  const data={};
+  new FormData(form).forEach(function(v,k){
+    if(data[k]){data[k]=[].concat(data[k],v);}else{data[k]=v;}
+  });
+  if(data.website){ form.style.display='none'; document.getElementById('print-success').style.display='block'; return false; }
+  var consent=(window.H4FConsent||{}).printer;
+  var err=document.getElementById('print-error');
+  if(!consent){ err.textContent='Merci de lire et accepter les CGV Printers avant de rejoindre le réseau.'; err.style.display='block'; return false; }
+  var machines=readMachines();
+  if(!machines.length){ err.textContent='Indiquez au moins une imprimante (marque / modèle) dans le parc machines.'; err.style.display='block'; return false; }
+  data.machines=machines;
+  data.parc_machines=machines.map(function(m){ return m.quantite+'× '+m.modele+(m.techno?' ('+m.techno+')':''); }).join(' ; ');
+  err.style.display='none';
+  var btn=form.querySelector('.form-submit');
+  btn.disabled=true; var label=btn.textContent; btn.textContent='Envoi…';
+  delete data.website;
+  h4fCollect({ email:data.email, type:'printer', name:data.prenom||data.nom||null, consent:consent, fields:data })
+    .then(function(){
+      form.style.display='none';
+      document.getElementById('print-success').style.display='block';
+    })
+    .catch(function(error){
+      console.error('Collect error:', error);
+      btn.disabled=false; btn.textContent=label;
+      err.textContent='L’envoi a échoué. Vérifiez votre connexion et réessayez, ou écrivez-nous à contact@hub4fix.com.';
+      err.style.display='block';
+    });
+  return false;
+}
+
+document.getElementById('accountBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('accountMenu').classList.toggle('visible');
+  document.getElementById('langDropdown').classList.remove('open');
+});
+document.addEventListener('click', () => { document.getElementById('accountMenu').classList.remove('visible'); document.getElementById('langDropdown').classList.remove('open'); });
+document.getElementById('langDropdownBtn').addEventListener('click', e => {
+  e.stopPropagation();
+  document.getElementById('langDropdown').classList.toggle('open');
+  document.getElementById('accountMenu').classList.remove('visible');
+});
+// ═══ I18N ═══
+const I18N = {
+  fr: {
+    hero_overline: 'Pour les makers',
+    hero_title: 'Devenir <em style="color:var(--red)">printer</em><br>Hub⁴Fix',
+    hero_intro: 'Votre imprimante 3D dort 22h sur 24 ? Rentabilisez-la en imprimant pour vos voisins. Hub⁴Fix vous envoie des G-codes prêts à lancer, sans aucun paramétrage. Vous imprimez, vous déposez la pièce dans un locker proche, vous êtes payé. C’est tout.',
+    card_fifo_title: 'FIFO géographique',
+    card_fifo_desc: 'Les commandes vous sont attribuées par proximité. Un client passe commande : les 5 printers les plus proches reçoivent la notification. Premier à accepter, premier servi. 12h pour répondre avant que la commande passe au pool suivant.',
+    card_gcode_title: 'G-code prêt, zéro slicing',
+    card_gcode_desc: 'Vous recevez directement le G-code optimisé pour votre machine via le CloudSlicer. Aucun paramétrage, aucun test, aucun support à générer. Vous chargez sur l’imprimante et vous lancez.',
+    card_locker_title: 'Livraison locker',
+    card_locker_desc: 'Vous déposez la pièce nue dans un locker proche (Mondial Relay). Pas d’emballage, pas de colissimo, pas de point relais. Simple dépôt sécurisé. Zéro manutention, zéro logistique.',
+    card_payment_title: 'Paiement au taux horaire',
+    card_payment_desc: 'Rémunération par heure d’impression, selon le matériau. Du PLA (3€/h) au nylon technique (7€/h) jusqu’à la résine (8€/h). Mensualisation des paiements, transparence totale via votre tableau de bord.',
+    req_title: 'Profil recherché',
+    req_1: 'Posséder au minimum <strong>une imprimante 3D fonctionnelle</strong> (FDM ou résine)',
+    req_2: 'Espace de travail ventilé (obligatoire pour les résines et plastiques techniques)',
+    req_3: 'Connaissance de base : premier niveau de maintenance, résolution de problèmes d’impression courants',
+    req_4: 'Statut de freelance pour facturation (micro-entrepreneur minimum)',
+    req_5: 'Disponibilité régulière — vous devez pouvoir lancer une impression dans les 24h',
+    req_6: 'Un locker Mondial Relay accessible dans votre zone',
+    rate_pla_detail: '50% du mix prévu',
+    rate_petg_detail: '20% du mix',
+    rate_abs_detail: '15% du mix',
+    rate_tech_detail: 'Matériaux techniques',
+    rate_resin_label: 'Résine',
+    rate_resin_detail: 'Finition premium',
+    rate_rep_label: 'Niveaux de réputation',
+    form_title: 'Inscription <em style="color:var(--red)">printer</em>',
+    form_intro: 'Renseignez votre parc d’impression pour rejoindre le réseau. Nous vous contactons sous 5 jours pour finaliser votre intégration.',
+    label_prenom: 'Prénom *',
+    label_nom: 'Nom *',
+    label_email: 'Email *',
+    label_tel: 'Téléphone *',
+    label_cp: 'Code postal *',
+    label_ville: 'Ville *',
+    label_statut: 'Statut professionnel',
+    opt_select: '— Sélectionnez —',
+    opt_micro: 'Micro-entrepreneur / Auto-entrepreneur',
+    opt_eurl: 'EURL / SASU',
+    opt_societe: 'Société (SARL, SAS…)',
+    opt_no_statut: 'Pas encore de statut (à créer)',
+    label_nb_printers: 'Nombre d’imprimantes 3D *',
+    opt_select2: '— Sélectionnez —',
+    opt_4to5: '4 à 5',
+    opt_more5: 'Plus de 5',
+    label_machine_types: 'Types de machines *',
+    label_brands: 'Marques / modèles principaux',
+    placeholder_brands: 'Ex: Bambu Lab X1C, Creality K2 Plus, Anycubic Photon…',
+    label_materials: 'Matériaux maîtrisés *',
+    label_workspace: 'Votre espace de travail',
+    opt_select3: '— Sélectionnez —',
+    opt_atelier: 'Atelier dédié bien ventilé',
+    opt_piece: 'Pièce dédiée chez moi',
+    opt_garage: 'Garage / cave',
+    opt_fablab: 'Espace partagé (fablab…)',
+    opt_salon: 'Salon / chambre (usage mixte)',
+    label_availability: 'Disponibilité hebdomadaire estimée',
+    opt_select4: '— Sélectionnez —',
+    opt_10h: 'Moins de 10h / semaine',
+    opt_10_20h: '10 à 20h / semaine',
+    opt_20_40h: '20 à 40h / semaine',
+    opt_40h: 'Plus de 40h / semaine',
+    label_other: 'Autres informations',
+    placeholder_other: 'Locker Mondial Relay le plus proche, expérience en impression 3D, motivations…',
+    form_submit: 'Rejoindre le réseau →',
+    form_note: 'Vos données sont traitées conformément au RGPD. Nous revenons vers vous sous 5 jours.',
+    success_title: 'Bienvenue dans le réseau',
+    success_msg: 'Merci pour votre inscription. Nous vérifions votre profil et revenons vers vous sous 5 jours pour finaliser votre intégration et vos premiers essais d’impression.',
+    account_repair: 'Réparer',
+    account_repair_sub: 'Trouver sa pièce',
+    account_printer_sub: 'Devenir printer',
+    account_modeler: 'Modélisateur',
+    account_modeler_sub: 'Devenir modélisateur',
+    account_library: 'Ma bibliothèque',
+    account_settings: 'Paramètres',
+    account_logout: 'Déconnexion',
+    footer_tagline: 'Un fichier numérique ne s’épuise jamais.'
+  },
+  en: {
+    hero_overline: 'For makers',
+    hero_title: 'Become a <em style="color:var(--red)">printer</em><br>with Hub⁴Fix',
+    hero_intro: 'Your 3D printer sits idle 22 hours a day? Put it to work printing for your neighbours. Hub⁴Fix sends you ready-to-print G-codes with zero setup. You print, drop the part in a nearby locker, and get paid. That’s it.',
+    card_fifo_title: 'Geographic FIFO',
+    card_fifo_desc: 'Orders are assigned by proximity. A customer places an order: the 5 nearest printers receive the notification. First to accept, first served. 12 hours to respond before the order moves to the next pool.',
+    card_gcode_title: 'Ready G-code, zero slicing',
+    card_gcode_desc: 'You receive the G-code optimised for your machine directly via the CloudSlicer. No settings, no testing, no supports to generate. Just load and start.',
+    card_locker_title: 'Locker delivery',
+    card_locker_desc: 'You drop the bare part into a nearby locker (Mondial Relay). No packaging, no shipping label, no drop-off point hassle. Simple secure deposit. Zero handling, zero logistics.',
+    card_payment_title: 'Hourly rate payment',
+    card_payment_desc: 'Compensation per print hour, based on material. From PLA (€3/h) to technical nylon (€7/h) up to resin (€8/h). Monthly payouts with full transparency via your dashboard.',
+    req_title: 'Who we’re looking for',
+    req_1: 'Own at least <strong>one working 3D printer</strong> (FDM or resin)',
+    req_2: 'Ventilated workspace (mandatory for resins and technical plastics)',
+    req_3: 'Basic knowledge: first-level maintenance, ability to troubleshoot common print issues',
+    req_4: 'Freelance status for invoicing (sole trader minimum)',
+    req_5: 'Regular availability — you must be able to start a print within 24 hours',
+    req_6: 'A Mondial Relay locker accessible in your area',
+    rate_pla_detail: '50% of expected mix',
+    rate_petg_detail: '20% of mix',
+    rate_abs_detail: '15% of mix',
+    rate_tech_detail: 'Technical materials',
+    rate_resin_label: 'Resin',
+    rate_resin_detail: 'Premium finish',
+    rate_rep_label: 'Reputation levels',
+    form_title: '<em style="color:var(--red)">Printer</em> registration',
+    form_intro: 'Tell us about your printing setup to join the network. We’ll get back to you within 5 days to finalise your onboarding.',
+    label_prenom: 'First name *',
+    label_nom: 'Last name *',
+    label_email: 'Email *',
+    label_tel: 'Phone *',
+    label_cp: 'Postal code *',
+    label_ville: 'City *',
+    label_statut: 'Professional status',
+    opt_select: '— Select —',
+    opt_micro: 'Sole trader / Self-employed',
+    opt_eurl: 'Single-person company (EURL / SASU)',
+    opt_societe: 'Company (SARL, SAS…)',
+    opt_no_statut: 'No status yet (to be created)',
+    label_nb_printers: 'Number of 3D printers *',
+    opt_select2: '— Select —',
+    opt_4to5: '4 to 5',
+    opt_more5: 'More than 5',
+    label_machine_types: 'Machine types *',
+    label_brands: 'Main brands / models',
+    placeholder_brands: 'E.g.: Bambu Lab X1C, Creality K2 Plus, Anycubic Photon…',
+    label_materials: 'Materials you master *',
+    label_workspace: 'Your workspace',
+    opt_select3: '— Select —',
+    opt_atelier: 'Dedicated, well-ventilated workshop',
+    opt_piece: 'Dedicated room at home',
+    opt_garage: 'Garage / basement',
+    opt_fablab: 'Shared space (fablab…)',
+    opt_salon: 'Living room / bedroom (mixed use)',
+    label_availability: 'Estimated weekly availability',
+    opt_select4: '— Select —',
+    opt_10h: 'Less than 10h / week',
+    opt_10_20h: '10 to 20h / week',
+    opt_20_40h: '20 to 40h / week',
+    opt_40h: 'More than 40h / week',
+    label_other: 'Additional information',
+    placeholder_other: 'Nearest Mondial Relay locker, 3D printing experience, motivations…',
+    form_submit: 'Join the network →',
+    form_note: 'Your data is processed in compliance with GDPR. We’ll get back to you within 5 days.',
+    success_title: 'Welcome to the network',
+    success_msg: 'Thank you for signing up. We are reviewing your profile and will contact you within 5 days to finalise your onboarding and first test prints.',
+    account_repair: 'Repair',
+    account_repair_sub: 'Find your part',
+    account_printer_sub: 'Become a printer',
+    account_modeler: 'Modeller',
+    account_modeler_sub: 'Become a modeller',
+    account_library: 'My library',
+    account_settings: 'Settings',
+    account_logout: 'Log out',
+    footer_tagline: 'A digital file never runs out.'
+  },
+  de: {
+    hero_overline: 'Für Maker',
+    hero_title: '<em style="color:var(--red)">Printer</em> werden<br>bei Hub⁴Fix',
+    hero_intro: 'Ihr 3D-Drucker steht 22 Stunden am Tag still? Nutzen Sie ihn, um für Ihre Nachbarn zu drucken. Hub⁴Fix schickt Ihnen druckfertige G-codes – ohne jegliche Einstellungen. Sie drucken, legen das Teil in ein nahes Schließfach, und werden bezahlt. Fertig.',
+    card_fifo_title: 'Geografisches FIFO',
+    card_fifo_desc: 'Aufträge werden nach Nähe zugewiesen. Ein Kunde bestellt: Die 5 nächstgelegenen Printer erhalten die Benachrichtigung. Wer zuerst annimmt, druckt. 12 Stunden Reaktionszeit, bevor der Auftrag an den nächsten Pool geht.',
+    card_gcode_title: 'Fertiger G-code, kein Slicing',
+    card_gcode_desc: 'Sie erhalten den für Ihre Maschine optimierten G-code direkt über den CloudSlicer. Keine Einstellungen, keine Tests, keine Stützstrukturen. Einfach laden und starten.',
+    card_locker_title: 'Schließfach-Lieferung',
+    card_locker_desc: 'Sie legen das blanke Teil in ein nahes Schließfach (Mondial Relay). Keine Verpackung, kein Versandetikett, kein Paketshop. Einfache, sichere Abgabe. Null Aufwand, null Logistik.',
+    card_payment_title: 'Stundensatz-Vergütung',
+    card_payment_desc: 'Vergütung pro Druckstunde, je nach Material. Von PLA (3€/h) über technisches Nylon (7€/h) bis hin zu Harz (8€/h). Monatliche Auszahlung mit voller Transparenz über Ihr Dashboard.',
+    req_title: 'Gesuchtes Profil',
+    req_1: 'Mindestens <strong>einen funktionsfähigen 3D-Drucker</strong> besitzen (FDM oder Harz)',
+    req_2: 'Belüfteter Arbeitsbereich (Pflicht für Harze und technische Kunststoffe)',
+    req_3: 'Grundkenntnisse: einfache Wartung, Behebung gängiger Druckprobleme',
+    req_4: 'Freiberufler-Status zur Rechnungsstellung (Kleinunternehmer mindestens)',
+    req_5: 'Regelmäßige Verfügbarkeit — Sie müssen innerhalb von 24 Stunden einen Druck starten können',
+    req_6: 'Ein erreichbares Mondial Relay Schließfach in Ihrer Nähe',
+    rate_pla_detail: '50% des geplanten Mix',
+    rate_petg_detail: '20% des Mix',
+    rate_abs_detail: '15% des Mix',
+    rate_tech_detail: 'Technische Materialien',
+    rate_resin_label: 'Harz',
+    rate_resin_detail: 'Premium-Finish',
+    rate_rep_label: 'Reputationsstufen',
+    form_title: '<em style="color:var(--red)">Printer</em>-Anmeldung',
+    form_intro: 'Beschreiben Sie Ihren Druckerpark, um dem Netzwerk beizutreten. Wir melden uns innerhalb von 5 Tagen bei Ihnen.',
+    label_prenom: 'Vorname *',
+    label_nom: 'Nachname *',
+    label_email: 'E-Mail *',
+    label_tel: 'Telefon *',
+    label_cp: 'Postleitzahl *',
+    label_ville: 'Stadt *',
+    label_statut: 'Beruflicher Status',
+    opt_select: '— Bitte wählen —',
+    opt_micro: 'Kleinunternehmer / Selbstständiger',
+    opt_eurl: 'Einzelunternehmen (EURL / SASU)',
+    opt_societe: 'Gesellschaft (SARL, SAS…)',
+    opt_no_statut: 'Noch kein Status (zu gründen)',
+    label_nb_printers: 'Anzahl 3D-Drucker *',
+    opt_select2: '— Bitte wählen —',
+    opt_4to5: '4 bis 5',
+    opt_more5: 'Mehr als 5',
+    label_machine_types: 'Maschinentypen *',
+    label_brands: 'Hauptmarken / -modelle',
+    placeholder_brands: 'Z.B.: Bambu Lab X1C, Creality K2 Plus, Anycubic Photon…',
+    label_materials: 'Beherrschte Materialien *',
+    label_workspace: 'Ihr Arbeitsbereich',
+    opt_select3: '— Bitte wählen —',
+    opt_atelier: 'Eigene, gut belüftete Werkstatt',
+    opt_piece: 'Eigener Raum zu Hause',
+    opt_garage: 'Garage / Keller',
+    opt_fablab: 'Gemeinschaftsraum (Fablab…)',
+    opt_salon: 'Wohnzimmer / Schlafzimmer (Mischnutzung)',
+    label_availability: 'Geschätzte wöchentliche Verfügbarkeit',
+    opt_select4: '— Bitte wählen —',
+    opt_10h: 'Weniger als 10 Std. / Woche',
+    opt_10_20h: '10 bis 20 Std. / Woche',
+    opt_20_40h: '20 bis 40 Std. / Woche',
+    opt_40h: 'Mehr als 40 Std. / Woche',
+    label_other: 'Weitere Informationen',
+    placeholder_other: 'Nächstes Mondial Relay Schließfach, 3D-Druck-Erfahrung, Motivation…',
+    form_submit: 'Dem Netzwerk beitreten →',
+    form_note: 'Ihre Daten werden DSGVO-konform verarbeitet. Wir melden uns innerhalb von 5 Tagen.',
+    success_title: 'Willkommen im Netzwerk',
+    success_msg: 'Vielen Dank für Ihre Anmeldung. Wir prüfen Ihr Profil und kontaktieren Sie innerhalb von 5 Tagen, um Ihre Integration und erste Testdrucke abzuschließen.',
+    account_repair: 'Reparieren',
+    account_repair_sub: 'Ihr Teil finden',
+    account_printer_sub: 'Printer werden',
+    account_modeler: 'Modellierer',
+    account_modeler_sub: 'Modellierer werden',
+    account_library: 'Meine Bibliothek',
+    account_settings: 'Einstellungen',
+    account_logout: 'Abmelden',
+    footer_tagline: 'Eine digitale Datei geht nie zur Neige.'
+  },
+  es: {
+    hero_overline: 'Para makers',
+    hero_title: 'Conviértase en <em style="color:var(--red)">printer</em><br>Hub⁴Fix',
+    hero_intro: '¿Su impresora 3D descansa 22 horas al día? Rentabilícela imprimiendo para sus vecinos. Hub⁴Fix le envía G-codes listos para imprimir, sin ningún ajuste. Imprime, deposita la pieza en un locker cercano y cobra. Así de simple.',
+    card_fifo_title: 'FIFO geográfico',
+    card_fifo_desc: 'Los pedidos se asignan por proximidad. Un cliente realiza un pedido: los 5 printers más cercanos reciben la notificación. El primero en aceptar se lo queda. 12 horas para responder antes de que el pedido pase al siguiente grupo.',
+    card_gcode_title: 'G-code listo, cero slicing',
+    card_gcode_desc: 'Recibe directamente el G-code optimizado para su máquina a través del CloudSlicer. Sin configuración, sin pruebas, sin soportes que generar. Cargue en la impresora y lance.',
+    card_locker_title: 'Entrega en locker',
+    card_locker_desc: 'Deposite la pieza sin embalar en un locker cercano (Mondial Relay). Sin embalaje, sin envío postal, sin complicaciones. Depósito simple y seguro. Cero manipulación, cero logística.',
+    card_payment_title: 'Pago por hora',
+    card_payment_desc: 'Remuneración por hora de impresión, según el material. Desde PLA (3€/h) hasta nylon técnico (7€/h) y resina (8€/h). Pagos mensuales con total transparencia a través de su panel de control.',
+    req_title: 'Perfil buscado',
+    req_1: 'Poseer al menos <strong>una impresora 3D funcional</strong> (FDM o resina)',
+    req_2: 'Espacio de trabajo ventilado (obligatorio para resinas y plásticos técnicos)',
+    req_3: 'Conocimientos básicos: mantenimiento de primer nivel, resolución de problemas de impresión comunes',
+    req_4: 'Estatus de autónomo para facturación (autónomo como mínimo)',
+    req_5: 'Disponibilidad regular — debe poder iniciar una impresión en un plazo de 24 horas',
+    req_6: 'Un locker Mondial Relay accesible en su zona',
+    rate_pla_detail: '50% del mix previsto',
+    rate_petg_detail: '20% del mix',
+    rate_abs_detail: '15% del mix',
+    rate_tech_detail: 'Materiales técnicos',
+    rate_resin_label: 'Resina',
+    rate_resin_detail: 'Acabado premium',
+    rate_rep_label: 'Niveles de reputación',
+    form_title: 'Inscripción <em style="color:var(--red)">printer</em>',
+    form_intro: 'Describa su parque de impresión para unirse a la red. Le contactaremos en un plazo de 5 días para finalizar su integración.',
+    label_prenom: 'Nombre *',
+    label_nom: 'Apellido *',
+    label_email: 'Email *',
+    label_tel: 'Teléfono *',
+    label_cp: 'Código postal *',
+    label_ville: 'Ciudad *',
+    label_statut: 'Situación profesional',
+    opt_select: '— Seleccione —',
+    opt_micro: 'Autónomo / Trabajador independiente',
+    opt_eurl: 'Empresa unipersonal (EURL / SASU)',
+    opt_societe: 'Sociedad (SARL, SAS…)',
+    opt_no_statut: 'Sin estatus aún (por crear)',
+    label_nb_printers: 'Número de impresoras 3D *',
+    opt_select2: '— Seleccione —',
+    opt_4to5: '4 a 5',
+    opt_more5: 'Más de 5',
+    label_machine_types: 'Tipos de máquinas *',
+    label_brands: 'Marcas / modelos principales',
+    placeholder_brands: 'Ej.: Bambu Lab X1C, Creality K2 Plus, Anycubic Photon…',
+    label_materials: 'Materiales dominados *',
+    label_workspace: 'Su espacio de trabajo',
+    opt_select3: '— Seleccione —',
+    opt_atelier: 'Taller dedicado y bien ventilado',
+    opt_piece: 'Habitación dedicada en casa',
+    opt_garage: 'Garaje / sótano',
+    opt_fablab: 'Espacio compartido (fablab…)',
+    opt_salon: 'Salón / dormitorio (uso mixto)',
+    label_availability: 'Disponibilidad semanal estimada',
+    opt_select4: '— Seleccione —',
+    opt_10h: 'Menos de 10h / semana',
+    opt_10_20h: '10 a 20h / semana',
+    opt_20_40h: '20 a 40h / semana',
+    opt_40h: 'Más de 40h / semana',
+    label_other: 'Información adicional',
+    placeholder_other: 'Locker Mondial Relay más cercano, experiencia en impresión 3D, motivaciones…',
+    form_submit: 'Unirse a la red →',
+    form_note: 'Sus datos se tratan conforme al RGPD. Le respondemos en un plazo de 5 días.',
+    success_title: 'Bienvenido a la red',
+    success_msg: 'Gracias por su inscripción. Estamos verificando su perfil y le contactaremos en un plazo de 5 días para finalizar su integración y sus primeras pruebas de impresión.',
+    account_repair: 'Reparar',
+    account_repair_sub: 'Encontrar su pieza',
+    account_printer_sub: 'Convertirse en printer',
+    account_modeler: 'Modelador',
+    account_modeler_sub: 'Convertirse en modelador',
+    account_library: 'Mi biblioteca',
+    account_settings: 'Ajustes',
+    account_logout: 'Cerrar sesión',
+    footer_tagline: 'Un archivo digital nunca se agota.'
+  },
+  it: {
+    hero_overline: 'Per i maker',
+    hero_title: 'Diventa <em style="color:var(--red)">printer</em><br>Hub⁴Fix',
+    hero_intro: 'La vostra stampante 3D resta ferma 22 ore al giorno? Fatela fruttare stampando per i vostri vicini. Hub⁴Fix vi invia G-code pronti da avviare, senza alcuna configurazione. Stampate, depositate il pezzo in un locker vicino e venite pagati. Fine.',
+    card_fifo_title: 'FIFO geografico',
+    card_fifo_desc: 'Gli ordini vengono assegnati per prossimità. Un cliente effettua un ordine: i 5 printer più vicini ricevono la notifica. Chi accetta per primo, stampa. 12 ore per rispondere prima che l’ordine passi al pool successivo.',
+    card_gcode_title: 'G-code pronto, zero slicing',
+    card_gcode_desc: 'Ricevete direttamente il G-code ottimizzato per la vostra macchina tramite il CloudSlicer. Nessuna configurazione, nessun test, nessun supporto da generare. Caricate e avviate.',
+    card_locker_title: 'Consegna in locker',
+    card_locker_desc: 'Depositate il pezzo nudo in un locker vicino (Mondial Relay). Nessun imballaggio, nessuna spedizione, nessun punto di ritiro. Deposito semplice e sicuro. Zero movimentazione, zero logistica.',
+    card_payment_title: 'Pagamento a tariffa oraria',
+    card_payment_desc: 'Compenso per ora di stampa, in base al materiale. Dal PLA (3€/h) al nylon tecnico (7€/h) fino alla resina (8€/h). Pagamenti mensili con totale trasparenza tramite la vostra dashboard.',
+    req_title: 'Profilo ricercato',
+    req_1: 'Possedere almeno <strong>una stampante 3D funzionante</strong> (FDM o resina)',
+    req_2: 'Spazio di lavoro ventilato (obbligatorio per resine e plastiche tecniche)',
+    req_3: 'Conoscenze di base: manutenzione di primo livello, risoluzione dei problemi di stampa comuni',
+    req_4: 'Partita IVA per la fatturazione (regime forfettario minimo)',
+    req_5: 'Disponibilità regolare — dovete poter avviare una stampa entro 24 ore',
+    req_6: 'Un locker Mondial Relay raggiungibile nella vostra zona',
+    rate_pla_detail: '50% del mix previsto',
+    rate_petg_detail: '20% del mix',
+    rate_abs_detail: '15% del mix',
+    rate_tech_detail: 'Materiali tecnici',
+    rate_resin_label: 'Resina',
+    rate_resin_detail: 'Finitura premium',
+    rate_rep_label: 'Livelli di reputazione',
+    form_title: 'Iscrizione <em style="color:var(--red)">printer</em>',
+    form_intro: 'Descrivete il vostro parco stampanti per entrare nella rete. Vi contatteremo entro 5 giorni per completare l’integrazione.',
+    label_prenom: 'Nome *',
+    label_nom: 'Cognome *',
+    label_email: 'Email *',
+    label_tel: 'Telefono *',
+    label_cp: 'CAP *',
+    label_ville: 'Città *',
+    label_statut: 'Situazione professionale',
+    opt_select: '— Selezionare —',
+    opt_micro: 'Lavoratore autonomo / Partita IVA',
+    opt_eurl: 'Impresa individuale (EURL / SASU)',
+    opt_societe: 'Società (SARL, SAS…)',
+    opt_no_statut: 'Nessuno status ancora (da creare)',
+    label_nb_printers: 'Numero di stampanti 3D *',
+    opt_select2: '— Selezionare —',
+    opt_4to5: '4 a 5',
+    opt_more5: 'Più di 5',
+    label_machine_types: 'Tipi di macchine *',
+    label_brands: 'Marchi / modelli principali',
+    placeholder_brands: 'Es.: Bambu Lab X1C, Creality K2 Plus, Anycubic Photon…',
+    label_materials: 'Materiali padroneggiati *',
+    label_workspace: 'Il vostro spazio di lavoro',
+    opt_select3: '— Selezionare —',
+    opt_atelier: 'Laboratorio dedicato e ben ventilato',
+    opt_piece: 'Stanza dedicata a casa',
+    opt_garage: 'Garage / cantina',
+    opt_fablab: 'Spazio condiviso (fablab…)',
+    opt_salon: 'Soggiorno / camera (uso misto)',
+    label_availability: 'Disponibilità settimanale stimata',
+    opt_select4: '— Selezionare —',
+    opt_10h: 'Meno di 10h / settimana',
+    opt_10_20h: '10 a 20h / settimana',
+    opt_20_40h: '20 a 40h / settimana',
+    opt_40h: 'Più di 40h / settimana',
+    label_other: 'Altre informazioni',
+    placeholder_other: 'Locker Mondial Relay più vicino, esperienza nella stampa 3D, motivazioni…',
+    form_submit: 'Unisciti alla rete →',
+    form_note: 'I vostri dati sono trattati in conformità al GDPR. Vi rispondiamo entro 5 giorni.',
+    success_title: 'Benvenuti nella rete',
+    success_msg: 'Grazie per l’iscrizione. Stiamo verificando il vostro profilo e vi contatteremo entro 5 giorni per completare l’integrazione e le prime prove di stampa.',
+    account_repair: 'Riparare',
+    account_repair_sub: 'Trovare il vostro pezzo',
+    account_printer_sub: 'Diventare printer',
+    account_modeler: 'Modellatore',
+    account_modeler_sub: 'Diventare modellatore',
+    account_library: 'La mia libreria',
+    account_settings: 'Impostazioni',
+    account_logout: 'Disconnettersi',
+    footer_tagline: 'Un file digitale non si esaurisce mai.'
+  }
+};
+
+function applyLang(lang) {
+  if (!I18N[lang]) lang = 'fr';
+  document.documentElement.lang = lang;
+  document.body.setAttribute('data-lang', lang);
+
+  var data = I18N[lang];
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n');
+    if (data[key] !== undefined) el.textContent = data[key];
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n-html');
+    if (data[key] !== undefined) el.innerHTML = data[key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n-placeholder');
+    if (data[key] !== undefined) el.placeholder = data[key];
+  });
+
+  // Selects: retranslate options
+  var selectKeys = ['opt_select','opt_micro','opt_eurl','opt_societe','opt_no_statut','opt_select2','opt_4to5','opt_more5','opt_select3','opt_atelier','opt_piece','opt_garage','opt_fablab','opt_salon','opt_select4','opt_10h','opt_10_20h','opt_20_40h','opt_40h'];
+  selectKeys.forEach(function(key) {
+    var opt = document.querySelector('option[data-i18n="'+key+'"]');
+    if (opt && data[key]) opt.textContent = data[key];
+  });
+
+  // Update lang dropdown
+  var btn = document.getElementById('langDropdownBtn');
+  btn.setAttribute('data-lang', lang);
+  document.querySelectorAll('.lang-opt').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('data-lang') === lang);
+  });
+  document.getElementById('langDropdown').classList.remove('open');
+}
+
+document.getElementById('langDropdownList').addEventListener('click', function(e) {
+  var opt = e.target.closest('.lang-opt');
+  if (!opt) return;
+  applyLang(opt.getAttribute('data-lang'));
+});
+document.querySelectorAll('.account-role.locked').forEach(el => {
+  el.addEventListener('click', e => e.preventDefault());
+});
+applyLang('fr');
+
+// Logo click suction effect
+(function(){
+  var brand = document.querySelector('.nav-brand');
+  if(!brand) return;
+  brand.addEventListener('click', function(e){
+    var href = brand.getAttribute('href') || 'index.html';
+    e.preventDefault();
+    document.body.style.transformOrigin = 'top center';
+    document.body.classList.add('page-sucking');
+    var navigated = false;
+    function go(){ if(!navigated){ navigated=true; window.location.assign(href); } }
+    document.body.addEventListener('animationend', go);
+    setTimeout(go, 800);
+  });
+})();
+</script>
+<script>
+(function(){var cvs=document.createElement('canvas');cvs.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none;';document.body.insertBefore(cvs,document.body.firstChild);var ctx=cvs.getContext('2d'),W,H,P=[],dpr;var DIST=130,SPD=0.35;function resize(){dpr=window.devicePixelRatio||1;W=window.innerWidth;H=window.innerHeight;cvs.width=W*dpr;cvs.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}function make(){P=[];var n=Math.min(Math.round(W*H/13000),80);for(var i=0;i<n;i++)P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*SPD,vy:(Math.random()-.5)*SPD,r:Math.random()*.7+.5});}function tick(){ctx.clearRect(0,0,W,H);for(var i=0;i<P.length;i++){for(var j=i+1;j<P.length;j++){var dx=P[i].x-P[j].x,dy=P[i].y-P[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<DIST){ctx.strokeStyle='rgba(168,159,145,'+(0.28*(1-d/DIST)).toFixed(3)+')';ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(P[i].x,P[i].y);ctx.lineTo(P[j].x,P[j].y);ctx.stroke();}}ctx.fillStyle='rgba(168,159,145,.3)';ctx.beginPath();ctx.arc(P[i].x,P[i].y,P[i].r,0,6.283);ctx.fill();P[i].x+=P[i].vx;P[i].y+=P[i].vy;if(P[i].x<0||P[i].x>W)P[i].vx*=-1;if(P[i].y<0||P[i].y>H)P[i].vy*=-1;}requestAnimationFrame(tick);}resize();make();tick();window.addEventListener('resize',function(){resize();make();});})();
+</script>
+<script src="/js/sphere-bg.js"></script>
+<script src="js/cgv-accept.js"></script>
+<script src="js/nav-mindmap.js"></script>
+</body>
+</html>

@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hub4Fix — Gestion Hot List</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/glass-sphere.css">
+<style>
+:root{--ivory:#FAF8F5;--warm-white:#F3EEE8;--cream:#EDE6DC;--sand:#D4C9B8;--stone:#A89F91;--earth:#7A7268;--charcoal:#3B3632;--night:#1C1A18;--gold:#B8963E;--gold-light:#D4B15F;--gold-pale:rgba(184,150,62,0.08);--gold-glow:rgba(184,150,62,0.15);--red:#C8102E;--red-soft:rgba(200,16,46,0.06);--red-medium:rgba(200,16,46,0.18);--green:#2D8B5E;--green-soft:rgba(45,139,94,0.08);--font-serif:'Cormorant Garamond',serif;--font-sans:'Karla',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);background:var(--ivory);color:var(--charcoal);-webkit-font-smoothing:antialiased;min-height:100vh}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+::selection{background:var(--gold-glow);color:var(--night)}
+
+/* Nav */
+nav{position:sticky;top:0;z-index:100;padding:1rem 4rem;display:flex;justify-content:space-between;align-items:center;background:rgba(243,238,232,0.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(237,230,220,0.4)}
+.nav-brand{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo{width:auto;height:36px;transition:transform .5s cubic-bezier(.25,.46,.45,.94);transform-origin:center center;position:relative;z-index:101}
+.nav-brand:hover .nav-logo{transform:scale(3);filter:drop-shadow(0 8px 24px rgba(0,0,0,.2))}
+@keyframes suckIn{0%{transform:scale(1);opacity:1;filter:blur(0)}60%{transform:scale(.3) translate(0,-30vh);opacity:.6;filter:blur(2px)}100%{transform:scale(0) translate(0,-40vh);opacity:0;filter:blur(8px)}}
+.page-sucking{animation:suckIn .7s cubic-bezier(.55,.06,.68,.19) forwards;pointer-events:none}
+.nav-wordmark{font-family:var(--font-serif);font-size:1.15rem;font-weight:500;color:var(--night);letter-spacing:.02em}
+.nav-wordmark sup{color:var(--red);font-size:.7em;vertical-align:super;line-height:0}
+.nav-right{display:flex;align-items:center;gap:1.5rem}
+.nav-back{font-size:.78rem;font-weight:500;color:var(--earth);text-decoration:none;letter-spacing:.04em;display:flex;align-items:center;gap:.4rem;transition:color .3s}
+.nav-back:hover{color:var(--red)}
+.nav-badge{font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);background:var(--gold-pale);padding:4px 10px;border-radius:2px;border:1px solid rgba(184,150,62,.2)}
+.nav-account{position:relative}
+.nav-account-btn{display:flex;align-items:center;gap:.3rem;background:none;border:none;cursor:pointer;padding:.3rem;border-radius:2px;transition:background .2s}
+.nav-account-btn:hover{background:var(--cream)}
+.nav-account-icon{width:22px;height:22px;color:var(--charcoal)}
+.nav-token-badge{background:var(--red);color:white;font-size:.65rem;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;line-height:1}
+.nav-account-menu{position:absolute;top:calc(100% + 8px);right:0;width:340px;background:white;border:1px solid var(--cream);border-radius:4px;box-shadow:0 16px 48px rgba(0,0,0,.12);display:none;z-index:200}
+.nav-account-menu.visible{display:block;animation:fadeUp .25s}
+.account-menu-header{padding:1rem 1.2rem;border-bottom:1px solid var(--cream);display:flex;justify-content:space-between;align-items:center}
+.account-menu-header-left{display:flex;flex-direction:column}
+.account-menu-name{font-weight:600;font-size:.9rem;color:var(--night)}
+.account-menu-email{font-size:.72rem;color:var(--earth);margin-top:.15rem}
+.account-menu-tokens-inline{display:flex;align-items:center;gap:.3rem;background:var(--red-soft);padding:4px 10px;border-radius:12px}
+.account-menu-tokens-inline .token-icon{font-size:.75rem;color:var(--red)}
+.account-menu-tokens-inline strong{font-family:'Courier New',monospace;font-size:1rem;color:var(--red)}
+.account-roles{padding:.8rem;display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;border-bottom:1px solid var(--cream)}
+.account-role{display:flex;flex-direction:column;align-items:center;gap:.4rem;padding:.8rem .4rem;border-radius:4px;cursor:pointer;border:2px solid transparent;transition:all .2s;text-decoration:none}
+.account-role:hover{transform:translateY(-1px)}
+.account-role-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem}
+.account-role-label{font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-align:center}
+.account-role-sub{font-size:.6rem;color:var(--earth);text-align:center;line-height:1.2}
+.account-role-client .account-role-icon{background:var(--red-soft);color:var(--red)}
+.account-role-client .account-role-label{color:var(--red)}
+.account-role-client.active{border-color:var(--red);background:var(--red-soft)}
+.account-role-printer .account-role-icon{background:#1a2a3a;color:#5ba8d4}
+.account-role-printer .account-role-label{color:#2c6e9b}
+.account-role-printer:hover{background:#e8f1f8}
+.account-role-modeler .account-role-icon{background:#2a1f1a;color:#d4845b}
+.account-role-modeler .account-role-label{color:#a0522d}
+.account-role-modeler:hover{background:#f5ece5}
+.account-role.locked{opacity:.5;pointer-events:auto;position:relative}
+.account-role.locked .account-role-icon{filter:grayscale(.6)}
+.account-role-lock{font-size:.6rem;margin-top:-.1rem}
+.account-role.locked:hover{opacity:.75}
+.account-role.locked:hover .account-role-sub{display:none}
+.account-role.locked:hover::after{content:'Inscription requise';font-size:.55rem;color:var(--earth);text-align:center}
+.account-menu-links{padding:.3rem 0}
+.account-menu-item{display:flex;align-items:center;gap:.6rem;padding:.6rem 1.2rem;font-size:.82rem;color:var(--charcoal);text-decoration:none;transition:background .15s}
+.account-menu-item:hover{background:var(--warm-white)}
+.account-menu-item svg{width:16px;height:16px;color:var(--stone);flex-shrink:0}
+.account-menu-logout{color:var(--earth);border-top:1px solid var(--cream)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* Modal password */
+.modal-overlay{position:fixed;inset:0;background:rgba(28,26,24,.6);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.hidden{display:none}
+.modal{background:white;border:1px solid var(--cream);border-radius:6px;box-shadow:0 16px 48px rgba(0,0,0,.15);padding:2.5rem;width:100%;max-width:380px;text-align:center}
+.modal .logo-text{font-family:var(--font-serif);font-size:1.6rem;font-weight:500;color:var(--night)}
+.modal .logo-text sup{color:var(--red);font-size:.65em;vertical-align:super}
+.modal-title{font-family:var(--font-serif);font-size:1.4rem;font-weight:400;color:var(--night);margin:.8rem 0 .5rem}
+.modal-subtitle{font-size:.82rem;color:var(--earth);margin-bottom:1.5rem}
+.modal .form-input{text-align:center;margin-bottom:1rem}
+.error-msg{font-size:.78rem;color:var(--red);min-height:1.2rem;margin-bottom:.5rem}
+
+/* Layout */
+.admin-layout{max-width:1200px;margin:0 auto;padding:2rem 4rem 4rem}
+.admin-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2.5rem;flex-wrap:wrap;gap:1.5rem}
+.admin-title{font-family:var(--font-serif);font-size:clamp(1.8rem,3vw,2.4rem);font-weight:300;color:var(--night);line-height:1.15}
+.admin-title em{font-style:italic;font-weight:400;color:var(--gold)}
+.admin-subtitle{font-size:.88rem;color:var(--earth);font-weight:300;margin-top:.4rem}
+
+/* Stats */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-bottom:2.5rem}
+.stat-card{background:rgba(255,255,255,0.45);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(237,230,220,0.5);border-radius:3px;padding:1.5rem;text-align:center;transition:box-shadow .3s}
+.stat-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.04)}
+.stat-value{font-family:var(--font-serif);font-size:2.2rem;font-weight:500;line-height:1;margin-bottom:.4rem}
+.stat-label{font-size:.72rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--earth)}
+.stat-card.gold .stat-value{color:var(--gold)}
+.stat-card.red .stat-value{color:var(--red)}
+.stat-card.green .stat-value{color:var(--green)}
+.stat-card.night .stat-value{color:var(--night)}
+
+/* Boost control */
+.subvention-control{background:rgba(255,255,255,0.45);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(237,230,220,0.5);border-radius:3px;padding:2rem;margin-bottom:2.5rem}
+.subvention-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem}
+.subvention-title{font-family:var(--font-serif);font-size:1.3rem;font-weight:500;color:var(--night)}
+.subvention-desc{font-size:.85rem;color:var(--earth);font-weight:300;margin-bottom:1.5rem;line-height:1.6}
+.subvention-row{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap}
+.subvention-input-group{display:flex;align-items:center;gap:.8rem}
+.subvention-input-group label{font-size:.78rem;font-weight:600;letter-spacing:.04em;color:var(--charcoal);white-space:nowrap}
+.subvention-input{width:80px;padding:.6rem .8rem;font-family:var(--font-sans);font-size:1.1rem;font-weight:600;color:var(--gold);text-align:center;background:var(--ivory);border:2px solid var(--gold);border-radius:3px;outline:none;transition:box-shadow .2s}
+.subvention-input:focus{box-shadow:0 0 0 3px var(--gold-pale)}
+.subvention-save{padding:.6rem 1.5rem;font-family:var(--font-sans);font-size:.75rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:var(--gold);color:white;border:none;border-radius:3px;cursor:pointer;transition:all .25s}
+.subvention-save:hover{background:var(--gold-light);transform:translateY(-1px);box-shadow:0 4px 12px rgba(184,150,62,.25)}
+.subvention-save.saved{background:var(--green)}
+.subvention-gauge{flex:1;min-width:200px}
+.gauge-bar{height:8px;background:var(--cream);border-radius:4px;overflow:hidden;margin-bottom:.4rem}
+.gauge-fill{height:100%;border-radius:4px;transition:width .5s ease,background .3s}
+.gauge-label{font-size:.72rem;color:var(--stone);text-align:right}
+
+/* Table */
+.table-section{background:rgba(255,255,255,0.45);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(237,230,220,0.5);border-radius:3px;overflow:hidden}
+.table-toolbar{display:flex;justify-content:space-between;align-items:center;padding:1.2rem 1.5rem;border-bottom:1px solid var(--cream);flex-wrap:wrap;gap:1rem}
+.table-toolbar-left{display:flex;align-items:center;gap:1rem}
+.table-search{padding:.5rem .8rem;font-family:var(--font-sans);font-size:.85rem;color:var(--charcoal);background:var(--ivory);border:1px solid var(--sand);border-radius:3px;outline:none;width:220px;transition:border-color .2s}
+.table-search:focus{border-color:var(--gold)}
+.table-search::placeholder{color:var(--stone)}
+.btn-add{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1.2rem;font-family:var(--font-sans);font-size:.75rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:var(--red);color:white;border:none;border-radius:3px;cursor:pointer;transition:all .25s}
+.btn-add:hover{background:#A00D24;transform:translateY(-1px);box-shadow:0 4px 12px rgba(200,16,46,.2)}
+
+table{width:100%;border-collapse:collapse}
+thead{background:var(--warm-white)}
+th{padding:.8rem 1rem;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--earth);text-align:left;border-bottom:1px solid var(--cream);white-space:nowrap}
+th.center{text-align:center}
+td{padding:.8rem 1rem;font-size:.85rem;border-bottom:1px solid var(--cream);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover{background:var(--gold-pale)}
+tr.subsidized{background:rgba(184,150,62,.04)}
+tr.subsidized:hover{background:rgba(184,150,62,.08)}
+tr.modeled{opacity:.5}
+tr.modeled td{text-decoration:line-through;text-decoration-color:var(--stone)}
+tr.modeled .badge-sub{display:none}
+
+.rank-cell{font-family:'Courier New',monospace;font-weight:700;font-size:.95rem;color:var(--night);text-align:center;width:50px}
+.rank-cell.gold{color:var(--gold)}
+.product-cell{display:flex;flex-direction:column;gap:.15rem}
+.product-cell-name{font-weight:500;color:var(--night)}
+.product-cell-machine{font-size:.75rem;color:var(--stone);font-style:italic}
+.badge-sub{display:inline-flex;align-items:center;gap:.3rem;font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);background:var(--gold-pale);border:1px solid rgba(184,150,62,.2);padding:2px 8px;border-radius:2px;white-space:nowrap}
+.badge-months{font-size:.75rem;font-weight:600;color:var(--gold)}
+.demand-bar{display:flex;align-items:center;gap:.5rem}
+.demand-bar-track{width:80px;height:5px;background:var(--cream);border-radius:3px;overflow:hidden}
+.demand-bar-fill{height:100%;border-radius:3px;background:var(--red)}
+.demand-bar-value{font-size:.75rem;font-weight:600;color:var(--charcoal);min-width:28px}
+
+.actions-cell{display:flex;gap:.3rem}
+.btn-icon{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:none;border:1px solid var(--cream);border-radius:3px;cursor:pointer;font-size:.85rem;transition:all .2s;color:var(--earth)}
+.btn-icon:hover{background:var(--warm-white);border-color:var(--sand)}
+.btn-icon.btn-check{color:var(--green)}
+.btn-icon.btn-check:hover{background:var(--green-soft);border-color:var(--green)}
+.btn-icon.btn-delete{color:var(--red)}
+.btn-icon.btn-delete:hover{background:var(--red-soft);border-color:var(--red)}
+.btn-icon.btn-up,.btn-icon.btn-down{font-size:.7rem}
+
+.table-footer{padding:1rem 1.5rem;border-top:1px solid var(--cream);display:flex;justify-content:space-between;align-items:center;font-size:.78rem;color:var(--stone)}
+.table-empty{padding:4rem 2rem;text-align:center;color:var(--stone);font-size:.92rem}
+
+/* Add/Edit modal */
+.product-modal-overlay{position:fixed;inset:0;background:rgba(28,26,24,.5);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;padding:1rem}
+.product-modal-overlay.hidden{display:none}
+.product-modal{background:white;border:1px solid var(--cream);border-radius:6px;box-shadow:0 16px 48px rgba(0,0,0,.12);padding:2rem;width:100%;max-width:520px}
+.product-modal h3{font-family:var(--font-serif);font-size:1.4rem;font-weight:400;color:var(--night);margin-bottom:1.5rem}
+.form-input,.form-select{width:100%;padding:.7rem .9rem;font-family:var(--font-sans);font-size:.88rem;color:var(--charcoal);background:var(--ivory);border:1px solid var(--sand);border-radius:3px;outline:none;transition:border-color .2s,box-shadow .2s}
+.form-input::placeholder{color:var(--stone);font-weight:300}
+.form-input:focus,.form-select:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-pale)}
+.form-group{margin-bottom:1.2rem}
+.form-label{display:block;font-size:.72rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--earth);margin-bottom:.4rem}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.modal-actions{display:flex;gap:.8rem;margin-top:1.5rem}
+.modal-actions .btn{flex:1;display:inline-flex;align-items:center;justify-content:center;padding:.75rem 1.5rem;font-family:var(--font-sans);font-size:.78rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;border:none;border-radius:3px;cursor:pointer;transition:all .25s}
+.btn-primary{background:var(--gold);color:white}
+.btn-primary:hover{background:var(--gold-light);transform:translateY(-1px)}
+.btn-secondary{background:none;border:1px solid var(--sand);color:var(--earth)}
+.btn-secondary:hover{border-color:var(--stone);color:var(--charcoal);background:var(--warm-white)}
+
+/* Animation */
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.admin-layout{animation:fadeUp .4s ease}
+
+/* Responsive */
+@media(max-width:900px){
+  nav{padding:1rem 1.5rem}
+  .admin-layout{padding:1.5rem 1.5rem 3rem}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .form-row{grid-template-columns:1fr}
+  .table-section{overflow-x:auto}
+}
+@media(max-width:600px){
+  nav{padding:.6rem 1rem}
+  .admin-layout{padding:1rem 1rem 2rem}
+  .stats-row{grid-template-columns:1fr}
+  .subvention-row{flex-direction:column;align-items:stretch}
+  .subvention-input-group{justify-content:space-between}
+  .table-toolbar{flex-direction:column;align-items:stretch}
+  .table-search{width:100%}
+  .product-modal{padding:1.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- Password Modal -->
+<div class="modal-overlay" id="passwordModal">
+  <div class="modal">
+    <div><span class="logo-text">Hub<sup>4</sup>Fix</span></div>
+    <h2 class="modal-title">Gestion Hot List</h2>
+    <p class="modal-subtitle">Acces reserve a l'equipe Hub4Fix.</p>
+    <input type="password" class="form-input" id="passwordInput" placeholder="Mot de passe" autocomplete="off">
+    <div class="error-msg" id="errorMsg"></div>
+    <button class="btn-primary" style="width:100%;padding:.75rem;font-family:var(--font-sans);font-size:.78rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;border:none;border-radius:3px;cursor:pointer" id="passwordSubmit">Entrer</button>
+  </div>
+</div>
+
+<!-- Add/Edit Product Modal -->
+<div class="product-modal-overlay hidden" id="productModal">
+  <div class="product-modal">
+    <h3 id="productModalTitle">Ajouter un produit</h3>
+    <input type="hidden" id="editIndex" value="-1">
+    <div class="form-group">
+      <label class="form-label" for="pName">Nom de la piece</label>
+      <input type="text" class="form-input" id="pName" placeholder="Tete d'aspirateur rotative">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="pMachine">Appareil / Marque</label>
+        <input type="text" class="form-input" id="pMachine" placeholder="Dyson V8">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="pCategory">Categorie</label>
+        <input type="text" class="form-input" id="pCategory" placeholder="Electromenager">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="pDemand">Demande (recherches/mois)</label>
+        <input type="number" class="form-input" id="pDemand" placeholder="1200" min="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="pAlerts">Alertes actives</label>
+        <input type="number" class="form-input" id="pAlerts" placeholder="45" min="0">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label" for="pUnits">Unites vendues (estimation)</label>
+        <input type="text" class="form-input" id="pUnits" placeholder="450 000">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="pAge">Age produit (annees)</label>
+        <input type="number" class="form-input" id="pAge" placeholder="5" min="0">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="productModalCancel">Annuler</button>
+      <button class="btn btn-primary" id="productModalSave">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Nav -->
+<nav>
+  <a href="index.html" class="nav-brand">
+    <svg class="nav-logo" viewBox="0 0 202.6 265.4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><linearGradient id="lg1"><stop style="stop-color:#2a00fe" offset="0.336"/><stop style="stop-color:#fff" offset="1"/></linearGradient><linearGradient id="lg2"><stop style="stop-color:#fff" offset="0.107"/><stop style="stop-color:#fe0000" offset="0.684"/></linearGradient><linearGradient xlink:href="#lg1" id="grad1" x1="129.89" y1="808.83" x2="194.31" y2="808.83" gradientUnits="userSpaceOnUse"/><linearGradient xlink:href="#lg2" id="grad2" x1="271.02" y1="731.42" x2="327.45" y2="731.42" gradientUnits="userSpaceOnUse" spreadMethod="pad"/></defs><g transform="translate(-129.894,-634.847)"><g transform="translate(-114.063,-139.373)"><path d="m 353.331,791.185 -24.32,66.818 c -8.972,24.651 9.283,50.722 35.516,50.722 h 72.08 c 5.218,0 9.449,4.23 9.449,9.449 0,5.218 -4.231,9.449 -9.449,9.449 h -72.08 c -39.35,0 -66.732,-39.106 -53.274,-76.083 l 7.123,-19.57 17.2,-47.256 c 1.787,-4.903 7.21,-7.428 12.113,-5.642 4.903,1.787 7.429,7.21 5.643,12.112 z" style="fill:#000;stroke:#000"/><path d="m 314.879,1026.411 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#000;stroke:#000"/><path d="m 249.987,1019.877 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:#000;stroke:#000"/><path d="m 359.24,904.532 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#000;stroke:#000"/><path d="m 436.607,884.024 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:#000;stroke:#000"/></g><g><path d="m 234.225,648.032 -24.32,66.818 a 37.795,37.795 0 0 0 35.516,50.722 h 72.08 a 9.449,9.449 0 0 1 0,18.898 h -72.08 a 56.693,56.693 0 0 1 -53.274,-76.083 l 24.323,-66.826 a 9.449,9.449 0 0 1 17.755,6.471 z" style="fill:#fff;stroke:#000"/><path d="m 195.773,883.258 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#fff;stroke:#000"/><path d="m 130.881,876.724 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:url(#grad1);stroke:#000"/><path d="m 240.133,761.379 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#fff;stroke:#000"/><path d="m 317.5,740.871 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:url(#grad2);stroke:#000"/></g></g></svg>
+    <span class="nav-wordmark">Hub<sup>4</sup>Fix</span>
+  </a>
+  <div class="nav-right">
+    <span class="nav-badge">Admin</span>
+    <a href="hotlist.html" class="nav-back">Voir la Hot List publique &rarr;</a>
+    <a href="index.html" class="nav-back"><span>&larr;</span> Accueil</a>
+    <div class="nav-account" id="navAccount">
+      <button class="nav-account-btn" id="accountBtn">
+        <svg class="nav-account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0112 0v1"/></svg>
+        <span class="nav-token-badge" id="tokenBadge">5</span>
+      </button>
+      <div class="nav-account-menu" id="accountMenu">
+        <div class="account-menu-header">
+          <div class="account-menu-header-left">
+            <span class="account-menu-name">Julien D.</span>
+            <span class="account-menu-email">demo@hub4fix.com</span>
+          </div>
+          <div class="account-menu-tokens-inline">
+            <span class="token-icon">&#x2B21;</span>
+            <strong id="accountTokenCount">5</strong>
+          </div>
+        </div>
+        <div class="account-roles">
+          <a href="#" class="account-role account-role-client active">
+            <div class="account-role-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg></div>
+            <span class="account-role-label">Reparer</span>
+            <span class="account-role-sub">Trouver sa piece</span>
+          </a>
+          <a href="printer.html" class="account-role account-role-printer locked">
+            <div class="account-role-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="20" width="18" height="2" rx=".5"/><path d="M7 20v-5h10v5"/><path d="M12 4v6"/><path d="M9.5 10h5L12 15.5 9.5 10z"/></svg></div>
+            <span class="account-role-label">Printer</span>
+            <span class="account-role-sub">Devenir printer</span>
+            <span class="account-role-lock">&#x1F512;</span>
+          </a>
+          <a href="modelisateur.html" class="account-role account-role-modeler locked">
+            <div class="account-role-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 7v4l9 5 9-5V7l-9-5z"/><path d="M12 22V12"/><path d="M3 7l9 5 9-5"/><path d="M21 11v6l-9 5-9-5v-6"/></svg></div>
+            <span class="account-role-label">Modelisateur</span>
+            <span class="account-role-sub">Devenir modelisateur</span>
+            <span class="account-role-lock">&#x1F512;</span>
+          </a>
+        </div>
+        <div class="account-menu-links">
+          <a href="mon-compte.html" class="account-menu-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><span>Ma bibliotheque</span></a>
+          <a href="mon-compte.html" class="account-menu-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span>Parametres</span></a>
+          <a href="#" class="account-menu-item account-menu-logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span>Deconnexion</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Main -->
+<div class="admin-layout" id="mainContent" style="display:none">
+
+  <div class="admin-header">
+    <div>
+      <h1 class="admin-title">Gestion <em>Hot List</em></h1>
+      <p class="admin-subtitle">Definir les produits boostes et gerer le catalogue de pieces prioritaires.</p>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card red">
+      <div class="stat-value" id="statTotal">0</div>
+      <div class="stat-label">Produits en liste</div>
+    </div>
+    <div class="stat-card gold">
+      <div class="stat-value" id="statBoostes">0</div>
+      <div class="stat-label">Boostes</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-value" id="statModelises">0</div>
+      <div class="stat-label">Modelises</div>
+    </div>
+    <div class="stat-card night">
+      <div class="stat-value" id="statEnAttente">0</div>
+      <div class="stat-label">En attente</div>
+    </div>
+  </div>
+
+  <!-- Boost control -->
+  <div class="subvention-control">
+    <div class="subvention-header">
+      <div class="subvention-title">Nombre de produits boostes</div>
+    </div>
+    <p class="subvention-desc">
+      Les <strong>N premiers fichiers</strong> de la Hot List beneficient d'une avance sur royalties de +1 EUR/mois, cumulative et sans plafond. Plus une piece reste en attente, plus le Boost monte. Quand le fichier est livre et valide, la piece quitte la liste et la suivante prend sa place.
+    </p>
+    <div class="subvention-row">
+      <div class="subvention-input-group">
+        <label for="subventionCount">Places boostees :</label>
+        <input type="number" class="subvention-input" id="subventionCount" min="0" max="100" value="5">
+      </div>
+      <button class="subvention-save" id="saveBoost">Appliquer</button>
+      <div class="subvention-gauge">
+        <div class="gauge-bar"><div class="gauge-fill" id="gaugeFill" style="width:0%;background:var(--gold)"></div></div>
+        <div class="gauge-label" id="gaugeLabel">0 / 0 places utilisees</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-section">
+    <div class="table-toolbar">
+      <div class="table-toolbar-left">
+        <input type="text" class="table-search" id="tableSearch" placeholder="Rechercher une piece...">
+      </div>
+      <button class="btn-add" id="btnAdd">+ Ajouter</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th class="center">#</th>
+          <th>Piece / Appareil</th>
+          <th>Categorie</th>
+          <th class="center">Demande</th>
+          <th class="center">Alertes</th>
+          <th class="center">Boost</th>
+          <th class="center">Mois</th>
+          <th class="center">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div class="table-footer">
+      <span id="tableCount">0 produits</span>
+      <span>Donnees stockees localement (localStorage)</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+document.getElementById('accountBtn').addEventListener('click', function(e) {
+  e.stopPropagation();
+  document.getElementById('accountMenu').classList.toggle('visible');
+});
+document.addEventListener('click', function() { document.getElementById('accountMenu').classList.remove('visible'); });
+</script>
+<script>
+(function() {
+  var ADMIN_PASSWORD = 'hub4fix_admin_2026';
+  var AUTH_KEY = 'h4f_admin_auth';
+  var STORAGE_KEY = 'h4f_hotlist';
+  var SUB_KEY = 'h4f_hotlist_subvention';
+
+  var modal = document.getElementById('passwordModal');
+  var mainContent = document.getElementById('mainContent');
+  var passwordInput = document.getElementById('passwordInput');
+  var passwordSubmit = document.getElementById('passwordSubmit');
+  var errorMsg = document.getElementById('errorMsg');
+
+  if (sessionStorage.getItem(AUTH_KEY) === 'true') showAdmin();
+
+  passwordSubmit.addEventListener('click', checkPassword);
+  passwordInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') checkPassword(); });
+
+  function checkPassword() {
+    if (passwordInput.value === ADMIN_PASSWORD) {
+      sessionStorage.setItem(AUTH_KEY, 'true');
+      showAdmin();
+    } else {
+      errorMsg.textContent = 'Mot de passe incorrect.';
+      passwordInput.value = '';
+      passwordInput.focus();
+    }
+  }
+
+  function showAdmin() {
+    modal.classList.add('hidden');
+    mainContent.style.display = 'block';
+    init();
+  }
+
+  // --- Data ---
+  var DEFAULT_PRODUCTS = [
+    { name: "Tete d'aspirateur rotative", machine: "Dyson V7/V8/V10/V11", category: "Electromenager", demand: 2340, alerts: 89, units: "1 200 000", age: 6, addedDate: "2026-01-15", modeled: false },
+    { name: "Roulette panier superieur", machine: "Bosch / Siemens lave-vaisselle", category: "Electromenager", demand: 1870, alerts: 72, units: "3 500 000", age: 8, addedDate: "2026-01-15", modeled: false },
+    { name: "Poussoir extracteur", machine: "Magimix 3200XL / 4200XL", category: "Cuisine", demand: 1540, alerts: 58, units: "800 000", age: 5, addedDate: "2026-02-01", modeled: false },
+    { name: "Charniere de porte", machine: "Samsung RF23M8090SR", category: "Refrigerateur", demand: 1320, alerts: 45, units: "600 000", age: 4, addedDate: "2026-02-10", modeled: false },
+    { name: "Bouton de commande", machine: "De'Longhi Magnifica S", category: "Cafe", demand: 1180, alerts: 41, units: "2 100 000", age: 7, addedDate: "2026-02-15", modeled: false },
+    { name: "Roue avant pivotante", machine: "Weber Q1200 / Q2200", category: "Barbecue", demand: 980, alerts: 34, units: "1 500 000", age: 5, addedDate: "2026-03-01", modeled: false },
+    { name: "Clip fixation filtre", machine: "Rowenta Silence Force", category: "Electromenager", demand: 870, alerts: 29, units: "900 000", age: 6, addedDate: "2026-03-10", modeled: false },
+    { name: "Patin anti-vibration", machine: "LG F4V5VYP2T", category: "Lave-linge", demand: 750, alerts: 22, units: "400 000", age: 3, addedDate: "2026-03-20", modeled: false },
+    { name: "Cache ampoule interieur", machine: "Whirlpool ARC4020", category: "Refrigerateur", demand: 620, alerts: 18, units: "350 000", age: 4, addedDate: "2026-04-01", modeled: false },
+    { name: "Verrou porte tambour", machine: "Miele W1 Classic", category: "Lave-linge", demand: 540, alerts: 15, units: "250 000", age: 5, addedDate: "2026-04-10", modeled: false }
+  ];
+
+  function loadProducts() {
+    var data = localStorage.getItem(STORAGE_KEY);
+    if (!data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_PRODUCTS));
+      return JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+    }
+    return JSON.parse(data);
+  }
+
+  function saveProducts(products) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+  }
+
+  function loadBoostCount() {
+    var v = localStorage.getItem(SUB_KEY);
+    return v !== null ? parseInt(v, 10) : 5;
+  }
+
+  function saveBoostCount(n) {
+    localStorage.setItem(SUB_KEY, String(n));
+  }
+
+  function monthsSince(dateStr) {
+    if (!dateStr) return 0;
+    var d = new Date(dateStr);
+    var now = new Date();
+    var months = (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth());
+    return Math.max(0, months);
+  }
+
+  function subventionAmount(months) {
+    return Math.max(1, months);
+  }
+
+  // --- Render ---
+  var searchTerm = '';
+
+  function render() {
+    var products = loadProducts();
+    var subCount = loadBoostCount();
+    document.getElementById('subventionCount').value = subCount;
+
+    var active = products.filter(function(p) { return !p.modeled; });
+    var modeled = products.filter(function(p) { return p.modeled; });
+    var subsidizedCount = Math.min(subCount, active.length);
+
+    document.getElementById('statTotal').textContent = active.length;
+    document.getElementById('statBoostes').textContent = subsidizedCount;
+    document.getElementById('statModelises').textContent = modeled.length;
+    document.getElementById('statEnAttente').textContent = Math.max(0, active.length - subsidizedCount);
+
+    var pct = active.length > 0 ? Math.round((subsidizedCount / active.length) * 100) : 0;
+    document.getElementById('gaugeFill').style.width = pct + '%';
+    var gaugeColor = pct > 80 ? 'var(--green)' : pct > 50 ? 'var(--gold)' : 'var(--red)';
+    document.getElementById('gaugeFill').style.background = gaugeColor;
+    document.getElementById('gaugeLabel').textContent = subsidizedCount + ' / ' + active.length + ' places utilisees (' + pct + '%)';
+
+    var tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+
+    var maxDemand = 1;
+    products.forEach(function(p) { if (p.demand > maxDemand) maxDemand = p.demand; });
+
+    var filtered = [];
+    products.forEach(function(p, i) {
+      p._origIndex = i;
+      if (searchTerm) {
+        var s = searchTerm.toLowerCase();
+        if ((p.name + ' ' + p.machine + ' ' + p.category).toLowerCase().indexOf(s) === -1) return;
+      }
+      filtered.push(p);
+    });
+
+    var activeRank = 0;
+    filtered.forEach(function(p) {
+      if (!p.modeled) activeRank++;
+      var isSubsidized = !p.modeled && activeRank <= subCount;
+      var months = monthsSince(p.addedDate);
+      var subAmt = subventionAmount(months);
+      var demandPct = Math.round((p.demand / maxDemand) * 100);
+
+      var tr = document.createElement('tr');
+      if (p.modeled) tr.className = 'modeled';
+      else if (isSubsidized) tr.className = 'subsidized';
+
+      tr.innerHTML =
+        '<td class="rank-cell ' + (isSubsidized ? 'gold' : '') + '">' + (p.modeled ? '—' : activeRank) + '</td>' +
+        '<td><div class="product-cell"><span class="product-cell-name">' + esc(p.name) + '</span><span class="product-cell-machine">' + esc(p.machine) + '</span></div></td>' +
+        '<td>' + esc(p.category) + '</td>' +
+        '<td><div class="demand-bar"><div class="demand-bar-track"><div class="demand-bar-fill" style="width:' + demandPct + '%"></div></div><span class="demand-bar-value">' + p.demand + '</span></div></td>' +
+        '<td style="text-align:center">' + p.alerts + '</td>' +
+        '<td style="text-align:center">' + (isSubsidized ? '<span class="badge-sub">+' + subAmt + ' EUR/mois</span>' : (p.modeled ? '' : '—')) + '</td>' +
+        '<td style="text-align:center"><span class="badge-months">' + months + '</span></td>' +
+        '<td><div class="actions-cell">' +
+          (!p.modeled ? '<button class="btn-icon btn-up" data-action="up" data-idx="' + p._origIndex + '" title="Monter">&#9650;</button>' +
+          '<button class="btn-icon btn-down" data-action="down" data-idx="' + p._origIndex + '" title="Descendre">&#9660;</button>' : '') +
+          '<button class="btn-icon btn-check" data-action="toggle" data-idx="' + p._origIndex + '" title="' + (p.modeled ? 'Reactiver' : 'Marquer modelise') + '">' + (p.modeled ? '&#8634;' : '&#10003;') + '</button>' +
+          '<button class="btn-icon btn-delete" data-action="delete" data-idx="' + p._origIndex + '" title="Supprimer">&#10005;</button>' +
+        '</div></td>';
+
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('tableCount').textContent = filtered.length + ' produit' + (filtered.length > 1 ? 's' : '');
+  }
+
+  function esc(s) {
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  // --- Actions ---
+  document.getElementById('tableBody').addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    var action = btn.getAttribute('data-action');
+    var idx = parseInt(btn.getAttribute('data-idx'), 10);
+    var products = loadProducts();
+
+    if (action === 'toggle') {
+      products[idx].modeled = !products[idx].modeled;
+      saveProducts(products);
+      render();
+    } else if (action === 'delete') {
+      if (confirm('Supprimer "' + products[idx].name + '" de la Hot List ?')) {
+        products.splice(idx, 1);
+        saveProducts(products);
+        render();
+      }
+    } else if (action === 'up' && idx > 0) {
+      var tmp = products[idx];
+      products[idx] = products[idx - 1];
+      products[idx - 1] = tmp;
+      saveProducts(products);
+      render();
+    } else if (action === 'down' && idx < products.length - 1) {
+      var tmp2 = products[idx];
+      products[idx] = products[idx + 1];
+      products[idx + 1] = tmp2;
+      saveProducts(products);
+      render();
+    }
+  });
+
+  // Boost save
+  document.getElementById('saveBoost').addEventListener('click', function() {
+    var val = parseInt(document.getElementById('subventionCount').value, 10);
+    if (isNaN(val) || val < 0) val = 0;
+    saveBoostCount(val);
+    var btn = this;
+    btn.textContent = 'Applique !';
+    btn.classList.add('saved');
+    setTimeout(function() { btn.textContent = 'Appliquer'; btn.classList.remove('saved'); }, 1200);
+    render();
+  });
+
+  // Search
+  document.getElementById('tableSearch').addEventListener('input', function() {
+    searchTerm = this.value;
+    render();
+  });
+
+  // Add product modal
+  var productModal = document.getElementById('productModal');
+  document.getElementById('btnAdd').addEventListener('click', function() {
+    document.getElementById('editIndex').value = '-1';
+    document.getElementById('productModalTitle').textContent = 'Ajouter un produit';
+    document.getElementById('pName').value = '';
+    document.getElementById('pMachine').value = '';
+    document.getElementById('pCategory').value = '';
+    document.getElementById('pDemand').value = '';
+    document.getElementById('pAlerts').value = '';
+    document.getElementById('pUnits').value = '';
+    document.getElementById('pAge').value = '';
+    productModal.classList.remove('hidden');
+  });
+
+  document.getElementById('productModalCancel').addEventListener('click', function() {
+    productModal.classList.add('hidden');
+  });
+
+  document.getElementById('productModalSave').addEventListener('click', function() {
+    var name = document.getElementById('pName').value.trim();
+    var machine = document.getElementById('pMachine').value.trim();
+    var category = document.getElementById('pCategory').value.trim();
+    var demand = parseInt(document.getElementById('pDemand').value, 10) || 0;
+    var alerts = parseInt(document.getElementById('pAlerts').value, 10) || 0;
+    var units = document.getElementById('pUnits').value.trim() || '0';
+    var age = parseInt(document.getElementById('pAge').value, 10) || 0;
+
+    if (!name || !machine) { alert('Nom et appareil requis.'); return; }
+
+    var products = loadProducts();
+    var idx = parseInt(document.getElementById('editIndex').value, 10);
+
+    var product = {
+      name: name, machine: machine, category: category,
+      demand: demand, alerts: alerts, units: units, age: age,
+      addedDate: new Date().toISOString().slice(0, 10),
+      modeled: false
+    };
+
+    if (idx >= 0 && idx < products.length) {
+      product.addedDate = products[idx].addedDate;
+      product.modeled = products[idx].modeled;
+      products[idx] = product;
+    } else {
+      products.push(product);
+    }
+
+    saveProducts(products);
+    productModal.classList.add('hidden');
+    render();
+  });
+
+  productModal.addEventListener('click', function(e) {
+    if (e.target === productModal) productModal.classList.add('hidden');
+  });
+
+  function init() {
+    render();
+  }
+})();
+
+// Logo click suction effect
+(function(){
+  var brand = document.querySelector('.nav-brand');
+  if(!brand) return;
+  brand.addEventListener('click', function(e){
+    var href = brand.getAttribute('href') || 'index.html';
+    e.preventDefault();
+    document.body.style.transformOrigin = 'top center';
+    document.body.classList.add('page-sucking');
+    var navigated = false;
+    function go(){ if(!navigated){ navigated=true; window.location.assign(href); } }
+    document.body.addEventListener('animationend', go);
+    setTimeout(go, 800);
+  });
+})();
+</script>
+<script>
+(function(){var cvs=document.createElement('canvas');cvs.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none;';document.body.insertBefore(cvs,document.body.firstChild);var ctx=cvs.getContext('2d'),W,H,P=[],dpr;var DIST=130,SPD=0.35;function resize(){dpr=window.devicePixelRatio||1;W=window.innerWidth;H=window.innerHeight;cvs.width=W*dpr;cvs.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}function make(){P=[];var n=Math.min(Math.round(W*H/13000),80);for(var i=0;i<n;i++)P.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*SPD,vy:(Math.random()-.5)*SPD,r:Math.random()*.7+.5});}function tick(){ctx.clearRect(0,0,W,H);for(var i=0;i<P.length;i++){for(var j=i+1;j<P.length;j++){var dx=P[i].x-P[j].x,dy=P[i].y-P[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<DIST){ctx.strokeStyle='rgba(168,159,145,'+(0.28*(1-d/DIST)).toFixed(3)+')';ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(P[i].x,P[i].y);ctx.lineTo(P[j].x,P[j].y);ctx.stroke();}}ctx.fillStyle='rgba(168,159,145,.3)';ctx.beginPath();ctx.arc(P[i].x,P[i].y,P[i].r,0,6.283);ctx.fill();P[i].x+=P[i].vx;P[i].y+=P[i].vy;if(P[i].x<0||P[i].x>W)P[i].vx*=-1;if(P[i].y<0||P[i].y>H)P[i].vy*=-1;}requestAnimationFrame(tick);}resize();make();tick();window.addEventListener('resize',function(){resize();make();});})();
+</script>
+<script src="/js/sphere-bg.js"></script>
+<script src="js/nav-mindmap.js"></script>
+<footer style="border-top:.5px solid rgba(28,26,22,0.08);padding:1.2rem 2rem;display:flex;align-items:center;justify-content:center;gap:1.5rem;font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.06em"><a href="cgu.html" style="color:var(--stone,#A89F91);text-decoration:none">CGU</a> <span style="opacity:.3">&middot;</span> <a href="cgv.html" style="color:var(--stone,#A89F91);text-decoration:none">CGV</a></footer>
+</body>
+</html>
