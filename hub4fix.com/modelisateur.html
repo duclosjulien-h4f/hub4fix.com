@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/glass-sphere.css">
+<link rel="stylesheet" href="css/cgv-modal.css">
 <style>
 :root{--ivory:#FAF8F5;--warm-white:#F3EEE8;--cream:#EDE6DC;--sand:#D4C9B8;--stone:#A89F91;--earth:#7A7268;--charcoal:#3B3632;--night:#1C1A18;--gold:#B8963E;--gold-light:#D4B15F;--gold-pale:rgba(184,150,62,0.08);--red:#C8102E;--red-soft:rgba(200,16,46,0.06);--green:#2D8B5E}
 *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
@@ -464,7 +465,17 @@ footer{padding:3rem 4rem;border-top:1px solid var(--cream);display:flex;justify-
       <textarea name="message" data-i18n-placeholder="form_message_placeholder" placeholder="Parlez-nous de votre parcours, de vos motivations, de ce que vous voulez apporter à Hub⁴Fix…"></textarea>
     </div>
 
-    <button type="submit" class="form-submit" data-i18n="form_submit">Envoyer ma candidature →</button>
+    <!-- honeypot anti-spam : invisible, doit rester vide -->
+    <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;opacity:0;height:0;width:0">
+
+    <div class="form-group form-consent" id="mod-consent" style="background:#faf7f2;border:1px solid #ede6dc;border-radius:8px;padding:1rem">
+      <p style="margin:0 0 .6rem;font-size:.85rem;color:#3d3a33">Avant de rejoindre le réseau, lisez et acceptez les conditions applicables aux modélisateurs.</p>
+      <button type="button" class="cgv-open-btn" data-cgv-accept="cgv-modelisateurs.html" data-cgv-title="CGV — Modélisateurs" data-cgv-role="modelisateur" data-cgv-version="1.0" style="font-family:'Karla',sans-serif;font-size:.8rem;font-weight:600;border:1px solid var(--red,#C8102E);color:var(--red,#C8102E);background:none;border-radius:6px;padding:.6rem 1rem;cursor:pointer">Lire et accepter les CGV Modélisateurs →</button>
+      <span id="mod-consent-status" style="display:block;margin-top:.6rem;font-size:.78rem;color:#7a766c"></span>
+    </div>
+
+    <button type="submit" class="form-submit" data-i18n="form_submit" disabled>Envoyer ma candidature →</button>
+    <p class="form-error" id="mod-error" style="display:none;color:#C8102E;font-size:.82rem;margin-top:.6rem"></p>
     <p class="form-note" data-i18n="form_note">Vos données sont traitées conformément au RGPD. Nous revenons vers vous sous 7 jours.</p>
   </form>
 
@@ -476,6 +487,7 @@ footer{padding:3rem 4rem;border-top:1px solid var(--cream);display:flex;justify-
 </section>
 
 <script src="js/collect-email.js"></script>
+<script src="js/cgv-accept.js"></script>
 <footer>
   <div class="footer-brand">
     <div class="footer-logo"><svg viewBox="0 0 202.6 265.4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><linearGradient id="flg1"><stop style="stop-color:#2a00fe" offset="0.336"/><stop style="stop-color:#fff" offset="1"/></linearGradient><linearGradient id="flg2"><stop style="stop-color:#fff" offset="0.107"/><stop style="stop-color:#fe0000" offset="0.684"/></linearGradient><linearGradient xlink:href="#flg1" id="fgr1" x1="129.89" y1="808.83" x2="194.31" y2="808.83" gradientUnits="userSpaceOnUse"/><linearGradient xlink:href="#flg2" id="fgr2" x1="271.02" y1="731.42" x2="327.45" y2="731.42" gradientUnits="userSpaceOnUse" spreadMethod="pad"/></defs><g transform="translate(-129.894,-634.847)"><g transform="translate(-114.063,-139.373)"><path d="m 353.331,791.185 -24.32,66.818 c -8.972,24.651 9.283,50.722 35.516,50.722 h 72.08 c 5.218,0 9.449,4.23 9.449,9.449 0,5.218 -4.231,9.449 -9.449,9.449 h -72.08 c -39.35,0 -66.732,-39.106 -53.274,-76.083 l 7.123,-19.57 17.2,-47.256 c 1.787,-4.903 7.21,-7.428 12.113,-5.642 4.903,1.787 7.429,7.21 5.643,12.112 z" style="fill:#000;stroke:#000"/><path d="m 314.879,1026.411 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#000;stroke:#000"/><path d="m 249.987,1019.877 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:#000;stroke:#000"/><path d="m 359.24,904.532 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#000;stroke:#000"/><path d="m 436.607,884.024 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:#000;stroke:#000"/></g><g><path d="m 234.225,648.032 -24.32,66.818 a 37.795,37.795 0 0 0 35.516,50.722 h 72.08 a 9.449,9.449 0 0 1 0,18.898 h -72.08 a 56.693,56.693 0 0 1 -53.274,-76.083 l 24.323,-66.826 a 9.449,9.449 0 0 1 17.755,6.471 z" style="fill:#fff;stroke:#000"/><path d="m 195.773,883.258 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#fff;stroke:#000"/><path d="m 130.881,876.724 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:url(#fgr1);stroke:#000"/><path d="m 240.133,761.379 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#fff;stroke:#000"/><path d="m 317.5,740.871 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:url(#fgr2);stroke:#000"/></g></g></svg></div>
@@ -840,6 +852,16 @@ document.querySelectorAll('.form-check input').forEach(function(cb){
     cb.parentElement.classList.toggle('checked',cb.checked);
   });
 });
+// Le bouton reste desactive tant que les CGV ne sont pas acceptees
+document.addEventListener('cgv:accepted', function(e){
+  if(e.detail.role!=='modelisateur') return;
+  var btn=document.querySelector('#modeliseur-form .form-submit');
+  if(btn) btn.disabled=false;
+  var st=document.getElementById('mod-consent-status');
+  if(st) st.innerHTML='✓ CGV Modélisateurs acceptées le '+new Date(e.detail.at).toLocaleString('fr-FR');
+  document.getElementById('mod-consent').style.borderColor='#2D8B5E';
+});
+
 function submitModForm(e){
   e.preventDefault();
   var form=document.getElementById('modeliseur-form');
@@ -847,10 +869,25 @@ function submitModForm(e){
   new FormData(form).forEach(function(v,k){
     if(data[k]){data[k]=[].concat(data[k],v);}else{data[k]=v;}
   });
-  h4fCollect({ email: data.email, type: 'modelisateur', name: data.prenom || data.nom || null })
-    .catch(function(err){ console.error('Collect error:', err); });
-  document.getElementById('modeliseur-form').style.display='none';
-  document.getElementById('mod-success').style.display='block';
+  if(data.website){ form.style.display='none'; document.getElementById('mod-success').style.display='block'; return false; }
+  var consent=(window.H4FConsent||{}).modelisateur;
+  var err=document.getElementById('mod-error');
+  if(!consent){ err.textContent='Merci de lire et accepter les CGV Modélisateurs avant d’envoyer votre candidature.'; err.style.display='block'; return false; }
+  err.style.display='none';
+  var btn=form.querySelector('.form-submit');
+  btn.disabled=true; var label=btn.textContent; btn.textContent='Envoi…';
+  delete data.website;
+  h4fCollect({ email:data.email, type:'modelisateur', name:data.prenom||data.nom||null, consent:consent, fields:data })
+    .then(function(){
+      form.style.display='none';
+      document.getElementById('mod-success').style.display='block';
+    })
+    .catch(function(error){
+      console.error('Collect error:', error);
+      btn.disabled=false; btn.textContent=label;
+      err.textContent='L’envoi a échoué. Vérifiez votre connexion et réessayez, ou écrivez-nous à contact@hub4fix.com.';
+      err.style.display='block';
+    });
   return false;
 }
 
