@@ -74,3 +74,11 @@ speech*
 CLAUDE.md
 CLAUDE_CODE_BRIEFING.md
 DEMO_SPEC.md
+# Outillage / config Claude Code local (jamais public)
+.claude/
+# Strategie / veille / shadowlist (tous formats, partout)
+*[Ss]ynthese*
+*[Ss]hadow*
+*[Rr]oadmap*
+*pipeline_ia*
+*veille*
