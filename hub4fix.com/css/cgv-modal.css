@@ -1,0 +1,65 @@
+/* Hub4Fix — scroll-to-accept CGV modal + anti-rush nudge.
+ * Self-contained: hardcoded brand colors, no global reset, no :root dependency,
+ * so it can drop into ANY page (signup forms, legal pages) without clashing
+ * with that page's own styles. */
+
+.cgv-modal-ov{position:fixed;inset:0;z-index:1000;background:rgba(28,26,22,.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:2rem}
+.cgv-modal-ov.open{display:flex;animation:cgvFade .25s ease}
+@keyframes cgvFade{from{opacity:0}to{opacity:1}}
+.cgv-modal{background:#FDFAF5;color:#1C1A16;font-family:'Karla',sans-serif;width:min(760px,100%);max-height:90vh;max-height:90dvh;border-radius:14px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.3)}
+.cgv-modal-head{padding:1.1rem 1.5rem;border-bottom:1px solid #EDE8DC;display:flex;justify-content:space-between;align-items:center}
+.cgv-modal-head h2{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:500;margin:0}
+.cgv-modal-close{background:none;border:none;font-size:1.4rem;color:#7A766C;cursor:pointer;line-height:1}
+.cgv-progress{height:3px;background:#EDE8DC}
+.cgv-progress-fill{height:100%;width:0;background:#C0392B;transition:width .1s}
+.cgv-modal-body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1.5rem 1.8rem;flex:1;min-height:0;line-height:1.7;font-weight:300;color:#3D3A33}
+.cgv-modal-body .doc{padding:0;max-width:none}
+.cgv-modal-body h1{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:400;color:#1C1A16;margin:0 0 .4rem}
+.cgv-modal-body h2{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:500;color:#1C1A16;margin:1.8rem 0 .7rem;padding-top:.8rem;border-top:1px solid #EDE8DC}
+.cgv-modal-body h3{font-size:1rem;font-weight:600;color:#1C1A16;margin:1.1rem 0 .4rem}
+.cgv-modal-body p{margin:0 0 .8rem}
+.cgv-modal-body ul{margin:.3rem 0 1rem 1.4rem}
+.cgv-modal-body li{margin-bottom:.35rem}
+.cgv-modal-body strong{font-weight:600;color:#1C1A16}
+.cgv-modal-body a{color:#C0392B}
+.cgv-modal-body .doc-eyebrow{font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:#C0392B;margin-bottom:.6rem}
+.cgv-modal-body .doc-meta{font-family:'DM Mono',monospace;font-size:.72rem;color:#7A766C;margin-bottom:.4rem}
+.cgv-modal-body .doc-note{background:#EDE8DC;border-left:2px solid #C0392B;padding:.9rem 1.1rem;font-size:.82rem;color:#3D3A33;margin:1.4rem 0;border-radius:0 6px 6px 0}
+.cgv-modal-foot{padding:1rem 1.5rem;border-top:1px solid #EDE8DC;display:flex;align-items:center;justify-content:space-between;gap:1rem;background:#F5F0E8}
+.cgv-hint{font-family:'DM Mono',monospace;font-size:.7rem;color:#7A766C}
+.cgv-accept{font-family:'Karla',sans-serif;font-weight:600;font-size:.85rem;border:none;border-radius:8px;padding:.7rem 1.6rem;cursor:not-allowed;background:#D4C9B8;color:#FDFAF5;transition:background .3s,transform .1s;opacity:.7}
+.cgv-accept.ready{background:#2D8B5E;cursor:pointer;opacity:1}
+.cgv-accept.ready:hover{transform:translateY(-1px)}
+.cgv-accept.done{background:#2D8B5E}
+@media(max-width:600px){
+  /* plein ecran sur mobile : le pied de page (bouton Accepter) reste toujours
+     visible et atteignable, meme avec la barre d'adresse du navigateur (dvh). */
+  .cgv-modal-ov{padding:0;align-items:stretch}
+  .cgv-modal{width:100%;max-width:100%;height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;border-radius:0}
+  .cgv-modal-foot{flex-direction:column-reverse;align-items:stretch;gap:.6rem;padding-bottom:calc(1rem + env(safe-area-inset-bottom))}
+  .cgv-accept{width:100%;padding:.95rem 1.6rem;font-size:.95rem}
+  .cgv-hint{text-align:center}
+}
+
+/* anti-rush nudge */
+.cgv-nudge{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:1.5rem;background:rgba(28,26,22,.45);backdrop-filter:blur(3px);opacity:0;transition:opacity .25s}
+.cgv-nudge.show{opacity:1}
+.cgv-nudge-card{background:#FDFAF5;max-width:420px;border-radius:14px;padding:1.8rem;text-align:center;box-shadow:0 18px 48px rgba(0,0,0,.28);transform:translateY(8px) scale(.98);transition:transform .25s}
+.cgv-nudge.show .cgv-nudge-card{transform:none}
+.cgv-nudge-emoji{font-size:2.2rem;margin-bottom:.4rem}
+.cgv-nudge-card h3{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:500;margin:0 0 .7rem;color:#1C1A16}
+.cgv-nudge-card p{font-size:.88rem;color:#3D3A33;margin:0 0 .7rem;line-height:1.6}
+.cgv-nudge-card .cgv-nudge-sub{font-size:.78rem;color:#7A766C}
+.cgv-nudge-read{display:block;width:100%;margin-top:.8rem;font-family:'Karla',sans-serif;font-weight:600;font-size:.9rem;border:none;border-radius:8px;padding:.8rem 1.4rem;background:#C0392B;color:#fff;cursor:pointer;transition:transform .1s}
+.cgv-nudge-read:hover{transform:translateY(-1px)}
+.cgv-nudge-ok{display:block;width:100%;margin-top:.5rem;font-family:'Karla',sans-serif;font-weight:500;font-size:.8rem;border:1px solid #D4C9B8;border-radius:8px;padding:.6rem 1.4rem;background:none;color:#7A766C;cursor:pointer;transition:border-color .15s}
+.cgv-nudge-ok:hover{border-color:#7A766C}
+
+/* karaoke : currently-read line */
+.cgv-reading{background:rgba(192,57,43,.12);box-shadow:0 0 0 6px rgba(192,57,43,.12);border-radius:4px;transition:background .2s,box-shadow .2s}
+
+/* tarif table inside the modal */
+.cgv-modal-body table.cgv-tarifs{border-collapse:collapse;margin:.6rem 0 1.2rem;font-size:.9rem;min-width:280px}
+.cgv-modal-body table.cgv-tarifs th,.cgv-modal-body table.cgv-tarifs td{text-align:left;padding:.5rem .9rem;border-bottom:1px solid #EDE8DC}
+.cgv-modal-body table.cgv-tarifs thead th{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:#7A766C}
+.cgv-modal-body table.cgv-tarifs td:last-child{font-family:'DM Mono',monospace;color:#C0392B;font-weight:500;white-space:nowrap}
