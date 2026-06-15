@@ -154,6 +154,9 @@ nav{position:sticky;top:0;z-index:100;padding:1rem 4rem;display:flex;justify-con
 .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--gold)}
 .form-group textarea{min-height:100px;resize:vertical}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.tel-row{display:flex;gap:.5rem}
+.tel-row .tel-indicatif{width:auto;flex:0 0 auto;max-width:46%}
+.tel-row input{flex:1;min-width:0}
 .form-checkboxes{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:.5rem}
 .form-check{display:flex;align-items:center;gap:.5rem;padding:.5rem .9rem;border:1px solid var(--cream);border-radius:2px;cursor:pointer;transition:all .3s;font-size:.85rem}
 .form-check:hover{border-color:var(--sand)}
@@ -401,7 +404,31 @@ footer{padding:3rem 4rem;border-top:1px solid var(--cream);display:flex;justify-
     <div class="form-row">
       <div class="form-group">
         <label data-i18n="form_phone">Téléphone</label>
-        <input type="tel" name="tel">
+        <div class="tel-row">
+          <select name="indicatif" class="tel-indicatif" aria-label="Indicatif">
+            <option value="+33" selected>🇫🇷 +33</option>
+            <option value="+32">🇧🇪 +32</option>
+            <option value="+41">🇨🇭 +41</option>
+            <option value="+352">🇱🇺 +352</option>
+            <option value="+49">🇩🇪 +49</option>
+            <option value="+34">🇪🇸 +34</option>
+            <option value="+39">🇮🇹 +39</option>
+            <option value="+351">🇵🇹 +351</option>
+            <option value="+31">🇳🇱 +31</option>
+            <option value="+44">🇬🇧 +44</option>
+            <option value="+353">🇮🇪 +353</option>
+            <option value="+43">🇦🇹 +43</option>
+            <option value="+48">🇵🇱 +48</option>
+            <option value="+1">🇺🇸 +1</option>
+            <option value="+212">🇲🇦 +212</option>
+            <option value="+213">🇩🇿 +213</option>
+            <option value="+216">🇹🇳 +216</option>
+            <option value="+221">🇸🇳 +221</option>
+            <option value="+225">🇨🇮 +225</option>
+            <option value="+237">🇨🇲 +237</option>
+          </select>
+          <input type="tel" name="tel">
+        </div>
       </div>
       <div class="form-group">
         <label data-i18n="form_zip">Code postal *</label>
@@ -877,6 +904,7 @@ function submitModForm(e){
   var btn=form.querySelector('.form-submit');
   btn.disabled=true; var label=btn.textContent; btn.textContent='Envoi…';
   delete data.website;
+  if(data.indicatif){ data.tel=((data.indicatif||'')+' '+(data.tel||'')).trim(); delete data.indicatif; }
   h4fCollect({ email:data.email, type:'modelisateur', name:data.prenom||data.nom||null, consent:consent, fields:data })
     .then(function(){
       form.style.display='none';
