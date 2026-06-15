@@ -65,6 +65,16 @@
 .cgv-nudge-ok{display:block;width:100%;margin-top:.5rem;font-family:'Karla',sans-serif;font-weight:500;font-size:.8rem;border:1px solid #D4C9B8;border-radius:8px;padding:.6rem 1.4rem;background:none;color:#7A766C;cursor:pointer;transition:border-color .15s}
 .cgv-nudge-ok:hover{border-color:#7A766C}
 
+/* carte de bienvenue festive a l'acceptation */
+.cgv-welcome{position:fixed;inset:0;z-index:2001;display:flex;align-items:center;justify-content:center;padding:1.5rem;pointer-events:none;opacity:0;transition:opacity .35s}
+.cgv-welcome.show{opacity:1}
+.cgv-welcome-card{background:#FDFAF5;border-radius:16px;padding:2rem 2.4rem;max-width:420px;text-align:center;box-shadow:0 28px 70px rgba(0,0,0,.32);transform:translateY(14px) scale(.94);transition:transform .4s cubic-bezier(.2,.9,.25,1)}
+.cgv-welcome.show .cgv-welcome-card{transform:none}
+.cgv-welcome-emoji{font-size:3.2rem;line-height:1;margin-bottom:.5rem;animation:cgvPop .5s .1s both}
+@keyframes cgvPop{0%{transform:scale(0) rotate(-25deg)}70%{transform:scale(1.2) rotate(8deg)}100%{transform:scale(1) rotate(0)}}
+.cgv-welcome-card h3{font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:500;color:#2D8B5E;margin:0 0 .5rem;line-height:1.15}
+.cgv-welcome-card p{font-family:'Karla',sans-serif;font-size:.9rem;font-weight:300;color:#3D3A33;margin:0;line-height:1.6}
+
 /* karaoke : currently-read line */
 .cgv-reading{background:rgba(192,57,43,.12);box-shadow:0 0 0 6px rgba(192,57,43,.12);border-radius:4px;transition:background .2s,box-shadow .2s}
 

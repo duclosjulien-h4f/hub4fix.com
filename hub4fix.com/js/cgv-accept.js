@@ -351,6 +351,57 @@
     clearTimeout(state.raf);
   }
 
+  // Petits cotillons a l'acceptation : auto-contenu, sans dependance.
+  function ensureConfettiCss() {
+    if (document.getElementById('h4f-conf-css')) return;
+    var s = document.createElement('style');
+    s.id = 'h4f-conf-css';
+    s.textContent = '@keyframes h4fConfFall{to{transform:translate(var(--xend),105vh) rotate(720deg);opacity:.15}}';
+    document.head.appendChild(s);
+  }
+  function confettiBurst() {
+    ensureConfettiCss();
+    var colors = ['#C0392B', '#2D8B5E', '#B8963E', '#2a00fe', '#fe0000', '#FDFAF5'];
+    var box = document.createElement('div');
+    box.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:2000;overflow:hidden';
+    document.body.appendChild(box);
+    for (var i = 0; i < 150; i++) {
+      var p = document.createElement('div');
+      var w = 6 + Math.random() * 8;
+      p.style.cssText = 'position:absolute;top:-24px;left:' + (Math.random() * 100) + '%;' +
+        'width:' + w + 'px;height:' + (w * 0.5 + 4) + 'px;background:' + colors[i % colors.length] + ';' +
+        'opacity:.95;border-radius:1px;will-change:transform;' +
+        '--xend:' + ((Math.random() * 2 - 1) * 140) + 'px;' +
+        'animation:h4fConfFall ' + (2.2 + Math.random() * 1.8) + 's ' + (Math.random() * 0.35) + 's ease-in forwards';
+      box.appendChild(p);
+    }
+    setTimeout(function () { box.remove(); }, 4600);
+  }
+
+  // Célébration : cotillons plein écran + carte de bienvenue festive.
+  function celebrate(role) {
+    var msg = role === 'printer' ? 'Bienvenue dans le réseau de printers !'
+            : role === 'modelisateur' ? 'Bienvenue parmi les modélisateurs !'
+            : 'Bienvenue chez Hub⁴Fix !';
+
+    // carte de bienvenue
+    var w = document.createElement('div');
+    w.className = 'cgv-welcome';
+    w.innerHTML = '<div class="cgv-welcome-card">' +
+        '<div class="cgv-welcome-emoji">🎉</div>' +
+        '<h3>' + msg + '</h3>' +
+        '<p>Conditions acceptées — ravis de vous compter parmi nous.</p>' +
+      '</div>';
+    document.body.appendChild(w);
+    void w.offsetWidth;
+    w.classList.add('show');
+    setTimeout(function () { w.classList.remove('show'); setTimeout(function () { w.remove(); }, 400); }, 2800);
+
+    // cotillons plein écran (réutilise confettiBurst, respecte reduced-motion)
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    confettiBurst();
+  }
+
   function onAccept() {
     if (acceptEl.disabled) return;
     var consent = { accepted: true, role: state.role, doc: state.url,
@@ -361,7 +412,8 @@
     acceptEl.textContent = '✓ Accepté';
     hintEl.textContent = 'Acceptation enregistrée.';
     document.dispatchEvent(new CustomEvent('cgv:accepted', { detail: consent }));
-    setTimeout(close, 900);
+    celebrate(state.role);
+    setTimeout(close, 1200);
   }
 
   // auto-wire triggers

@@ -885,7 +885,7 @@ document.addEventListener('cgv:accepted', function(e){
   var btn=document.querySelector('#modeliseur-form .form-submit');
   if(btn) btn.disabled=false;
   var st=document.getElementById('mod-consent-status');
-  if(st) st.innerHTML='✓ CGV Modélisateurs acceptées le '+new Date(e.detail.at).toLocaleString('fr-FR');
+  if(st){ st.innerHTML='✓ CGV Modélisateurs acceptées le '+new Date(e.detail.at).toLocaleString('fr-FR'); st.style.color='#2D8B5E'; st.style.fontWeight='600'; }
   document.getElementById('mod-consent').style.borderColor='#2D8B5E';
 });
 

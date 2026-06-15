@@ -609,7 +609,7 @@ document.addEventListener('cgv:accepted', function(e){
   var btn=document.querySelector('#printer-form .form-submit');
   if(btn) btn.disabled=false;
   var st=document.getElementById('print-consent-status');
-  if(st) st.innerHTML='✓ CGV Printers acceptées le '+new Date(e.detail.at).toLocaleString('fr-FR');
+  if(st){ st.innerHTML='✓ CGV Printers acceptées le '+new Date(e.detail.at).toLocaleString('fr-FR'); st.style.color='#2D8B5E'; st.style.fontWeight='600'; }
   document.getElementById('print-consent').style.borderColor='#2D8B5E';
 });
 
