@@ -31,6 +31,16 @@
 .cgv-accept.ready{background:#2D8B5E;cursor:pointer;opacity:1}
 .cgv-accept.ready:hover{transform:translateY(-1px)}
 .cgv-accept.done{background:#2D8B5E}
+/* compteur circulaire (rouge -> vert) */
+.cgv-foot-left{display:flex;align-items:center;gap:.7rem;min-width:0}
+.cgv-timer{position:relative;width:44px;height:44px;flex:0 0 auto}
+.cgv-timer svg{width:44px;height:44px;display:block;transform:rotate(-90deg)}
+.cgv-timer-track{fill:none;stroke:#EDE8DC;stroke-width:4}
+.cgv-timer-prog{fill:none;stroke:#C0392B;stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .25s linear,stroke .4s linear}
+.cgv-timer-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.85rem;font-weight:600;color:#3D3A33}
+.cgv-timer.ready{animation:cgvPulse .5s ease}
+.cgv-timer.ready .cgv-timer-num{color:#2D8B5E}
+@keyframes cgvPulse{0%{transform:scale(1)}50%{transform:scale(1.12)}100%{transform:scale(1)}}
 @media(max-width:600px){
   /* plein ecran sur mobile : le pied de page (bouton Accepter) reste toujours
      visible et atteignable, meme avec la barre d'adresse du navigateur (dvh). */
