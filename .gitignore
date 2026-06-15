@@ -46,6 +46,8 @@ venv/
 *.pdf
 # Dossiers internes
 _coffre-fort/
+*.hc
+*.vc
 documents/
 context/
 cloud-slicer/
