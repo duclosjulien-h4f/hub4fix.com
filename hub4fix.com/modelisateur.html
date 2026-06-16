@@ -909,6 +909,7 @@ function submitModForm(e){
     .then(function(){
       form.style.display='none';
       document.getElementById('mod-success').style.display='block';
+      if(window.H4FCgv&&window.H4FCgv.celebrate) window.H4FCgv.celebrate('modelisateur');
     })
     .catch(function(error){
       console.error('Collect error:', error);

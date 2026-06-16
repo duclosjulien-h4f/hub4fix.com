@@ -412,8 +412,9 @@
     acceptEl.textContent = '✓ Accepté';
     hintEl.textContent = 'Acceptation enregistrée.';
     document.dispatchEvent(new CustomEvent('cgv:accepted', { detail: consent }));
-    celebrate(state.role);
-    setTimeout(close, 1200);
+    // Pas de fête ici : la célébration se déclenche à l'envoi du formulaire
+    // (voir window.H4FCgv.celebrate appelé au succès de l'inscription).
+    setTimeout(close, 700);
   }
 
   // auto-wire triggers
@@ -429,5 +430,5 @@
 
   // expose for programmatic use
   window.H4FConsent = window.H4FConsent || {};
-  window.H4FCgv = { open: open, close: close };
+  window.H4FCgv = { open: open, close: close, celebrate: celebrate };
 })();
