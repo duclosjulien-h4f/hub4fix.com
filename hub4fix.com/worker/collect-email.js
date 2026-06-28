@@ -1,21 +1,25 @@
 /**
- * Hub4Fix — Cloudflare Worker : collecte d'emails
+ * Hub4Fix — Cloudflare Worker : collecte d'inscriptions vers Google Sheets
  *
- * Recoit un POST { email, type, name? }
+ * Recoit un POST { email, type, name?, consent?, fields? }
  *   type = "modelisateur" | "printer" | "client"
  *
- * Commit un fichier JSON dans le repo GitHub :
- *   leads/{type}/{timestamp}_{hash}.json
+ * Ajoute chaque inscription comme UNE ligne dans un Google Sheet PRIVE.
+ * La feuille est le document de travail vivant (editable, suppressions
+ * durables, historique de versions Google = filet de securite).
  *
- * Variables d'environnement requises (dans Cloudflare dashboard) :
- *   GITHUB_TOKEN  — Personal Access Token (fine-grained, contents:write)
- *   GITHUB_REPO   — "duclosjulien-h4f/hub4fix.com"
+ * Variables d'environnement (Cloudflare > Settings > Variables) :
+ *   SHEET_ID         — id du Google Sheet (dans l'URL .../d/<SHEET_ID>/edit)
+ *   GOOGLE_SA_EMAIL  — email du compte de service (xxx@yyy.iam.gserviceaccount.com)
+ *   GOOGLE_SA_KEY    — "private_key" du JSON de compte de service (PEM, secret)
+ *   SHEET_TAB        — nom de l'onglet (optionnel, defaut "Inscriptions")
  *
- * Deploiement :
- *   1. Creer un Worker sur https://dash.cloudflare.com
- *   2. Coller ce code
- *   3. Ajouter les variables d'environnement (Settings > Variables)
- *   4. Publier
+ * Prerequis : partager la feuille avec GOOGLE_SA_EMAIL en "Editeur".
+ *
+ * Ordre des colonnes (header a coller en ligne 1 de la feuille) :
+ *   date | type | email | name | prenom | nom | tel | cp | ville | statut |
+ *   parc_machines | materiaux | espace | dispo | logiciels | experience |
+ *   capa | portfolio | message | consent_version | consent_at | source | ip_country
  */
 
 const ALLOWED_ORIGINS = [
@@ -23,9 +27,17 @@ const ALLOWED_ORIGINS = [
   'https://hub4fix.com',
   'https://www.hub4fix.com',
   'http://localhost:8765',
+  'http://localhost:9090',
 ];
 
 const VALID_TYPES = ['modelisateur', 'printer', 'client'];
+
+// Ordre des champs du formulaire dans la ligne (apres date/type/email/name)
+const FIELDS_ORDER = [
+  'prenom', 'nom', 'tel', 'cp', 'ville', 'statut',
+  'parc_machines', 'materiaux', 'espace', 'dispo',
+  'logiciels', 'experience', 'capa', 'portfolio', 'message',
+];
 
 function corsHeaders(origin) {
   const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
@@ -43,76 +55,103 @@ function jsonResponse(data, status, origin) {
   });
 }
 
-// Hash simple pour generer un ID court a partir de l'email
-async function shortHash(text) {
-  const data = new TextEncoder().encode(text);
-  const hash = await crypto.subtle.digest('SHA-256', data);
-  const arr = Array.from(new Uint8Array(hash));
-  return arr.slice(0, 4).map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-// Valide le format email
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-// Commit un fichier dans le repo GitHub via l'API Contents
-async function commitToGitHub(env, path, content, message) {
-  const url = `https://api.github.com/repos/${env.GITHUB_REPO}/contents/${path}`;
+// ---- base64url helpers ----
+function b64url(str) {
+  return btoa(unescape(encodeURIComponent(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function b64urlBytes(bytes) {
+  let s = '';
+  for (const b of bytes) s += String.fromCharCode(b);
+  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
 
-  // Verifier si le fichier existe deja (doublon)
-  const check = await fetch(url, {
-    headers: {
-      'Authorization': `Bearer ${env.GITHUB_TOKEN}`,
-      'User-Agent': 'Hub4Fix-Worker',
-      'Accept': 'application/vnd.github.v3+json',
-    },
+// Importe la cle privee PEM (gere le PEM brut ou la version JSON avec \n)
+async function importPrivateKey(pem) {
+  const body = pem
+    .replace(/-----[^-]+-----/g, '') // enleve les en-tetes BEGIN/END
+    .replace(/\\n/g, '')              // \n litteraux (cas JSON colle)
+    .replace(/\s+/g, '');             // espaces / vrais sauts de ligne
+  const der = Uint8Array.from(atob(body), (c) => c.charCodeAt(0));
+  return crypto.subtle.importKey(
+    'pkcs8', der.buffer,
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false, ['sign']
+  );
+}
+
+// Cache du token dans l'isolat (evite de re-signer a chaque requete)
+let _tokenCache = { token: null, exp: 0 };
+
+async function getAccessToken(env) {
+  const now = Math.floor(Date.now() / 1000);
+  if (_tokenCache.token && _tokenCache.exp > now + 60) return _tokenCache.token;
+
+  const header = { alg: 'RS256', typ: 'JWT' };
+  const claim = {
+    iss: env.GOOGLE_SA_EMAIL,
+    scope: 'https://www.googleapis.com/auth/spreadsheets',
+    aud: 'https://oauth2.googleapis.com/token',
+    iat: now,
+    exp: now + 3600,
+  };
+  const unsigned = `${b64url(JSON.stringify(header))}.${b64url(JSON.stringify(claim))}`;
+  const key = await importPrivateKey(env.GOOGLE_SA_KEY);
+  const sig = await crypto.subtle.sign(
+    { name: 'RSASSA-PKCS1-v1_5' }, key, new TextEncoder().encode(unsigned)
+  );
+  const jwt = `${unsigned}.${b64urlBytes(new Uint8Array(sig))}`;
+
+  const res = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`,
   });
+  const j = await res.json();
+  if (!j.access_token) throw new Error(`OAuth: ${JSON.stringify(j)}`);
+  _tokenCache = { token: j.access_token, exp: now + (j.expires_in || 3600) };
+  return j.access_token;
+}
 
-  if (check.status === 200) {
-    return { exists: true };
-  }
+function buildRow(record) {
+  const f = record.fields || {};
+  const c = record.consent || {};
+  const fmt = (v) => (Array.isArray(v) ? v.join(', ') : v == null ? '' : String(v));
+  return [
+    record.date, record.type, record.email, record.name || '',
+    ...FIELDS_ORDER.map((k) => fmt(f[k])),
+    c.version || '', c.at || '', record.source || '', record.ip_country || '',
+  ];
+}
 
-  // Creer le fichier
-  const body = JSON.stringify({
-    message,
-    content: btoa(unescape(encodeURIComponent(content))),
-    branch: 'main',
-  });
-
+async function appendToSheet(env, row) {
+  const token = await getAccessToken(env);
+  const tab = env.SHEET_TAB || 'Inscriptions';
+  const range = encodeURIComponent(`${tab}!A1`);
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${env.SHEET_ID}/values/${range}:append`
+    + `?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
   const res = await fetch(url, {
-    method: 'PUT',
-    headers: {
-      'Authorization': `Bearer ${env.GITHUB_TOKEN}`,
-      'User-Agent': 'Hub4Fix-Worker',
-      'Accept': 'application/vnd.github.v3+json',
-      'Content-Type': 'application/json',
-    },
-    body,
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ values: [row] }),
   });
-
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`GitHub API error ${res.status}: ${err}`);
-  }
-
-  return { exists: false, committed: true };
+  if (!res.ok) throw new Error(`Sheets ${res.status}: ${await res.text()}`);
 }
 
 export default {
   async fetch(request, env) {
     const origin = request.headers.get('Origin') || '';
 
-    // Preflight CORS
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: corsHeaders(origin) });
     }
-
     if (request.method !== 'POST') {
       return jsonResponse({ error: 'Method not allowed' }, 405, origin);
     }
 
-    // Parse le body
     let data;
     try {
       data = await request.json();
@@ -120,9 +159,7 @@ export default {
       return jsonResponse({ error: 'Invalid JSON' }, 400, origin);
     }
 
-    const { email, type, name } = data;
-
-    // Validation
+    const { email, type, name, consent, fields } = data;
     if (!email || !isValidEmail(email)) {
       return jsonResponse({ error: 'Email invalide' }, 400, origin);
     }
@@ -130,39 +167,22 @@ export default {
       return jsonResponse({ error: `Type invalide. Attendu: ${VALID_TYPES.join(', ')}` }, 400, origin);
     }
 
-    // Generer le chemin du fichier
-    const now = new Date();
-    const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
-    const hash = await shortHash(email.toLowerCase());
-    const fileName = `${timestamp}_${hash}.json`;
-    const filePath = `leads/${type}s/${fileName}`;
-
-    // Contenu du fichier
-    const fileContent = JSON.stringify({
+    const record = {
+      date: new Date().toISOString(),
       email: email.toLowerCase().trim(),
       type,
-      name: name ? name.trim() : null,
-      date: now.toISOString(),
+      name: name ? String(name).trim() : null,
       source: origin || 'unknown',
       ip_country: request.cf?.country || null,
-    }, null, 2);
+      consent: consent || null,
+      fields: fields || null,
+    };
 
-    // Commit dans GitHub
     try {
-      const result = await commitToGitHub(
-        env,
-        filePath,
-        fileContent,
-        `lead: nouveau ${type} — ${email.split('@')[0]}@***`
-      );
-
-      if (result.exists) {
-        return jsonResponse({ ok: true, message: 'Deja enregistre' }, 200, origin);
-      }
-
+      await appendToSheet(env, buildRow(record));
       return jsonResponse({ ok: true, message: 'Inscription enregistree' }, 201, origin);
     } catch (err) {
-      console.error('GitHub commit failed:', err.message);
+      console.error('sheet append failed:', err.message);
       return jsonResponse({ error: 'Erreur serveur' }, 500, origin);
     }
   },
