@@ -1,0 +1,54 @@
+/* Shared styling for Hub4Fix legal pages (CGU / CGV) */
+:root{
+  --rouge:#C0392B;--creme:#F5F0E8;--ivoire:#EDE8DC;--encre:#1C1A16;
+  --encre-mid:#3D3A33;--encre-light:#7A766C;--blanc:#FDFAF5;--sand:#D4C9B8;--vert:#2D8B5E;
+  --font-serif:'Cormorant Garamond',serif;--font-sans:'Karla',sans-serif;--font-mono:'DM Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--blanc);color:var(--encre);font-family:var(--font-sans);line-height:1.7;font-weight:300}
+nav{position:sticky;top:0;z-index:100;padding:1rem 4rem;display:flex;justify-content:space-between;align-items:center;background:rgba(253,250,245,0.85);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--ivoire)}
+.nav-brand{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-wordmark{font-family:var(--font-serif);font-size:1.15rem;font-weight:500;color:var(--encre);letter-spacing:.02em}
+.nav-wordmark sup{color:var(--rouge);font-size:.7em;vertical-align:super;line-height:0}
+.nav-back{font-size:.78rem;font-weight:500;color:var(--encre-light);text-decoration:none;letter-spacing:.04em}
+.nav-back:hover{color:var(--rouge)}
+.doc{max-width:820px;margin:0 auto;padding:4rem 2rem 5rem}
+.doc-eyebrow{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--rouge);margin-bottom:1rem}
+.doc h1{font-family:var(--font-serif);font-size:clamp(2rem,4vw,3rem);font-weight:400;line-height:1.1;margin-bottom:.6rem}
+.doc-meta{font-family:var(--font-mono);font-size:.72rem;color:var(--encre-light);margin-bottom:.5rem}
+.doc-note{background:var(--ivoire);border-left:2px solid var(--rouge);padding:1rem 1.2rem;font-size:.82rem;color:var(--encre-mid);margin:2rem 0;border-radius:0 6px 6px 0}
+.doc h2{font-family:var(--font-serif);font-size:1.5rem;font-weight:500;margin:2.6rem 0 .9rem;padding-top:1rem;border-top:1px solid var(--ivoire)}
+.doc h3{font-size:1rem;font-weight:600;color:var(--encre);margin:1.4rem 0 .5rem}
+.doc p{margin-bottom:.9rem;color:var(--encre-mid)}
+.doc ul{margin:.4rem 0 1rem 1.4rem;color:var(--encre-mid)}
+.doc li{margin-bottom:.4rem}
+.doc strong{font-weight:600;color:var(--encre)}
+.doc a{color:var(--rouge);text-decoration:none}
+.doc a:hover{text-decoration:underline}
+footer{border-top:1px solid var(--ivoire);padding:2rem 3rem;display:flex;flex-direction:column;align-items:center;gap:.6rem;text-align:center}
+footer .logo{font-family:var(--font-mono);font-size:12px;color:var(--encre-light);letter-spacing:.1em}
+footer .logo span{color:var(--rouge)}
+footer .mention{font-family:var(--font-mono);font-size:10px;color:var(--sand);letter-spacing:.08em}
+footer .legal-links{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.06em}
+footer .legal-links a{color:var(--encre-light);text-decoration:none}
+footer .legal-links a:hover{color:var(--rouge)}
+@media(max-width:700px){nav{padding:.8rem 1.2rem}.doc{padding:2.5rem 1.2rem 3rem}}
+
+/* ---- CGV index cards ---- */
+.cgv-grid{max-width:900px;margin:2rem auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.2rem}
+.cgv-card{background:var(--blanc);border:1px solid var(--ivoire);border-radius:12px;padding:1.6rem;display:flex;flex-direction:column;gap:.6rem}
+.cgv-card h3{font-family:var(--font-serif);font-size:1.3rem;font-weight:500}
+.cgv-card p{font-size:.85rem;color:var(--encre-mid);flex:1}
+.cgv-card .badge{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--rouge)}
+.cgv-card .act{display:inline-flex;align-items:center;gap:.4rem;align-self:flex-start;margin-top:.4rem;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.06em;border:1px solid var(--encre);border-radius:6px;padding:.5rem .9rem;cursor:pointer;background:none;color:var(--encre);text-decoration:none;transition:all .2s}
+.cgv-card .act:hover{background:var(--encre);color:var(--blanc)}
+.cgv-card .act.sign{border-color:var(--rouge);color:var(--rouge)}
+.cgv-card .act.sign:hover{background:var(--rouge);color:#fff}
+
+
+/* ---- Tarif tables ---- */
+.doc table.cgv-tarifs{border-collapse:collapse;margin:.6rem 0 1.2rem;font-size:.9rem;min-width:280px}
+.doc table.cgv-tarifs th,.doc table.cgv-tarifs td{text-align:left;padding:.5rem .9rem;border-bottom:1px solid var(--ivoire)}
+.doc table.cgv-tarifs thead th{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--encre-light)}
+.doc table.cgv-tarifs td:last-child{font-family:var(--font-mono);color:var(--rouge);font-weight:500;white-space:nowrap}
