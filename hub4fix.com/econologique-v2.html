@@ -116,6 +116,22 @@ p.body{font-size:clamp(1rem,2vw,1.25rem);font-weight:300;color:var(--earth);max-
 .tl-item .big{font-family:var(--serif);font-size:clamp(2rem,4vw,3rem);font-weight:500;margin:.3rem 0;line-height:1}
 .tl-item .desc{font-size:.9rem;color:var(--earth)}
 
+/* maillage France (hexagone) */
+.hexwrap{position:relative;max-width:500px;margin:2.4rem auto 1.2rem}
+.hexwrap svg{width:100%;height:auto;display:block;overflow:visible}
+.hex-outline{fill:rgba(184,150,62,.05);stroke:rgba(184,150,62,.55);stroke-width:1.5}
+.pd{fill:var(--green);opacity:0;transition:opacity .55s ease;cursor:pointer}
+.hexwrap.in .pd{opacity:.82}
+.pd:hover{fill:var(--gold);opacity:1}
+.pd.hq{fill:var(--red)}
+.hexwrap.in .pd.hq{opacity:1}
+.city{fill:var(--gold);opacity:0;transition:opacity .6s}
+.hexwrap.in .city{opacity:.9}
+.clabel{font-family:var(--mono);font-size:8.5px;fill:#C9C3B8;opacity:0;transition:opacity .6s}
+.hexwrap.in .clabel{opacity:.85}
+.maillage-stat{font-family:var(--serif);font-size:clamp(2.2rem,6vw,3.6rem);font-weight:500;color:var(--gold);text-align:center}
+.maillage-stat span{font-variant-numeric:tabular-nums}
+
 /* impact counter */
 .counter{font-family:var(--serif);font-weight:500;font-size:clamp(3.4rem,11vw,8rem);line-height:1;color:var(--gold)}
 .counter-sub{font-family:var(--mono);font-size:.8rem;letter-spacing:.16em;text-transform:uppercase;color:#C9C3B8;margin-top:.6rem}
@@ -230,6 +246,21 @@ footer a{color:var(--gold);text-decoration:none}
   </div>
 </section>
 
+<!-- 6b. MAILLAGE -->
+<section class="sect dark">
+  <div class="wrap" style="text-align:center">
+    <div class="eyebrow reveal">Le maillage</div>
+    <h2 class="title reveal d1">Un réseau qui<br>se <em>densifie</em>.</h2>
+    <p class="body reveal d2" style="margin:0 auto">Chaque printer rapproche la pièce du besoin. L'objectif : mailler tout l'Hexagone.</p>
+    <div class="hexwrap reveal d2" id="hexwrap">
+      <svg viewBox="0 0 400 440" id="hexsvg" aria-label="Carte du maillage des printers en France">
+        <polygon class="hex-outline" points="200,30 360,125 360,315 200,410 40,315 40,125"></polygon>
+      </svg>
+    </div>
+    <div class="maillage-stat reveal d3"><span data-count="800" data-suffix="">0</span> printers visés</div>
+  </div>
+</section>
+
 <!-- 7. TRACTION & CAP -->
 <section class="sect dark">
   <div class="wrap">
@@ -318,6 +349,43 @@ document.querySelectorAll('[data-count]').forEach(function(el){ ioCount.observe(
     });
   }, { threshold:.4 });
   io2.observe(el);
+})();
+</script>
+<script>
+// Maillage : génère des points-printers dans l'hexagone + villes + siège.
+(function(){
+  var svg = document.getElementById('hexsvg'); if(!svg) return;
+  var NS = 'http://www.w3.org/2000/svg';
+  var hex = [[200,30],[360,125],[360,315],[200,410],[40,315],[40,125]];
+  function inHex(x,y){
+    var inside=false;
+    for(var i=0,j=hex.length-1;i<hex.length;j=i++){
+      var xi=hex[i][0],yi=hex[i][1],xj=hex[j][0],yj=hex[j][1];
+      if(((yi>y)!=(yj>y)) && (x < (xj-xi)*(y-yi)/(yj-yi)+xi)) inside=!inside;
+    }
+    return inside;
+  }
+  var n=0, tries=0;
+  while(n<82 && tries<5000){
+    tries++;
+    var x=42+Math.random()*316, y=32+Math.random()*376;
+    if(!inHex(x,y)) continue;
+    var c=document.createElementNS(NS,'circle');
+    c.setAttribute('cx',x.toFixed(1)); c.setAttribute('cy',y.toFixed(1));
+    c.setAttribute('r',(1.5+Math.random()*1.7).toFixed(1));
+    c.setAttribute('class','pd');
+    c.style.transitionDelay=(0.2+Math.random()*1.4).toFixed(2)+'s';
+    svg.appendChild(c); n++;
+  }
+  var cities=[['Paris',208,150],['Lyon',250,255],['Marseille',258,345],['Lille',212,80],['Bordeaux',115,300],['Nantes',100,228],['Strasbourg',332,150],['Toulouse',165,348]];
+  cities.forEach(function(ci){
+    var c=document.createElementNS(NS,'circle'); c.setAttribute('cx',ci[1]); c.setAttribute('cy',ci[2]); c.setAttribute('r',3); c.setAttribute('class','city'); svg.appendChild(c);
+    var t=document.createElementNS(NS,'text'); t.setAttribute('x',ci[1]+6); t.setAttribute('y',ci[2]+3); t.setAttribute('class','clabel'); t.textContent=ci[0]; svg.appendChild(t);
+  });
+  var hq=document.createElementNS(NS,'circle'); hq.setAttribute('cx',216); hq.setAttribute('cy',164); hq.setAttribute('r',5); hq.setAttribute('class','pd hq'); svg.appendChild(hq);
+  var ht=document.createElementNS(NS,'text'); ht.setAttribute('x',222); ht.setAttribute('y',167); ht.setAttribute('class','clabel'); ht.setAttribute('style','fill:#e9b949'); ht.textContent='Viry-Châtillon (siège)'; svg.appendChild(ht);
+  var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ document.getElementById('hexwrap').classList.add('in'); io.disconnect(); } }); }, { threshold:.3 });
+  io.observe(document.getElementById('hexwrap'));
 })();
 </script>
 <script src="js/account-menu.js"></script>
