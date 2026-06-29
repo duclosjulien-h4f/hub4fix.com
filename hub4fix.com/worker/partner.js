@@ -131,8 +131,11 @@ function layout(title, body) {
 }
 
 function shellTop(sess) {
-  return '<div class="top"><div class="brand">Hub<sup>4</sup>Fix<span>Espace partenaire</span></div>' +
-    '<div>' + (sess ? esc(sess.name) + ' · <a href="/auth/logout">Déconnexion</a>' : '') + '</div></div>';
+  const banner = (sess && sess.demo)
+    ? '<div style="background:var(--gold);color:#fff;text-align:center;padding:.45rem 1rem;font-size:.82rem;font-weight:600">MODE DÉMO — exploration libre, aucune action réelle · ⬡ ' + (sess.tokens || 0) + ' tokens virtuels</div>'
+    : '';
+  return banner + '<div class="top"><div class="brand">Hub<sup>4</sup>Fix<span>Espace partenaire</span></div>' +
+    '<div>' + (sess ? esc(sess.name) + ' · <a href="/auth/logout">' + (sess.demo ? 'Quitter la démo' : 'Déconnexion') + '</a>' : '') + '</div></div>';
 }
 
 function dashboard(sess, rows) {
@@ -220,14 +223,37 @@ export default {
       return new Response(null, { status: 302, headers: h });
     }
 
+    // Mode démo : session sans authentification, aucune incidence réelle.
+    if (path === '/demo') {
+      const demo = await makeToken(env.SESSION_SECRET, {
+        demo: true, name: 'Compte Démo', email: 'demo@hub4fix.com',
+        types: ['printer', 'modelisateur'], tokens: 5,
+        exp: Math.floor(Date.now() / 1000) + SESSION_TTL,
+      });
+      const h = new Headers();
+      h.append('Set-Cookie', setCookie('h4f_psession', demo, SESSION_TTL));
+      h.append('Location', '/');
+      return new Response(null, { status: 302, headers: h });
+    }
+
     // Protégé
     const sess = await readToken(env.SESSION_SECRET, getCookie(request, 'h4f_psession'));
     if (!sess) {
       return layout('Espace partenaire', shellTop(null) +
         '<div class="main" style="text-align:center;margin-top:4rem">' +
         '<h1>Espace partenaire</h1><p class="sub">Modélisateurs et printers Hub⁴Fix.</p>' +
-        '<a class="btn" href="/auth/login">Se connecter</a></div>');
+        '<a class="btn" href="/auth/login">Se connecter</a>' +
+        '<p style="margin-top:1.3rem"><a href="/demo" style="color:var(--earth);font-size:.9rem;text-decoration:none">Explorer en mode démo →</a></p></div>');
     }
+    // Démo : tableau de bord simulé (printer + modélisateur), sans lecture du Sheet.
+    if (sess.demo) {
+      const demoRows = [
+        { type: 'printer', tel: '06 00 00 00 00', ville: 'Démoville' },
+        { type: 'modelisateur', portfolio: 'https://exemple.fr' },
+      ];
+      return layout('Espace partenaire — démo', dashboard(sess, demoRows));
+    }
+
     const res = await inscriptionsFor(env, sess.email);
     if (res.error) {
       return layout('Espace partenaire', shellTop(sess) + '<div class="main"><h1>Service indisponible</h1><p class="sub">Impossible de vérifier ton inscription pour le moment. Réessaie plus tard.</p></div>');
