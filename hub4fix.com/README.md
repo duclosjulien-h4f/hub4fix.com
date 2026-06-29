@@ -11,4 +11,4 @@ Page de présentation du projet **Hub4Fix**, plateforme française d'économie c
 ## Contact
 
 📧 contact@hub4fix.com
-📍 La STaTION, 105-107 avenue Victor Schoelcher, Viry-Châtillon (91)
+📍 Le rooftop de Viry, 53 rue Francoeur, Viry-Châtillon (91)
