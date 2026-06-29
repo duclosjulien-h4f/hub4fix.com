@@ -22,10 +22,14 @@
 
   var CSS =
     '.h4f-nav-tools{display:flex;align-items:center;gap:.8rem}' +
-    '.h4f-demo-toggle{display:flex;align-items:center;gap:.45rem;border:1px solid #D4C9B8;background:#fff;border-radius:20px;padding:.28rem .7rem;cursor:pointer;font-family:inherit;font-size:.72rem;font-weight:600;color:#7A7268;transition:all .2s}' +
-    '.h4f-demo-toggle .h4f-dot{width:9px;height:9px;border-radius:50%;background:#D4C9B8;transition:all .2s}' +
-    '.h4f-demo-toggle.on{border-color:#B8963E;color:#8a6d24;background:#fbf6e9}' +
-    '.h4f-demo-toggle.on .h4f-dot{background:#B8963E;box-shadow:0 0 0 3px rgba(184,150,62,.2)}' +
+    '.h4f-demo-toggle{display:flex;align-items:center;gap:.5rem;border:none;background:none;cursor:pointer;font-family:inherit;font-size:.72rem;font-weight:600;color:#7A7268;padding:.2rem}' +
+    '.h4f-demo-toggle .h4f-track{width:40px;height:21px;border-radius:21px;background:#D4C9B8;position:relative;transition:background .3s}' +
+    '.h4f-demo-toggle .h4f-knob{position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:left .3s,box-shadow .3s,background .3s}' +
+    '.h4f-demo-toggle.on{color:#1f6b46}' +
+    '.h4f-demo-toggle.on .h4f-track{background:#2D8B5E;animation:h4fLed .6s ease}' +
+    '.h4f-demo-toggle.on .h4f-knob{left:21px;background:#eafff3;box-shadow:0 0 8px 1px rgba(45,139,94,.95),0 0 0 2px rgba(45,139,94,.4)}' +
+    '@keyframes h4fLed{0%{box-shadow:0 0 0 0 rgba(45,139,94,.55)}70%{box-shadow:0 0 0 7px rgba(45,139,94,0)}100%{box-shadow:0 0 0 0 rgba(45,139,94,0)}}' +
+    '#h4f-demo-wm{position:fixed;inset:0;z-index:9998;pointer-events:none;background-repeat:repeat}' +
     '.h4f-acc{position:relative}' +
     '.h4f-acc-btn{display:flex;align-items:center;gap:.3rem;background:none;border:none;cursor:pointer;padding:.3rem;border-radius:4px}' +
     '.h4f-acc-btn:hover{background:#EDE6DC}' +
@@ -51,6 +55,20 @@
     '.h4f-links a:hover{background:#F3EEE8}.h4f-links a.out{color:#7A7268}';
 
   var st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
+
+  // Filigrane "DÉMO" plein écran, diagonale, très discret (présent en mode démo).
+  function ensureWatermark(on) {
+    var ex = document.getElementById('h4f-demo-wm');
+    if (!on) { if (ex) ex.remove(); return; }
+    if (ex) return;
+    var svg = "<svg xmlns='http://www.w3.org/2000/svg' width='300' height='190'>" +
+      "<text x='6' y='120' font-family='Karla,Arial,sans-serif' font-size='38' font-weight='700' " +
+      "fill='#1C1A18' fill-opacity='0.045' transform='rotate(-28 150 95)'>DÉMO</text></svg>";
+    var wm = document.createElement('div');
+    wm.id = 'h4f-demo-wm';
+    wm.style.backgroundImage = 'url("data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg))) + '")';
+    document.body.appendChild(wm);
+  }
 
   function tokenBadge(on) { return on ? '<span class="h4f-badge">5</span>' : ''; }
 
@@ -99,11 +117,12 @@
     var prev = document.getElementById('h4f-tools'); if (prev) prev.remove();
 
     var on = demoOn();
+    ensureWatermark(on);
     var tools = document.createElement('div');
     tools.className = 'h4f-nav-tools'; tools.id = 'h4f-tools';
     tools.innerHTML =
-      '<button class="h4f-demo-toggle' + (on ? ' on' : '') + '" id="h4fDemo" title="Mode démo">' +
-        '<span class="h4f-dot"></span><span>Démo</span></button>' +
+      '<button class="h4f-demo-toggle' + (on ? ' on' : '') + '" id="h4fDemo" title="Mode démo" aria-pressed="' + on + '">' +
+        '<span class="h4f-track"><span class="h4f-knob"></span></span><span>Démo</span></button>' +
       '<div class="h4f-acc">' + menuHtml(on) + '</div>';
     right.appendChild(tools);
 
