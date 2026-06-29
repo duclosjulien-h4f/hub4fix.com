@@ -66,6 +66,33 @@ p.body{font-size:clamp(1rem,2vw,1.25rem);font-weight:300;color:var(--earth);max-
 .step p{font-size:.86rem;color:var(--earth)}
 .dark .step p{color:#B8B2A6}
 
+/* arbre qui pousse */
+.tree{position:relative;max-width:780px;margin:2.8rem auto 0}
+.tree-trunk{position:absolute;left:50%;top:6px;bottom:6px;width:3px;background:linear-gradient(180deg,#6f5a1f,var(--gold) 45%,var(--green));transform:translateX(-50%) scaleY(0);transform-origin:top;transition:transform 1.2s cubic-bezier(.2,.7,.2,1)}
+.tree.in .tree-trunk{transform:translateX(-50%) scaleY(1)}
+.leaf{position:relative;display:flex;margin:1.4rem 0;min-height:96px;align-items:center}
+.leaf.left{justify-content:flex-start}.leaf.right{justify-content:flex-end}
+.leaf .node{position:absolute;left:50%;top:50%;width:14px;height:14px;border-radius:50%;background:var(--gold);transform:translate(-50%,-50%) scale(0);box-shadow:0 0 0 5px rgba(184,150,62,.16);transition:transform .5s;z-index:2}
+.tree.in .leaf .node{transform:translate(-50%,-50%) scale(1)}
+.leaf-bubble{position:relative;width:calc(50% - 40px);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.13);border-radius:16px;padding:1.15rem 1.3rem;opacity:0;transform:translateY(16px) scale(.97);transition:opacity .7s,transform .7s}
+.tree.in .leaf-bubble{opacity:1;transform:none}
+.leaf-bubble::before{content:'';position:absolute;top:50%;width:28px;height:2px;background:rgba(255,255,255,.2)}
+.leaf.left .leaf-bubble::before{right:-28px}.leaf.right .leaf-bubble::before{left:-28px}
+.leaf-bubble .lstep{font-family:var(--mono);font-size:.66rem;letter-spacing:.12em;color:var(--gold)}
+.leaf-bubble h4{font-family:var(--serif);font-size:1.4rem;font-weight:600;margin:.25rem 0 .4rem;color:var(--ivory)}
+.leaf-bubble p{font-size:.86rem;color:#B8B2A6}
+.tree.in .l1 .leaf-bubble,.tree.in .l1 .node{transition-delay:.35s}
+.tree.in .l2 .leaf-bubble,.tree.in .l2 .node{transition-delay:.6s}
+.tree.in .l3 .leaf-bubble,.tree.in .l3 .node{transition-delay:.85s}
+.tree.in .l4 .leaf-bubble,.tree.in .l4 .node{transition-delay:1.1s}
+@media(max-width:760px){
+  .tree-trunk{left:22px}
+  .leaf,.leaf.left,.leaf.right{justify-content:flex-end}
+  .leaf .node{left:22px}
+  .leaf-bubble{width:calc(100% - 54px)}
+  .leaf-bubble::before{left:-28px!important;right:auto!important}
+}
+
 /* split / cards */
 .cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:2.2rem}
 .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:1.8rem}
@@ -157,11 +184,16 @@ footer a{color:var(--gold);text-decoration:none}
   <div class="wrap">
     <div class="eyebrow reveal">La solution</div>
     <h2 class="title reveal d1">De la panne au fichier,<br>du fichier à la <em>pièce</em>.</h2>
-    <div class="flow">
-      <div class="step reveal d1"><div class="n">01 — IA</div><h4>Shadow List</h4><p>L'IA identifie les pièces orphelines à fort volume (produits &gt;100k unités, rupture fournisseur).</p></div>
-      <div class="step reveal d2"><div class="n">02 — Réseau</div><h4>Modélisateurs</h4><p>Nos modélisateurs recréent la pièce en 3D, priorisés par la demande réelle (Hot List).</p></div>
-      <div class="step reveal d3"><div class="n">03 — Cloud</div><h4>Cloud Slicer</h4><p>Génération du G-code en cloud, avec token traçable — aucun fichier source diffusé.</p></div>
-      <div class="step reveal d4"><div class="n">04 — Local</div><h4>Printers</h4><p>Le réseau de printers imprime au plus près du client, ou le client imprime lui-même.</p></div>
+    <div class="tree reveal">
+      <div class="tree-trunk"></div>
+      <div class="leaf left l1"><div class="node"></div>
+        <div class="leaf-bubble"><div class="lstep">01 · IA</div><h4>Shadow List</h4><p>L'IA identifie les pièces orphelines à fort volume — produits &gt; 100k unités, en rupture fournisseur.</p></div></div>
+      <div class="leaf right l2"><div class="node"></div>
+        <div class="leaf-bubble"><div class="lstep">02 · Réseau</div><h4>Modélisateurs</h4><p>Nos modélisateurs recréent la pièce en 3D, priorisés par la demande réelle (Hot List).</p></div></div>
+      <div class="leaf left l3"><div class="node"></div>
+        <div class="leaf-bubble"><div class="lstep">03 · Cloud</div><h4>Cloud Slicer</h4><p>Génération du G-code en cloud, avec token traçable — aucun fichier source diffusé.</p></div></div>
+      <div class="leaf right l4"><div class="node"></div>
+        <div class="leaf-bubble"><div class="lstep">04 · Local</div><h4>Printers</h4><p>Le réseau de printers imprime au plus près du client — ou le client imprime lui-même.</p></div></div>
     </div>
   </div>
 </section>
