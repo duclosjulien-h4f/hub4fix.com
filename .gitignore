@@ -30,6 +30,11 @@ venv/
 .env.local
 .env.*.local
 
+# Outillage generation d'images (script + sorties brutes — local uniquement)
+genimg/
+# References pipeline hotlist (dessins sources — depot PUBLIC, ne pas committer)
+pipeline-hotlist/
+
 # Claude Code (settings locaux - ne pas partager)
 .claude/settings.local.json
 
