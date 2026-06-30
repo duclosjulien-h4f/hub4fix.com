@@ -3,1905 +3,688 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hub4Fix — L'Economie de la Piece Juste</title>
+<title>Hub⁴Fix — Le pari économologique</title>
+<meta name="description" content="Hub4Fix : la marketplace de pièces détachées imprimées en 3D. Le dossier pour investisseurs et partenaires.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Karla:wght@300;400;500;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/glass-sphere.css">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Karla:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-  --rouge: #C0392B;
-  --rouge-sombre: #922B21;
-  --rouge-pale: rgba(192,57,43,0.08);
-  --creme: #F5F0E8;
-  --ivoire: #EDE8DC;
-  --encre: #1C1A16;
-  --encre-mid: #3D3A33;
-  --encre-light: #7A766C;
-  --vert-doux: #2D6A4F;
-  --vert-pale: #E8F4ED;
-  --or: #B8860B;
-  --blanc: #FDFAF5;
-  --ivory:#FAF8F5;--warm-white:#F3EEE8;--cream:#EDE6DC;--sand:#D4C9B8;
-  --stone:#A89F91;--earth:#7A7268;--charcoal:#3B3632;--night:#1C1A18;
-  --gold:#B8963E;--red:#C8102E;--red-soft:rgba(200,16,46,0.06);--green:#2D8B5E;
-  --font-serif:'Cormorant Garamond',serif;--font-sans:'Karla',sans-serif;
-  /* Tree gradient endpoints */
-  --tree-dark: #1C1A16;
-  --tree-light: #FAF8F5;
+:root{
+  --red:#C8102E;--ink:#15130F;--earth:#7A7268;--cream:#F3EEE8;--ivory:#FAF8F5;
+  --gold:#B8963E;--green:#2D8B5E;--line:#E6DFD4;--sand:#D4C9B8;--charcoal:#3B3632;--stone:#A89F91;--night:#1C1A18;
+  --serif:'Cormorant Garamond',serif;--sans:'Karla',sans-serif;--mono:'DM Mono',monospace;
 }
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-snap-type:y proximity}
+body{font-family:var(--sans);color:var(--ink);background:var(--ivory);-webkit-font-smoothing:antialiased;line-height:1.6}
+a{color:inherit}
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+/* progress bar */
+#prog{position:fixed;top:0;left:0;height:3px;width:0;background:var(--red);z-index:200;transition:width .1s}
 
-body {
-  background: var(--tree-dark);
-  color: var(--creme);
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  overflow-x: hidden;
-  transition: background-color 0.05s linear;
-}
-
-/* ════ NAV ════ */
-nav{position:sticky;top:0;z-index:100;padding:1rem 4rem;display:flex;justify-content:space-between;align-items:center;background:rgba(28,26,22,0.75);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(245,240,232,0.08);transition:background 0.3s,border-color 0.3s}
-nav.nav-light{background:rgba(243,238,232,0.55);border-bottom-color:rgba(237,230,220,0.4)}
-.nav-brand{display:flex;align-items:center;gap:.7rem;text-decoration:none}
-.nav-logo{width:auto;height:36px;transition:transform .5s cubic-bezier(.25,.46,.45,.94);transform-origin:center center;position:relative;z-index:101}
-.nav-brand:hover .nav-logo{transform:scale(3);filter:drop-shadow(0 8px 24px rgba(0,0,0,.2))}
-@keyframes suckIn{0%{transform:scale(1);opacity:1;filter:blur(0)}60%{transform:scale(.3) translate(0,-30vh);opacity:.6;filter:blur(2px)}100%{transform:scale(0) translate(0,-40vh);opacity:0;filter:blur(8px)}}
-.page-sucking{animation:suckIn .7s cubic-bezier(.55,.06,.68,.19) forwards;pointer-events:none}
-.nav-wordmark{font-family:var(--font-serif);font-size:1.15rem;font-weight:500;color:#FAF8F5;letter-spacing:.02em;transition:color .3s}
-nav.nav-light .nav-wordmark{color:var(--night)}
-.nav-wordmark sup{color:var(--red);font-size:.7em;vertical-align:super;line-height:0}
+/* nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:150;display:flex;justify-content:space-between;align-items:center;padding:1rem 2.4rem;mix-blend-mode:difference}
+.nav-brand{font-family:var(--serif);font-size:1.25rem;font-weight:600;color:#fff;text-decoration:none;letter-spacing:.01em}
+.nav-brand sup{color:var(--red);mix-blend-mode:normal}
 .nav-right{display:flex;align-items:center;gap:1rem}
-.nav-links{display:flex;gap:1.5rem;list-style:none;align-items:center}
-.nav-links a{font-size:.78rem;font-weight:500;color:rgba(245,240,232,0.6);text-decoration:none;letter-spacing:.04em;transition:color .3s}
-.nav-links a:hover{color:var(--red)}
-nav.nav-light .nav-links a{color:var(--earth)}
-.nav-back{font-size:.78rem;font-weight:500;color:rgba(245,240,232,0.6);text-decoration:none;letter-spacing:.04em;display:flex;align-items:center;gap:.4rem;transition:color .3s}
-.nav-back:hover{color:var(--red)}
-nav.nav-light .nav-back{color:var(--earth)}
-.lang-dropdown{position:relative}
-.lang-dropdown-btn{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;justify-content:center;width:34px;height:23px;padding:0;background:white;border:1px solid rgba(212,201,184,0.4);border-radius:4px;cursor:pointer;font-size:0;color:transparent;transition:all .25s ease;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.lang-dropdown-btn .flag{display:none}
-.lang-dropdown-btn::before{content:'';position:absolute;inset:0;border-radius:3px;background-size:contain;background-position:center;background-repeat:no-repeat;opacity:1;z-index:0}
-.lang-dropdown-btn:hover{box-shadow:0 2px 8px rgba(0,0,0,.12);transform:scale(1.08)}
-.lang-dropdown.open .lang-dropdown-btn{box-shadow:0 2px 10px rgba(0,0,0,.15);transform:scale(1.08)}
-.lang-dropdown-btn[data-lang="fr"]::before{background-image:url(https://flagcdn.com/w80/fr.png)}
-.lang-dropdown-btn[data-lang="en"]::before{background-image:url(https://flagcdn.com/w80/gb.png)}
-.lang-dropdown-btn[data-lang="de"]::before{background-image:url(https://flagcdn.com/w80/de.png)}
-.lang-dropdown-btn[data-lang="es"]::before{background-image:url(https://flagcdn.com/w80/es.png)}
-.lang-dropdown-btn[data-lang="it"]::before{background-image:url(https://flagcdn.com/w80/it.png)}
-.lang-dropdown-btn[data-lang="pt"]::before{background-image:url(https://flagcdn.com/w80/pt.png)}
-.lang-dropdown-btn[data-lang="zh"]::before{background-image:url(https://flagcdn.com/w80/cn.png)}
-.lang-dropdown-btn[data-lang="hi"]::before{background-image:url(https://flagcdn.com/w80/in.png)}
-.lang-dropdown-btn .lang-arrow{display:none}
-.lang-dropdown-list{position:absolute;top:calc(100% + 6px);right:0;background:rgba(255,255,255,0.97);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(212,201,184,0.3);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.08),0 2px 8px rgba(0,0,0,.04);display:none;z-index:210;min-width:155px;padding:6px;transform-origin:top right}
-.lang-dropdown.open .lang-dropdown-list{display:block;animation:langDropIn .25s cubic-bezier(.22,.61,.36,1)}
-@keyframes langDropIn{from{opacity:0;transform:scale(.95) translateY(-4px)}to{opacity:1;transform:scale(1) translateY(0)}}
-.lang-opt{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:8px 12px;cursor:pointer;font-size:.78rem;font-weight:500;color:var(--charcoal);font-family:var(--font-sans);border-radius:8px;transition:all .2s ease}
-.lang-opt .flag{display:none}
-.lang-opt::before{content:'';position:absolute;inset:0;background-size:contain;background-position:right center;background-repeat:no-repeat;border-radius:8px;opacity:0;transition:opacity .25s ease;z-index:-1}
-.lang-opt:hover{transform:translateX(2px);text-shadow:0 0 8px rgba(255,255,255,1),0 0 16px rgba(255,255,255,1),0 0 2px rgba(255,255,255,1)}
-.lang-opt:hover::before{opacity:.9}
-.lang-opt.active{font-weight:700;text-shadow:0 0 8px rgba(255,255,255,1),0 0 16px rgba(255,255,255,1),0 0 2px rgba(255,255,255,1)}
-.lang-opt.active::before{opacity:.85}
-.lang-opt[data-lang="fr"]::before{background:url(https://flagcdn.com/w160/fr.png) no-repeat right center / contain,#002654}
-.lang-opt[data-lang="en"]::before{background:url(https://flagcdn.com/w160/gb.png) no-repeat right center / contain,linear-gradient(to bottom,#012169 33%,#FFF 33% 40%,#C8102E 40% 60%,#FFF 60% 67%,#012169 67%)}
-.lang-opt[data-lang="de"]::before{background:url(https://flagcdn.com/w160/de.png) no-repeat right center / contain,linear-gradient(to bottom,#000 33%,#DD0000 33% 66%,#FFCC00 66%)}
-.lang-opt[data-lang="es"]::before{background:url(https://flagcdn.com/w160/es.png) no-repeat right center / auto 100%,linear-gradient(to bottom,#ad1519 25%,#fabd00 25% 75%,#ad1519 75%)}
-.lang-opt[data-lang="it"]::before{background:url(https://flagcdn.com/w160/it.png) no-repeat right center / contain,#009246}
-.lang-opt[data-lang="pt"]::before{background:url(https://flagcdn.com/w160/pt.png) no-repeat right center / contain,#006600}
-.lang-opt[data-lang="zh"]::before{background:url(https://flagcdn.com/w160/cn.png) no-repeat right center / contain,#EE1C25}
-.lang-opt[data-lang="hi"]::before{background:url(https://flagcdn.com/w160/in.png) no-repeat right center / contain,linear-gradient(to bottom,#ff6820 33%,#FFF 33% 66%,#046a38 66%)}
-.lang-opt::after{content:'';position:absolute;left:0;top:4px;bottom:4px;width:3px;border-radius:2px;z-index:1;transition:opacity .2s ease;opacity:.7}
-.lang-opt:hover::after,.lang-opt.active::after{opacity:1}
-.lang-opt[data-lang="fr"]::after{background:#002395}
-.lang-opt[data-lang="en"]::after{background:#012169}
-.lang-opt[data-lang="de"]::after{background:linear-gradient(to bottom,#000 33%,#DD0000 33% 66%,#FFCC00 66%)}
-.lang-opt[data-lang="es"]::after{background:linear-gradient(to bottom,#AA151B 25%,#F1BF00 25% 75%,#AA151B 75%)}
-.lang-opt[data-lang="it"]::after{background:#008C45}
-.lang-opt[data-lang="pt"]::after{background:#006600}
-.lang-opt[data-lang="zh"]::after{background:#DE2910}
-.lang-opt[data-lang="hi"]::after{background:linear-gradient(to bottom,#ff6820 33%,#FFF 33% 66%,#046a38 66%)}
-.nav-account{position:relative}
-.nav-account-btn{display:flex;align-items:center;gap:.3rem;background:none;border:none;cursor:pointer;padding:.3rem;border-radius:2px;transition:background .2s}
-.nav-account-btn:hover{background:rgba(245,240,232,0.1)}
-nav.nav-light .nav-account-btn:hover{background:var(--cream)}
-.nav-account-icon{width:22px;height:22px;color:rgba(245,240,232,0.7);transition:color .3s}
-nav.nav-light .nav-account-icon{color:var(--charcoal)}
-.nav-token-badge{background:var(--red);color:white;font-size:.65rem;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;line-height:1}
-.nav-account-menu{position:absolute;top:calc(100% + 8px);right:0;width:340px;background:white;border:1px solid var(--cream);border-radius:4px;box-shadow:0 16px 48px rgba(0,0,0,.12);display:none;z-index:200}
-.nav-account-menu.visible{display:block;animation:fadeUp .25s}
-.account-menu-header{padding:1rem 1.2rem;border-bottom:1px solid var(--cream);display:flex;justify-content:space-between;align-items:center}
-.account-menu-header-left{display:flex;flex-direction:column}
-.account-menu-name{font-weight:600;font-size:.9rem;color:var(--night)}
-.account-menu-email{font-size:.72rem;color:var(--earth);margin-top:.15rem}
-.account-menu-tokens-inline{display:flex;align-items:center;gap:.3rem;background:var(--red-soft);padding:4px 10px;border-radius:12px}
-.account-menu-tokens-inline .token-icon{font-size:.75rem;color:var(--red)}
-.account-menu-tokens-inline strong{font-family:'Courier New',monospace;font-size:1rem;color:var(--red)}
-.account-roles{padding:.8rem;display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;border-bottom:1px solid var(--cream)}
-.account-role{display:flex;flex-direction:column;align-items:center;gap:.4rem;padding:.8rem .4rem;border-radius:4px;cursor:pointer;border:2px solid transparent;transition:all .2s;text-decoration:none}
-.account-role:hover{transform:translateY(-1px)}
-.account-role-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem}
-.account-role-label{font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-align:center}
-.account-role-sub{font-size:.6rem;color:var(--earth);text-align:center;line-height:1.2}
-.account-role-client .account-role-icon{background:var(--red-soft);color:var(--red)}
-.account-role-client .account-role-label{color:var(--red)}
-.account-role-client.active{border-color:var(--red);background:var(--red-soft)}
-.account-role-printer .account-role-icon{background:#1a2a3a;color:#5ba8d4}
-.account-role-printer .account-role-label{color:#2c6e9b}
-.account-role-printer.active{border-color:#2c6e9b;background:#e8f1f8}
-.account-role-printer:hover{background:#e8f1f8}
-.account-role-modeler .account-role-icon{background:#2a1f1a;color:#d4845b}
-.account-role-modeler .account-role-label{color:#a0522d}
-.account-role-modeler.active{border-color:#a0522d;background:#f5ece5}
-.account-role-modeler:hover{background:#f5ece5}
-.account-role.locked{opacity:.5;pointer-events:auto;position:relative}
-.account-role.locked .account-role-icon{filter:grayscale(.6)}
-.account-role-lock{font-size:.6rem;margin-top:-.1rem}
-.account-role.locked:hover{opacity:.75}
-.account-role.locked:hover .account-role-sub{display:none}
-.account-role.locked:hover::after{content:'Inscription requise';font-size:.55rem;color:var(--earth);text-align:center}
-.account-menu-links{padding:.3rem 0}
-.account-menu-item{display:flex;align-items:center;gap:.6rem;padding:.6rem 1.2rem;font-size:.82rem;color:var(--charcoal);text-decoration:none;transition:background .15s}
-.account-menu-item:hover{background:var(--warm-white)}
-.account-menu-item svg{width:16px;height:16px;color:var(--stone);flex-shrink:0}
-.account-menu-logout{color:var(--earth);border-top:1px solid var(--cream)}
+.nav-back{font-size:.8rem;color:#fff;text-decoration:none;font-weight:500}
 
-/* ════════════════════════════════════════
-   FLOATING WASTE COUNTER
-   ════════════════════════════════════════ */
-.waste-float-counter {
-  position: fixed;
-  top: 80px;
-  right: 20px;
-  z-index: 50;
-  background: rgba(28,26,22,0.78);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(245,240,232,0.1);
-  border-radius: 12px;
-  padding: 1rem 1.5rem;
-  color: var(--creme);
-  transition: background 0.3s, border-color 0.3s, color 0.3s;
-}
-.waste-float-counter.waste-light {
-  background: rgba(255,255,255,0.85);
-  border-color: rgba(28,26,22,0.15);
-  color: var(--encre);
-  box-shadow: 0 6px 24px rgba(28,26,22,0.12);
-}
-.waste-float-number {
-  font-family: 'DM Mono', monospace;
-  font-size: 1.4rem;
-  font-weight: 500;
-  color: var(--rouge);
-  line-height: 1;
-  white-space: nowrap;
-}
-.waste-float-label {
-  font-family: 'DM Mono', monospace;
-  font-size: 0.65rem;
-  letter-spacing: 0.06em;
-  opacity: 0.6;
-  margin-top: 0.3rem;
-  white-space: nowrap;
+/* sections */
+.sect{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6rem 2rem;scroll-snap-align:start;position:relative;overflow:hidden}
+.wrap{max-width:1000px;width:100%;margin:0 auto}
+.sect.dark{background:var(--ink);color:var(--ivory)}
+.sect.cream{background:var(--cream)}
+.eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--red);margin-bottom:1.4rem}
+.dark .eyebrow{color:var(--gold)}
+h1.lead{font-family:var(--serif);font-weight:400;font-size:clamp(2.6rem,7vw,6rem);line-height:1.04;letter-spacing:-.01em}
+h2.title{font-family:var(--serif);font-weight:500;font-size:clamp(2rem,5vw,3.6rem);line-height:1.1;margin-bottom:1.4rem}
+.lead em,.title em{font-style:italic;color:var(--red)}
+.dark .lead em,.dark .title em{color:var(--gold)}
+p.body{font-size:clamp(1rem,2vw,1.25rem);font-weight:300;color:var(--earth);max-width:620px}
+.dark p.body{color:#C9C3B8}
+.scroll-cue{position:absolute;bottom:2.2rem;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:#fff;opacity:.7;animation:bob 2s infinite}
+@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(6px)}}
+
+/* reveal */
+.reveal{opacity:0;transform:translateY(34px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+.reveal.d1{transition-delay:.12s}.reveal.d2{transition-delay:.24s}.reveal.d3{transition-delay:.36s}.reveal.d4{transition-delay:.48s}
+
+/* stats */
+.stat-row{display:flex;flex-wrap:wrap;gap:2.5rem 4rem;margin-top:1rem}
+.stat{display:flex;flex-direction:column}
+.stat .num{font-family:var(--serif);font-weight:500;font-size:clamp(3rem,8vw,5.5rem);line-height:1;color:var(--red)}
+.dark .stat .num{color:var(--gold)}
+.stat .cap{font-size:.92rem;color:var(--earth);margin-top:.4rem;max-width:240px}
+.dark .stat .cap{color:#C9C3B8}
+
+/* flow steps */
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:2.4rem}
+.step{background:#fff;border:1px solid var(--line);border-radius:14px;padding:1.6rem 1.4rem}
+.dark .step{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.12)}
+.step .n{font-family:var(--mono);font-size:.7rem;color:var(--red);letter-spacing:.1em}
+.step h4{font-family:var(--serif);font-size:1.3rem;font-weight:600;margin:.4rem 0 .5rem}
+.step p{font-size:.86rem;color:var(--earth)}
+.dark .step p{color:#B8B2A6}
+
+/* mind map horizontal : problème (rouge) -> solution (vert) */
+.mindmap{position:relative;max-width:1040px;margin:3rem auto 0;padding:1rem 0}
+.mm-axis{position:absolute;left:3%;right:3%;top:50%;height:3px;border-radius:3px;background:linear-gradient(90deg,#C8102E,#C8102E 16%,#B8963E 50%,#2D8B5E 84%,#2D8B5E);transform:scaleX(0);transform-origin:left;transition:transform 1.3s cubic-bezier(.2,.7,.2,1)}
+.mindmap.in .mm-axis{transform:scaleX(1)}
+.mm-nodes{display:flex;justify-content:space-between;position:relative}
+.mm-node{flex:1;position:relative;min-height:250px}
+.mm-dot{position:absolute;left:50%;top:50%;width:15px;height:15px;border-radius:50%;background:var(--c);border:3px solid var(--c);transform:translate(-50%,-50%) scale(0);transition:transform .5s;z-index:3;box-shadow:0 0 0 5px color-mix(in srgb,var(--c) 22%,transparent)}
+.mindmap.in .mm-dot{transform:translate(-50%,-50%) scale(1)}
+.mm-stem{position:absolute;left:50%;width:2px;background:var(--c);transform:translateX(-50%) scaleY(0);transition:transform .5s;z-index:1}
+.mm-node.up .mm-stem{bottom:50%;height:30px;transform-origin:bottom}
+.mm-node.down .mm-stem{top:50%;height:30px;transform-origin:top}
+.mindmap.in .mm-stem{transform:translateX(-50%) scaleY(1)}
+.mm-bubble{position:absolute;left:50%;width:92%;max-width:165px;transform:translateX(-50%) scale(.16);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.13);border-top:3px solid var(--c);border-radius:12px;padding:.85rem .9rem;opacity:0;transition:opacity .55s,transform .65s cubic-bezier(.2,.85,.25,1)}
+.mindmap.in .mm-bubble{opacity:1;transform:translateX(-50%) scale(1)}
+.mm-node.up .mm-bubble{bottom:calc(50% + 30px);transform-origin:50% 100%}
+.mm-node.down .mm-bubble{top:calc(50% + 30px);transform-origin:50% 0%}
+.mm-bubble h4{font-family:var(--serif);font-size:1.08rem;font-weight:600;color:var(--ivory);margin-bottom:.2rem}
+.mm-bubble p{font-size:.75rem;color:#B8B2A6;line-height:1.4}
+.mindmap.in .n1 *{transition-delay:.2s}.mindmap.in .n2 *{transition-delay:.38s}.mindmap.in .n3 *{transition-delay:.56s}.mindmap.in .n4 *{transition-delay:.74s}.mindmap.in .n5 *{transition-delay:.92s}.mindmap.in .n6 *{transition-delay:1.1s}
+@media(max-width:820px){
+  .mm-axis{left:24px;right:auto;top:0;bottom:0;width:3px;height:auto;background:linear-gradient(180deg,#C8102E,#B8963E 50%,#2D8B5E);transform:scaleY(0);transform-origin:top}
+  .mindmap.in .mm-axis{transform:scaleY(1)}
+  .mm-nodes{flex-direction:column;gap:1rem;padding-left:54px}
+  .mm-node{min-height:auto}
+  .mm-bubble,.mm-node.up .mm-bubble,.mm-node.down .mm-bubble{position:static;transform:none;width:100%;max-width:none;bottom:auto;top:auto}
+  .mindmap.in .mm-bubble{transform:none}
+  .mm-dot{left:-34px;top:1.1rem;transform:scale(0)}
+  .mindmap.in .mm-dot{transform:scale(1)}
+  .mm-stem{display:none}
 }
 
-/* ════════════════════════════════════════
-   TREE STRUCTURE
-   ════════════════════════════════════════ */
-.eco-tree {
-  position: relative;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 6rem 2rem 4rem;
-  min-height: 100vh;
+/* split / cards */
+.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:2.2rem}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:1.8rem}
+.card .ic{width:40px;height:40px;color:var(--red);margin-bottom:.9rem}
+.card h4{font-family:var(--serif);font-size:1.35rem;font-weight:600;margin-bottom:.5rem}
+.card p{font-size:.9rem;color:var(--earth)}
+
+/* economics bars */
+.thirds{display:flex;gap:.5rem;margin:2rem 0 .8rem;max-width:640px}
+.third{flex:1;text-align:center}
+.third .bar{height:64px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:1.8rem;color:#fff;font-weight:500}
+.third:nth-child(1) .bar{background:var(--red)}.third:nth-child(2) .bar{background:var(--gold)}.third:nth-child(3) .bar{background:var(--green)}
+.third .lab{font-size:.82rem;color:var(--earth);margin-top:.5rem}
+.flux{display:flex;gap:1.5rem;flex-wrap:wrap;margin-top:1.6rem;font-size:.95rem;color:var(--earth)}
+.flux b{color:var(--ink)}
+
+/* timeline */
+.tl{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;margin-top:2.4rem}
+.tl-item{border-top:2px solid var(--red);padding-top:1.1rem}
+.tl-item .yr{font-family:var(--mono);font-size:.85rem;color:var(--red);font-weight:500}
+.tl-item .big{font-family:var(--serif);font-size:clamp(2rem,4vw,3rem);font-weight:500;margin:.3rem 0;line-height:1}
+.tl-item .desc{font-size:.9rem;color:var(--earth)}
+
+/* maillage France (hexagone) */
+.hexwrap{position:relative;max-width:500px;margin:2.4rem auto 1.2rem}
+.hexwrap svg{width:100%;height:auto;display:block;overflow:visible}
+.hex-outline{fill:rgba(184,150,62,.05);stroke:rgba(184,150,62,.55);stroke-width:1.5}
+.pd{fill:var(--green);opacity:0;transition:opacity .55s ease;cursor:pointer}
+.hexwrap.in .pd{opacity:.82}
+.pd:hover{fill:var(--gold);opacity:1}
+.pd.hq{fill:var(--red)}
+.hexwrap.in .pd.hq{opacity:1}
+.city{fill:var(--gold);opacity:0;transition:opacity .6s}
+.hexwrap.in .city{opacity:.9}
+.clabel{font-family:var(--mono);font-size:8.5px;fill:#C9C3B8;opacity:0;transition:opacity .6s}
+.hexwrap.in .clabel{opacity:.85}
+.maillage-stat{font-family:var(--serif);font-size:clamp(2.2rem,6vw,3.6rem);font-weight:500;color:var(--gold);text-align:center}
+.maillage-stat span{font-variant-numeric:tabular-nums}
+
+/* impact counter */
+.counter{font-family:var(--serif);font-weight:500;font-size:clamp(3.4rem,11vw,8rem);line-height:1;color:var(--gold)}
+.counter-sub{font-family:var(--mono);font-size:.8rem;letter-spacing:.16em;text-transform:uppercase;color:#C9C3B8;margin-top:.6rem}
+
+/* cta */
+.btn{display:inline-block;background:var(--red);color:#fff;text-decoration:none;padding:1rem 2.2rem;border-radius:10px;font-weight:600;font-size:.95rem;letter-spacing:.02em;transition:transform .2s,box-shadow .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(200,16,46,.3)}
+footer{background:var(--ink);color:#9b958a;text-align:center;padding:2.6rem 2rem;font-family:var(--mono);font-size:.72rem;letter-spacing:.05em}
+footer a{color:var(--gold);text-decoration:none}
+
+@media(max-width:760px){
+  nav{padding:.9rem 1.2rem}
+  .sect{padding:5rem 1.3rem}
+  .flow,.cards3,.tl{grid-template-columns:1fr}
+  .stat-row{gap:1.8rem}
+  .thirds{flex-direction:column}
 }
 
-/* SVG wires container */
-.eco-wires {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-}
-.eco-wires > path,
-.eco-wires > g {
-  stroke-linecap: round;
-  opacity: 0;
-  transition: opacity 0.8s ease 0.3s;
-}
-.eco-wires > path.wire-visible,
-.eco-wires > g.wire-visible {
-  opacity: 1;
-}
+/* == mind-map organique : fond dégradé rouge->vert + sections transparentes == */
+body{background:linear-gradient(180deg,#1b0f0e 0%,#17110d 20%,#13120f 45%,#0f1410 72%,#0d130f 100%)!important;color:var(--ivory)}
+.sect,.sect.dark,.sect.cream{background:transparent!important;position:relative;z-index:1}
+nav,footer,#prog{position:relative;z-index:2}
+h1.lead,h2.title{color:var(--ivory)}
+p.body,.stat .cap,.third .lab,.tl-item .desc,.step p,.card p{color:#C9C3B8}
+.card,.step{background:rgba(255,255,255,.05)!important;border-color:rgba(255,255,255,.14)!important}
+.card h4,.step h4{color:var(--ivory)}
+.card .ic{color:var(--gold)}
+#mmspine{position:absolute;top:0;left:0;width:100%;z-index:0;pointer-events:none}
+#mmspine path{filter:drop-shadow(0 0 6px rgba(184,150,62,.25))}
 
-/* Central trunk — replaced by the SVG organic trunk drawn in .eco-wires */
-.eco-trunk {
-  display: none;
-  position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  transform: translateX(-50%);
-  z-index: 1;
-  pointer-events: none;
-}
-.eco-trunk-line {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    to bottom,
-    rgba(220,90,70,0.7) 0%,
-    rgba(220,90,70,0.5) 30%,
-    rgba(80,180,120,0.45) 60%,
-    rgba(80,180,120,0.6) 100%
-  );
-}
-
-/* Tree levels */
-.eco-level {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: flex-start;
-  gap: 3rem;
-  margin-bottom: 4rem;
-  min-height: 80px;
-}
-.eco-level.level-left {
-  justify-content: flex-end;
-  padding-right: calc(50% + 2rem);
-}
-.eco-level.level-right {
-  justify-content: flex-start;
-  padding-left: calc(50% + 2rem);
-}
-.eco-level.level-center {
-  justify-content: center;
-  padding: 0 4rem;
-}
-.eco-level.level-split {
-  justify-content: center;
-  gap: 5rem;
-  padding: 0;
-}
-
-/* Sub-group and sub-bubble structure */
-.eco-sub-group {
-  display: flex;
-  flex-direction: column;
-  gap: 2.2rem;
-  flex: 1;
-  max-width: 440px;
-}
-.eco-level.level-center .eco-sub-group {
-  max-width: 800px;
-}
-
-/* ── Disposition racinaire ──
-   Tronc : 3 bulles fondatrices empilees, resserrees au centre.
-   Racines : les branches s'evasent de plus en plus en descendant. */
-.eco-trunk-level .eco-sub-group {
-  max-width: 580px;
-  gap: 2.4rem;
-}
-.eco-level.level-split[data-level="3"] { gap: 8rem; }
-.eco-level.level-split[data-level="5"] { gap: 10rem; }
-.eco-level.level-split[data-level="7"] { gap: 12rem; }
-.eco-level.level-split[data-level="9"] { gap: 14rem; }
-.eco-level.level-split[data-level="11"] { gap: 16rem; }
-/* Decalage vertical entre racines gauche/droite pour casser la symetrie */
-.eco-level.level-split .eco-sub-group[data-side="right"] { margin-top: 3.5rem; }
-.eco-sub-bubble {
-  padding: 1.5rem 2rem;
-  border-radius: 12px;
-  position: relative;
-  background: rgba(245, 240, 232, 0.04);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(245, 240, 232, 0.08);
-  opacity: 0;
-  transform: translate(var(--ox,0px), var(--oy,0px)) rotate(var(--rot,0deg)) scale(0.92);
-  filter: blur(2px);
-  transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              filter 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              background 0.3s, border-color 0.3s;
-}
-.eco-sub-bubble.open {
-  opacity: 1;
-  transform: translate(var(--ox,0px), var(--oy,0px)) rotate(var(--rot,0deg)) scale(1);
-  filter: blur(0);
-}
-
-/* Bubble content typography (applied to sub-bubbles now) */
-.eco-sub-bubble .bubble-eyebrow {
-  font-family: 'DM Mono', monospace;
-  font-size: 9px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--rouge);
-  margin-bottom: 1.2rem;
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-}
-.eco-sub-bubble .bubble-eyebrow::after {
-  content: '';
-  height: 1px;
-  flex: 1;
-  background: rgba(192,57,43,0.3);
-}
-.eco-sub-bubble .bubble-title {
-  font-size: clamp(1.6rem, 2.5vw, 2.2rem);
-  font-weight: 300;
-  line-height: 1.2;
-  margin-bottom: 1.2rem;
-}
-.eco-sub-bubble .bubble-title em {
-  font-style: italic;
-  color: var(--rouge);
-}
-.eco-sub-bubble .bubble-body {
-  font-size: 1rem;
-  line-height: 1.8;
-  opacity: 0.7;
-  margin-bottom: 1rem;
-}
-.eco-sub-bubble .bubble-body strong {
-  opacity: 1;
-  font-weight: 600;
-}
-
-/* Stat items inside bubbles */
-.bubble-stat {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 0.8rem 0;
-  border-bottom: 0.5px solid rgba(245,240,232,0.08);
-}
-.bubble-stat:last-child { border-bottom: none; }
-.bubble-stat-label {
-  font-size: 0.9rem;
-  opacity: 0.6;
-}
-.bubble-stat-sub {
-  font-family: 'DM Mono', monospace;
-  font-size: 0.68rem;
-  opacity: 0.35;
-  display: block;
-  margin-top: 2px;
-}
-.bubble-stat-value {
-  font-family: 'DM Mono', monospace;
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: var(--rouge);
-  flex-shrink: 0;
-  margin-left: 1rem;
-}
-
-/* Metric rows */
-.bubble-metric {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.6rem 0;
-  border-top: 0.5px solid rgba(245,240,232,0.08);
-}
-.bubble-metric-label {
-  font-family: 'DM Mono', monospace;
-  font-size: 0.7rem;
-  letter-spacing: 0.04em;
-  opacity: 0.4;
-}
-.bubble-metric-value {
-  font-family: 'DM Mono', monospace;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: var(--rouge);
-}
-
-/* Big stat number */
-.bubble-big-stat {
-  font-family: 'DM Mono', monospace;
-  font-size: clamp(2.2rem, 4vw, 3.5rem);
-  font-weight: 300;
-  line-height: 1;
-  margin-bottom: 0.5rem;
-}
-.bubble-big-stat span { color: var(--rouge); }
-
-/* Source footnote */
-.bubble-source {
-  font-family: 'DM Mono', monospace;
-  font-size: 0.65rem;
-  opacity: 0.3;
-  margin-top: 0.8rem;
-  letter-spacing: 0.04em;
-  line-height: 1.6;
-}
-
-/* Loop diagram (level 7) */
-.loop-flow {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
-  gap: 0;
-  align-items: center;
-  margin: 1rem 0;
-}
-.loop-flow-step {
-  text-align: center;
-  padding: 1rem 0.5rem;
-}
-.loop-flow-icon {
-  font-size: 1.8rem;
-  margin-bottom: 0.6rem;
-  display: block;
-}
-.loop-flow-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-bottom: 0.3rem;
-}
-.loop-flow-sub {
-  font-family: 'DM Mono', monospace;
-  font-size: 0.72rem;
-  line-height: 1.5;
-  opacity: 0.5;
-}
-.loop-flow-arrow {
-  font-size: 1.3rem;
-  color: var(--rouge);
-  opacity: 0.5;
-}
-
-/* Manifeste CTA */
-.manifeste-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.8rem;
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--encre);
-  border: 0.5px solid rgba(28,26,22,0.3);
-  padding: 1rem 2rem;
-  text-decoration: none;
-  transition: background 0.2s, border-color 0.2s, color 0.2s;
-  margin-top: 1.5rem;
-}
-.manifeste-cta:hover {
-  background: var(--rouge);
-  border-color: var(--rouge);
-  color: #fff;
-}
-
-/* Manifeste quote */
-.manifeste-quote {
-  font-size: clamp(1.5rem, 2.5vw, 2.2rem);
-  font-weight: 300;
-  line-height: 1.4;
-  font-style: italic;
-  margin-bottom: 1.5rem;
-}
-.manifeste-quote strong {
-  font-style: normal;
-  font-weight: 600;
-  color: var(--rouge);
-}
-
-/* ════ PROGRESS BAR ════ */
-.progress-bar {
-  position: fixed; top: 0; left: 0; right: 0;
-  height: 2px; z-index: 200;
-  background: transparent;
-}
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(to right, var(--rouge), var(--vert-doux));
-  width: 0%;
-  transition: width 0.1s;
-}
-
-/* ════ SOURCES ════ */
-.sources-section {
-  padding: 3rem;
-  border-top: 0.5px solid rgba(28,26,22,0.1);
-}
-.sources-inner {
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-/* ════ FOOTER ════ */
-footer {
-  border-top: 0.5px solid rgba(28,26,22,0.1);
-  padding: 2rem 3rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-footer .logo {
-  font-family: 'DM Mono', monospace;
-  font-size: 12px;
-  color: rgba(28,26,22,0.4);
-  letter-spacing: 0.1em;
-}
-footer .logo span { color: var(--rouge); }
-footer .mention {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  color: rgba(28,26,22,0.25);
-  letter-spacing: 0.08em;
-}
-
-/* ════ ANIMATIONS ════ */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ════ RESPONSIVE ════ */
-@media (max-width: 900px) {
-  nav { padding: 1rem 1.5rem; }
-  .eco-tree { padding: 4rem 1rem 2rem; }
-  .eco-level.level-left,
-  .eco-level.level-right {
-    padding-left: 0;
-    padding-right: 0;
-    justify-content: center;
-  }
-  .eco-level.level-split {
-    flex-direction: column;
-    gap: 2rem !important;
-    align-items: center;
-  }
-  .eco-level.level-split .eco-sub-group {
-    max-width: 100%;
-  }
-  .eco-level.level-split .eco-sub-group[data-side="right"] { margin-top: 0; }
-  .eco-level.level-center {
-    padding: 0 1rem;
-  }
-  .eco-trunk { display: none; }
-  .eco-wires { display: none; }
-  .eco-sub-group { max-width: 100%; }
-  .loop-flow {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
-  }
-  .loop-flow-arrow {
-    transform: rotate(90deg);
-  }
-  .sources-section div[style*="grid-template-columns"] {
-    grid-template-columns: 1fr !important;
-  }
-  .waste-float-counter {
-    top: 70px;
-    right: 10px;
-    padding: 0.6rem 1rem;
-  }
-  .waste-float-number {
-    font-size: 1.1rem;
-  }
-  .waste-float-label {
-    font-size: 0.55rem;
-  }
-}
-@media (max-width: 600px) {
-  nav{padding:.6rem 1rem}
-  .nav-wordmark{font-size:1.1rem}
-  .nav-right{gap:.5rem}
-  .nav-account-menu{width:calc(100vw - 2rem);max-width:340px;right:0}
-  .lang-dropdown-list{right:0;min-width:140px}
-  .lang-dropdown-btn{width:28px;height:19px}
-  .eco-tree{padding:3rem 0.8rem 2rem}
-  .eco-sub-bubble{padding:1.2rem 1.4rem;border-radius:10px}
-  .eco-sub-bubble .bubble-title{font-size:1.3rem}
-  .eco-level{margin-bottom:2.5rem}
-  footer{padding:1.5rem 1rem;flex-direction:column;gap:.5rem;text-align:center}
-}
+/* == carte maillage (reprise de index.html) == */
+.maillage-map-wrap{display:flex;justify-content:center;align-items:flex-end;gap:1.5rem;margin:2.5rem 0;position:relative}
+.maillage-map svg{width:100%;height:auto}
+.maillage-map-legend{background:rgba(250,248,245,.92);backdrop-filter:blur(6px);border-radius:4px;padding:.6rem .9rem;font-size:.65rem;color:var(--earth);font-weight:300;line-height:1.6;opacity:0;transform:translateY(8px) scale(.95);transition:opacity .5s,transform .5s cubic-bezier(.34,1.56,.64,1);pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.06);border:1px solid var(--sand);flex-shrink:0;align-self:flex-end}
+.maillage-map-legend.visible{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+.maillage-map-legend strong{color:var(--red);font-weight:600}
+.map-legend-row{display:flex;align-items:center;gap:.45rem}
+.map-legend-dot{border-radius:50%;background:var(--red);flex-shrink:0}
+.map-legend-total{margin-top:.35rem;padding-top:.3rem;border-top:1px solid var(--sand);font-weight:500;color:var(--charcoal);text-align:center}
+@keyframes mapDotPop{0%{r:0;opacity:0}50%{r:var(--pop-r);opacity:.85}100%{r:var(--r);opacity:.65}}
+@keyframes mapZoomPulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.12)}}
+.map-question{position:absolute;top:48%;left:50%;transform:translate(-50%,-50%);font-family:'Cormorant Garamond',serif;font-size:12rem;font-weight:700;color:var(--red);opacity:.55;user-select:none;pointer-events:none;animation:mapHeartbeat 1.8s ease-in-out infinite;transition:opacity .6s,transform .6s;z-index:2;text-shadow:0 0 20px rgba(200,16,46,.4),0 0 60px rgba(200,16,46,.25),0 0 100px rgba(200,16,46,.15)}
+@keyframes mapHeartbeat{0%,100%{transform:translate(-50%,-50%) scale(1);text-shadow:0 0 20px rgba(200,16,46,.4),0 0 60px rgba(200,16,46,.25),0 0 100px rgba(200,16,46,.15)}14%{transform:translate(-50%,-50%) scale(1.08);text-shadow:0 0 30px rgba(200,16,46,.6),0 0 80px rgba(200,16,46,.35),0 0 120px rgba(200,16,46,.2)}28%{transform:translate(-50%,-50%) scale(1);text-shadow:0 0 20px rgba(200,16,46,.4),0 0 60px rgba(200,16,46,.25),0 0 100px rgba(200,16,46,.15)}42%{transform:translate(-50%,-50%) scale(1.12);text-shadow:0 0 40px rgba(200,16,46,.7),0 0 90px rgba(200,16,46,.4),0 0 140px rgba(200,16,46,.25)}56%{transform:translate(-50%,-50%) scale(1);text-shadow:0 0 20px rgba(200,16,46,.4),0 0 60px rgba(200,16,46,.25),0 0 100px rgba(200,16,46,.15)}}
+.map-question.gone{opacity:0;transform:translate(-50%,-50%) scale(1.8);pointer-events:none}
+.map-teaser{position:absolute;top:12%;left:50%;transform:translate(-50%,-50%);font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:400;font-style:italic;color:var(--red);opacity:.35;user-select:none;pointer-events:none;animation:mapZoomPulse 3s ease-in-out infinite;animation-delay:-1.5s;transition:opacity .6s,transform .6s;z-index:2;text-align:center;white-space:nowrap;letter-spacing:.02em}
+.map-teaser.gone{opacity:0;transform:translate(-50%,-50%) scale(1.5);pointer-events:none}
+.maillage-map{width:100%;max-width:500px;position:relative}
 </style>
 </head>
 <body>
+<div id="prog"></div>
 
-<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
-
-<!-- FLOATING WASTE COUNTER -->
-<div class="waste-float-counter" id="wasteFloatCounter">
-  <div class="waste-float-number" id="wasteBgNumber">0</div>
-  <div class="waste-float-label">tonnes DEEE depuis 2020</div>
-</div>
-
-<!-- NAV -->
-<nav id="mainNav">
-  <a href="index.html" class="nav-brand">
-    <svg class="nav-logo" viewBox="0 0 202.6 265.4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><linearGradient id="lg1"><stop style="stop-color:#2a00fe" offset="0.336"/><stop style="stop-color:#fff" offset="1"/></linearGradient><linearGradient id="lg2"><stop style="stop-color:#fff" offset="0.107"/><stop style="stop-color:#fe0000" offset="0.684"/></linearGradient><linearGradient xlink:href="#lg1" id="grad1" x1="129.89" y1="808.83" x2="194.31" y2="808.83" gradientUnits="userSpaceOnUse"/><linearGradient xlink:href="#lg2" id="grad2" x1="271.02" y1="731.42" x2="327.45" y2="731.42" gradientUnits="userSpaceOnUse" spreadMethod="pad"/></defs><g transform="translate(-129.894,-634.847)"><g transform="translate(-114.063,-139.373)"><path d="m 353.331,791.185 -24.32,66.818 c -8.972,24.651 9.283,50.722 35.516,50.722 h 72.08 c 5.218,0 9.449,4.23 9.449,9.449 0,5.218 -4.231,9.449 -9.449,9.449 h -72.08 c -39.35,0 -66.732,-39.106 -53.274,-76.083 l 7.123,-19.57 17.2,-47.256 c 1.787,-4.903 7.21,-7.428 12.113,-5.642 4.903,1.787 7.429,7.21 5.643,12.112 z" style="fill:#000;stroke:#000"/><path d="m 314.879,1026.411 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#000;stroke:#000"/><path d="m 249.987,1019.877 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:#000;stroke:#000"/><path d="m 359.24,904.532 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#000;stroke:#000"/><path d="m 436.607,884.024 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:#000;stroke:#000"/></g><g><path d="m 234.225,648.032 -24.32,66.818 a 37.795,37.795 0 0 0 35.516,50.722 h 72.08 a 9.449,9.449 0 0 1 0,18.898 h -72.08 a 56.693,56.693 0 0 1 -53.274,-76.083 l 24.323,-66.826 a 9.449,9.449 0 0 1 17.755,6.471 z" style="fill:#fff;stroke:#000"/><path d="m 195.773,883.258 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#fff;stroke:#000"/><path d="m 130.881,876.724 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:url(#grad1);stroke:#000"/><path d="m 240.133,761.379 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#fff;stroke:#000"/><path d="m 317.5,740.871 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:url(#grad2);stroke:#000"/></g></g></svg>
-    <span class="nav-wordmark">Hub<sup>4</sup>Fix</span>
-  </a>
-  <div class="nav-right">
-    <a href="index.html" class="nav-back"><span class="nav-back-arrow">&larr;</span></a>
-    <div class="lang-dropdown" id="langDropdown">
-      <button class="lang-dropdown-btn" id="langDropdownBtn" data-lang="fr"></button>
-      <div class="lang-dropdown-list" id="langDropdownList">
-        <button class="lang-opt active" data-lang="fr"><span class="flag">&#x1F1EB;&#x1F1F7;</span> Francais</button>
-        <button class="lang-opt" data-lang="en"><span class="flag">&#x1F1EC;&#x1F1E7;</span> English</button>
-        <button class="lang-opt" data-lang="de"><span class="flag">&#x1F1E9;&#x1F1EA;</span> Deutsch</button>
-        <button class="lang-opt" data-lang="es"><span class="flag">&#x1F1EA;&#x1F1F8;</span> Espanol</button>
-        <button class="lang-opt" data-lang="it"><span class="flag">&#x1F1EE;&#x1F1F9;</span> Italiano</button>
-        <button class="lang-opt" data-lang="pt"><span class="flag">&#x1F1F5;&#x1F1F9;</span> Portugues</button>
-        <button class="lang-opt" data-lang="zh"><span class="flag">&#x1F1E8;&#x1F1F3;</span> &#x4E2D;&#x6587;</button>
-        <button class="lang-opt" data-lang="hi"><span class="flag">&#x1F1EE;&#x1F1F3;</span> &#x939;&#x93F;&#x928;&#x94D;&#x926;&#x940;</button>
-      </div>
-    </div>
-    <div class="nav-account" id="navAccount">
-      <button class="nav-account-btn" id="accountBtn">
-        <svg class="nav-account-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0112 0v1"/></svg>
-        <span class="nav-token-badge" id="tokenBadge">5</span>
-      </button>
-      <div class="nav-account-menu" id="accountMenu">
-        <div class="account-menu-header">
-          <div class="account-menu-header-left">
-            <span class="account-menu-name">Julien D.</span>
-            <span class="account-menu-email">demo@hub4fix.com</span>
-          </div>
-          <div class="account-menu-tokens-inline">
-            <span class="token-icon">&#x2B21;</span>
-            <strong id="accountTokenCount">5</strong>
-          </div>
-        </div>
-        <div class="account-roles">
-          <a href="#" class="account-role account-role-client active">
-            <div class="account-role-icon">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
-            </div>
-            <span class="account-role-label">Reparer</span>
-            <span class="account-role-sub">Trouver sa piece</span>
-          </a>
-          <a href="printer.html" class="account-role account-role-printer locked">
-            <div class="account-role-icon">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="20" width="18" height="2" rx=".5"/><path d="M7 20v-5h10v5"/><path d="M12 4v6"/><path d="M9.5 10h5L12 15.5 9.5 10z"/></svg>
-            </div>
-            <span class="account-role-label">Printer</span>
-            <span class="account-role-sub">Devenir printer</span>
-            <span class="account-role-lock">&#x1F512;</span>
-          </a>
-          <a href="modelisateur.html" class="account-role account-role-modeler locked">
-            <div class="account-role-icon">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 7v4l9 5 9-5V7l-9-5z"/><path d="M12 22V12"/><path d="M3 7l9 5 9-5"/><path d="M21 11v6l-9 5-9-5v-6"/></svg>
-            </div>
-            <span class="account-role-label">Modelisateur</span>
-            <span class="account-role-sub">Devenir modelisateur</span>
-            <span class="account-role-lock">&#x1F512;</span>
-          </a>
-        </div>
-        <div class="account-menu-links">
-          <a href="#" class="account-menu-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
-            <span>Ma bibliotheque</span>
-          </a>
-          <a href="#" class="account-menu-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-            <span>Parametres</span>
-          </a>
-          <a href="#" class="account-menu-item account-menu-logout">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            <span>Deconnexion</span>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
+<nav>
+  <a href="index.html" class="nav-brand">Hub<sup>4</sup>Fix</a>
+  <div class="nav-right"><a href="index.html" class="nav-back">← Accueil</a></div>
 </nav>
 
-<!-- ════════════════════════════════════════
-     THE TREE
-     ════════════════════════════════════════ -->
-<main class="eco-tree" id="ecoTree">
-  <div class="eco-trunk"><div class="eco-trunk-line"></div></div>
-  <svg class="eco-wires" id="ecoWires" aria-hidden="true"></svg>
-
-  <!-- TRONC — 3 bulles fondatrices empilees au centre (dark) -->
-  <div class="eco-level level-center eco-trunk-level" data-level="1">
-    <div class="eco-sub-group" data-side="center">
-      <div class="eco-sub-bubble" id="sub-1a-1">
-        <div class="bubble-eyebrow">Racine &middot; Le constat</div>
-        <div class="bubble-big-stat"><span data-count="888">0</span>M d'appareils en circulation</div>
-        <p class="bubble-body">
-          888 millions d'appareils en circulation en France (670M PEM + 218M GEM).
-        </p>
-        <div class="bubble-source">
-          GIFAM / NielsenIQ-GfK, bilan 2024 (fev. 2025) &middot; ecosystem.eco
-        </div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-1a-2">
-        <div class="bubble-eyebrow">Racine &middot; La panne</div>
-        <div class="bubble-big-stat"><span data-count="5">0</span>/6 non repares</div>
-        <p class="bubble-body">
-          Sur les ~30 millions de pannes par an, seulement 1 sur 6 est reparee.
-          Le reste finit au rebut.
-        </p>
-        <div class="bubble-source">
-          Loi AGEC (2020) &middot; aidealareparation.fr
-        </div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-1a-3">
-        <div class="bubble-eyebrow">Le paradoxe</div>
-        <h2 class="bubble-title">L'objet existe encore.<br>La piece a <em>disparu.</em></h2>
-        <p class="bubble-body">
-          Un lave-linge de sept ans, en parfait etat de marche,
-          mis au rebut parce qu'un pignon de pompe de vidange
-          est introuvable. Ni chez le fabricant, ni chez le reparateur,
-          ni nulle part. Ce n'est pas de l'obsolescence programmee &mdash;
-          c'est de l'obsolescence <strong>logistique</strong>.
-        </p>
-      </div>
-      <div class="eco-sub-bubble" id="sub-1a-4">
-        <div class="bubble-eyebrow">La piece orpheline</div>
-        <h2 class="bubble-title">Obsolescence <em>logistique</em></h2>
-        <p class="bubble-body">
-          La fabrication additive resout ce probleme structurellement.
-          Un fichier 3D valide ne perime pas. Il attend que la piece
-          soit demandee pour exister &mdash; sans stock, sans transport amont,
-          sans surproduction. C'est la definition meme de l'economie
-          de la fonctionnalite appliquee a la reparation.
-        </p>
-      </div>
-    </div>
+<!-- 1. ACCROCHE -->
+<section class="sect dark">
+  <div class="wrap">
+    <div class="eyebrow reveal">Le pari économologique</div>
+    <h1 class="lead reveal d1">Des millions d'appareils<br>partent à la casse.<br><em>Pour une pièce à 2 €.</em></h1>
+    <p class="body reveal d2" style="margin-top:1.8rem">Hub⁴Fix réindustrialise la pièce détachée — imprimée en 3D, près de chez vous. Voici pourquoi c'est un marché, pas une cause.</p>
   </div>
+  <div class="scroll-cue">Défiler ↓</div>
+</section>
 
-  <!-- LEVEL 3 — BRANCHES: Realite du marche / Et pourtant (split, dark) -->
-  <div class="eco-level level-split" data-level="3">
-    <div class="eco-sub-group" data-side="left">
-      <div class="eco-sub-bubble" id="sub-3a-1">
-        <div class="bubble-eyebrow">Realite du marche &middot; France</div>
-        <div class="bubble-stat">
-          <div><span class="bubble-stat-label">Appareils mis au rebut / an</span><span class="bubble-stat-sub">faute de reparation (1/6 repare) &middot; Loi AGEC</span></div>
-          <span class="bubble-stat-value">~3M</span>
-        </div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-3a-2">
-        <div class="bubble-stat">
-          <div><span class="bubble-stat-label">Delai de rupture catalogue</span><span class="bubble-stat-sub">apres fin de production</span></div>
-          <span class="bubble-stat-value">3&ndash;5 ans</span>
-        </div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-3a-3">
-        <div class="bubble-stat">
-          <div><span class="bubble-stat-label">Poids carbone d'un lave-linge</span><span class="bubble-stat-sub">fabrication seule (cycle complet : 513 kg CO&#x2082;e)</span></div>
-          <span class="bubble-stat-value">341 kg CO&#x2082;e</span>
-        </div>
-      </div>
+<!-- 2. PROBLÈME CHIFFRÉ -->
+<section class="sect">
+  <div class="wrap">
+    <div class="eyebrow reveal">Le problème</div>
+    <h2 class="title reveal d1">Un appareil sur deux meurt<br>d'une pièce <em>introuvable</em>.</h2>
+    <div class="stat-row">
+      <div class="stat reveal d2"><span class="num" data-count="888" data-suffix=" M">0</span><span class="cap">appareils concernés par la rupture de pièces (estimation marché).</span></div>
+      <div class="stat reveal d3"><span class="num">5/6</span><span class="cap">des pannes pourraient être réparées avec une seule pièce manquante.</span></div>
     </div>
-    <div class="eco-sub-group" data-side="right">
-      <div class="eco-sub-bubble" id="sub-3b-1">
-        <div class="bubble-eyebrow">Cout traditionnel &middot; par piece</div>
-        <div class="bubble-stat">
-          <div><span class="bubble-stat-label">Modelisation 3D freelance</span><span class="bubble-stat-sub">retro-ingenierie, mesure, CAO &middot; 2&ndash;6 h</span></div>
-          <span class="bubble-stat-value">80&ndash;300 &euro;</span>
-        </div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-3b-2">
-        <div class="bubble-stat">
-          <div><span class="bubble-stat-label">Slicing + parametrage</span><span class="bubble-stat-sub">choix profil, supports, tests &middot; logiciel requis</span></div>
-          <span class="bubble-stat-value">20&ndash;50 &euro;</span>
-        </div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-3b-3">
-        <div class="bubble-stat">
-          <div><span class="bubble-stat-label">Total traditionnel</span><span class="bubble-stat-sub">modelisation + slicing + impression unitaire</span></div>
-          <span class="bubble-stat-value">100&ndash;400 &euro;</span>
-        </div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-3b-4">
-        <div class="bubble-eyebrow">Solution Hub&#x2074;Fix</div>
-        <div class="bubble-stat">
-          <div><span class="bubble-stat-label">Piece orpheline H4F</span><span class="bubble-stat-sub">modelisation + slicing mutualises &middot; Cloud Slicer</span></div>
-          <span class="bubble-stat-value">3&ndash;19 &euro;</span>
-        </div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-3b-5">
-        <div class="bubble-stat">
-          <div><span class="bubble-stat-label">Ratio d'economie</span><span class="bubble-stat-sub">cout mutualise vs. unitaire</span></div>
-          <span class="bubble-stat-value">&divide; 10 &agrave; 20</span>
-        </div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-3b-6">
-        <div class="bubble-stat">
-          <div><span class="bubble-stat-label">Bonus reparation 2024</span><span class="bubble-stat-sub">doublement en 2024 &middot; Service-public.fr</span></div>
-          <span class="bubble-stat-value">50 &euro;</span>
-        </div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-3b-7">
-        <div class="bubble-stat">
-          <div><span class="bubble-stat-label">Matiere imprimee par piece</span><span class="bubble-stat-sub">filament PLA/PETG</span></div>
-          <span class="bubble-stat-value">&lt; 80 g</span>
-        </div>
-        <div class="bubble-source">Sources : ADEME, GIFAM, Loi AGEC, aidealareparation.fr &middot; Estimations H4F</div>
-      </div>
-    </div>
+    <p class="body reveal d4" style="margin-top:2rem">Au-delà de 3 ans, le fournisseur arrête la pièce. L'appareil, lui, fonctionne encore. C'est le paradoxe de l'obsolescence : on jette un produit entier faute d'un composant à quelques euros.</p>
   </div>
+</section>
 
-  <!-- LEVEL 5 — BRANCHES: Un fichier ne perime pas / Hub4Fix anticipe (split, dark-mid) -->
-  <div class="eco-level level-split" data-level="5">
-    <div class="eco-sub-group" data-side="left">
-      <div class="eco-sub-bubble" id="sub-5a-1">
-        <div class="bubble-eyebrow">La reponse 3D</div>
-        <h2 class="bubble-title">Un fichier ne <em>perime</em> pas.</h2>
-        <p class="bubble-body">
-          Un actif numerique immateriel, imperissable, reproductible a l'infini.
-          Zero stock physique. Zero m&#xB2; d'entrepot. Zero km de transport amont.
-        </p>
-      </div>
-      <div class="eco-sub-bubble" id="sub-5a-2">
-        <div class="bubble-metric">
-          <span class="bubble-metric-label">Stock physique</span>
-          <span class="bubble-metric-value">Zero &euro;</span>
-        </div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-5a-3">
-        <div class="bubble-metric">
-          <span class="bubble-metric-label">Entrepot</span>
-          <span class="bubble-metric-value">Zero m&#xB2;</span>
-        </div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-5a-4">
-        <div class="bubble-metric">
-          <span class="bubble-metric-label">Transport amont</span>
-          <span class="bubble-metric-value">Zero km *</span>
-        </div>
-        <div class="bubble-source">* pour les clients numeriques</div>
-      </div>
-    </div>
-    <div class="eco-sub-group" data-side="right">
-      <div class="eco-sub-bubble" id="sub-5b-1">
-        <div class="bubble-eyebrow">Hub&#x2074;Fix anticipe</div>
-        <p class="bubble-body">
-          Hub&#x2074;Fix construit cette bibliotheque de fichiers en anticipant
-          la demande &mdash; avant meme que la piece disparaisse du marche.
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- LEVEL 6 — TRUNK: Les cercles vertueux (center, mid) -->
-  <div class="eco-level level-center" data-level="6">
-    <div class="eco-sub-group" data-side="center">
-      <div class="eco-sub-bubble" id="sub-6a-1">
-        <div class="bubble-eyebrow">Les cercles vertueux</div>
-        <h2 class="bubble-title">Le cercle <em>vertueux</em></h2>
-        <p class="bubble-body">
-          Plus la demande monte dans la Hot List, plus le fichier est modelise vite.
-          Plus il est disponible, plus il genere des ventes.
-          Plus il genere des ventes, plus le modelisateur est recompense &mdash;
-          et plus il cherche la prochaine piece orpheline a valoriser.
-          Un marche auto-alimente, sans surstock, sans rupture.
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- LEVEL 7 — BRANCHES: Cercle economique / Cercle ecologique (split, mid) -->
-  <div class="eco-level level-split" data-level="7">
-    <div class="eco-sub-group" data-side="left">
-      <div class="eco-sub-bubble" id="sub-7a-1">
-        <div class="bubble-eyebrow">Cercle economique</div>
-        <div class="bubble-metric">
-          <span class="bubble-metric-label">Taux de remplacement evite</span>
-          <span class="bubble-metric-value">~85% *</span>
-        </div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-7a-2">
-        <div class="bubble-metric">
-          <span class="bubble-metric-label">Reparations bonus 2024</span>
-          <span class="bubble-metric-value">715 000</span>
-        </div>
-        <div class="bubble-source">&times;4 vs 2023. GIFAM / NielsenIQ-GfK, fev. 2025</div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-7a-3">
-        <p class="bubble-body">
-          Chaque printer choisit ses missions, son rythme, ses revenus.
-        </p>
-      </div>
-    </div>
-    <div class="eco-sub-group" data-side="right">
-      <div class="eco-sub-bubble" id="sub-7b-1">
-        <div class="bubble-eyebrow">Cercle ecologique</div>
-        <p class="bubble-body">
-          La fabrication additive depose la matiere uniquement la ou la piece l'exige &mdash;
-          pas de moule, pas d'outillage, pas de chute.
-          Le filament PLA est biosource, le PETG est recyclable.
-          <strong>Une piece de 40 g consomme 40 g de matiere &mdash; pas 400 g de plastique injecte.</strong>
-        </p>
-      </div>
-      <div class="eco-sub-bubble" id="sub-7b-2">
-        <div class="bubble-metric">
-          <span class="bubble-metric-label">CO&#x2082; vs. remplacement neuf</span>
-          <span class="bubble-metric-value">&minus;97%</span>
-        </div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-7b-3">
-        <div class="bubble-metric">
-          <span class="bubble-metric-label">Taux de chute matiere</span>
-          <span class="bubble-metric-value">&lt; 5%</span>
-        </div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-7b-4">
-        <div class="bubble-metric">
-          <span class="bubble-metric-label">Outillage / moule requis</span>
-          <span class="bubble-metric-value">0</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- LEVEL 8 — TRUNK: Ancrage territorial (center, mid-light) -->
-  <div class="eco-level level-center" data-level="8">
-    <div class="eco-sub-group" data-side="center">
-      <div class="eco-sub-bubble" id="sub-8a-1">
-        <div class="bubble-eyebrow">Cercle territorial</div>
-        <h2 class="bubble-title">Ancre a Viry.<br>Pense pour <em>essaimer.</em></h2>
-      </div>
-    </div>
-  </div>
-
-  <!-- LEVEL 9 — BRANCHES: Ancrage / Production / Reseau (split, light) -->
-  <div class="eco-level level-split" data-level="9">
-    <div class="eco-sub-group" data-side="left">
-      <div class="eco-sub-bubble" id="sub-9a-1">
-        <div class="bubble-eyebrow">Implantation</div>
-        <p class="bubble-body">
-          Hub&#x2074;Fix est implante au <a href="https://www.lerooftopdeviry.fr/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">rooftop de Viry</a>, 53 rue Francoeur,
-          a Viry-Chatillon &mdash; au plus pres de celles et ceux qui reparent.
-        </p>
-      </div>
-      <div class="eco-sub-bubble" id="sub-9a-2">
-        <div class="bubble-metric">
-          <span class="bubble-metric-label">Distance piece &rarr; client</span>
-          <span class="bubble-metric-value">&lt; 3 km</span>
-        </div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-9a-3">
-        <div class="bubble-metric">
-          <span class="bubble-metric-label">Fabrication speculative</span>
-          <span class="bubble-metric-value">0</span>
-        </div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-9a-4">
-        <div class="bubble-metric">
-          <span class="bubble-metric-label">Emballage par piece</span>
-          <span class="bubble-metric-value">0 g</span>
-        </div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-9a-5">
-        <div class="bubble-metric">
-          <span class="bubble-metric-label">Stock physique</span>
-          <span class="bubble-metric-value">0</span>
-        </div>
-      </div>
-    </div>
-    <div class="eco-sub-group" data-side="right">
-      <div class="eco-sub-bubble" id="sub-9b-1">
-        <div class="bubble-eyebrow">Reseau cible Phase 1</div>
-        <div class="bubble-metric">
-          <span class="bubble-metric-label">Zone de deploiement</span>
-          <span class="bubble-metric-value">IDF dense</span>
-        </div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-9b-2">
-        <div class="bubble-metric">
-          <span class="bubble-metric-label">Repar'Acteurs partenaires</span>
-          <span class="bubble-metric-value">7 500 artisans</span>
-        </div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-9b-3">
-        <div class="bubble-eyebrow">Emploi decentralise</div>
-        <p class="bubble-body">
-          Le modele freelance (modelisateurs, printers)
-          cree de l'emploi qualifie decentralise :
-          une economie de competence distribuee,
-          sans usine centralisee.
-        </p>
-      </div>
-      <div class="eco-sub-bubble" id="sub-9b-4">
-        <div class="bubble-eyebrow">Production locale</div>
-        <p class="bubble-body">
-          L'impression 3D distribuee recree une capacite de production
-          locale la ou les usines ont ferme.
-        </p>
-      </div>
-      <div class="eco-sub-bubble" id="sub-9b-5">
-        <div class="bubble-eyebrow">Prescripteurs</div>
-        <p class="bubble-body">
-          Les 7 500 reparateurs Repar'Acteurs CMA
-          deviennent des prescripteurs et des co-producteurs.
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- LEVEL 10 — TRUNK: La boucle matiere (center, lighter) -->
-  <div class="eco-level level-center" data-level="10">
-    <div class="eco-sub-group" data-side="center">
-      <div class="eco-sub-bubble" id="sub-10a-1">
-        <div class="bubble-eyebrow">La boucle matiere H4F</div>
-        <h2 class="bubble-title">De la panne au <em>retour en vie</em> en moins de 48 heures.</h2>
-        <div class="loop-flow">
-          <div class="loop-flow-step">
-            <span class="loop-flow-icon">&#x1F50D;</span>
-            <div class="loop-flow-label">Panne declaree</div>
-            <div class="loop-flow-sub">Le client cherche<br>sa piece. Hot List<br>enregistre.</div>
-          </div>
-          <div class="loop-flow-arrow">&rarr;</div>
-          <div class="loop-flow-step">
-            <span class="loop-flow-icon">&#x1F4D0;</span>
-            <div class="loop-flow-label">Fichier pris en charge</div>
-            <div class="loop-flow-sub">Un modelisateur prend<br>en charge le besoin.<br>H4F parametre + securise.</div>
-          </div>
-          <div class="loop-flow-arrow">&rarr;</div>
-          <div class="loop-flow-step">
-            <span class="loop-flow-icon">&#x1F5A8;&#xFE0F;</span>
-            <div class="loop-flow-label">Impression locale</div>
-            <div class="loop-flow-sub">Printer &lt; 3 km *<br>G-code tokenise<br>20&ndash;80 g.</div>
-          </div>
-          <div class="loop-flow-arrow">&rarr;</div>
-          <div class="loop-flow-step">
-            <span class="loop-flow-icon">&#x267B;&#xFE0F;</span>
-            <div class="loop-flow-label">Reparation</div>
-            <div class="loop-flow-sub">L'appareil repart.<br>270 kg CO&#x2082;<br>restent dans le sol.</div>
-          </div>
-        </div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-10a-2">
-        <p class="bubble-body" style="text-align:center;font-family:'DM Mono',monospace;font-size:0.78rem">
-          Le fichier reste dans la bibliotheque &mdash; reproductible a l'infini,
-          sans aucune nouvelle extraction de matiere premiere.
-          <strong>Un actif qui prend de la valeur a mesure que la piece physique disparait du marche.</strong>
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- LEVEL 11 — BRANCHES: Impact environnemental / Impact social (split, lightest) -->
-  <div class="eco-level level-split" data-level="11">
-    <div class="eco-sub-group" data-side="left">
-      <div class="eco-sub-bubble" id="sub-11a-1">
-        <div class="bubble-eyebrow">Impact &middot; Phase 1 &middot; 15 000 reparations/an</div>
-        <div class="bubble-big-stat"><span>5 115</span></div>
-        <p class="bubble-body" style="opacity:0.5">tonnes CO&#x2082; eq. evitees</p>
-        <p class="bubble-body">
-          Sur la base de 341 kg CO&#x2082;e evites par appareil non fabrique
-          (phase fabrication), pour 15 000 reparations reussies.
-        </p>
-        <div class="bubble-source">ADEME &middot; Base Empreinte&reg; &middot; impactco2.fr &middot; Etude ACV 2018 (Lhotellier et al.)</div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-11a-2">
-        <div class="bubble-big-stat"><span>1,2T</span></div>
-        <p class="bubble-body" style="opacity:0.5">kg de matiere imprimee</p>
-        <p class="bubble-body">
-          Contre ~900 tonnes de matiere plastique qui auraient constitue
-          des appareils neufs de remplacement.
-        </p>
-        <div class="bubble-source">Calcul H4F &middot; 80 g moy. par piece</div>
-      </div>
-    </div>
-    <div class="eco-sub-group" data-side="right">
-      <div class="eco-sub-bubble" id="sub-11b-1">
-        <div class="bubble-eyebrow">Impact social &amp; economique</div>
-        <div class="bubble-big-stat"><span>~300</span></div>
-        <p class="bubble-body" style="opacity:0.5">emplois-equivalents actives</p>
-        <p class="bubble-body">
-          Modelisateurs freelance, printers locaux,
-          artisans reparateurs partenaires &mdash;
-          sans CDI centralise.
-        </p>
-        <div class="bubble-source">Estimation &middot; 1 printer / 50 pieces/mois</div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-11b-2">
-        <div class="bubble-big-stat"><span>18M&euro;</span></div>
-        <p class="bubble-body" style="opacity:0.5">pouvoir d'achat preserve</p>
-        <p class="bubble-body">
-          Differentiel entre le cout d'un appareil neuf (~1 200 &euro; moy.)
-          et le cout de la reparation H4F (~3&ndash;19 &euro;),
-          pour 15 000 menages.
-        </p>
-        <div class="bubble-source">GIFAM / NielsenIQ-GfK &middot; Bilan 2024 (fev. 2025) &middot; 9,6 Md&euro; de CA electromenager</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TRUNK: Les objectifs (center, cream) -->
-  <div class="eco-level level-center" data-level="12">
-    <div class="eco-sub-group" data-side="center">
-      <div class="eco-sub-bubble" id="sub-obj-1">
-        <div class="bubble-eyebrow">Cap &middot; Les objectifs</div>
-        <h2 class="bubble-title">Trois horizons. Un seul <em>cap.</em></h2>
-        <p class="bubble-body">
-          Hub&#x2074;Fix ne vise pas la croissance pour elle-meme.
-          Chaque objectif est calibre pour un impact mesurable :
-          moins de dechets, plus d'emplois locaux,
-          plus de pouvoir d'achat preserve.
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- BRANCHES: Objectifs / Impacts attendus (split, light) -->
-  <div class="eco-level level-split" data-level="11">
-    <div class="eco-sub-group" data-side="left">
-      <div class="eco-sub-bubble" id="sub-obja-1">
-        <div class="bubble-eyebrow">Objectifs</div>
-        <div class="bubble-metric">
-          <span class="bubble-metric-label">Horizon 2026 &middot; Bibliotheque</span>
-          <span class="bubble-metric-value">1 000 fichiers</span>
-        </div>
-        <p class="bubble-body" style="margin-top:0.8rem;font-size:0.9rem">
-          1 000 pieces orphelines modelisees, validees et securisees
-          dans la bibliotheque H4F.
-        </p>
-      </div>
-      <div class="eco-sub-bubble" id="sub-obja-2">
-        <div class="bubble-metric">
-          <span class="bubble-metric-label">Horizon 2027 &middot; Reseau</span>
-          <span class="bubble-metric-value">800 printers France</span>
-        </div>
-        <p class="bubble-body" style="margin-top:0.8rem;font-size:0.9rem">
-          Un maillage de 800 printers actifs dans toute la France,
-          choisis et formes via le flux Resilient.
-        </p>
-      </div>
-      <div class="eco-sub-bubble" id="sub-obja-3">
-        <div class="bubble-metric">
-          <span class="bubble-metric-label">Horizon 2028 &middot; Cadence</span>
-          <span class="bubble-metric-value">100 000 rep./an</span>
-        </div>
-        <p class="bubble-body" style="margin-top:0.8rem;font-size:0.9rem">
-          100 000 reparations reussies par an &mdash;
-          0,3% des 30 millions de pannes annuelles. Un debut.
-        </p>
-      </div>
-    </div>
-    <div class="eco-sub-group" data-side="right">
-      <div class="eco-sub-bubble" id="sub-objb-1">
-        <div class="bubble-eyebrow">Impacts attendus</div>
-        <p class="bubble-body">
-          Chaque piece orpheline disponible <strong>avant</strong> la rupture
-          catalogue &mdash; la Shadow List anticipe la demande au lieu de la subir.
-        </p>
-      </div>
-      <div class="eco-sub-bubble" id="sub-objb-2">
-        <div class="bubble-metric">
-          <span class="bubble-metric-label">Toute la France a</span>
-          <span class="bubble-metric-value">&lt; 48 h</span>
-        </div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-objb-3">
-        <div class="bubble-big-stat"><span data-count="34100">0</span></div>
-        <p class="bubble-body" style="opacity:0.5">tonnes CO&#x2082; eq. evitees / an</p>
-        <div class="bubble-source">A 100 000 reparations/an &middot; 341 kg CO&#x2082;e par appareil non fabrique</div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-objb-4">
-        <div class="bubble-metric">
-          <span class="bubble-metric-label">Emplois-equivalents actives</span>
-          <span class="bubble-metric-value">~2 000</span>
-        </div>
-      </div>
-      <div class="eco-sub-bubble" id="sub-objb-5">
-        <div class="bubble-metric">
-          <span class="bubble-metric-label">Pouvoir d'achat preserve</span>
-          <span class="bubble-metric-value">120 M&euro;/an</span>
-        </div>
-        <div class="bubble-source">Estimations H4F &middot; extrapolation lineaire de la phase 1 (15 000 rep./an)</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- LEVEL 12 — TRUNK: Manifeste (center, cream) -->
-  <div class="eco-level level-center" data-level="12">
-    <div class="eco-sub-group" data-side="center">
-      <div class="eco-sub-bubble" id="sub-12a-1" style="text-align:center">
-        <div class="bubble-eyebrow" style="justify-content:center">Hub&#x2074;Fix &middot; Le Kintsugi Numerique</div>
-        <blockquote class="manifeste-quote">
-          &laquo; La reparation n'est pas un retour en arriere.
-          C'est la seule direction <strong>raisonnablement en avant.</strong> &raquo;
-        </blockquote>
-        <p class="bubble-body" style="max-width:600px;margin:0 auto 1.5rem">
-          Hub&#x2074;Fix ne defend pas l'environnement dans une charte RSE.
-          Il construit un modele ou la protection de l'environnement
-          est la consequence directe de chaque transaction rentable.
-          L'ecologie et l'economie ne s'opposent pas ici :
-          elles se renforcent a chaque piece imprimee,
-          a chaque appareil qui ne finit pas a la decharge.
-        </p>
-        <a href="#" class="manifeste-cta">Decouvrir la plateforme &rarr;</a>
-      </div>
-    </div>
-  </div>
-</main>
-
-<!-- SOURCES -->
-<section class="sources-section" id="sources" style="background:var(--ivoire)">
-  <div class="sources-inner">
-    <div style="font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--encre-light);margin-bottom:1.2rem">Sources & references</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem">
-      <div style="font-family:'DM Mono',monospace;font-size:0.7rem;line-height:1.8;color:var(--encre-mid)">
-        <strong style="color:var(--encre);display:block;margin-bottom:0.4rem">Marche electromenager</strong>
-        GIFAM / NielsenIQ-GfK &middot; Bilan 2024, 12 fev. 2025 &middot; gifam.fr<br>
-        888M appareils en circulation (670M PEM + 218M GEM)<br>
-        68M appareils vendus/an &middot; CA 9,6 Md&euro;<br>
-        97% des foyers equipes GEM &middot; 99% en PEM<br>
-        ~22 appareils PEM / foyer &middot; ~7 GEM / foyer
-      </div>
-      <div style="font-family:'DM Mono',monospace;font-size:0.7rem;line-height:1.8;color:var(--encre-mid)">
-        <strong style="color:var(--encre);display:block;margin-bottom:0.4rem">Impact carbone (ADEME)</strong>
-        Base Empreinte&reg; &middot; impactco2.fr &middot; base-empreinte.ademe.fr<br>
-        Etude ACV 2018 (Lhotellier, Less, Bossanne, Pesnel)<br>
-        Lave-linge : 341 kg CO&#x2082;e fabrication / 513 kg cycle complet<br>
-        Aspirateur : 47 kg &middot; Bouilloire : 37,8 kg CO&#x2082;e<br>
-        Fabrication = ~50% de l'empreinte totale d'un appareil
-      </div>
-      <div style="font-family:'DM Mono',monospace;font-size:0.7rem;line-height:1.8;color:var(--encre-mid)">
-        <strong style="color:var(--encre);display:block;margin-bottom:0.4rem">Reparation & reglementation</strong>
-        Loi AGEC (fev. 2020) &middot; Bonus reparation actif dec. 2022<br>
-        ~30M pannes/an &middot; 1 appareil sur 6 repare &middot; aidealareparation.fr<br>
-        715 000 reparations via bonus en 2024 (&times;4 vs 181 000 en 2023)<br>
-        Bonus lave-linge double a 50&euro; au 1er jan. 2024 &middot; service-public.fr<br>
-        Repar'Acteurs CMA &middot; artisanat.fr &middot; 7 500 artisans labellises QualiRepar
-      </div>
-    </div>
-    <div style="margin-top:1.2rem;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--encre-light);border-top:0.5px solid rgba(28,26,22,0.1);padding-top:1rem">
-      Les projections d'impact (CO&#x2082; evite, emplois induits, pouvoir d'achat preserve) sont des estimations H4F construites sur ces bases documentaires.
-      Les chiffres marques &laquo; Estimation H4F &raquo; sont des ordres de grandeur internes non audites.
+<!-- 3. MARCHÉ & MOMENTUM -->
+<section class="sect cream">
+  <div class="wrap">
+    <div class="eyebrow reveal">Le marché &amp; le momentum</div>
+    <h2 class="title reveal d1">La réparation devient<br>une <em>obligation</em>.</h2>
+    <p class="body reveal d2">Indice de réparabilité, droit à la réparation, disponibilité obligatoire des pièces : la réglementation européenne pousse exactement là où Hub⁴Fix opère. Le vent est dans le dos.</p>
+    <div class="stat-row">
+      <div class="stat reveal d3"><span class="num" data-count="100" data-suffix=" k">0</span><span class="cap">réparations/an visées en France à horizon 2028.</span></div>
+      <div class="stat reveal d4"><span class="num">3</span><span class="cap">flux de revenus complémentaires (numérique, physique, résilient).</span></div>
     </div>
   </div>
 </section>
 
-<!-- FOOTER -->
+<!-- 4. SOLUTION -->
+<section class="sect dark">
+  <div class="wrap">
+    <div class="eyebrow reveal">La solution</div>
+    <h2 class="title reveal d1">De la panne au fichier,<br>du fichier à la <em>pièce</em>.</h2>
+    <div class="mindmap reveal">
+      <div class="mm-axis"></div>
+      <div class="mm-nodes">
+        <div class="mm-node up n1" style="--c:#C8102E"><span class="mm-stem"></span><span class="mm-dot"></span>
+          <div class="mm-bubble"><h4>Le problème</h4><p>Pièce orpheline — l'appareil part à la casse.</p></div></div>
+        <div class="mm-node down n2" style="--c:#bd5128"><span class="mm-stem"></span><span class="mm-dot"></span>
+          <div class="mm-bubble"><h4>Shadow List</h4><p>L'IA repère la pièce qui manque.</p></div></div>
+        <div class="mm-node up n3" style="--c:#B8963E"><span class="mm-stem"></span><span class="mm-dot"></span>
+          <div class="mm-bubble"><h4>Modélisateur</h4><p>Recréée en 3D, priorisée par la demande.</p></div></div>
+        <div class="mm-node down n4" style="--c:#7e9a45"><span class="mm-stem"></span><span class="mm-dot"></span>
+          <div class="mm-bubble"><h4>Cloud Slicer</h4><p>G-code en cloud, token traçable.</p></div></div>
+        <div class="mm-node up n5" style="--c:#3f9266"><span class="mm-stem"></span><span class="mm-dot"></span>
+          <div class="mm-bubble"><h4>Printer</h4><p>Imprimée au plus près du client.</p></div></div>
+        <div class="mm-node down n6" style="--c:#2D8B5E"><span class="mm-stem"></span><span class="mm-dot"></span>
+          <div class="mm-bubble"><h4>Réparé</h4><p>L'appareil repart pour des années.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. MODÈLE ÉCONOMIQUE -->
+<section class="sect">
+  <div class="wrap">
+    <div class="eyebrow reveal">Le modèle économique</div>
+    <h2 class="title reveal d1">Un actif numérique<br>qui ne <em>s'épuise jamais</em>.</h2>
+    <p class="body reveal d2">Chaque fichier modélisé une fois se vend une infinité de fois. La marge ne s'érode pas : elle compose.</p>
+    <div class="thirds reveal d3">
+      <div class="third"><div class="bar">1/3</div><div class="lab">Modélisateur (royalties)</div></div>
+      <div class="third"><div class="bar">1/3</div><div class="lab">Frais</div></div>
+      <div class="third"><div class="bar">1/3</div><div class="lab">Ingénierie « Drop &amp; Print »</div></div>
+    </div>
+    <p class="reveal d3" style="font-size:.85rem;color:#9b958a;margin-top:.6rem">Répartition de <b style="color:#C9C3B8">l'utilisation de la licence</b> (l'achat du fichier) — elle n'englobe <b style="color:#C9C3B8">pas</b> l'impression 3D, facturée à part.</p>
+    <div class="reveal d4" style="margin-top:1.8rem;background:rgba(45,139,94,.08);border:1px solid rgba(45,139,94,.35);border-radius:14px;padding:1.4rem 1.6rem">
+      <div style="font-family:var(--mono);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--green);margin-bottom:.5rem">Drop &amp; Print — le cœur technique</div>
+      <p style="color:#C9C3B8;font-size:1.02rem;line-height:1.7;max-width:680px">Le client — ou le printer — reçoit un <b style="color:var(--ivory)">G-code prêt à lancer</b> : il le dépose sur sa machine, il imprime. Aucun slicing, aucun paramétrage, aucune expertise. Tout est préparé en cloud — <b style="color:var(--ivory)">la pièce devient imprimable par n'importe qui, partout</b>. Ce 3ᵉ tiers finance précisément cette ingénierie (Cloud Slicer, profils machines, token traçable) qui transforme un fichier en pièce, sans friction.</p>
+    </div>
+    <div class="flux reveal d4">
+      <span><b>70 %</b> Numérique — le client achète le fichier</span>
+      <span><b>30 %</b> Physique — pièce imprimée &amp; livrée</span>
+      <span><b>5 %</b> Résilient — le client s'équipe</span>
+    </div>
+  </div>
+</section>
+
+<!-- 6. DÉFENSIBILITÉ -->
+<section class="sect cream">
+  <div class="wrap">
+    <div class="eyebrow reveal">La défensibilité</div>
+    <h2 class="title reveal d1">Trois barrières<br>à l'entrée.</h2>
+    <div class="cards3">
+      <div class="card reveal d1"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2L3 7v5c0 5 3.5 8 9 10 5.5-2 9-5 9-10V7l-9-5z"/></svg><h4>IA Shadow List</h4><p>Une longueur d'avance sur l'identification des pièces qui comptent — un actif de données qui grossit avec l'usage.</p></div>
+      <div class="card reveal d2"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg><h4>Token traçable</h4><p>Aucun fichier source distribué : seul le G-code, marqué d'un token forensique, est livré. Le piratage est traçable.</p></div>
+      <div class="card reveal d3"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="5" cy="18" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 7l3 3m4 0l3-3M7 17l3-3m4 0l3 3"/></svg><h4>Réseau de printers</h4><p>Un maillage physique local, difficile à répliquer : la pièce arrive à moins de quelques kilomètres du besoin.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6b. MAILLAGE -->
+<section class="sect dark">
+  <div class="wrap" style="text-align:center">
+    <div class="eyebrow reveal">Le maillage</div>
+    <h2 class="title reveal d1">Un réseau qui<br>se <em>densifie</em>.</h2>
+    <p class="body reveal d2" style="margin:0 auto">Chaque printer rapproche la pièce du besoin. L'objectif : mailler tout l'Hexagone.</p>
+    <div class="maillage-map-wrap reveal">
+    <div class="maillage-map" id="maillageMapWrap">
+      <div class="map-teaser" id="mapTeaser">A votre avis, ou se trouve notre production ?</div>
+      <div class="map-question" id="mapQuestion">?</div>
+      <svg viewBox="105 18 568 567" xmlns="http://www.w3.org/2000/svg" id="maillageMap" width="568" height="567">
+        <defs><clipPath id="noInset"><rect x="105" y="18" width="510" height="567"/><rect x="615" y="460" width="60" height="130"/></clipPath></defs>
+        <g fill="none" stroke="var(--sand)" stroke-width="1.2" opacity=".55" id="franceDepts" clip-path="url(#noInset)">
+          <path d="m641.8 78.3l-0.2 3.8-1 2.6-8.3-1.7-6-0.6-5.2 3h-4l-2.5-0.3-0.4-0.1-13.5-5-3-3.8-4.3-1.9-0.5-0.2 0.4-1.9 1.3-3.1 2.7-2.1 2.9-1.1 3.9 0.5h0.1l0.9-2.2 7.1-4.6 14-0.1 1.8 3.6 1.8 2.4 0.6 0.9 0.1 0.4 0.5 1.2 0.4 5.4 0.4 1.8v0.1l-0.3 0.8 0.1 3.6 0.6-0.5 1.6-1.6 2-0.5 2-0.5zm-245 76.4l-3.2-0.5-2.5 1.7 3 3.5 5.3-0.1-1.8-1.9z"/>
+          <path d="m441.1 176.1l-2.9 0.8 0.4 8.5-15.4 3-0.2 5.8-3.9 5.4-11.2 2.7-9.2-0.7 2.6-1.5 0.6-2.7-4.2-4.3-0.7-3.1 3.4-4.8 4-17.2-0.5-1 1.1-4.1-0.3-2.9v-0.1l-1.3-4.7 1.3-2.5-1.7-5.1 0.1-0.1 1.7-2.3-0.2-2 6.9 1 2-2.2 2.5 1.6 8.1-2.9 2.6 0.7 1.8 2.5-0.7 2.8 3.9 4.2 9.3 6-0.4 2-2.6 2.2 3.5 8.3 2.6 1.7z"/>
+          <path d="m364.1 158.1l-3.6-6.6-1.8-5.8 2.3-2.6 3.8 0.1 9.5 0.8 9 3.6 5.5 6.1-2 3.1 3.2 5.2-7.1 5.4-1.6 2.6 0.7 2.9-4.6 8.6-3.1 0.7-2.3-2.2-1.2-5.6-6.2-5.4z"/>
+          <path d="m401.6 164.8l2.3 2.2 0.5 1-4 17.2-3.4 4.8-3.7-0.6-2.8 1.8-1.5-2.7-1.9 2.9-6.9 0.7-2.8-10.6 4.6-8.6-0.7-2.9 1.6-2.6 7.1-5.4v-0.1l3.7 1.6 5.1 2.1z"/>
+          <path d="m391.1 155.9l3 3.5-0.4 4.1-3.7-1.6v0.1l-3.2-5.2 2-3.1 3.6-2.6 1.3 2-0.1 1.1zm221.5-101.8l1.6-0.7 0.7-1.9 0.5-1.8-0.1-1.1-0.2-1.4-4.6-1.9-4.6-0.9-4 1.3-7.6 5.6-6.1 5.8-5.3 3-1 1-3.7 7.4 1.7 7.2v0.1l-2.7 3.2 0.6 2.5 2.5 4.8 3.3-0.5 1 5.2 3.9-0.3 1.4 3.5 3.4 1.6 0.5 2.1 5.3 4.2 4.3 1.3-0.1 4.9 5.7 3.5 3.2-5.9-0.7-5.5 0.7-1.2 0.4-1.3 0.7-2.1-1.4-1.9 0.3-1.2 0.8-2.8-1-2.6 0.5-0.3 0.5-0.3 0.9-0.5 0.7-1.1-0.4-0.1-13.5-5-3-3.8-4.3-1.9-0.5-0.2 0.3-1.9 1.4-3.1 2.7-2.1 2.8-1.1h0.1l3.9 0.5 0.9-2.2 7.2-4.6-0.7-2-0.6-2 1.4-0.7z"/>
+          <path d="m404.7 152.7l-1.3 2.5 1.3 4.7v0.1l-7.1-2.6-0.8-2.7-3.2-0.5 0.1-1.1-1.3-2 3.3-1.3 2.6 1.1c1.6-1.1 3.2-2.2 4.7-3.3zm258.5-78.8l0.1-0.1h-0.1l2.7-3.4-4-0.3-1.6-5.9 0.1-0.1h-0.1l6.4-6.6 0.1-5.4 1.1-4-1.2-3.4-5.1-8 0.1-0.1h-0.1l2.7-3.4-0.9-4-4.5-2.9-4.1 1.7-6.4 8.8-8.2 6.2-0.7-0.2-7.8-1.1-1.9 1-5.1-4.6-1.3-0.2-1.9-0.7-5.1 3-1.6 2.7-1-1.2-5.9-2.1-2 2.2v0.2l0.7 2.5 3.9 0.8 4.7 1.9 0.1 1.4 0.1 1.1-0.2 0.9-0.3 0.9-0.7 1.9-1.6 0.7-0.3 0.8-1.4 0.7 0.6 2 0.7 2 13.9-0.2 0.1 0.1 1.8 3.6 1.8 2.4 0.6 0.8 0.1 0.5 0.5 1.2 0.4 5.4 0.4 1.8 5.9-0.5 0.5-0.3c0.1 0 0.1 0 0.2 0l6.3-2.8 2.9 0.4 0.7 1.3 3 1.5 4 2.9c0 0.1 0.1 0.2 0.2 0.2l0.7 0.5 6 6.2 0.8 0.6c0.1 0 0.2 0.1 0.3 0.1l3.6 2.6v-0.1l0.5-1.3 0.2-0.7-1.8-6z"/>
+          <path d="m404.7 160l0.3 2.9-1.1 4.1-2.3-2.2-2.8 0.8-5.1-2.1 0.4-4.1 5.3-0.1-1.8-1.9zm263.4-57.8v-0.1l3.3-0.2-1.5-3.6-3.7-2.4 0.8-8h-0.1l-3.6-2.6c-0.1 0-0.2-0.1-0.3-0.1l-0.8-0.6-6-6.2-0.7-0.5c-0.1 0-0.2-0.1-0.2-0.2l-4-2.9-3-1.5-0.7-1.3-2.9-0.4-6.3 2.8c-0.1 0-0.1 0-0.2 0l-0.5 0.3-5.9 0.5v0.1l-0.3 0.8 0.1 3.6 0.6-0.5 1.6-1.7 2-0.4 2-0.5 4 1.7-0.2 3.8-1 2.6-8.3-1.7-6-0.6-5.2 3h-4l-2.5-0.3-0.6 1.1h-0.1l-0.9 0.5-0.5 0.3-0.5 0.3 1 2.5v0.1l-0.8 2.8-0.3 1.2 1.4 1.9-0.7 2.1-0.4 1.3-0.7 1.2 0.8 5.4 2.1 0.2 4.7 2.8 3.1-2.2 0.1 5.5 3.3 2.4 4.9-1.8 0.7 2.5 5.2-2.3 0.5 1.3 1.7 1.7 4.6-3.6 2.1-0.5 5.2-1.8 1.9 6.8 1.7 2.5 3.3 1.8 5.5 1.9-0.7-5.1 0.1-0.1h-0.1l2.5-4.2 2.8-2.8-1.4-3.6 0.1-0.1h-0.1l2.4-2z"/>
+          <path d="m374.3 144l-9.5-0.8 4-9.5 1.6 3.2 5.6 1.1 6.3-1.8 9.2 2.2 2.2-1.6 10.9 6.4 0.2 2-1.7 2.3-0.1 0.1c-1.5 1.1-3.1 2.2-4.7 3.3l-2.6-1.1-3.3 1.3-3.6 2.6-5.5-6.1z"/>
+          <path d="m385.3 235.4l5-2.4 13.5 3.1 3.9 4.8 9-1.7 2 6.5-1.7 5.8 2.7 2.1 3.1 7.6 0.3 5.9 2.2 2-0.2 5.8-1.3 8.9h-0.1-4l-4.8 3.7-8.4 2.9-2.3 1.9 1.7 5.3-1.7 2.4-8.7 1-3.5 5.9v0.1l-4.9-0.2 1.5-3.5-0.9-8.9-4.7-7.9 1.4-2.7-2.3-2.2 2.5-5.1-2.3-11.7-11.6-1.6 2.8-5.5 2.8 0.1 0.6-2.8 9.7-2-2.1-5.9 5.9-4.1z"/>
+          <path d="m333.1 200.9l-2.1-3.8-1.1-7.5 7.5-5.1-0.5-4.6 0.2-4.5-4.8-4.4-0.1-3.2 2.4-2.6 6-1.1 5.3-3.2 2.8 1.6 6-1.3-0.2-2.8 6-6.9 3.6 6.6 0.5 10.9 6.2 5.4 1.2 5.6 2.3 2.2 3.1-0.7 2.8 10.6-0.5 1.5-4.8 10.8-8.5 0.6-6 2.8 0.2 2.8-3.3-1.9-5.5 3.5-12.8-10.8-6.3 1.3z"/>
+          <path d="m357.8 308.5l-2.8 2.9-1.7-2.5-5.8 1.1-2.6-1.1 1.5-2.8-2.5-1.3-2.6-5.4h-2.9l-4.6-4.4 0.8-5.8-2.1-3 5.6-0.5-1-2.7 3.3-11.9 5.1-2.7 2.3 1.7 2.6-3.5 2.5-2.1-1-4.9 6-3.2 2.5 1.3 1.5-2.6 6.4-0.9 5.2 3.5-2.8 5.5 11.6 1.6 2.3 11.7-2.5 5.1 2.3 2.2-1.4 2.7 4.7 7.9 0.9 8.9-1.5 3.5-2.7 0.8-13.2-2.7-1.9 2.5z"/>
+          <path d="m303.9 263l-5.5-3.2v-0.1l5.8-15.3 1.7-9.3 0.7-2.4 6.1 2.6-0.5-3.3 2.8 0.3 7.7-4.5 10.5 0.5-0.2 5.5 2.2-1.8 6 3.4-0.7 2.7 3.4 5.1-1.2 9.1 2.4 1.9 2.6-1.3 4.2 6.7 1 4.9-2.5 2.1-2.6 3.5-2.3-1.7-5.1 2.7-3.3 11.9 1 2.7-5.6 0.5-7.1-10-0.3-3.1-5.3-3 1.4 2.9-10 0.4-2.8-1.4-1.3-6.1-2.9 0.3z"/>
+          <path d="m357.9 256.4l-6 3.2-4.2-6.7-2.6 1.3-2.4-1.9 1.2-9.1-3.4-5.1 0.7-2.7-6-3.4-2.2 1.8 0.2-5.5-10.5-0.5 0.6-3.5 3.2-1.1 6.3-10.6-0.4-5.5-1.7-2.2 2-2.1v-0.1l6.3-1.3 12.8 10.8 5.5-3.5 3.3 1.9 2.5 7.1-1.8 3.2 1.7 5.6 3-1.3 2.4 1.5 1.1 3.8 2.9 0.6 1.9-2.3 15.2 1.6 0.8 2.6-5 2.4 5.1 7.6-5.9 4.1 2.1 5.9-9.7 2-0.6 2.8-2.8-0.1-5.2-3.5-6.4 0.9-1.5 2.6z"/>
+          <path d="m393.3 189.4l3.7 0.6 0.7 3.1 4.2 4.3-0.6 2.7-2.6 1.5 9.2 0.7 11.2-2.7 6.7 7.5 0.4 5.8-4.6 4.9 1.1 2.9-1.6 2.4-5.3 3.3 3 2.8 2.2 6.9-2.8 0.7-1.5 2.4-9 1.7-3.9-4.8-13.5-3.1-0.8-2.6-15.2-1.6-1.9 2.3-2.9-0.6-1.1-3.8-2.4-1.5-3 1.3-1.7-5.6 1.8-3.2-2.5-7.1-0.2-2.8 6-2.8 8.5-0.6 4.8-10.8 0.5-1.5 6.9-0.7 1.9-2.9 1.5 2.7z"/>
+          <path d="m523.6 241.7l3.9 8.2-1.2 1.3-1.8 8.2-6.2 6.8-1.1 4.1v-0.1l-15 1.5-8.8 4.2-5.6-6.3-5.5-1.9-1.3-2.6-5.7-1.7-2.4-2.6v-0.8l0.4-3.2-3.7-1.2-1.3-6h0.1l-1.3-2.7 1.3-8.1 6.7-10.4-1.7-2.3 2.8-2.1 0.3-3.7-3.1-3.9 1.9-3.1 2.2-2 6.1-0.9 4.7-3.9 3.9 0.5 3.5 0.7 0.5 2.7 2.6 1-0.3 2.9 2.9 0.3 1.8 2.2 1 3.1-2.8 2.4 2.3 4.8 9.2 2 3 1.6v2.8l4.8-1.9h0.1l2.7-1.6 2 3 0.1 3.2-4.6 4.1z"/>
+          <path d="m590.1 245.2l-2.4 2.2 0.4 3-4.8 6.2-4.8 4-0.4 2.9-2.5 2.7-5.7 1.7-0.3 0.3-1.7 2.3 0.9 2.7-0.7 4.5 0.5 2.5-9.5 8.8-2.9 5.2-0.2 0.7-3.7-3.5 3.6-7.4 2.1-2.3-4.2-4.1-2.9-0.5-5.8-10.1-3 0.8-1.5-2.5-2 2.1-1.2-2.5 3-5.1-5.2-7.8 22.3-10.2 3-4.7 5.6-1.9 2.8 0.9 1.8-2.2 3.2-0.4 0.5-2.8 5.9 0.8 0.2-0.1h0.1l5.9 2.7-1.4 2.5 1.4 2.4 0.4-0.5-0.1 0.2-2.2 4.9 7-0.7z"/>
+          <path d="m552.3 291.4l3.7 3.5-2.6 8.1-5.3 7.2-5.5 3.2-3.8 0.2-0.4-2.8-3.4-1.6-4 4.4-2.9 0.1-0.1-3h-2.9l-4.3-7.7 2.8-1.1-0.8-5.3 2.8-5-2.2-8.7-2.5-1.6 5-3.7-8.3-4.4-0.4-2.9 1.1-4.1 6.2-6.8 1.8-8.2 1.2-1.3 2.3 2 5.4 0.1 5.2 7.8-3 5.1 1.2 2.5 2-2.1 1.5 2.5 3-0.8 5.8 10.1 2.9 0.5 4.2 4.1-2.1 2.3z"/>
+          <path d="m462.8 250l5.5-0.4 1.3 6 3.7 1.2-0.4 3.2v0.8l-1.1 0.3-2.7 0.4v1.3l-2.8 1 0.3 5.9-2.1 1.7 4 7-1.9 2.1 0.7 2.9-11.3 5.7-7-2.8-5.9 6-4.4-3.7-2.8 1.7-6.4-0.2-5.7-6.3 1.3-8.9 0.2-5.8-2.2-2-0.3-5.9-3.1-7.6-2.7-2.1 1.7-5.8-2-6.5 1.5-2.4 2.8-0.7v0.1h3.4l7.4 4.8h6l4.6-4.3 3.9 5.6 5.5 3 5.8-0.9 0.9 3.7 2.8-0.9z"/>
+          <path d="m579.1 225.9l1.4 5.5-0.2 0.1-5.9-0.8-0.5 2.8-3.2 0.4-1.8 2.2-2.8-0.9-5.6 1.9-3 4.7-22.3 10.2-5.4-0.1-2.3-2-3.9-8.2-2.6-1.4 4.6-4.1-0.1-3.2-2-3-2.7 1.6h-0.1l1.2-2.5 6.6-3.9 2.1 1.8 3.2-1 0.3-8.3 2-2.4 2.9 0.3 2.3-3.2-0.2-1.4 8-5.8 7 4.3 5.8-1.6 4.9 3.6 5.1-2.2 8.4 6.6-2.3 5.7z"/>
+          <path d="m517.2 270.2v0.1l0.4 2.9 8.3 4.4-5 3.7 2.5 1.6 2.2 8.7-2.8 5 0.8 5.3-2.8 1.1-4.8-3.3-5.4 1.3-5.9-1.5-5.9 20.9-5.7-7.7-1.6 2.3-2.5-1.5-2.2 1.6-2.2-1.7-2.3 1.9-0.3 2.9v0.1l-5.7 3.8-2.1-2.1-8 1.5-5.2-3.3v-3l3.7-4.6 0.5-5.5-1.6-2.4-7.9-2.9-6.7-13.5 7 2.8 11.3-5.7-0.7-2.9 1.9-2.1-4-7 2.1-1.7-0.3-5.9 2.8-1 2.7-1.7 1.1-0.3 2.4 2.6 5.7 1.7 1.3 2.6 5.5 1.9 5.6 6.3 8.8-4.2z"/>
+          <path d="m425.8 207.1l-6.7-7.5 3.9-5.4 0.2-5.8 15.4-3 3.6 1.5 4.5 5.5 2.5 8.3 2-2.2 3.6 4.1 5 10.9 12.6-1.6 2.9 1.4-1.9 3.1 3.1 3.9-0.3 3.7-2.8 2.1 1.7 2.3-6.7 10.4-1.3 8.1 1.3 2.7h-0.1l-5.5 0.4-1.5-2.8-2.8 0.9-0.9-3.7-5.8 0.9-5.5-3-3.9-5.6-4.6 4.3h-6l-7.4-4.8h-3.4v-0.1l-2.2-6.9-3-2.8 5.3-3.3 1.6-2.4-1.1-2.9 4.6-4.9z"/>
+          <path d="m580.3 215.9l0.9-0.6 7.6 5 0.5 9 2.8-0.2 2 5-0.1 0.1-2.8 0.4-1.1-0.4-3.2 4.3-0.4 0.5-1.4-2.4 1.4-2.5-5.9-2.7h-0.1l-1.4-5.5-1.1-4.3z"/>
+          <path d="m316.9 148l-0.7 2.2-5.6-1-7 1.7-7.2 5.4-2.9 0.3-5.7-1.1-2.6 1.7-4.9-3-6.4 2.3-2.7-1.3-0.9 2.7-5.4 2.9-9.7-2.1-1.8-2.4 4.5-5.3-1.6-2.3 8.1-4.9-2.2-8.2 2-2.6-8.4-3.1-0.5-6.6v-0.1l0.1-0.7 1.8 0.8 1.9-2.1 3.4-0.3 9.4 3.3 13.9 1.5 6.9 3.4 5.7-0.7 4.7-2.5 4.1-3.7 5.1-1.1 0.3 8.3h2.9l-2.3 2.1 2.8 9.4-1.4 3z"/>
+          <path d="m316.4 153.4l-0.2-3.2 0.7-2.2-2.3-4.1 1.4-3-2.8-9.4 2.3-2.1h-2.9l-0.3-8.3 1.7-0.4 0.3-0.1h1.5l-0.9-0.2 0.8-0.3-1.3-0.3 5.9-2.4 7.6 5 3.4-0.7 4.9 3-1.9 2.4 2.1 2.1 5.4 2.4 1.4-2.7 8.2-2.5 4.8-7 13.1 3.3 3.5 8.4-4 2.6-4 9.5-3.8-0.1-2.3 2.6 1.8 5.8-6 6.9 0.2 2.8-6 1.3-2.8-1.6-5.3 3.2-6 1.1-2.4 2.6-3.4-2.1 1.7-2.3-7.8-9.5z"/>
+          <path d="m255.2 158.7l9.7 2.1 4.1 4.2-1.8 6.7-3.6 4.5h-0.1l-8.6-0.8-5.4-2.3-7.1 4.8-2.7-1-4.7-9.6 1.9-0.2 4.8 0.4 2.5-1.1 0.5-2.2-2.4 1.3-5.1-5.6-0.3-5.3 2-6.1-0.3-4.9-1.8-3.6 0.4-7.4 1.5-2-2.5 0.3-2-5 0.3-2.2-2.4-1.2-2.9-4.1-0.7-5.9-1.4-1.9 1.8-1.8 0.1-2.8-0.5-2.3-2.2-1.1-1-2.5 2.1-0.2 11.9 4.2h2.4l4-2.6 5.1 0.6 1.8 1.7 0.9 2.7-3.2 5.2 4 6.5 1.1 4.3-0.1 0.7v0.1l0.5 6.6 8.4 3.1-2 2.6 2.2 8.2-8.1 4.9 1.6 2.3-4.5 5.3z"/>
+          <path d="m266.9 179.9l-3.3-3.7 3.6-4.5 1.8-6.7-4.1-4.2 5.4-2.9 0.9-2.7 2.7 1.3 6.4-2.3 4.9 3 2.6-1.7 5.7 1.1 2.9-0.3 7.2-5.4 7-1.7 5.6 1 0.2 3.2 6.3 0.5 7.8 9.5-1.7 2.3 3.4 2.1 0.1 3.2 4.8 4.4-0.2 4.5 0.5 4.6-7.5 5.1 1.1 7.5-3.2-0.7-3.1-3.5-2.9 1-7.2-5-1.6-8.4-2.8-1.5-11 5.9-3-0.1v-0.1-2.9l-3.3-1.6-1.9-6-2.7-0.2-0.7 2.7h-9.1l-6.7 3.3-2.5-1.7z"/>
+          <path d="m314.4 119.8l-7.6-1.8-1.2-2-0.1-2.3 4.4-9.7 13.8-7.4 2.3-1.6 10.3-2.1 4.8-1.8 2.4 0.3 8.5-4.4 5.1-4.1 11.8 10 3.4 8.4-3.1 4.7 1.4 8.7-1.3 8-13.1-3.3-4.8 7-8.2 2.5-1.4 2.7-5.4-2.4-2.1-2.1 1.9-2.4-4.9-3-3.4 0.7-7.6-5z"/>
+          <path d="m450.3 82.6l16.7 4.6 2.9 0.9 0.7 5.9-1.3 3.5 1.3 3.1-5 7.2-2.7 0.3 0.3 14.3-1 2.8-5.3-1.8-8 4-1.2 2.6 3.2 8-5.5 2.3 1.6 2.4-0.8 2.7 2.5 1.3-7.7 10.2-9.3-6-3.9-4.2 0.7-2.8-1.8-2.5-2.6-0.7 2.1-1.7-0.5-2.8-2.9-1.1-2.4 1.5-0.7-2.9 3 0.2-2.9-4.5 2.6-1.7 2.4-5.7 2.6-1.1-2.2-1.8 0.8-4.5-0.4-10.2-2.3-7 3.9-8.1 0.4-3.8 12.6-0.6 2.6-2.2 2.3 1.7z"/>
+          <path d="m384.3 25.1l0.9-0.3 2 0.8 1.1-2.1 7.9-2.1 2.9 0.3 4.4-1.9v-0.1l1.2 4.8 2.3 3.7-1.6 1.9 0.6 0.8 1.2 5.8h3.4l2.7 5.1 3.1 1.5h2.1l0.6-2.4 8.1-3 3.8 7.5 0.1 1 1.3 5.2 2 3.5h0.1l2.8 0.6 2.1-1.4 2.4-0.2-0.5 2.2 2.2-0.7 2.8 1 1.8 4.4-0.6 2.3 0.7 2.3 1.4 1.9 1.1-2.6 4.6-0.3 2.4 1.1 4.3-1.7 5.5 6 2.3 0.2-2.1 2.4-1.4 4.7 2.6 0.2 1.4 3.3-3.5 3.9 0.2 2.5-16.7-4.6-5.2 1.8-2.3-1.7-2.6 2.2-12.6 0.6-3.3-2.6 3.5-10.6-1.8-2.4-3-0.4 0.7-2.7-3.9-5.2 3.1-1.6-3.8-5.3-5.9-1 1-6.1-1.3-2.5-1.7 2.2-11.6-0.5-4.1-4.2 0.6-2.8-5.5-2.6z"/>
+          <path d="m372.8 131.1l-3.5-8.4 1.3-8-1.4-8.7 3.1-4.7 4.1 3.7 3.1-1.2 14.4 2.2 12.8 6.7 8.6-6.8 10.3-1.5 0.4 10.2-0.8 4.5 2.2 1.8-2.6 1.1-2.4 5.7-2.6 1.7 2.9 4.5-3-0.2 0.7 2.9 2.4-1.5 2.9 1.1 0.5 2.8-2.1 1.7-8.1 2.9-2.5-1.6-2 2.2-6.9-1-10.9-6.4-2.2 1.6-9.2-2.2-6.3 1.8-5.6-1.1-1.6-3.2z"/>
+          <path d="m379.8 68.9l7.1 5.8 12-2.5-2.6 5.7 1.7 3.1 2.5-3.1 8.4 3.5 0.8-2.8 2.8 4.6 2.4-1.7 0.8 3.2 8.6-1.8 3.5-10.6-1.8-2.4-3-0.4 0.7-2.7-3.9-5.2 3.1-1.6-3.8-5.3-5.9-1 1-6.1-1.3-2.5-1.7 2.2-11.6-0.5-4.1-4.2 0.6-2.8-5.5-2.6-6.3-12.1-11.7 3.4-6.4 5.4 0.9 5.6-1.7 4.6 0.6 6.7 2 4.2-1.7-1.4-0.3 9.7 2.3 1.6 10.5 1z"/>
+          <path d="m424.3 82.9l3.3 2.6-0.4 3.8-3.9 8.1 2.3 7-10.3 1.5-8.6 6.8-12.8-6.7-14.4-2.2-3.1 1.2-4.1-3.7-3.4-8.4-11.8-10 2.4-1.9 3.4-6.6 1.9-1.1 0.1-0.1 1.4 1.8 3.5 0.3-5.6-6 1.2-5.1 2.9 0.7 10.5 1 1 3 7.1 5.8 12-2.5-2.6 5.7 1.7 3.1 2.5-3.1 8.4 3.5 0.8-2.8 2.8 4.6 2.4-1.7 0.8 3.2z"/>
+          <path d="m469.9 88.1l0.8 0.3 9.8 0.4 7.3-3.2 1.1-6 4-3.8 2.8-0.2v3.8l-1.7 1.6-0.6 5.2 3.3 4.5-1 2.4 0.6 3.1 1.4 1.9 3.3-0.9 4.3 2.4 2.8 3.8 4.9 0.6 2 1.7-0.9 2.4 2.1-0.1-1.6 1.1-2 2.7-5.7-2.1-1.9 2 0.8 8.8-3.2 5.1 1.4 2.5-4.2 3.6v0.1l-20.1-1.9-9.8-6.6-6.7-0.9-0.3-14.3 2.7-0.3 5-7.2-1.3-3.1 1.3-3.5z"/>
+          <path d="m442.2 186.9l-3.6-1.5-0.4-8.5 2.9-0.8 3-5 3.2 4.5 9 1.2v-3.3l9.5-7.6 6.5-0.9 3.1 0.5 0.4 6.1 2.6 2c1.9 0.8 3.8 1.5 5.6 2.3l2.5-1.5 3.3 1.1-0.6 3.4 2.4 5.2 5.6 3 0.5 9.9-0.1 2.7-5.6 2.5 0.2 4.8-3.9-0.5-4.7 3.9-6.1 0.9-2.2 2-2.9-1.4-12.6 1.6-5-10.9-3.6-4.1-2 2.2-2.5-8.3z"/>
+          <path d="m440.6 158.9l0.4-2 7.7-10.2-2.5-1.3 0.8-2.7-1.6-2.4 5.5-2.3-3.2-8 1.2-2.6 8-4 5.3 1.8 1-2.8 6.7 0.9 9.8 6.6 20.1 1.9 2.2 9-1 4.1 2.6 1.3-0.6 3.9-3.1 1.1-1.1 5.8 3.2 4.6 0.5 4.1-8.6 2.2 2.2 2.5-2.3 2.2 0.7 2.9h-4.7l-3.3-1.1-2.5 1.5c-1.8-0.8-3.7-1.5-5.6-2.3l-2.6-2-0.4-6.1-3.1-0.5-6.5 0.9-9.5 7.6v3.3l-9-1.2-3.2-4.5-2.6-1.7-3.5-8.3z"/>
+          <path d="m493.9 167.9l8.6-2.2 3.4 5.2 16.9 10.4-2.4 2.3 12.7 9.5-1.7 8.6 5.5 4.7 0.2 3.1 2.7-1.1 1.3 2.5v0.1l0.2 1.4-2.3 3.2-2.9-0.3-2 2.4-0.3 8.3-3.2 1-2.1-1.8-6.6 3.9-1.2 2.5-4.8 1.9v-2.8l-3-1.6-9.2-2-2.3-4.8 2.8-2.4-1-3.1-1.8-2.2-2.9-0.3 0.3-2.9-2.6-1-0.5-2.7-3.5-0.7-0.2-4.8 5.6-2.5 0.1-2.7-0.5-9.9-5.6-3-2.4-5.2 0.6-3.4h4.7l-0.7-2.9 2.3-2.2z"/>
+          <path d="m588.2 170.9l1.9 1.3-1.5 0.4-10.6 7.6-6.1-1.6-1.6-2.7-5.3 3.8-6 1-2.4-1.8-5.4 2-1.1 2.8-5.7 0.7-4.1-4.8 0.1-2.9-5.8-0.6 0.2-2.9-2.5-2 1.7-2.8-1.3-8.6 2.2-13.8 0.9-2.7-4.9-11.5 1.5-5.9-1.2-2.7-4.4-4.8-5.3 2-0.7-5.3 4.8-1.7 2-1.9h6.8l2.5 2.3 2.7 10.2 2.5 1.6 1.2 3.6-1.7 3.1 1 5.6-2.8 0.1 4.3 7.5 11.5 4-0.3 2.9 2.7 5.1 8.5 1.5 5.3 3.9 14.4 5.3z"/>
+          <path d="m516.2 108l1.2-0.1 1.5 1.6 1.9 5.6 0.7 5.3 5.3-2 4.4 4.8 1.2 2.7-1.5 5.9 4.9 11.5-0.9 2.7-2.2 13.8 1.3 8.6-1.7 2.8 2.5 2-0.2 2.9-1.9 2.3-3-0.5-6.9 3.4-16.9-10.4-3.4-5.2-0.5-4.1-3.2-4.6 1.1-5.8 3.1-1.1 0.6-3.9-2.6-1.3 1-4.1-2.2-9v-0.1l4.2-3.6-1.4-2.5 3.2-5.1-0.8-8.8 1.9-2 5.7 2.1 2-2.7z"/>
+          <path d="m539.6 124l-2.6-10.2 0.6 0.6h2.4l1.5 2.1 2.3 0.7 2.3-0.5 1-2.3 2-1.2 2.2-0.2 4.5 2.3 4.9-0.1 3.1 3.8 2.3 1.9-0.5 2 3.7 3.2 2.8 4.5v2.3l4.2 0.7 1.2-1.9-0.3-2.4 2.6-0.2 3.8 1.8 1.4 3.5 2.1-1.5 2.5 1.9 5.8-0.4 5.3-4.2 2.2 1.4 0.5 2.1 2.4 2.4 3.2 1.5-1.7 4.4-1.4 2.6-8.9 0.3-9.1-4.6-0.8-2.8-5 10.8 5.5 2.4-1.6 2.5 2.3 1.7 1.3-2.5 3 0.3 4.3 3.4-3 13.3-2.3 1.8-3.4-0.3-2-2.7-14.4-5.3-5.3-3.9-8.5-1.5-2.7-5.1 0.3-2.9-11.5-4-4.3-7.5 2.8-0.1-1-5.6 1.7-3.1-1.2-3.6z"/>
+          <path d="m631.8 140.7l-2.8 9.4-7.8 10.5-2 1.5-1.4 3.3 0.3 4.9-2.4 7.2 0.7 3.6-1.5 2-1.2 5.5-3.2 6.2-4.6-1.8-0.3-2.8-8.5-5.6-3.1-0.2-5.2-2.2 1.3-10-1.9-1.3 3.4 0.3 2.3-1.8 3-13.3-4.3-3.4-3-0.3-1.3 2.5-2.3-1.7 1.6-2.5-5.5-2.4 5-10.8 0.8 2.8 9.1 4.6 8.9-0.3 1.4-2.6 1.7-4.4 8.9 0.6 2.4-0.6z"/>
+          <path d="m605.9 193l4.6 1.8v0.1 5.3l1.6 1.9 0.2 3.4-2.2 11.1 0.1 6.7 1.8 1.5 0.6 3.5-2.2 2-0.2 2.3-3.1 0.9 0.5 2.2-1.5 1.6h-2.7l-3.8 1.4-3-1.1 0.3-2.5-2.4-1.1-0.4 0.1-2-5-2.8 0.2-0.5-9-7.6-5 2.8-2.4v-6.2l4.8-7.8 4.1-13.5 1.1-1 3.1 0.2 8.5 5.6z"/>
+          <path d="m520.4 183.6l2.4-2.3 6.9-3.4 3 0.5 1.9-2.3 5.8 0.6-0.1 2.9 4.1 4.8 5.7-0.7 1.1-2.8 5.4-2 2.4 1.8 6-1 5.3-3.8 1.6 2.7 6.1 1.6 10.6-7.6 1.5-0.4-1.3 10 5.2 2.2-1.1 1-4.1 13.5-4.8 7.8v6.2l-2.8 2.4-0.9 0.6-8.4-6.6-5.1 2.2-4.9-3.6-5.8 1.6-7-4.3-8 5.8v-0.1l-1.3-2.5-2.7 1.1-0.2-3.1-5.5-4.7 1.7-8.6z"/>
+          <path d="m213.1 265.2l1.8-1-2.8-4.1-7.8-3 3-1.3 0.6-2.2-0.5-2.5 1.4-2.1 5.8-1.1-5.5-0.7-6.6 3.7-4.1-3.2-2.2 1-2.2-1.2-0.5-4.9 0.9-2.5 3-0.5-0.9-2.2-0.2-0.3 13.2-3.9 0.4-6 5.2-3.4 13.2-0.4 1.6-2.9 9-3.9 6.8 3.6 7.2 13.3-2.7-0.4-1.9 2.4 8.5 3.3 0.3 5.9-14.3 2.1-2.9 2.2 3 0.8 3.6 4.7 0.8 2.8-2.8 4.5 2.8 1.4 0.4 3-4.8-3.5-1.5 2.4-3.2 0.7 0.5 3-2.4 2.1-2.3-1.7v-3.1l-3.4 0.2-0.2 9.5-11.7-5z"/>
+          <path d="m270.6 269.2l-12.3 0.8-10.6-3.8-0.4-3-2.8-1.4 2.8-4.5-0.8-2.8-3.6-4.7-3-0.8 2.9-2.2 14.3-2.1-0.3-5.9-8.5-3.3 1.9-2.4 2.7 0.4-7.2-13.3 0.4-2.2 10.5 3.5 2.1-1.9 8.7 3.6 3 0.4 5.9-2.7 5.1 1.7 0.6 2.7 6.7-0.2 0.2 3.5 2 2 3.1-1.3 5.2 3.3 7.4 0.1-0.7 2.4-1.7 9.3-5.8 15.3v0.1l-6.6 5.9-2.3-2.3-9.6 0.2-5.6 0.8z"/>
+          <path d="m256.6 221.5l-10.5-3.5 3.6-8.6 5.5-2.2-1.9-17.3 1.5-2.4 0.1-12.1 8.6 0.8h0.1l3.3 3.7 2.4-1.6 2.5 1.7 6.7-3.3h9.1l0.7-2.7 2.7 0.2 1.9 6 3.3 1.6v2.9 0.1l-4.3 2.7 0.3 6.9-4.4 4 1.2 2.9-5 4.6 1.4 3.4-5.5 7.7 1.5 5.6-5.1-1.7-5.9 2.7-3-0.4-8.7-3.6z"/>
+          <path d="m312.7 235.3l-6.1-2.6-7.4-0.1-5.2-3.3-3.1 1.3-2-2-0.2-3.5-6.7 0.2-0.6-2.7-1.5-5.6 5.5-7.7-1.4-3.4 5-4.6-1.2-2.9 4.4-4-0.3-6.9 4.3-2.7 3 0.1 11-5.9 2.8 1.5 1.6 8.4 7.2 5 2.9-1 3.1 3.5 3.2 0.7 2.1 3.8-0.4 1.8v0.1l-2 2.1 1.7 2.2 0.4 5.5-6.3 10.6-3.2 1.1-0.6 3.5-7.7 4.5-2.8-0.3z"/>
+          <path d="m269.3 305.1l0.2-7.4-4.7-17.9-4.2-4.1-2.3-5.7-10.6-3.8-4.8-3.5-1.5 2.4-3.2 0.7 0.5 3-2.4 2.1-2.3-1.7v-3.1l-3.4 0.2-0.2 9.5-11.7-5-5.6-5.6-0.3 0.1-0.8 2.6-3.4 4.3-1.2 2.3 0.2 2.4 8.7 9.5 2.7 5.6 1.2 5.3 8 5.4 3.4 0.5 3.9 4.3 2.9-0.1 2 1.2 1.8 2.5-0.9-2.1 3.9 3.3 0.5-2.7 2.4 0.3 7.1-2.7-1.4 2.9 6.5-0.3 2.4 1.8 9.1-4.5z"/>
+          <path d="m208.7 188.9l-4.9 7.1-2.9 1.1-1.5-2.7-3.5-0.9-6.2 7.5-1.8-6-3 0.9-12.9-6.5-7.9 3-12.5-3.3 2.1-4.1-2.5-9.3 2.5-8.3-3.6-4.7 1.1-4.3 1.2 1.4 3.2-0.4 1.1-7.7 1.5-1.6 2.2-0.6 1.9 1.4h2.5l2.1-1 2.2 0.3 1.5-1.8 0.9 2-1.5 2.6 3-3.6 2.9-0.8-0.1 2.3-1.2 4.4 1.7-3.1 2.6-0.5-1.1 2 7.2 7.8 2.2 5.4 3 2 0.8 3.7 0.7-2.2 3-1 2.4-2.7 8.1-3.3 2.7-0.2-2 2.5 2.9-1.1 1.8 4.4 1.3-1.9 2.5 0.2v-0.1l1.6 4h-0.3 0.3l2.5 0.3 0.7 0.2 0.4 1.7-1.9 13z"/>
+          <path d="m151.6 210.1l2 3.4-0.8 1.4-5.5-1.2-1.2-1.9 2.2-0.7-3 0.8-0.3-2.7v2.7l-2.5 0.7-2.2-1-4.2-6.1-0.8 2.5-2.3 0.2-3.5-3.1 1.6-4.6-2.4 4.3 1.3 1.9-2.2 1-1 2.8-5.9-0.2-2.1-1.6 1.5-1.6-1.5-5.5-2.4-3.1-2.8-1.8 1.6-1.7-2.1 1.4-7.5-2.2 2.2-1.3 12.5-1.8 1.8 1.8 2-1.3 0.7-2.5-1.6-3.6-6.8-2.5-1.5 2.6-2.6-4.2 1.3-1.8-0.3-2.2 1.7 2.3 4.9 1 4.6-0.8 2.1 3.1 5.4 1-3.7-0.9-2.8-2 2.2-0.5-4.2-2 2-1.5-2.6-0.2-2.7 0.8-0.8-2.2 7.1-4.5-4.4 2.2-2.3 0.1-7.5 2.9-2.7-1.2-2.7 1.2-1.5-1.8 0.6-5.3 2.5-1.6-2.2-0.9 0.8-2.6 1.8-1.6 2.1-0.8 5.1 1.5-1.9-1.1 2.5-1.2 1.6 1.4-1.9-1.7 1.2-1.9 2.9-0.1 3.8-2 2.3 2.6 6.7-3.1 3 1.6 1-2.2 2.9-0.5 0.4 5 2.2-1.5 1.3 2.5 1.2-4.5 4.7 0.3 1.2 1.7-1.1 4.3 3.6 4.7-2.5 8.3 2.5 9.3-2.1 4.1v0.1l-6.8 3.2 0.5 3.5 3.4 5.5 8.1 1.3 0.1 5.4-2.5 2.8z"/>
+          <path d="m255.2 207.2l-5.5 2.2-3.6 8.6-0.4 2.2-6.8-3.6-9 3.9-1.6 2.9-13.2 0.4-5.2 3.4-1-5.8 3-0.7-2.8-1.5 2.4-2.2 1-3.2-2.4-1.7 1.6-2.6-1.2-2.5-5.1-2.8-0.5-2.8 3.5-0.9-3.6-0.1-1-4.4 4.9-7.1 9-2.5 1.9-13-0.4-1.7-0.7-0.2-2.5-0.3-1.6-4 0.1-0.8v-0.9l0.7-0.1h2.1v0.1l1.7 4.4 1.3 2-0.5 2.1 1.4-2.1-2.3-5.1 0.7-2.5 2.2-1.5 2.3-0.6 2.2 1-1.5 2.3 2.9 2.4 7.3-0.6 4.7 9.6 2.7 1 7.1-4.8 5.4 2.3-0.1 12.1-1.5 2.4z"/>
+          <path d="m167.7 242.6l2.9 1.2-1.1 2.1-5.1-1.2-1.3-2.7 0.4-3 2.1 1.4zm41.4-23.4l2.4-2.2 1-3.2-2.4-1.7 1.6-2.6-1.2-2.5-5.1-2.8-0.5-2.8 3.5-0.9-3.6-0.1-1-4.4-2.9 1.1-1.5-2.7-3.5-0.9-6.2 7.5-1.8-6-3 0.9-12.9-6.5-7.9 3-12.5-3.3v0.1l-6.8 3.2 0.5 3.5 3.4 5.5 8.1 1.3 0.1 5.4-2.5 2.8-2.8-0.8 2 3.4 0.1 1.5 2.9 4.4 2.3-0.2 1.5-1.7-0.8-5.1 0.6 2.4 1.7 1.7 1.9-1.7-2.5 4.2 2.2 1.4-2.3-0.6 3.2 1.9 0.1 0.1 1.6 1 1.7-2.5-1.6 3.1 2.1 2.6 0.6 3.5-0.9 2.8 2.1 1.1-1.2-3 0.5-3.8 2.2 1.6 5.1 0.1-0.7-5 1.4 2 2.1 1.5 4.8-0.5 2.1 2.4-1 2.2-2.1-0.6-4.8 0.4 3.8 3.3 12.9-0.9 3.1 1.5-3.4 0.1 1.4 2.4 13.2-3.9 0.4-6-1-5.8 3-0.7z"/>
+          <path d="m294.8 379.2l-2 2v-0.1l-6.3-6.3-6-1.2 1.7-3-2.3-2 2.4-1.7-1.5-2.6 1.7-2.6-2.4-1.7-0.3-3-5-3.1 2.2-2.1-3.2-5.6 8.1-3.3 2.3 2 2.7-0.1 2.7-11.6 2.7-1.6 0.3-3 5.8-2.5 3.5 0.4 0.8-0.8h0.1l9.1 3 2.9-0.8-1.4-2.4 2.2-1.8 4.1 3.9 3.8-1.4 1.3-2.5 4.8 0.6-0.2 5.1 4.7 3.6-0.6 3.2-2.6 1.1-4 8-2.8 0.6-3.4 3.8h0.1l-5.7 6.1-2.1 5.3-7.9 5.9-0.7 5.7-4.1 5.8z"/>
+          <path d="m242.8 341.1l-1.4-5-3.5-3-1.3-2.3 1.5-3.6 1.7 1.8 2.9 0.5 1.4 8.4zm-0.9-22.2l-5.8-4.5-4.4-1.5-0.6 2.9 2.7 0.1 4.8 3.3zm44.6 55.9l-6-1.2 1.7-3-2.3-2 2.4-1.7-1.5-2.6 1.7-2.6-2.4-1.7-0.3-3-5-3.1 2.2-2.1-3.2-5.6 8.1-3.3 2.3 2 2.7-0.1 2.7-11.6-3.6-4.7-17.4-6.7-5.9-6.5v-3.7l-2.4-1.8-6.5 0.3 1.4-2.9-7.1 2.7 0.5 0.1-0.6 3.4-4.5 5.9 2.4 0.3 2.2 1.7 3 7.2-1.5 1.9-0.2 5.1-3.3 3.1-0.1 2.6-2.2 0.4-1.5 1.7 1.1 4.3 9 6.5 1.5 2.6 4.3 2.7 3.7 4.8 1.8 7.3 3.8-0.5 0.7 2.8 6.4 1.7 0.6 5.8 6.1 4.3 9.4 1 2-5 0.1-0.4v-0.1z"/>
+          <path d="m363.6 392.3l-8.1 0.8-3.5-7-3.2-0.7-0.2-3-2.3-1.5 2-1.8-1.7-3 3.6-4.6-2.9-4.7 1.6-2.7 2.5 1.2 4.7-4 5.7-1.3 4.9-4.6 8.7-4 7-3.4 11.2 5.2 2.3-2.6 2.7 0.8 2.4-2.4 1.2 5.6-1.7 2.4 1.2 7.9 0.7 6-6.2-2-0.6 3.5-7.6 9.5 1.8 2.2-2.3 1.9-0.3 3.5-3.1 1.1 1.5 3.4-3.2 1.9h-0.1l-6.7-0.2-5.3 2.7z"/>
+          <path d="m396.6 343.5l4.4 5.5-2.4 2.4-2.7-0.8-2.3 2.6-11.2-5.2-7 3.4-0.6-5.9-4.7-3-6.4-0.5-0.1-2.8-2.9-1.5 0.9-3.4-1.8-5.2-6.6-9.8 3-5.3-1.2-2.6 2.8-2.9 11.5-1.1 1.9-2.5 13.2 2.7 2.7-0.8 4.9 0.2 1.1 3.9c2.5 1.6 4.9 3.2 7.4 4.8l3.6 8.4-0.5 4.1 2.3 6.7z"/>
+          <path d="m307.7 414.3l-2.8-6.4-1-1.3 0.9-2.9-2.4-2.6-2 3.2-9.8-2.3 2-2 0.2-5.7 2.8-5.5-1.2-2.8-3.7 0.6 2-5 0.1-0.4 2-2 5.5-0.7 4.1-5.8 0.7-5.7 7.9-5.9 2.1-5.3 5.7-6.1 6.2 3-0.1 4.7 9.5-1.1 7.2 5.6-2 2.7 5.7 2.2 2.9 4.7-3.6 4.6 1.7 3-2 1.8 2.3 1.5 0.2 3 3.2 0.7 3.5 7-0.7 5-1.4 5.3-4.5 3.2 0.6 3.6-6 3.4-4.7 6.5-4.2-4.2-5.4 2.7-1.5-6-6.1 1-2.2-1.8-2.8 2z"/>
+          <path d="m243.9 420.1l-5.8 2.6v-4.6l2.2-3.2 0.5-2.3 1.9-1.7 1.8 1.4 3.1-0.2-1.1-4.6-3.5-3.4-2.8 4-1.2 3.8 6.2-50 0.9-2.8 3.3-3.4 1.4 4.7 9 9 2.8 7.6 1.7-3.1-0.6-2.4 3.8-0.5 0.7 2.8 6.4 1.7 0.6 5.8 6.1 4.3 9.4 1 3.7-0.6 1.2 2.8-2.8 5.5-0.2 5.7-2 2 9.8 2.3 2-3.2 2.4 2.6-0.9 2.9 1 1.3-3.1-0.1-1.2 2.5-2.7-0.9-1.1 3.3 2.9 1.4-8.5 8.6-0.6 8.9-3 2.3 1.5 2.5-4.5 4-2.1-2.7-1.6 3.6h-6.4l-0.6-4.7-11-7.7 0.4-2.8-17.2 0.7 1.5-5.4z"/>
+          <path d="m222.3 481.2l1.1-1.5 3.9-7.1 8.8-37.8 2-11.7v-0.4l5.8-2.6 3.7 1.3-1.5 5.4 17.2-0.7-0.4 2.8 11 7.7 0.6 4.7h6.4l1.6-3.6 2.1 2.7 0.4 4.6 11.7 2.9-3.6 5.2 0.7 2.6-0.4 2.9-2.5 1.3-0.6-3-9.4 2.7 0.5 6.4-4.2 11.1 1.6 2.7-8.6 1.5-3.3-1.1-4.8 1.9-2.2-2-2.3 1.5-2.5-2.3-9.8 2-1.6 2.2-2.5-1.4-2.7 1.3-1.2-2.8-11 2.5z"/>
+          <path d="m293.8 455.6v0.1l-0.7-2.6 3.6-5.2-11.7-2.9-0.4-4.6 4.5-4-1.5-2.5 3-2.3 0.6-8.9 8.5-8.6-2.9-1.4 1.1-3.3 2.7 0.9 1.2-2.5 3.1 0.1 2.8 6.4 8.9-0.5 2.8-2 2.2 1.8 6.1-1 1.5 6 5.4-2.7 4.2 4.2-3.4 3.1 2.7 9.1-7.5 2v2.9l2.4 1.4-4.4 5.5 1.3 2.7-2.8-0.2-3.6 4.7-2.7 1.3-8.6-1-5 2.9-8.3-0.7-1.4 2.5z"/>
+          <path d="m276.9 513.4l3.4-0.8-0.4-2.9 8-9.3-0.8-3.1 2.7-1.4-0.5-7.2h-2.9l1.5-2.8-2.5-5.8-6.6-0.3-8.6 1.5-3.3-1.1-4.8 1.9-2.2-2-2.3 1.5-2.5-2.3-9.8 2-1.6 2.2-2.5-1.4-2.7 1.3-1.2-2.8-11 2.5-4-1.9-3.5 4.9-2.7 1.9-4.5 0.9 1.9 4.5 4.5-0.2 0.2 2.2 2.4 1 2.2-2.1 2.4 1.3 2.5 0.1 1.4 2.8-2.5 6.7-2.1 2.2 1.3 2.2 4.3-0.1 0.7-3.4 2.3-0.1-1.3 2.4 5.9 2.3 1.5 1.8h2.5l6.1 3.8 5.8 0.4 2.3-1 1.4 2.1 0.3 2.8 2.7 1.3 3.9 4 2.1 0.9 1.1-2.1 2.7 2.1 3.6-1.1 0.2-0.2 1.4-9.3z"/>
+          <path d="m292.3 331.6l-2.7 1.6-3.6-4.7-17.4-6.7-5.9-6.5v-3.7l9.1-4.5-2.5-2 0.2-7.4-4.7-17.9-4.2-4.1-2.3-5.7 12.3-0.8 3.7-4.8 5.6-0.8 9.6-0.2 2.3 2.3 3.4 9-0.8 3 2.7 1.2-4.5 14.1 2.7-0.9 1.5 3-3.4 5.5 0.5 5.8 2.1 2-0.1 2.8 6.4 0.2-3.2 8.5 4.5 3-0.8 2.8h-0.1l-0.8 0.8-3.5-0.4-5.8 2.5z"/>
+          <path d="m329.6 320.8v3.5l-4.8-0.6-1.3 2.5-3.8 1.4-4.1-3.9-2.2 1.8 1.4 2.4-2.9 0.8-9.1-3 0.8-2.8-4.5-3 3.2-8.5-6.4-0.2 0.1-2.8-2.1-2-0.5-5.8 3.4-5.5-1.5-3-2.7 0.9 4.5-14.1-2.7-1.2 0.8-3-3.4-9 6.6-5.9 5.5 3.2 0.3 3.2 2.9-0.3 1.3 6.1 2.8 1.4 10-0.4-1.4-2.9 5.3 3 0.3 3.1 7.1 10 2.1 3-0.8 5.8 4.6 4.4h2.9l2.6 5.4 2.5 1.3-1.5 2.8-0.8-0.3-1.3 2.4-3.3-0.9-1.3 3-5.6 2.7z"/>
+          <path d="m348.9 364.1l-1.6 2.7-5.7-2.2 2-2.7-7.2-5.6-9.5 1.1 0.1-4.7-6.2-3h-0.1l3.4-3.8 2.8-0.6 4-8 2.6-1.1 0.6-3.2-4.7-3.6 0.2-5.1v-3.5l3-5 5.6-2.7 1.3-3 3.3 0.9 1.3-2.4 0.8 0.3 2.6 1.1 5.8-1.1 1.7 2.5 1.2 2.6-3 5.3 6.6 9.8 1.8 5.2-0.9 3.4 2.9 1.5 0.1 2.8 6.4 0.5 4.7 3 0.6 5.9-8.7 4-4.9 4.6-5.7 1.3-4.7 4z"/>
+          <path d="m369.8 543.6l0.8-0.9-2.6-1.1-2-2.1-3.7-0.1-1.7-1.7-2.8 0.4-1.3 2.1-2.4-0.8-2.8-5.9-10-0.6-1.3-2.8-13.2-3.9-0.5-1.4 3.8-5.2 2.8-1v-5.9l3.9-4 2.8-1.1 6.2 4.1-0.4-5.6 5.4-1.6-3-4.8 2.8-1.1 3.4 5.5 2.8-0.5 0.6-2.8 5.7 2.2 2-2.3 2.2 5.5 8.7 3.9 2.2 5.2 0.2 3.1-2.2 2.3 2.4 2.5-1.2 3-3.2 0.6 0.8 5.7 3.4 1.5 3.3-1.2 4.8 5.6-7.4 0.2-1.3 2.6z"/>
+          <path d="m435.1 504.4l-1.5 1.5-5.2 9.3-0.9 3.5 0.1 9.6-9.4-5.6-8.2 5.4-13.6-1-2.7 1.4 1.4 6-8.6 3.9-4.8-5.6-3.3 1.2-3.4-1.5-0.8-5.7 3.2-0.6 1.2-3-2.4-2.5 2.2-2.3-0.2-3.1-2.2-5.2-8.7-3.9-2.2-5.5 8.4-10 1.4 2.7 5.2-1.8 0.5-0.8 1.8 2.3 6.3 0.9 1.1-3.3 2.8-0.5 12 1.4-0.5 2.8 3.5 5 2.5-1.6 1.4 2.9 3.1-0.8 3.8-5.3 1 2.9 13.8 4.7 1.7 2z"/>
+          <path d="m430.8 440.7l9.4 4.5-2 3.9-2.8 1.1 8.4 4.1-4.3 5.3 0.3 1.5-3.7 1-3 5.3-6.3-1.3-0.1 8.7-5.7-0.1-1.3-2.8-11.1-1.3-4.2-5-4.3-11.5-4.8-4.3-10.3-5.8-6.1 2.8-4.3-3.6 2.3-2.4-3.1-2.7 0.4-3-0.8-9.1 7.6-5 5.9-1.4 1.7-1.5h0.1l5.1-3.2 6.4 1.5 3.8-4.8 3-9.1 4.7-4.2 5.2 4 1.3 4.2 2.4 1.6-0.5 3 2.6 5.1v0.1l4.2 4.5 2.9 8.8-0.5 8.7z"/>
+          <path d="m480 487.2l-2.8-0.6-1.9-1.6-1.1-3.4h-0.1l3.3-4.4-1.5-3-6.1-6.7-3-0.2-0.2-3-6.8-1.4 0.9-2.7-1.9-2.6-3.9 0.6-4.2 3.9-0.1 2.8-5.3-2.5-2.2 1.7-0.4-2.9-2.9-0.1-0.3-1.5 4.3-5.3-8.4-4.1 2.8-1.1 2-3.9 7.8 3.4 3.9-0.5 0.1-3.3 8.7 2.2 6.3-1.8-1.4-3 1.2-2.9-3.9-7.7 3.6-2.5 1.1-2.1 2.7 5.9 7.8 5 7.1-4.3 0.1 3.1 2.5-2.3h2.8l6 3.5 2.6 4.4 0.2 5.5 6.3 6.4-4.5 5-3.9 4.1-1.9 10.6-3.3-0.9-4.2 4.8 1 2.7-5.8 1.8z"/>
+          <path d="m326.8 526.2l-5.5-1.5-1.2 2.4 0.2 7.6-8.8-0.7-1.7 0.3-0.6-7 5.5-3.2 2.6-5.3-0.8-2.7-3.1 0.3 0.6-3.5-4.6-4 7.1-11.2 3.1-1.1 3.5-5.3 11.4 2.5 0.7-5.8 6.5-6.1-9.1-13.3 9.9-0.9 1.7 2.3 5.8-2.5-2.2-2.3 11.7-4.3 1.4 6.3 2.6 1.2 0.2 2.8 2.3 2.1-0.7 5.4 14.3 9.3 1 2.8-0.5 0.8-5.2 1.8-1.4-2.7-8.4 10-2 2.3-5.7-2.2-0.6 2.8-2.8 0.5-3.4-5.5-2.8 1.1 3 4.8-5.4 1.6 0.4 5.6-6.2-4.1-2.8 1.1-3.9 4v5.9l-2.8 1-3.8 5.2z"/>
+          <path d="m330.6 461.7l2 6.9 9.1 13.3-6.5 6.1-0.7 5.8-11.4-2.5-3.5 5.3-3.1 1.1-12.4-2.2-1.4-3-5.5 0.6-2.6-8.7-3.3-1.3-2-3.5-3.9 0.5-6.6-0.3-1.6-2.7 4.2-11.1-0.5-6.4 9.4-2.7 0.6 3 2.5-1.3 0.4-2.9v-0.1l3.7 0.7 1.4-2.5 8.3 0.7 5-2.9 8.6 1 2.7-1.3 5.3 1.7-3.3 4.6z"/>
+          <path d="m474.1 481.6l-2.4-0.1-5.9 2.6-3.6 3.2-7.2 4.6-4.3 4.2 2.1-3.5-4.3 6.6h-6.8l-5.5 4-1.1 1.2-0.2-0.2-1.7-2-13.8-4.7-1-2.9-3.8 5.3-3.1 0.8-1.4-2.9-2.5 1.6-3.5-5 0.5-2.8 3.4-2 0.8-3-0.7-9.7 6.1 2.2c2.3-1.5 4.6-2.9 6.8-4.4l5.7 0.1 0.1-8.7 6.3 1.3 3-5.3 3.7-1 2.9 0.1 0.4 2.9 2.2-1.7 5.3 2.5 0.1-2.8 4.2-3.9 3.9-0.6 1.9 2.6-0.9 2.7 6.8 1.4 0.2 3 3 0.2 6.1 6.7 1.5 3z"/>
+          <path d="m385.4 413.1l3.3 5h-0.1l-1.7 1.5-5.9 1.4-7.6 5 0.8 9.1-6.2 0.8-7.5 5.5-2.6-2.3-8.7 2.5-0.5-4-2.4 1.5-2.7-1-4.5-4 2.1-2.3-3.1 0.5-2.7-9.1 3.4-3.1 4.7-6.5 6-3.4-0.6-3.6 4.5-3.2 1.4-5.3 0.7-5 8.1-0.8 6.7 6.1 5.3-2.7 6.7 0.2 1 5.4 3.8 6z"/>
+          <path d="m463.4 418.7l4.2 8.3-1.1 2.1-3.6 2.5 3.9 7.7-1.2 2.9 1.4 3-6.3 1.8-8.7-2.2-0.1 3.3-3.9 0.5-7.8-3.4-9.4-4.5-1.5-2.4 0.5-8.7-2.9-8.8-4.2-4.5v-0.1l6.9-15.9 1.7 2.3 6.8-5.7 1-1 2.3 1.7 1.5 5.7 6.4 1.2 0.1-2.8 2.9 0.2 9 7.7z"/>
+          <path d="m314.7 524.1l-5.5 3.2 0.6 7-0.7 0.2-2.3-1.6-2.4 1.8-2.5-0.5-1.9-1.7-3.9-0.3-6.9 2.1-2.2-0.9-2.1-1.7-1.1-2.5-7.8-5.5-2.1 1.8 1.4-9.3 1.6-2.8 3.4-0.8-0.4-2.9 8-9.3-0.8-3.1 2.7-1.4-0.5-7.2h-2.9l1.5-2.8-2.5-5.8 3.9-0.5 2 3.5 3.3 1.3 2.6 8.7 5.5-0.6 1.4 3 12.4 2.2-7.1 11.2 4.6 4-0.6 3.5 3.1-0.3 0.8 2.7z"/>
+          <path d="m427.6 528.3l0.3 15.6 3.9 3.3 1.9 3.8h-2.3l-8.1-2.7-6.9 3.9-3-0.2-2.4 1.1-0.6 2.4-2.1 1.2-2.4-0.7-2.9 1-4-3.1-7-2.9-2.5 1.4h-3l-1 2.1-4.6 2-1.9-1.7-1.7-4.8-7.5-2-2-2.1 2-2.3 8-2.4 1.3-2.6 7.4-0.2 8.6-3.9-1.4-6 2.7-1.4 13.6 1 8.2-5.4z"/>
+          <path d="m419.7 471.9l1.3 2.8c-2.2 1.5-4.5 2.9-6.8 4.4l-6.1-2.2 0.7 9.7-0.8 3-3.4 2-12-1.4-2.8 0.5-1.1 3.3-6.3-0.9-1.8-2.3-1-2.8-14.3-9.3 0.7-5.4-2.3-2.1-0.2-2.8-2.6-1.2-1.4-6.3 0.5-2.8 4.8-3.2 1-2.7-1.8-2.2 3-1.1 2.7 1.1 9.2-3.2 6.1-2.8 10.3 5.8 4.8 4.3 4.3 11.5 4.2 5z"/>
+          <path d="m360 458.1l-0.5 2.8-11.7 4.3 2.2 2.3-5.8 2.5-1.7-2.3-9.9 0.9-2-6.9-5.1-4.1 3.3-4.6-5.3-1.7 3.6-4.7 2.8 0.2-1.3-2.7 4.4-5.5-2.4-1.4v-2.9l7.5-2 3.1-0.5-2.1 2.3 4.5 4 2.7 1 2.4-1.5 0.5 4 8.7-2.5 2.6 2.3 7.5-5.5 6.2-0.8-0.4 3 3.1 2.7-2.3 2.4 4.3 3.6-9.2 3.2-2.7-1.1-3 1.1 1.8 2.2-1 2.7z"/>
+          <path d="m542 347l-5.7 6.7-11.2-15.2-2.8 0.7-3 5.1-6-2-6.4 0.5-3.7-5.7-2.8 0.5-3.1-9.2 1.5-8 5.9-20.9 5.9 1.5 5.4-1.3 4.8 3.3 4.3 7.7h2.9l0.1 3 2.9-0.1 4-4.4 3.4 1.6 0.4 2.8 3.8-0.2 5.5-3.2 5.3-7.2 4.5 2.7-1.8 4.7 0.3 2.5-4.4 1.5-1.9 2 0.2 2.8 0.5 0.2-4.4 4.7h-2.9l0.8 9.3z"/>
+          <path d="m443.1 292.3l5.9-6 6.7 13.5 7.9 2.9 1.6 2.4-0.5 5.5-3.7 4.6-3.9 1.3-0.5 3 1.5 12.4-5.5 4.8-3.5-4.3-6.4-0.4-1.4-3.2-13.1-0.5-1.6-2.5-3.3 0.5-4.4-4.5 1.2-2.8-2.3-1.7-11.2 8-2.5-1.2-3.6-8.4c-2.5-1.6-4.9-3.2-7.4-4.8l-1.1-3.9v-0.1l3.5-5.9 8.7-1 1.7-2.4-1.7-5.3 2.3-1.9 8.4-2.9 4.8-3.7h4 0.1l5.7 6.3 6.4 0.2 2.8-1.7z"/>
+          <path d="m496.5 434.2l0.1 3.7-6-3.5h-2.8l-2.5 2.3-0.1-3.1-7.1 4.3-7.8-5-2.7-5.9-4.2-8.3-2.1-9.1 6.7-6.4 5.9-1.9 3.4-5.9 3.4-0.4-0.7-2.8 2.6-2.3 1.5-5.2 2.6 1.2v-3.1l0.9-4.1 3.5-0.8 3.2-4.9 5-2.7 2 4.2 0.5 10.3 3.8 11.3-1.5 6.2-3.5 4.5 1 7.1-3 5.9z"/>
+          <path d="m435.6 387.9l3.5 8-1 1-6.8 5.7-1.7-2.3-6.9 15.9-2.6-5.1 0.5-3-2.4-1.6-1.3-4.2-5.2-4-4.7 4.2-3 9.1-3.8 4.8-6.4-1.5-5.1 3.2-3.3-5 1.7-5.8-3.8-6-1-5.4h0.1l3.2-1.9-1.5-3.4 3.1-1.1 0.3-3.5 2.3-1.9-1.8-2.2 7.6-9.5 0.6-3.5 6.2 2-0.7-6 7.5 3.5 1.5 2.5 6.7 0.3 6.5 5.4 3.7-4.1v3.9l5.5 1.5 3.3 8.7 2.6 1.1z"/>
+          <path d="m535.1 404.4l-3 0.5-0.8-17.5-3 1.7-8.2-1.9-2.7 1 1.1-6.3-3.3-7.8-4.9-2.7-9 3.1 0.5 10.3 3.8 11.3-1.5 6.2-3.5 4.5 1 7.1-3 5.9-2.1 14.4 5.9 0.7 3.5 4.2 8.7-3.9 2.4 1.4 2.5-2.2 0.5 5.8 9.3 0.9 0.1 2.8 5.2 2.3 4.3-4.8 2.3-0.1 1-0.2 0.2-4.7-10-5.7-1.5-2.6 3.2-5.1 4.2 1.4 2.5-2.5-3-2.3 2.5-6.7 5.8-0.3 0.3-3.4-5.9-0.8z"/>
+          <path d="m513.6 349.4l-0.3-7.1 6 2 3-5.1 2.8-0.7 11.2 15.2 6.5 10.5 6.2 0.2 0.3-2.8 9.4 2.1 2.7 6.3-2.3 5.5 1 5.4 5.2 1.5-1.6 3.8 1.8 4.2 4.4 3.1-0.4 5.8-3.1-1.1-12.6 3.9-0.9 2.8-5.5 1.2-1 3.1-5.9-0.8-5.4-4-3 0.5-0.8-17.5-3 1.7-8.2-1.9-2.7 1 1.1-6.3-3.3-7.8-4.9-2.7-9 3.1-2-4.2v-4.4l-0.2-1.1h0.1l4.4-3.9-1.9-2.5 2.5-2.5 6.9-1.5z"/>
+          <path d="m499.3 365.9v4.4l-5 2.7-3.2 4.9-3.5 0.8-2.2-2.4-2.6 1-0.7-5.5-6-2.2-6.2 3-2.8 0.4-2.3-2-2.8 0.8 3-7.1-2.7-7.5-4.6-3.8-4.7-7.7 2.1-6.3-2.5-2.7 5.5-4.8-1.5-12.4 0.5-3 3.9-1.3v3l5.2 3.3 8-1.5 2.1 2.1 5.7-3.8v-0.1l2.1 3-4.9 3.5-1.6 8.6 5.2 6.7-1.7 5.9 2.3 1.6-1.3 2.5 1.1 3 4.6 4.1 5.9 2.1 0.9 3 4.6 2.6h-0.1z"/>
+          <path d="m485.4 376.3l2.2 2.4-0.9 4.1v3.1l-2.6-1.2-1.5 5.2-2.6 2.3 0.7 2.8-3.4 0.4-3.4 5.9-5.9 1.9-6.7 6.4-9-7.7-2.9-0.2-0.1 2.8-6.4-1.2-1.5-5.7-2.3-1.7-3.5-8 3.4-0.2-2.6-1.1-3.3-8.7-5.5-1.5v-3.9-0.1l9.6-3.2 8.5 0.1 5.2 3.2 11.1-0.7 2.8-0.8 2.3 2 2.8-0.4 6.2-3 6 2.2 0.7 5.5z"/>
+          <path d="m449.1 332.4l3.5 4.3 2.5 2.7-2.1 6.3 4.7 7.7 4.6 3.8 2.7 7.5-3 7.1-11.1 0.7-5.2-3.2-8.5-0.1-9.6 3.2v0.1l-3.7 4.1-6.5-5.4-6.7-0.3-1.5-2.5-7.5-3.5-1.2-7.9 1.7-2.4-1.2-5.6-4.4-5.5 9.3-8.6-2.3-6.7 0.5-4.1 2.5 1.2 11.2-8 2.3 1.7-1.2 2.8 4.4 4.5 3.3-0.5 1.6 2.5 13.1 0.5 1.4 3.2z"/>
+          <path d="m493.1 312.7l5.7 7.7-1.5 8 3.1 9.2 2.8-0.5 3.7 5.7 6.4-0.5 0.3 7.1-2.5 5-6.9 1.5-2.5 2.5 1.9 2.5-4.4 3.9-4.6-2.6-0.9-3-5.9-2.1-4.6-4.1-1.1-3 1.3-2.5-2.3-1.6 1.7-5.9-5.2-6.7 1.6-8.6 4.9-3.5-2.1-3 0.3-2.9 2.3-1.9 2.2 1.7 2.2-1.6 2.5 1.5z"/>
+          <path d="m603.7 362l-1 10.3-3.1 1.4-2.2 0.7-4.5 3.4-1.5 2.4-2.5-1.4-5.1 1.3-2 1.8v0.1l-6.8 1.9-2 2-7.7-3.5-5.2-1.5-1-5.4 2.3-5.5-2.7-6.3-9.4-2.1-0.3 2.8-6.2-0.2-6.5-10.5 5.7-6.7 2.3-13.6 2.7 6.7 2.7 0.9 1.3 2.5 3 1.7 2.6-1.6 3.2 0.8 4.6 3.6 9.4-13.9 2.4 1.6-0.6 3 2.3 1.8 6.2 2.3 2.2-1.5 0.6-0.8 1.9 4.7 2.7 1.1 1.5 1.9 2.8 0.4-0.7 3 1.3 5.2 5.1 4z"/>
+          <path d="m547 340.1l-2.7-6.7-0.8-9.3h2.9l4.4-4.7 2.2 0.9 2.3-1 2.3 0.1 3.4-3.5 2.1-1 1-2.3-2.8-1.3 1.8-5.1 2.4-0.8 2.3 1 3.6-2.9 9.5-1.3 3.2 0.6-0.5 2.7 4.2 4.1-2.1 6.4-0.6 1.5 4.6 1.7-0.1 4.8 2-1.4 4.6 6.6-1.3 5-2.5 1.7-4.9 0.9-0.6 3.7-0.6 0.8-2.2 1.5-6.2-2.3-2.3-1.8 0.6-3-2.4-1.6-9.4 13.9-4.6-3.6-3.2-0.8-2.6 1.6-3-1.7-1.3-2.5z"/>
+          <path d="m596.5 409.9l0.6-0.5-0.4 4.5-2.2 1.5-0.6 2.9 3.5 4-1.8 4.8 0.2 0.2-6.8 7.8-2 5.3 4.3 8.5 7 7.7-5.2-0.6-5.2 3.8 1.2 2.6-3 1.4-9.8 0.4-1.2 3.5-5.9-3.6-10.1 8.5-4-4.8-2.7 1.8-5.3-0.2-6.1-6-3.4-1.1 1.7-2.5-3.7-5.2 1.2-3-2.2-5.4 4.3-4.8 2.3-0.1 1-0.2 5.9-1.4 3.8 1-3.4-4.9 3.9 1.1 1.4-8.6 5.3-4 3.3-0.7 3.5 4.5 0.7-3.8 3.8-4.2 11.1 3.3 9-10.2z"/>
+          <path d="m597.1 409v0.4l-0.6 0.5-6 3.3-9 10.2-11.1-3.3-3.8 4.2-0.7 3.8-3.5-4.5-3.3 0.7-5.3 4-1.4 8.6-3.9-1.1 3.4 4.9-3.8-1-5.9 1.4 0.2-4.7-10-5.7-1.5-2.6 3.2-5.1 4.2 1.4 2.5-2.5-3-2.3 2.5-6.7 5.8-0.3 0.3-3.4 1-3.1 5.5-1.2 0.9-2.8 12.6-3.9 3.1 1.1 0.4-5.8-4.4-3.1-1.8-4.2 1.6-3.8 7.7 3.5 2-2 6.8-1.9 1.8 4.5 2.4 0.6 1.1 2 0.4 3 1.2 2.2 3 2.3 5.7 0.5 2.2 1.3-0.7 2.1 3.2 4.7-3 1.5z"/>
+          <path d="m605.3 477.1l-3.2-0.1-1.3 1.8-0.1 2.2-0.4 0.8-2.2-4 0.8-2.9-5.6-2.6-1.7-5.6-5.5-2.9 3-1.4-1.2-2.6 5.2-3.8 5.2 0.6-7-7.7-4.3-8.5 2-5.3 6.8-7.8 6.9 7.8 6.9 1.6 4.2 2.8 2.5-0.4 1.8 1.4 10.3-2.4 2.7-1.8-0.3 2.6 1.5 2.2 0.3 3.2-1.6 1.9-0.2 2.3-2.7 1.6-3.3 5-0.5 1.6 1.1 2.7-1.1 2.7-3.5 2.9-2.3 0.5-0.9 2.4-3-0.9-1.5 2.1-2.3 0.5-1.8 2.4 0.1 2.8-2.4 0.6z"/>
+          <path d="m545 500.2l2.5-2-2.2-6.3 1.1-2.6 2.7-0.5-5.5-9.1 2-5.3 3.3-0.8-1.9-3.8-0.1-0.1-6.6 4.3-3.2 0.2-12-4.8-3.5 0.7-4.5-2.3-5.5-5.7-10.4-2.9-3.9 4.1-1.9 10.6-3.3-0.9-4.2 4.8 1 2.7-5.8 1.8-3.1 4.9 0.2 0.1h13.2l2.2 0.9 1 2.2-1.6 1.5 2.2 1.4 7.4 0.1 3.2 1.3 1.8-1.7-1.5-2.8 0.4-2.4 4.9 1 3 5.3 10-0.8 2.6-1.1 1.8 2-0.2 2.5 1 2-1.2 2.2h9.2l1.3 2 2.2-0.8 1.7 0.2z"/>
+          <path d="m600.3 481.8l-1.4 2.5-6.8 1.7-0.7 2.5-5.5 5.7 5 0.7-2 4.8-4 0.2-4.8 2.5-3.5 1.1 0.1 2.7-4.9-1.5-2.7 0.5-1.6 1.6-0.4 2.3-2.2 1.6 1.4-1.8-2.4-1.7-2.2 0.7-1.6-1.6-3.1 0.1 0.9 2.2-2.3-0.4-1.5 1.7-3-1.1 0.6-2.3-6.4-4.1-0.5-0.1 0.2-2.1 2.5-2-2.2-6.3 1.1-2.6 2.7-0.5-5.5-9.1 2-5.3 3.3-0.8-1.9-3.8 0.1-0.4 5.3 0.2 2.7-1.8 4 4.8 10.1-8.5 5.9 3.6 1.2-3.5 9.8-0.4 5.5 2.9 1.7 5.6 5.6 2.6-0.8 2.9z"/>
+          <path d="m541 463.4l6.1 6-0.1 0.4-0.1-0.1-6.6 4.3-3.2 0.2-12-4.8-3.5 0.7-4.5-2.3-5.5-5.7-10.4-2.9 4.5-5-6.3-6.4-0.2-5.5-2.6-4.4-0.1-3.7 5.9 0.7 3.5 4.2 8.7-3.9 2.4 1.4 2.5-2.2 0.5 5.8 9.3 0.9 0.1 2.8 5.2 2.3 2.2 5.4-1.2 3 3.7 5.2-1.7 2.5z"/>
+          <path d="m640.5 554.2l3.2-1.7 0.7 8.4-0.1 0.5-1.9 4.9-2.7 1.9 3.3 0.4-5.8 14.7-3.1-1.2-1.2-2.8-11.2-3.4-4.8-4.4 0.2-3 4.9-3.3-9.5-1.9 2.7-7-0.9-5.8-7.3 2.6 3-8.4 2.6-1.6-7.9-4.4-1.1-5.5 5.3-3.8-3.8-4.2-2.6 1 0.5-2.7 13.6 2.1 1.2 3.5 6 3.4 6 5.9 0.5 3.2 2.7 1.1 3.7 11z"/>
+          <path d="m643.7 551.5v1l-3.2 1.7-3.8-0.5-3.7-11-2.7-1.1-0.5-3.2-6-5.9-6-3.4-1.2-3.5-13.6-2.1v-0.2l3.9-5-0.3-3.4 2.2-2.8 2.8-0.3 0.9-2.9 10.7-4.2 3.5-4.9 8.6 1.3-0.5-17.4 2.4-2 2.9 1.1 0.2 0.9 1.5 8.2-0.5 10.6 4 5.6 3.8 26-5.4 11.9v5.5z"/>
+        </g>
+        <g id="mapDots"></g>
+      </svg>
+    </div>
+    <div class="maillage-map-legend" id="mapLegend">
+      <div class="map-legend-row"><div class="map-legend-dot" style="width:10px;height:10px;opacity:.7"></div> +50 imprimantes</div>
+      <div class="map-legend-row"><div class="map-legend-dot" style="width:7px;height:7px;opacity:.65"></div> 10 - 50 imprimantes</div>
+      <div class="map-legend-row"><div class="map-legend-dot" style="width:4px;height:4px;opacity:.6"></div> 1 - 10 imprimantes</div>
+      <div class="map-legend-total"><strong id="mapDotCount">0</strong> imprimantes 3D</div>
+    </div>
+  </div>
+  </div>
+</section>
+
+<!-- 7. TRACTION & CAP -->
+<section class="sect dark">
+  <div class="wrap">
+    <div class="eyebrow reveal">Traction &amp; trajectoire</div>
+    <h2 class="title reveal d1">Le cap.</h2>
+    <div class="tl">
+      <div class="tl-item reveal d1"><div class="yr">2026</div><div class="big" data-count="1000" data-suffix="">0</div><div class="desc">fichiers 3D au catalogue.</div></div>
+      <div class="tl-item reveal d2"><div class="yr">2027</div><div class="big" data-count="800" data-suffix="">0</div><div class="desc">printers actifs en France.</div></div>
+      <div class="tl-item reveal d3"><div class="yr">2028</div><div class="big" data-count="100" data-suffix=" k">0</div><div class="desc">réparations par an.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 8. IMPACT -->
+<section class="sect dark" style="background:radial-gradient(circle at 50% 30%,#241f17,#15130F)">
+  <div class="wrap" style="text-align:center">
+    <div class="eyebrow reveal">L'impact</div>
+    <h2 class="title reveal d1" style="margin-bottom:.6rem">Chaque fichier sauve<br>un appareil de la <em>benne</em>.</h2>
+    <div class="counter reveal d2" id="wasteCounter">0</div>
+    <div class="counter-sub reveal d2">kg de déchets évités (simulation temps réel)</div>
+    <p class="body reveal d3" style="margin:1.8rem auto 0;color:#C9C3B8">Économie circulaire, emplois locaux, ancrage de terrain — Hub⁴Fix est implanté <a href="https://www.lerooftopdeviry.fr/" target="_blank" rel="noopener" style="color:var(--gold)">au rooftop de Viry</a>, au plus près de celles et ceux qui réparent.</p>
+  </div>
+</section>
+
+<!-- 9. CTA -->
+<section class="sect cream" style="min-height:80vh">
+  <div class="wrap" style="text-align:center">
+    <div class="eyebrow reveal">Rejoignez l'aventure</div>
+    <h2 class="title reveal d1">Investir dans la pièce<br>qui <em>manquait</em>.</h2>
+    <p class="body reveal d2" style="margin:0 auto 2rem">Vous êtes investisseur ou partenaire ? Parlons du dossier complet.</p>
+    <a class="btn reveal d3" href="mailto:contact@hub4fix.com?subject=Hub4Fix%20—%20Dossier%20investisseur">Demander le dossier →</a>
+  </div>
+</section>
+
 <footer>
-  <div class="logo">HUB<span>4</span>FIX &mdash; Kintsugi Numerique</div>
-  <div class="mention">SAS &middot; Le <a href="https://www.lerooftopdeviry.fr/" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">rooftop de Viry</a> &middot; 53 rue Francoeur &middot; Viry-Chatillon &middot; Essonne</div>
-  <div style="width:100%;text-align:center;margin-top:.6rem;font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.06em"><a href="cgu.html" style="color:rgba(28,26,22,0.35);text-decoration:none">CGU</a> &middot; <a href="cgv.html" style="color:rgba(28,26,22,0.35);text-decoration:none">CGV</a></div>
+  HUB⁴FIX — Kintsugi Numérique · <a href="https://www.lerooftopdeviry.fr/" target="_blank" rel="noopener">Le rooftop de Viry</a>, 53 rue Francoeur, Viry-Châtillon ·
+  <a href="cgu.html">CGU</a> · <a href="cgv.html">CGV</a>
 </footer>
 
 <script>
-// ════════════════════════════════════════
-// BACKGROUND COLOR INTERPOLATION (dark -> light on scroll)
-// ════════════════════════════════════════
-(function() {
-  var darkR = 28, darkG = 26, darkB = 22;       // #1C1A16
-  var lightR = 250, lightG = 248, lightB = 245;  // #FAF8F5
+// reveal au scroll
+var io = new IntersectionObserver(function(es){
+  es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+}, { threshold:.18 });
+document.querySelectorAll('.reveal').forEach(function(el){ io.observe(el); });
 
-  function lerp(a, b, t) { return Math.round(a + (b - a) * t); }
+// barre de progression
+var prog = document.getElementById('prog');
+addEventListener('scroll', function(){
+  var h = document.documentElement.scrollHeight - innerHeight;
+  prog.style.width = (h>0 ? (scrollY/h*100) : 0) + '%';
+}, { passive:true });
 
-  function updateBg() {
-    var scrollTop = window.scrollY || document.documentElement.scrollTop;
-    var docHeight = Math.max(1, document.body.scrollHeight - window.innerHeight);
-    var t = Math.min(1, Math.max(0, scrollTop / docHeight));
-
-    var r = lerp(darkR, lightR, t);
-    var g = lerp(darkG, lightG, t);
-    var b = lerp(darkB, lightB, t);
-    document.body.style.backgroundColor = 'rgb(' + r + ',' + g + ',' + b + ')';
-
-    // Nav transition
-    var nav = document.getElementById('mainNav');
-    var wasteCounter = document.getElementById('wasteFloatCounter');
-    if (t > 0.45) {
-      nav.classList.add('nav-light');
-      if (wasteCounter) wasteCounter.classList.add('waste-light');
-    } else {
-      nav.classList.remove('nav-light');
-      if (wasteCounter) wasteCounter.classList.remove('waste-light');
-    }
-
-    // Progress bar
-    var progress = (scrollTop / docHeight) * 100;
-    document.getElementById('progress').style.width = progress + '%';
+// count-up déclenché à l'apparition
+function countUp(el){
+  var target = parseFloat(el.getAttribute('data-count'));
+  var suffix = el.getAttribute('data-suffix') || '';
+  var t0 = null, dur = 1400;
+  function frame(t){
+    if(!t0) t0 = t;
+    var p = Math.min((t-t0)/dur, 1);
+    var val = Math.floor((1-Math.pow(1-p,3)) * target);
+    el.textContent = val.toLocaleString('fr-FR') + suffix;
+    if(p<1) requestAnimationFrame(frame);
+    else el.textContent = target.toLocaleString('fr-FR') + suffix;
   }
+  requestAnimationFrame(frame);
+}
+var ioCount = new IntersectionObserver(function(es){
+  es.forEach(function(e){ if(e.isIntersecting){ countUp(e.target); ioCount.unobserve(e.target); } });
+}, { threshold:.5 });
+document.querySelectorAll('[data-count]').forEach(function(el){ ioCount.observe(el); });
 
-  window.addEventListener('scroll', updateBg, { passive: true });
-  updateBg();
-})();
-
-// ════════════════════════════════════════
-// BUBBLE COLOR ADAPTATION (12 levels: dark -> light on scroll)
-// ════════════════════════════════════════
-(function() {
-  var style = document.createElement('style');
-  style.textContent =
-    /* Levels 1-3: dark background, light text */
-    '[data-level="1"] .eco-sub-bubble,' +
-    '[data-level="2"] .eco-sub-bubble,' +
-    '[data-level="3"] .eco-sub-bubble {' +
-    '  color: var(--creme);' +
-    '  background: rgba(245,240,232,0.04);' +
-    '  border-color: rgba(245,240,232,0.08);' +
-    '}' +
-    '[data-level="1"] .eco-sub-bubble .bubble-body,' +
-    '[data-level="2"] .eco-sub-bubble .bubble-body,' +
-    '[data-level="3"] .eco-sub-bubble .bubble-body {' +
-    '  color: rgba(245,240,232,0.75);' +
-    '}' +
-    '[data-level="1"] .eco-sub-bubble .bubble-stat-label,' +
-    '[data-level="2"] .eco-sub-bubble .bubble-stat-label,' +
-    '[data-level="3"] .eco-sub-bubble .bubble-stat-label {' +
-    '  color: rgba(245,240,232,0.85);' +
-    '}' +
-    '[data-level="1"] .eco-sub-bubble .bubble-stat-sub,' +
-    '[data-level="2"] .eco-sub-bubble .bubble-stat-sub,' +
-    '[data-level="3"] .eco-sub-bubble .bubble-stat-sub,' +
-    '[data-level="1"] .eco-sub-bubble .bubble-source,' +
-    '[data-level="2"] .eco-sub-bubble .bubble-source,' +
-    '[data-level="3"] .eco-sub-bubble .bubble-source {' +
-    '  color: rgba(245,240,232,0.5);' +
-    '}' +
-    '[data-level="1"] .eco-sub-bubble .bubble-metric-label,' +
-    '[data-level="2"] .eco-sub-bubble .bubble-metric-label,' +
-    '[data-level="3"] .eco-sub-bubble .bubble-metric-label {' +
-    '  color: rgba(245,240,232,0.6);' +
-    '}' +
-    '[data-level="1"] .eco-sub-bubble .bubble-metric-value,' +
-    '[data-level="2"] .eco-sub-bubble .bubble-metric-value,' +
-    '[data-level="3"] .eco-sub-bubble .bubble-metric-value {' +
-    '  color: var(--rouge);' +
-    '}' +
-    /* Levels 4-5: dark-mid, light text */
-    '[data-level="4"] .eco-sub-bubble,' +
-    '[data-level="5"] .eco-sub-bubble {' +
-    '  color: var(--creme);' +
-    '  background: rgba(245,240,232,0.06);' +
-    '  border-color: rgba(245,240,232,0.1);' +
-    '}' +
-    '[data-level="4"] .eco-sub-bubble .bubble-body,' +
-    '[data-level="5"] .eco-sub-bubble .bubble-body {' +
-    '  color: rgba(245,240,232,0.75);' +
-    '}' +
-    '[data-level="4"] .eco-sub-bubble .bubble-metric-label,' +
-    '[data-level="5"] .eco-sub-bubble .bubble-metric-label {' +
-    '  color: rgba(245,240,232,0.6);' +
-    '}' +
-    '[data-level="4"] .eco-sub-bubble .bubble-metric-value,' +
-    '[data-level="5"] .eco-sub-bubble .bubble-metric-value {' +
-    '  color: var(--rouge);' +
-    '}' +
-    '[data-level="4"] .eco-sub-bubble .bubble-source,' +
-    '[data-level="5"] .eco-sub-bubble .bubble-source {' +
-    '  color: rgba(245,240,232,0.5);' +
-    '}' +
-    /* Levels 6-7: mid, transitioning text */
-    '[data-level="6"] .eco-sub-bubble,' +
-    '[data-level="7"] .eco-sub-bubble {' +
-    '  color: var(--creme);' +
-    '  background: rgba(245,240,232,0.06);' +
-    '  border-color: rgba(245,240,232,0.1);' +
-    '}' +
-    '[data-level="6"] .eco-sub-bubble .bubble-body,' +
-    '[data-level="7"] .eco-sub-bubble .bubble-body {' +
-    '  color: rgba(245,240,232,0.7);' +
-    '}' +
-    '[data-level="6"] .eco-sub-bubble .bubble-metric-label,' +
-    '[data-level="7"] .eco-sub-bubble .bubble-metric-label {' +
-    '  color: rgba(245,240,232,0.6);' +
-    '}' +
-    '[data-level="6"] .eco-sub-bubble .bubble-metric-value,' +
-    '[data-level="7"] .eco-sub-bubble .bubble-metric-value {' +
-    '  color: var(--rouge);' +
-    '}' +
-    '[data-level="6"] .eco-sub-bubble .bubble-stat-label,' +
-    '[data-level="7"] .eco-sub-bubble .bubble-stat-label {' +
-    '  color: rgba(245,240,232,0.85);' +
-    '}' +
-    '[data-level="6"] .eco-sub-bubble .bubble-stat-sub,' +
-    '[data-level="7"] .eco-sub-bubble .bubble-stat-sub,' +
-    '[data-level="6"] .eco-sub-bubble .bubble-source,' +
-    '[data-level="7"] .eco-sub-bubble .bubble-source {' +
-    '  color: rgba(245,240,232,0.5);' +
-    '}' +
-    /* Levels 8-9: light, dark text */
-    '[data-level="8"] .eco-sub-bubble,' +
-    '[data-level="9"] .eco-sub-bubble {' +
-    '  color: var(--encre);' +
-    '  background: rgba(28,26,22,0.04);' +
-    '  border-color: rgba(28,26,22,0.1);' +
-    '}' +
-    '[data-level="8"] .eco-sub-bubble .bubble-body,' +
-    '[data-level="9"] .eco-sub-bubble .bubble-body {' +
-    '  color: var(--encre-mid);' +
-    '}' +
-    '[data-level="8"] .eco-sub-bubble .bubble-metric-label,' +
-    '[data-level="9"] .eco-sub-bubble .bubble-metric-label {' +
-    '  color: var(--encre-light);' +
-    '}' +
-    '[data-level="8"] .eco-sub-bubble .bubble-metric-value,' +
-    '[data-level="9"] .eco-sub-bubble .bubble-metric-value {' +
-    '  color: var(--rouge);' +
-    '}' +
-    '[data-level="8"] .eco-sub-bubble .bubble-source,' +
-    '[data-level="9"] .eco-sub-bubble .bubble-source {' +
-    '  color: var(--encre-light);' +
-    '}' +
-    '[data-level="8"] .eco-sub-bubble .bubble-stat-label,' +
-    '[data-level="9"] .eco-sub-bubble .bubble-stat-label {' +
-    '  color: var(--encre-mid);' +
-    '}' +
-    '[data-level="8"] .eco-sub-bubble .bubble-stat-sub,' +
-    '[data-level="9"] .eco-sub-bubble .bubble-stat-sub {' +
-    '  color: var(--encre-light);' +
-    '}' +
-    /* Levels 10-11: lighter, dark text */
-    '[data-level="10"] .eco-sub-bubble,' +
-    '[data-level="11"] .eco-sub-bubble {' +
-    '  color: var(--encre);' +
-    '  background: rgba(255,255,255,0.45);' +
-    '  backdrop-filter: blur(16px);' +
-    '  border-color: rgba(237,230,220,0.5);' +
-    '}' +
-    '[data-level="10"] .eco-sub-bubble .bubble-body,' +
-    '[data-level="11"] .eco-sub-bubble .bubble-body {' +
-    '  color: var(--encre-mid);' +
-    '}' +
-    '[data-level="10"] .eco-sub-bubble .bubble-source,' +
-    '[data-level="11"] .eco-sub-bubble .bubble-source {' +
-    '  color: var(--encre-light);' +
-    '}' +
-    '[data-level="10"] .eco-sub-bubble .bubble-metric-label,' +
-    '[data-level="11"] .eco-sub-bubble .bubble-metric-label {' +
-    '  color: var(--encre-light);' +
-    '}' +
-    '[data-level="10"] .eco-sub-bubble .bubble-metric-value,' +
-    '[data-level="11"] .eco-sub-bubble .bubble-metric-value {' +
-    '  color: var(--rouge);' +
-    '}' +
-    '[data-level="10"] .eco-sub-bubble .loop-flow-label {' +
-    '  color: var(--encre);' +
-    '}' +
-    '[data-level="10"] .eco-sub-bubble .loop-flow-sub {' +
-    '  color: var(--encre-light);' +
-    '}' +
-    '[data-level="10"] .eco-sub-bubble .loop-flow-arrow {' +
-    '  color: var(--rouge);' +
-    '}' +
-    /* Level 12: cream, dark text */
-    '[data-level="12"] .eco-sub-bubble {' +
-    '  color: var(--encre);' +
-    '  background: rgba(255,255,255,0.45);' +
-    '  backdrop-filter: blur(16px);' +
-    '  border-color: rgba(237,230,220,0.5);' +
-    '}' +
-    '[data-level="12"] .eco-sub-bubble .bubble-body {' +
-    '  color: var(--encre-mid);' +
-    '}' +
-    '[data-level="12"] .eco-sub-bubble .bubble-source {' +
-    '  color: var(--encre-light);' +
-    '}' +
-    '[data-level="12"] .eco-sub-bubble .manifeste-quote {' +
-    '  color: var(--encre);' +
-    '}' +
-    '[data-level="12"] .manifeste-cta {' +
-    '  color: var(--encre);' +
-    '  border-color: rgba(28,26,22,0.3);' +
-    '}';
-  document.head.appendChild(style);
-})();
-
-// ════════════════════════════════════════
-// SCROLL-DRIVEN SUB-BUBBLE REVEAL (IntersectionObserver)
-// ════════════════════════════════════════
-(function() {
-  var subBubbles = document.querySelectorAll('.eco-sub-bubble');
-  var globalIndex = 0;
-
-  // Count-up animation for [data-count] numbers when their bubble opens
-  function animateCounts(bubble) {
-    bubble.querySelectorAll('[data-count]').forEach(function(el) {
-      if (el._counted) return;
-      el._counted = true;
-      var target = parseFloat(el.getAttribute('data-count'));
-      var dur = 1400, t0 = null;
-      function step(ts) {
-        if (!t0) t0 = ts;
-        var p = Math.min(1, (ts - t0) / dur);
-        var eased = 1 - Math.pow(1 - p, 3);
-        el.textContent = Math.round(target * eased).toLocaleString('fr-FR');
-        if (p < 1) requestAnimationFrame(step);
-      }
-      requestAnimationFrame(step);
-    });
-  }
-
-  function openBubble(bubble) {
-    bubble.classList.add('open');
-    animateCounts(bubble);
-    var group = bubble.closest('.eco-sub-group');
-    // Reveal the trunk -> group wire when the first bubble of the group opens
-    if (group.querySelector('.eco-sub-bubble') === bubble) {
-      var wire = document.getElementById('wire-' + bubble.id);
-      if (wire) wire.classList.add('wire-visible');
-    }
-    // Reveal the organic vine linking the previous tile to this one
-    var link = document.getElementById('link-' + bubble.id);
-    if (link) link.classList.add('wire-visible');
-  }
-
-  // Sequential reveal queue: each animation starts only once the previous
-  // one has FINISHED (800ms) plus a 200ms breath.
-  var ANIM_MS = 800, GAP_MS = 200;
-  var queue = [];
-  var animating = false;
-
-  function pump() {
-    if (animating || !queue.length) return;
-    animating = true;
-    var b = queue.shift();
-    openBubble(b);
-    setTimeout(function() {
-      animating = false;
-      pump();
-    }, ANIM_MS + GAP_MS);
-  }
-
-  var observer = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-      if (entry.isIntersecting) {
-        queue.push(entry.target);
-        observer.unobserve(entry.target);
+// compteur de déchets : simulation qui s'incrémente quand la section est visible
+(function(){
+  var el = document.getElementById('wasteCounter');
+  var base = 128450, started = false;
+  var io2 = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(e.isIntersecting && !started){
+        started = true;
+        var v = base;
+        setInterval(function(){ v += Math.floor(Math.random()*7)+2; el.textContent = v.toLocaleString('fr-FR'); }, 900);
+        el.textContent = base.toLocaleString('fr-FR');
       }
     });
-    // Play strictly in document order, whatever order they entered the viewport
-    queue.sort(function(a, b) {
-      return (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_PRECEDING) ? 1 : -1;
-    });
-    pump();
-  }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
-
-  subBubbles.forEach(function(b) {
-    observer.observe(b);
-  });
-})();
-
-// ════════════════════════════════════════
-// SVG WIRES — organic bezier from the trunk to each branch
-// + organic "vines" linking consecutive tiles within a group,
-// with a deterministic organic stagger applied to the tiles.
-// ════════════════════════════════════════
-(function() {
-  var svg = document.getElementById('ecoWires');
-  if (!svg) return;
-  var tree = document.getElementById('ecoTree');
-
-  // Deterministic pseudo-random in [0,1] so the layout & curves stay
-  // stable across redraws (resize) instead of jittering every frame.
-  function seeded(n) {
-    var x = Math.sin(n * 127.1 + 0.137) * 43758.5453;
-    return x - Math.floor(x);
-  }
-
-  // Apply a subtle organic offset (translate + rotate) to every tile so the
-  // column zig-zags like a living branch rather than a rigid stack.
-  function applyOrganicLayout() {
-    var groups = tree.querySelectorAll('.eco-sub-group');
-    groups.forEach(function(group) {
-      var side = group.getAttribute('data-side');
-      var lvl = parseInt(group.closest('.eco-level').getAttribute('data-level') || '1');
-      var amp = (side === 'center') ? 16 : 42;
-      var bubbles = group.querySelectorAll('.eco-sub-bubble');
-      bubbles.forEach(function(b, i) {
-        var ox = Math.round((Math.sin(i * 1.25 + lvl * 0.6) * 0.62 + (seeded(i * 3 + lvl) - 0.5) * 0.9) * amp);
-        var oy = Math.round((seeded(i * 5 + lvl) - 0.5) * 12);
-        var rot = ((seeded(i * 7 + lvl) - 0.5) * 1.8).toFixed(2);
-        b._ox = ox; b._oy = oy;
-        b.style.setProperty('--ox', ox + 'px');
-        b.style.setProperty('--oy', oy + 'px');
-        b.style.setProperty('--rot', rot + 'deg');
-      });
-    });
-  }
-
-  // Layout position of an element relative to the tree (ignores CSS transforms,
-  // walking the offsetParent chain — robust against the reveal scale animation).
-  function posInTree(el) {
-    var x = 0, y = 0, node = el;
-    while (node && node !== tree) {
-      x += node.offsetLeft;
-      y += node.offsetTop;
-      node = node.offsetParent;
-    }
-    return { x: x, y: y };
-  }
-
-  // Same gradient as the trunk (red -> earth -> green), sampled at the
-  // branch's own height so every limb blends seamlessly into the trunk.
-  var GRAD_STOPS = [
-    { t: 0,    c: [235, 115, 90] },
-    { t: 0.55, c: [195, 90, 65] },
-    { t: 1,    c: [95, 190, 130] }
-  ];
-  function colorAt(y, H, alpha) {
-    var t = Math.min(1, Math.max(0, y / H));
-    var a = GRAD_STOPS[0], b = GRAD_STOPS[GRAD_STOPS.length - 1];
-    for (var i = 0; i < GRAD_STOPS.length - 1; i++) {
-      if (t >= GRAD_STOPS[i].t && t <= GRAD_STOPS[i + 1].t) {
-        a = GRAD_STOPS[i]; b = GRAD_STOPS[i + 1];
-        break;
-      }
-    }
-    var f = (t - a.t) / ((b.t - a.t) || 1);
-    var c = [0, 1, 2].map(function(k) { return Math.round(a.c[k] + (b.c[k] - a.c[k]) * f); });
-    return 'rgba(' + c.join(',') + ',' + alpha + ')';
-  }
-
-  var SVGNS = 'http://www.w3.org/2000/svg';
-
-  // ── Branch geometry helpers ──
-  function cubicPoint(p0, p1, p2, p3, t) {
-    var mt = 1 - t;
-    return {
-      x: mt*mt*mt*p0.x + 3*mt*mt*t*p1.x + 3*mt*t*t*p2.x + t*t*t*p3.x,
-      y: mt*mt*mt*p0.y + 3*mt*mt*t*p1.y + 3*mt*t*t*p2.y + t*t*t*p3.y
-    };
-  }
-  function cubicTangent(p0, p1, p2, p3, t) {
-    var mt = 1 - t;
-    var x = 3*mt*mt*(p1.x-p0.x) + 6*mt*t*(p2.x-p1.x) + 3*t*t*(p3.x-p2.x);
-    var y = 3*mt*mt*(p1.y-p0.y) + 6*mt*t*(p2.y-p1.y) + 3*t*t*(p3.y-p2.y);
-    var len = Math.sqrt(x*x + y*y) || 1;
-    return { x: x/len, y: y/len };
-  }
-
-  // Build a tapered, slightly wavy filled shape along a cubic bezier —
-  // thick at the base, thin at the tip, like a living branch.
-  function taperedPath(p0, p1, p2, p3, baseW, tipW, seed) {
-    var N = 16, left = [], right = [];
-    for (var i = 0; i <= N; i++) {
-      var t = i / N;
-      var pt = cubicPoint(p0, p1, p2, p3, t);
-      var tg = cubicTangent(p0, p1, p2, p3, t);
-      // organic width: taper + subtle wobble along the limb
-      var w = (baseW + (tipW - baseW) * t) * (1 + Math.sin(t * 9 + seed * 6.28) * 0.12);
-      var nx = -tg.y * w / 2, ny = tg.x * w / 2;
-      left.push((pt.x + nx).toFixed(1) + ' ' + (pt.y + ny).toFixed(1));
-      right.push((pt.x - nx).toFixed(1) + ' ' + (pt.y - ny).toFixed(1));
-    }
-    return 'M ' + left.join(' L ') + ' L ' + right.reverse().join(' L ') + ' Z';
-  }
-
-  // A small twig forking off the main branch at parameter t, with a bud at its tip.
-  function addTwig(g, p0, p1, p2, p3, t, side, len, fill, seed) {
-    var base = cubicPoint(p0, p1, p2, p3, t);
-    var tg = cubicTangent(p0, p1, p2, p3, t);
-    var ang = Math.atan2(tg.y, tg.x) + side * (0.55 + seeded(seed) * 0.35);
-    var curl = side * (0.5 + seeded(seed + 1) * 0.4);
-    var tip = {
-      x: base.x + Math.cos(ang + curl) * len,
-      y: base.y + Math.sin(ang + curl) * len
-    };
-    var c1 = { x: base.x + Math.cos(ang) * len * 0.45, y: base.y + Math.sin(ang) * len * 0.45 };
-    var c2 = { x: tip.x - Math.cos(ang + curl) * len * 0.35, y: tip.y - Math.sin(ang + curl) * len * 0.35 };
-    var p = document.createElementNS(SVGNS, 'path');
-    p.setAttribute('d', taperedPath(base, c1, c2, tip, 3.2, 0.5, seed));
-    p.setAttribute('fill', fill);
-    g.appendChild(p);
-    var bud = document.createElementNS(SVGNS, 'circle');
-    bud.setAttribute('cx', tip.x.toFixed(1));
-    bud.setAttribute('cy', tip.y.toFixed(1));
-    bud.setAttribute('r', (2.2 + seeded(seed + 2) * 1.8).toFixed(1));
-    bud.setAttribute('fill', fill);
-    g.appendChild(bud);
-  }
-
-  // Add a full organic branch: tapered limb + a few twigs with buds.
-  // targetEl: the bubble whose reveal drives this branch's visibility —
-  // if it is already open (wires drawn after the reveal), show immediately.
-  function addBranch(p0, p1, p2, p3, baseW, tipW, fill, id, seed, twigCount, targetEl) {
-    var g = document.createElementNS(SVGNS, 'g');
-    if (id) g.id = id;
-    if (targetEl && targetEl.classList.contains('open')) g.classList.add('wire-visible');
-    var main = document.createElementNS(SVGNS, 'path');
-    main.setAttribute('d', taperedPath(p0, p1, p2, p3, baseW, tipW, seed));
-    main.setAttribute('fill', fill);
-    g.appendChild(main);
-    for (var i = 0; i < twigCount; i++) {
-      var t = 0.3 + (i + 1) / (twigCount + 1) * 0.5 + (seeded(seed + i * 3) - 0.5) * 0.1;
-      var side = (i % 2 === 0) ? 1 : -1;
-      var len = 24 + seeded(seed + i * 5) * 22;
-      addTwig(g, p0, p1, p2, p3, t, side, len, fill, seed + i * 7);
-    }
-    svg.appendChild(g);
-  }
-
-  // Trunk profile: thick at the top of the story, tapering as the
-  // root system spreads. Branches fork at exactly this width.
-  var TRUNK_TOP_W = 18, TRUNK_BOT_W = 7;
-  function trunkWidthAt(y, H) {
-    return TRUNK_TOP_W + (TRUNK_BOT_W - TRUNK_TOP_W) * (y / H);
-  }
-
-  function drawWires() {
-    svg.innerHTML = '';
-    var treeRect = tree.getBoundingClientRect();
-    var H = tree.scrollHeight;
-    svg.setAttribute('width', treeRect.width);
-    svg.setAttribute('height', H);
-    svg.style.width = treeRect.width + 'px';
-    svg.style.height = H + 'px';
-
-    var trunkX = treeRect.width / 2;
-
-    // 0) The trunk itself: one continuous tapered organic limb, always
-    // visible, red at the root of the story fading to green at the end.
-    var defs = document.createElementNS(SVGNS, 'defs');
-    defs.innerHTML =
-      '<linearGradient id="trunkGrad" x1="0" y1="0" x2="0" y2="1">' +
-      '<stop offset="0" stop-color="rgb(235,115,90)" stop-opacity="0.85"/>' +
-      '<stop offset="0.55" stop-color="rgb(195,90,65)" stop-opacity="0.8"/>' +
-      '<stop offset="1" stop-color="rgb(95,190,130)" stop-opacity="0.85"/>' +
-      '</linearGradient>';
-    svg.appendChild(defs);
-    var trunkLimb = document.createElementNS(SVGNS, 'path');
-    trunkLimb.setAttribute('d', taperedPath(
-      { x: trunkX, y: 0 },
-      { x: trunkX + 3, y: H * 0.33 },
-      { x: trunkX - 3, y: H * 0.66 },
-      { x: trunkX, y: H },
-      TRUNK_TOP_W, TRUNK_BOT_W, 0.5));
-    trunkLimb.setAttribute('fill', 'url(#trunkGrad)');
-    trunkLimb.classList.add('wire-visible');
-    svg.appendChild(trunkLimb);
-
-    var groups = tree.querySelectorAll('.eco-sub-group');
-
-    groups.forEach(function(group) {
-      var side = group.getAttribute('data-side');
-      var lvl = parseInt(group.closest('.eco-level').getAttribute('data-level') || '1');
-      var bubbles = group.querySelectorAll('.eco-sub-bubble');
-      if (!bubbles.length) return;
-
-      // Measure visual boxes (layout position + organic offset).
-      var boxes = [];
-      bubbles.forEach(function(b) {
-        var p = posInTree(b);
-        boxes.push({
-          el: b,
-          left: p.x + (b._ox || 0),
-          top: p.y + (b._oy || 0),
-          w: b.offsetWidth,
-          h: b.offsetHeight
-        });
-      });
-
-      // 1) Trunk → first tile of the branch.
-      // Tangential bezier: leaves the trunk vertically (tangent to the trunk),
-      // arrives at the bubble edge horizontally (tangent to the bubble).
-      // Drawn as a tapered limb — thick where it forks off the trunk,
-      // thin where it reaches the tile — with small twigs and buds.
-      if (side !== 'center') {
-        var fb = boxes[0];
-        var connX = side === 'left' ? fb.left + fb.w + 2 : fb.left - 2;
-        var connY = fb.top + fb.h * 0.32;
-        var dir = side === 'left' ? 1 : -1; // from bubble edge toward the trunk
-        var drop = 60 + seeded(lvl * 11) * 50;
-        var forkY = connY - drop;
-        // Fork starts at the trunk's own diameter at that height,
-        // so branch and trunk read as one continuous piece of wood.
-        var forkW = trunkWidthAt(forkY, H);
-        addBranch(
-          { x: trunkX, y: forkY },
-          { x: trunkX, y: connY - drop * 0.4 },
-          { x: connX + dir * (40 + seeded(lvl * 3) * 30), y: connY },
-          { x: connX, y: connY },
-          forkW, 2.5, colorAt(forkY, H, 0.85), 'wire-' + fb.el.id, lvl * 11, 3, fb.el);
-      }
-
-      // 2) Vines linking each tile to the next within the group.
-      // Tangential at both ends; tapered like a young shoot, with one twig.
-      // Center groups skip this: the trunk itself runs through them.
-      if (side === 'center') return;
-      for (var i = 0; i < boxes.length - 1; i++) {
-        var a = boxes[i], b2 = boxes[i + 1];
-        var ax = a.left + a.w * 0.5, ay = a.top + a.h - 4;
-        var bx = b2.left + b2.w * 0.5, by = b2.top + 4;
-        var dy = by - ay;
-        var k1 = dy * (0.38 + seeded(i * 13 + lvl * 5) * 0.2);
-        var k2 = dy * (0.38 + seeded(i * 17 + lvl * 7) * 0.2);
-        addBranch(
-          { x: ax, y: ay },
-          { x: ax, y: ay + k1 },
-          { x: bx, y: by - k2 },
-          { x: bx, y: by },
-          8, 1.8, colorAt((ay + by) / 2, H, 0.75), 'link-' + b2.el.id, i * 13 + lvl * 5,
-          dy > 60 ? 1 : 0, b2.el);
-      }
-    });
-  }
-
-  var resizeTimer;
-  function debouncedDraw() {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(drawWires, 150);
-  }
-
-  applyOrganicLayout();
-  setTimeout(function() { applyOrganicLayout(); drawWires(); }, 300);
-  window.addEventListener('resize', debouncedDraw);
-  if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(function() { setTimeout(drawWires, 120); });
-  }
-})();
-
-// ════════════════════════════════════════
-// WASTE COUNTER — floating window, real-time
-// ════════════════════════════════════════
-(function() {
-  var el = document.getElementById('wasteBgNumber');
-  if (!el) return;
-  // EU: 450M hab x 17.6 kg/year = 7,920,000 tonnes/year
-  var tonnesPerYear = 7920000;
-  var tonnesPerMs = tonnesPerYear / (365.25 * 24 * 3600 * 1000);
-  var epoch = new Date(2020, 0, 1).getTime();
-
-  function update() {
-    var now = Date.now();
-    var tonnes = (now - epoch) * tonnesPerMs;
-    var whole = Math.floor(tonnes);
-    // 3 rolling decimals = kilogram precision, ticking in real time
-    var dec = String(Math.floor((tonnes % 1) * 1000));
-    while (dec.length < 3) dec = '0' + dec;
-    el.textContent = whole.toLocaleString('fr-FR') + ',' + dec;
-    requestAnimationFrame(update);
-  }
-  update();
-})();
-
-// ════════════════════════════════════════
-// NAV INTERACTIONS
-// ════════════════════════════════════════
-(function() {
-  document.getElementById('accountBtn').addEventListener('click', function(e) {
-    e.stopPropagation();
-    document.getElementById('accountMenu').classList.toggle('visible');
-    document.getElementById('langDropdown').classList.remove('open');
-  });
-  document.addEventListener('click', function() {
-    document.getElementById('accountMenu').classList.remove('visible');
-    document.getElementById('langDropdown').classList.remove('open');
-  });
-  document.getElementById('langDropdownBtn').addEventListener('click', function(e) {
-    e.stopPropagation();
-    document.getElementById('langDropdown').classList.toggle('open');
-    document.getElementById('accountMenu').classList.remove('visible');
-  });
-  document.querySelectorAll('.account-role.locked').forEach(function(el) {
-    el.addEventListener('click', function(e) { e.preventDefault(); });
-  });
-
-  // Logo click suction effect
-  var brand = document.querySelector('.nav-brand');
-  if (brand) {
-    brand.addEventListener('click', function(e) {
-      var href = brand.getAttribute('href') || 'index.html';
-      e.preventDefault();
-      document.body.style.transformOrigin = 'top center';
-      document.body.classList.add('page-sucking');
-      var navigated = false;
-      function go() { if (!navigated) { navigated = true; window.location.assign(href); } }
-      document.body.addEventListener('animationend', go);
-      setTimeout(go, 800);
-    });
-  }
+  }, { threshold:.4 });
+  io2.observe(el);
 })();
 </script>
-<script src="/js/sphere-bg.js"></script>
-<script src="js/nav-mindmap.js"></script>
+<script>
+// Maillage : génère des points-printers dans l'hexagone + villes + siège.
+(function(){
+  var svg = document.getElementById('hexsvg'); if(!svg) return;
+  var NS = 'http://www.w3.org/2000/svg';
+  var hex = [[200,30],[360,125],[360,315],[200,410],[40,315],[40,125]];
+  function inHex(x,y){
+    var inside=false;
+    for(var i=0,j=hex.length-1;i<hex.length;j=i++){
+      var xi=hex[i][0],yi=hex[i][1],xj=hex[j][0],yj=hex[j][1];
+      if(((yi>y)!=(yj>y)) && (x < (xj-xi)*(y-yi)/(yj-yi)+xi)) inside=!inside;
+    }
+    return inside;
+  }
+  var n=0, tries=0;
+  while(n<82 && tries<5000){
+    tries++;
+    var x=42+Math.random()*316, y=32+Math.random()*376;
+    if(!inHex(x,y)) continue;
+    var c=document.createElementNS(NS,'circle');
+    c.setAttribute('cx',x.toFixed(1)); c.setAttribute('cy',y.toFixed(1));
+    c.setAttribute('r',(1.5+Math.random()*1.7).toFixed(1));
+    c.setAttribute('class','pd');
+    c.style.transitionDelay=(0.2+Math.random()*1.4).toFixed(2)+'s';
+    svg.appendChild(c); n++;
+  }
+  var cities=[['Paris',208,150],['Lyon',250,255],['Marseille',258,345],['Lille',212,80],['Bordeaux',115,300],['Nantes',100,228],['Strasbourg',332,150],['Toulouse',165,348]];
+  cities.forEach(function(ci){
+    var c=document.createElementNS(NS,'circle'); c.setAttribute('cx',ci[1]); c.setAttribute('cy',ci[2]); c.setAttribute('r',3); c.setAttribute('class','city'); svg.appendChild(c);
+    var t=document.createElementNS(NS,'text'); t.setAttribute('x',ci[1]+6); t.setAttribute('y',ci[2]+3); t.setAttribute('class','clabel'); t.textContent=ci[0]; svg.appendChild(t);
+  });
+  var hq=document.createElementNS(NS,'circle'); hq.setAttribute('cx',216); hq.setAttribute('cy',164); hq.setAttribute('r',5); hq.setAttribute('class','pd hq'); svg.appendChild(hq);
+  var ht=document.createElementNS(NS,'text'); ht.setAttribute('x',222); ht.setAttribute('y',167); ht.setAttribute('class','clabel'); ht.setAttribute('style','fill:#e9b949'); ht.textContent='Viry-Châtillon (siège)'; svg.appendChild(ht);
+  var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ document.getElementById('hexwrap').classList.add('in'); io.disconnect(); } }); }, { threshold:.3 });
+  io.observe(document.getElementById('hexwrap'));
+})();
+</script>
+<script>
+// Maillage map: place printer dots on France map
+(function(){
+  var g = document.getElementById('mapDots');
+  if(!g) return;
+  // Cities: [x, y, count] - positions from department centroids (viewBox 105 18 568 567)
+  var cities = [
+    [400,155,120],[493,338,52],[520,485,50],[341,500,42],
+    [420,40,36],[271,404,26],[225,250,25],[592,457,25],
+    [590,160,16],[440,481,20],[223,189,16],[330,110,20],
+    [533,376,18],[567,491,17],[476,349,15],[327,256,14],
+    [428,348,14],[310,100,13],[496,238,13],[270,242,12],
+    [472,155,12],[568,136,12],[548,152,12],[393,214,12],
+    [283,140,11],[129,185,10],[400,546,10],[391,84,10],
+    [346,337,10],[568,257,10],[262,510,9],[316,299,9],
+    [240,333,8],[524,416,8],[623,552,5],[629,520,4],
+    [308,210,8],[237,495,7],[523,453,7],[595,220,7],
+    [440,28,7],[572,358,6],[166,243,6],[399,272,5],
+    [286,301,5],[175,230,5],[140,195,5],[185,168,4],
+    [296,512,4],[411,437,4],[311,432,4],[349,448,4],
+    [353,183,4],[588,205,4],[566,410,3],[385,470,3]
+  ];
+
+  var allDots = [];
+  cities.forEach(function(c){
+    var cx = c[0], cy = c[1], count = c[2];
+    var baseR = Math.min(2 + count * 0.06, 6);
+    var spread = Math.sqrt(count) * 5.5;
+    for(var i = 0; i < count; i++){
+      var angle = (i / count) * Math.PI * 2 + (i * 2.399);
+      var dist = Math.sqrt(i / count) * spread * (0.6 + Math.random() * 0.8);
+      var dx = cx + Math.cos(angle) * dist;
+      var dy = cy + Math.sin(angle) * dist;
+      var r = baseR * (0.7 + Math.random() * 0.6);
+      allDots.push({x: dx, y: dy, r: r, popR: r * 2.2, count: count});
+    }
+  });
+  allDots.sort(function(a, b){ return b.count - a.count; });
+  var html = '';
+  allDots.forEach(function(d){
+    html += '<circle cx="'+d.x.toFixed(1)+'" cy="'+d.y.toFixed(1)+'" r="0" fill="var(--red)" opacity="0" style="--r:'+d.r.toFixed(1)+';--pop-r:'+d.popR.toFixed(1)+'"/>';
+  });
+  g.innerHTML = html;
+  var totalDots = allDots.length;
+  var circles = g.querySelectorAll('circle');
+  var legend = document.getElementById('mapLegend');
+  var countEl = document.getElementById('mapDotCount');
+  var questionMark = document.getElementById('mapQuestion');
+  var mapTeaser = document.getElementById('mapTeaser');
+  var mapWrap = document.getElementById('maillageMapWrap');
+  var animated = false;
+
+  function startMapAnimation(){
+    if(animated) return;
+    animated = true;
+    questionMark.classList.add('gone');
+    mapTeaser.classList.add('gone');
+    var duration = 2800;
+    var step = duration / circles.length;
+    for(var i = 0; i < circles.length; i++){
+      (function(c, d){
+        setTimeout(function(){
+          c.style.animation = 'mapDotPop .5s cubic-bezier(.34,1.56,.64,1) forwards';
+        }, d);
+      })(circles[i], Math.round(i * step));
+    }
+    var countStart = Date.now();
+    var countInterval = setInterval(function(){
+      var elapsed = Date.now() - countStart;
+      var progress = Math.min(elapsed / duration, 1);
+      countEl.textContent = Math.round(progress * totalDots).toLocaleString('fr-FR');
+      if(progress >= 1) clearInterval(countInterval);
+    }, 30);
+    setTimeout(function(){ legend.classList.add('visible'); }, duration * 0.6);
+  }
+
+  mapWrap.style.cursor = 'pointer';
+  mapWrap.addEventListener('click', function(){
+    startMapAnimation();
+    mapWrap.style.cursor = 'default';
+  });
+})();
+</script>
+<script>
+// Colonne vertébrale organique : courbes tangentielles verticales, dégradé
+// rouge (problèmes, haut) -> vert (solutions, bas), nœuds, tracé au scroll.
+(function(){
+  var NS='http://www.w3.org/2000/svg';
+  var svg=document.createElementNS(NS,'svg');
+  svg.id='mmspine'; svg.setAttribute('preserveAspectRatio','none');
+  var defs=document.createElementNS(NS,'defs');
+  var grad=document.createElementNS(NS,'linearGradient');
+  grad.id='mmgrad'; grad.setAttribute('x1','0');grad.setAttribute('y1','0');grad.setAttribute('x2','0');grad.setAttribute('y2','1');
+  [['0','#C8102E'],['0.42','#C8102E'],['0.58','#B8963E'],['1','#2D8B5E']].forEach(function(s){
+    var st=document.createElementNS(NS,'stop'); st.setAttribute('offset',s[0]); st.setAttribute('stop-color',s[1]); grad.appendChild(st);
+  });
+  defs.appendChild(grad); svg.appendChild(defs);
+  var path=document.createElementNS(NS,'path');
+  path.setAttribute('fill','none'); path.setAttribute('stroke','url(#mmgrad)');
+  path.setAttribute('stroke-width','3'); path.setAttribute('stroke-linecap','round'); path.setAttribute('opacity','.6');
+  svg.appendChild(path);
+  var nodesG=document.createElementNS(NS,'g'); svg.appendChild(nodesG);
+  document.body.insertBefore(svg, document.body.firstChild);
+
+  function build(){
+    var W=window.innerWidth, H=document.body.scrollHeight;
+    var amp=Math.min(W*0.16,160), cx=W*0.5;
+    svg.setAttribute('width',W); svg.setAttribute('height',H); svg.setAttribute('viewBox','0 0 '+W+' '+H);
+    svg.style.height=H+'px';
+    var sects=[].slice.call(document.querySelectorAll('.sect'));
+    var pts=[[cx,0]];
+    sects.forEach(function(s,i){ pts.push([cx+(i%2?1:-1)*amp, s.offsetTop+s.offsetHeight/2]); });
+    pts.push([cx,H]);
+    var d='M'+pts[0][0]+' '+pts[0][1];
+    for(var i=0;i<pts.length-1;i++){
+      var p0=pts[i-1]||pts[i], p1=pts[i], p2=pts[i+1], p3=pts[i+2]||pts[i+1];
+      var c1x=p1[0]+(p2[0]-p0[0])/6, c1y=p1[1]+(p2[1]-p0[1])/6;
+      var c2x=p2[0]-(p3[0]-p1[0])/6, c2y=p2[1]-(p3[1]-p1[1])/6;
+      d+=' C'+c1x.toFixed(1)+' '+c1y.toFixed(1)+' '+c2x.toFixed(1)+' '+c2y.toFixed(1)+' '+p2[0].toFixed(1)+' '+p2[1].toFixed(1);
+    }
+    path.setAttribute('d',d);
+    var len=path.getTotalLength();
+    path.dataset.len=len; path.style.strokeDasharray=len;
+    nodesG.innerHTML='';
+    sects.forEach(function(s,i){
+      var c=document.createElementNS(NS,'circle');
+      c.setAttribute('cx',cx+(i%2?1:-1)*amp); c.setAttribute('cy',s.offsetTop+s.offsetHeight/2);
+      c.setAttribute('r','5'); c.setAttribute('fill','#14110d'); c.setAttribute('stroke','url(#mmgrad)'); c.setAttribute('stroke-width','2');
+      nodesG.appendChild(c);
+    });
+    update();
+  }
+  function update(){
+    var len=parseFloat(path.dataset.len||0);
+    var max=document.body.scrollHeight-window.innerHeight;
+    var p=max>0?Math.min(window.scrollY/max,1):1;
+    path.style.strokeDashoffset=len*(1-Math.min(p+0.1,1));
+  }
+  window.addEventListener('scroll',update,{passive:true});
+  window.addEventListener('resize',function(){ clearTimeout(window._mmt); window._mmt=setTimeout(build,150); });
+  window.addEventListener('load',build);
+  setTimeout(build,500);
+})();
+</script>
 <script src="js/account-menu.js"></script>
 </body>
 </html>
