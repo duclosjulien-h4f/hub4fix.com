@@ -103,6 +103,11 @@ p.body{font-size:clamp(1rem,2vw,1.25rem);font-weight:300;color:var(--earth);max-
 .card .ic{width:40px;height:40px;color:var(--red);margin-bottom:.9rem}
 .card h4{font-family:var(--serif);font-size:1.35rem;font-weight:600;margin-bottom:.5rem}
 .card p{font-size:.9rem;color:var(--earth)}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin-top:2.6rem}
+.duo .card{padding:1.9rem 1.8rem}
+.duo .tag{font-family:var(--mono);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;margin-bottom:.8rem}
+.duo h4{font-family:var(--serif);font-size:1.5rem;font-weight:600;margin-bottom:.6rem}
+.duo p{font-size:1rem;line-height:1.65}
 
 /* economics bars */
 .thirds{display:flex;gap:.5rem;margin:2rem 0 .8rem;max-width:640px}
@@ -149,7 +154,7 @@ footer a{color:var(--gold);text-decoration:none}
 @media(max-width:760px){
   nav{padding:.9rem 1.2rem}
   .sect{padding:5rem 1.3rem}
-  .flow,.cards3,.tl{grid-template-columns:1fr}
+  .flow,.cards3,.tl,.duo{grid-template-columns:1fr}
   .stat-row{gap:1.8rem}
   .thirds{flex-direction:column}
 }
@@ -275,6 +280,28 @@ p.body,.stat .cap,.third .lab,.tl-item .desc,.step p,.card p{color:#C9C3B8}
       <span><b>30 %</b> Physique — pièce imprimée &amp; livrée</span>
       <span><b>5 %</b> Résilient — le client s'équipe</span>
     </div>
+  </div>
+</section>
+
+<!-- 5b. DEUX CHEMINS -->
+<section class="sect">
+  <div class="wrap">
+    <div class="eyebrow reveal">Quel que soit votre profil</div>
+    <h2 class="title reveal d1">Deux chemins.<br><em>Zéro friction.</em></h2>
+    <p class="body reveal d2">Que vous ayez une imprimante 3D ou pas la moindre envie d'en posséder une, il existe une réponse à votre panne.</p>
+    <div class="duo reveal d3">
+      <div class="card" style="border-top:3px solid var(--green)">
+        <div class="tag" style="color:var(--green)">Achat numérique — le maker</div>
+        <h4>« J'ai une imprimante. Je veux le fichier. »</h4>
+        <p>Vous achetez le G-code, vous le déposez sur votre machine, vous lancez. <b style="color:var(--ivory)">Drop &amp; Print</b> : aucun slicing, aucun réglage, aucune expertise. La pièce sort chez vous, dans l'heure — au prix du fichier seul.</p>
+      </div>
+      <div class="card" style="border-top:3px solid var(--gold)">
+        <div class="tag" style="color:var(--gold)">Achat physique — le particulier</div>
+        <h4>« Je veux juste que ça marche. »</h4>
+        <p>Vous commandez la pièce finie. <b style="color:var(--ivory)">Paiement centralisé par Hub⁴Fix</b>, impression et livraison confiées au printer le plus proche. Zéro logiciel, zéro machine à acheter — une solution rapide et écologique, livrée à votre porte.</p>
+      </div>
+    </div>
+    <p class="reveal d4" style="text-align:center;margin-top:2rem;color:#C9C3B8;font-size:1.08rem">Maker aguerri ou simple particulier pressé — <b style="color:var(--ivory)">personne ne reste sans solution.</b></p>
   </div>
 </section>
 
