@@ -100,7 +100,7 @@ async function googleToken(env) {
   const header = { alg: 'RS256', typ: 'JWT' };
   const claim = {
     iss: env.GOOGLE_SA_EMAIL,
-    scope: 'https://www.googleapis.com/auth/spreadsheets.readonly',
+    scope: 'https://www.googleapis.com/auth/spreadsheets',
     aud: 'https://oauth2.googleapis.com/token', iat: now, exp: now + 3600,
   };
   const unsigned = b64urlStr(JSON.stringify(header)) + '.' + b64urlStr(JSON.stringify(claim));
@@ -136,6 +136,196 @@ function countNew(rows, seen) {
   if (!rows) return 0;
   if (!seen) return rows.length;
   return rows.filter((r) => (r.date || '') > seen).length;
+}
+
+// ==================== BASE CENTRALE « Pièces » (Google Sheet + R2) ====================
+// Le Sheet "Pieces" est la source de vérité (une ligne par pièce, clé = id taxonomique).
+// Les images vivent dans R2 : orig/<id> (privé) et h4f/<id> (visuel public).
+const PIECES_TAB_DEFAULT = 'Pieces';
+const PIECE_COLS = [
+  'id', 'group', 'brand', 'range', 'model', 'piece',
+  'name', 'machine', 'category',
+  'demand', 'alerts', 'units', 'age', 'addedDate', 'modeled',
+  'description', 'price', 'dimensions', 'weight', 'material', 'printTime', 'compat', 'ref',
+  'model3d',
+  'status', 'sourceUrl', 'sha256', 'dhash', 'validatedBy', 'validatedAt',
+];
+const PIECE_PUBLIC_COLS = [
+  'id', 'group', 'brand', 'range', 'model', 'piece', 'name', 'machine', 'category',
+  'demand', 'alerts', 'units', 'age', 'addedDate', 'modeled',
+  'description', 'price', 'dimensions', 'weight', 'material', 'printTime', 'compat', 'ref',
+  'model3d',
+];
+function truthy(v) { return /^(true|1|oui|yes|x)$/i.test(String(v == null ? '' : v).trim()); }
+
+function json(obj, status, extraHeaders) {
+  return new Response(JSON.stringify(obj), {
+    status: status || 200,
+    headers: Object.assign({ 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }, extraHeaders || {}),
+  });
+}
+function piecesSheetId(env) { return env.PIECES_SHEET_ID || env.SHEET_ID; }
+function piecesTab(env) { return env.PIECES_TAB || PIECES_TAB_DEFAULT; }
+
+async function sheetsValues(env, tab) {
+  const token = await googleToken(env);
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${piecesSheetId(env)}/values/${encodeURIComponent(tab)}`;
+  const r = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+  if (!r.ok) throw new Error('sheets read ' + r.status);
+  const j = await r.json();
+  return j.values || [];
+}
+// Écrit une plage (PUT values.update) ou ajoute une ligne (append).
+async function sheetsWrite(env, method, range, values) {
+  const token = await googleToken(env);
+  const sid = piecesSheetId(env);
+  let url = `https://sheets.googleapis.com/v4/spreadsheets/${sid}/values/${encodeURIComponent(range)}`;
+  url += method === 'append'
+    ? ':append?valueInputOption=RAW&insertDataOption=INSERT_ROWS'
+    : '?valueInputOption=RAW';
+  const r = await fetch(url, {
+    method: method === 'append' ? 'POST' : 'PUT',
+    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ values }),
+  });
+  if (!r.ok) throw new Error('sheets write ' + r.status);
+  return true;
+}
+
+async function loadPieces(env) {
+  if (!piecesSheetId(env) || !env.GOOGLE_SA_EMAIL || !env.GOOGLE_SA_KEY) return { error: 'config' };
+  try {
+    const v = await sheetsValues(env, piecesTab(env));
+    const header = v.length ? v[0] : PIECE_COLS;
+    const rows = v.slice(1).map((a) => { const o = {}; header.forEach((h, i) => (o[h] = a[i] != null ? a[i] : '')); return o; });
+    return { rows, header, raw: v };
+  } catch { return { error: 'api' }; }
+}
+function countToValidate(rows) {
+  return rows ? rows.filter((r) => (r.status || '') === 'to-validate').length : 0;
+}
+
+// Upsert par id. Les champs vides entrants ne SUPPRIMENT pas une valeur existante
+// (permet de compléter la fiche technique à la main dans le Sheet sans être écrasé).
+async function upsertPiece(env, piece) {
+  const tab = piecesTab(env);
+  let v = [];
+  try { v = await sheetsValues(env, tab); } catch { v = []; }
+  if (!v.length) { await sheetsWrite(env, 'append', tab, [PIECE_COLS]); v = [PIECE_COLS]; }
+  const header = v[0];
+  const idIdx = header.indexOf('id');
+  let found = -1;
+  for (let i = 1; i < v.length; i++) { if ((v[i][idIdx] || '') === piece.id) { found = i; break; } }
+  if (found >= 0) {
+    const existing = v[found];
+    const merged = header.map((h, i) => {
+      const inc = piece[h];
+      return (inc == null || inc === '') ? (existing[i] != null ? existing[i] : '') : String(inc);
+    });
+    await sheetsWrite(env, 'update', `${tab}!A${found + 1}`, [merged]);
+  } else {
+    await sheetsWrite(env, 'append', tab, [header.map((h) => (piece[h] != null ? String(piece[h]) : ''))]);
+  }
+  return { ok: true };
+}
+// Patch ciblé (publish / reject) : ne touche que les colonnes de `patch`.
+async function patchPiece(env, id, patch) {
+  const tab = piecesTab(env);
+  const v = await sheetsValues(env, tab);
+  if (!v.length) return { ok: false };
+  const header = v[0];
+  const idIdx = header.indexOf('id');
+  let found = -1;
+  for (let i = 1; i < v.length; i++) { if ((v[i][idIdx] || '') === id) { found = i; break; } }
+  if (found < 0) return { ok: false };
+  const row = header.map((h, i) => (patch[h] != null ? String(patch[h]) : (v[found][i] != null ? v[found][i] : '')));
+  await sheetsWrite(env, 'update', `${tab}!A${found + 1}`, [row]);
+  return { ok: true };
+}
+
+// ---- R2 (stockage images privé) ----
+async function r2Put(env, key, buf, ct) {
+  if (!env.PIECES_R2) return false;
+  await env.PIECES_R2.put(key, buf, { httpMetadata: { contentType: ct || 'application/octet-stream' } });
+  return true;
+}
+async function serveR2(env, key) {
+  if (!env.PIECES_R2) return json({ error: 'r2-unbound' }, 503);
+  const obj = await env.PIECES_R2.get(key);
+  if (!obj) return new Response('Not found', { status: 404 });
+  const ct = (obj.httpMetadata && obj.httpMetadata.contentType) || 'image/png';
+  return new Response(obj.body, { headers: { 'Content-Type': ct, 'Cache-Control': 'private, max-age=300' } });
+}
+
+// POST /api/pieces — le pipeline pousse méta + original + visuel (auth token).
+async function apiPiecesPost(request, env) {
+  const token = (request.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
+  if (!env.PIPELINE_TOKEN || token !== env.PIPELINE_TOKEN) return json({ error: 'unauthorized' }, 401);
+  let form;
+  try { form = await request.formData(); } catch { return json({ error: 'bad-multipart' }, 400); }
+  let meta;
+  try { meta = JSON.parse(form.get('meta') || '{}'); } catch { return json({ error: 'bad-meta' }, 400); }
+  if (!meta.id) return json({ error: 'missing-id' }, 400);
+  const out = { id: meta.id, r2: false, sheet: false };
+  try {
+    const orig = form.get('original');
+    const visual = form.get('visual');
+    if (orig && orig.arrayBuffer) await r2Put(env, 'orig/' + meta.id, await orig.arrayBuffer(), orig.type || 'image/png');
+    if (visual && visual.arrayBuffer) await r2Put(env, 'h4f/' + meta.id, await visual.arrayBuffer(), visual.type || 'image/png');
+    out.r2 = !!env.PIECES_R2;
+  } catch (e) { out.r2error = String(e); }
+  try {
+    await upsertPiece(env, Object.assign({}, meta, { status: 'to-validate' }));
+    out.sheet = true;
+  } catch (e) { out.sheeterror = String(e); }
+  await audit(env, 'pipeline', 'piece-push', meta.id);
+  return json(out, 200);
+}
+
+// POST /api/wishlist — un visiteur s'inscrit pour être alerté sur une pièce non
+// encore disponible. Enregistre le lead + fait monter le signal de demande (alerts).
+// Requête simple (form-urlencoded) => pas de préflight CORS.
+async function apiWishlistPost(request, env) {
+  let form;
+  try { form = await request.formData(); } catch { return json({ error: 'bad-form' }, 400, { 'Access-Control-Allow-Origin': '*' }); }
+  const id = (form.get('id') || '').toString().trim();
+  const email = (form.get('email') || '').toString().trim();
+  const cors = { 'Access-Control-Allow-Origin': '*' };
+  if (!id || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return json({ error: 'invalid' }, 400, cors);
+  try {
+    // lead -> onglet Wishlist (création de l'en-tête si absent)
+    const tab = env.WISHLIST_TAB || 'Wishlist';
+    let v = [];
+    try { v = await sheetsValues(env, tab); } catch { v = []; }
+    if (!v.length) await sheetsWrite(env, 'append', tab, [['date', 'id', 'email']]);
+    await sheetsWrite(env, 'append', tab, [[nowIso(), id, email]]);
+    // signal de demande : +1 alerte sur la pièce
+    const pd = await loadPieces(env);
+    if (!pd.error) {
+      const row = pd.rows.find((r) => r.id === id);
+      if (row) await patchPiece(env, id, { alerts: (parseInt(row.alerts, 10) || 0) + 1 });
+    }
+  } catch (e) {
+    return json({ error: 'store', detail: String(e) }, 200, cors); // on ne bloque pas le visiteur
+  }
+  return json({ ok: true }, 200, cors);
+}
+
+// GET /api/pieces.json — feed public (pièces publiées, colonnes sûres uniquement).
+async function apiPiecesJson(env) {
+  const data = await loadPieces(env);
+  const cors = { 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'public, max-age=120' };
+  if (data.error) return json({ products: [] }, 200, cors);
+  const products = data.rows
+    .filter((r) => (r.status || '') === 'published')
+    .map((r) => {
+      const o = {};
+      PIECE_PUBLIC_COLS.forEach((k) => (o[k] = r[k]));
+      o.modeled = truthy(r.modeled);
+      o.image = '/img/h4f/' + r.id;
+      return o;
+    });
+  return json({ products }, 200, cors);
 }
 
 // ---- base D1 : admins / rôles / audit ----
@@ -238,6 +428,7 @@ function htmlResponse(body, status) {
 const NAV = [
   { path: '/admin', label: 'Tableau de bord', roles: ['admin', 'sous-admin', 'comptabilite'] },
   { path: '/admin/inscriptions', label: 'Inscriptions', roles: ['admin', 'sous-admin'] },
+  { path: '/admin/shadowlist', label: 'Shadow List', roles: ['admin', 'sous-admin'] },
   { path: '/admin/modeles', label: 'Modèles 3D', roles: ['admin', 'sous-admin'] },
   { path: '/admin/admins', label: 'Administrateurs', roles: ['admin'] },
   { path: '/admin/appareils', label: 'Appareils', roles: ['admin'] },
@@ -297,11 +488,13 @@ tr.is-new td{background:rgba(45,139,94,.05)}
 }
 `;
 
-function shell(activePath, sess, content, newCount) {
+function shell(activePath, sess, content, newCount, toValidate) {
   const role = sess.role || 'admin';
   const items = NAV.filter((n) => n.roles.includes(role))
     .map((n) => {
-      const badge = (n.path === '/admin/inscriptions' && newCount > 0) ? `<span class="pill">${newCount}</span>` : '';
+      let badge = '';
+      if (n.path === '/admin/inscriptions' && newCount > 0) badge = `<span class="pill">${newCount}</span>`;
+      else if (n.path === '/admin/shadowlist' && toValidate > 0) badge = `<span class="pill">${toValidate}</span>`;
       return `<a href="${n.path}"${n.path === activePath ? ' class="active"' : ''}><span>${esc(n.label)}</span>${badge}</a>`;
     }).join('');
   return htmlResponse(
@@ -326,10 +519,14 @@ function fmtDate(iso) {
   return esc(String(iso).replace('T', ' ').slice(0, 16));
 }
 
-function viewDashboard(sess, data, seen) {
+function viewDashboard(sess, data, seen, toValidate) {
+  const tvBanner = toValidate > 0
+    ? '<div class="banner" style="background:rgba(200,16,46,.08);border-color:var(--red);color:#9b1c1c">' +
+      toValidate + ' pièce' + (toValidate > 1 ? 's' : '') + ' H4F en attente de validation — <a href="/admin/shadowlist">les voir</a>.</div>'
+    : '';
   if (data.error) {
     return '<h1 class="page">Tableau de bord</h1><p class="sub">Bonjour ' + esc(sess.name) + '.</p>' +
-      dataError(data.error);
+      tvBanner + dataError(data.error);
   }
   const rows = data.rows;
   const nb = (t) => rows.filter((r) => (r.type || '') === t).length;
@@ -341,7 +538,7 @@ function viewDashboard(sess, data, seen) {
       '<div class="card' + (nouveau > 0 ? ' new' : '') + '"><div class="k">Nouvelles</div><div class="v">' + nouveau + '</div></div>' +
       '<div class="card"><div class="k">Printers</div><div class="v">' + nb('printer') + '</div></div>' +
       '<div class="card"><div class="k">Modélisateurs</div><div class="v">' + nb('modelisateur') + '</div></div>' +
-    '</div>' +
+    '</div>' + tvBanner +
     (nouveau > 0
       ? '<div class="banner">' + nouveau + ' nouvelle' + (nouveau > 1 ? 's' : '') + ' inscription' + (nouveau > 1 ? 's' : '') + ' depuis ta dernière visite — <a href="/admin/inscriptions">les voir</a>.</div>'
       : '<div class="soon">Aucune nouvelle inscription depuis ta dernière visite.</div>');
@@ -464,6 +661,74 @@ function viewDevices(devices, sess, errMsg) {
     (errMsg ? '<div class="err">' + esc(errMsg) + '</div>' : '') + note +
     '<table>' + head + body + '</table>';
 }
+function statusTag(s) {
+  const map = {
+    'to-validate': ['À valider', 'var(--red)', '#fff'],
+    'published': ['Publié', 'var(--green)', '#fff'],
+    'pending': ['En attente', 'var(--cream)', 'var(--earth)'],
+  };
+  const m = map[s] || [s || '—', 'var(--cream)', 'var(--earth)'];
+  return `<span class="tag" style="background:${m[1]};color:${m[2]}">${esc(m[0])}</span>`;
+}
+
+function viewShadowList(data) {
+  const head = '<h1 class="page">Shadow List</h1>' +
+    '<p class="sub">Comparer l\'original (privé) et la version Hub⁴Fix, puis valider. ' +
+    'Rien n\'apparaît côté client tant que tu n\'as pas cliqué « Publier ».</p>';
+  if (data.error) return head + dataError(data.error);
+  const rows = (data.rows || []).slice();
+  if (!rows.length) {
+    return head + '<div class="soon">Aucune pièce dans la base pour le moment. ' +
+      'Le pipeline les ajoute automatiquement après génération (statut <b>à valider</b>).</div>';
+  }
+  const order = { 'to-validate': 0, 'published': 1 };
+  rows.sort((a, b) => (order[a.status] == null ? 2 : order[a.status]) - (order[b.status] == null ? 2 : order[b.status]));
+
+  const exportBtn = '<a href="/admin/pieces.csv" style="display:inline-block;margin-bottom:1.2rem;font-size:.82rem;font-weight:600;color:var(--earth);text-decoration:none;border:1px solid var(--line);border-radius:7px;padding:.45rem .9rem">⤓ Exporter la base en tableur (CSV)</a>';
+
+  const box = 'flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--cream)';
+  const lbl = 'font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:var(--earth);font-weight:600;padding:.4rem .7rem;background:#fff;border-bottom:1px solid var(--line)';
+  const img = 'display:block;width:100%;height:210px;object-fit:contain;background:#faf8f5';
+
+  const cards = rows.map((r) => {
+    const id = String(r.id || '');
+    const enc = id.split('/').map(encodeURIComponent).join('/');
+    const isTV = (r.status || '') === 'to-validate';
+    const isPub = (r.status || '') === 'published';
+    let actions = '';
+    if (isTV || isPub) {
+      const btn = 'font-family:inherit;font-size:.78rem;font-weight:600;border:none;border-radius:7px;padding:.55rem 1.1rem;cursor:pointer';
+      const publish = '<button name="action" value="publish" style="' + btn + ';background:var(--green);color:#fff">Publier</button>';
+      const reject = '<button name="action" value="reject" style="' + btn + ';background:#fff;color:var(--red);border:1px solid #f3c2c2">Rejeter</button>';
+      actions = '<form method="post" action="/admin/shadowlist" style="display:flex;gap:.6rem;margin-top:.9rem">' +
+        '<input type="hidden" name="id" value="' + esc(id) + '">' +
+        (isTV ? publish + reject : reject) + '</form>';
+    }
+    return '<div class="card" style="padding:1.1rem 1.2rem">' +
+      '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:1rem;margin-bottom:.8rem">' +
+        '<div><div style="font-weight:600">' + esc(r.name || id) + '</div>' +
+        '<div class="muted" style="font-size:.82rem">' + esc(r.machine || '') + '</div></div>' +
+        statusTag(r.status) + '</div>' +
+      '<div style="display:flex;gap:.9rem">' +
+        '<div style="' + box + '"><div style="' + lbl + '">Original (privé)</div>' +
+          '<img style="' + img + '" src="/img/orig/' + enc + '" alt="original" ' +
+          'onerror="this.style.display=\'none\';this.insertAdjacentHTML(\'afterend\',\'<div style=&quot;padding:2rem;text-align:center;color:#7A7268;font-size:.8rem&quot;>indisponible</div>\')"></div>' +
+        '<div style="' + box + '"><div style="' + lbl + '">Version Hub⁴Fix</div>' +
+          '<img style="' + img + '" src="/img/h4f/' + enc + '" alt="version H4F" ' +
+          'onerror="this.style.display=\'none\';this.insertAdjacentHTML(\'afterend\',\'<div style=&quot;padding:2rem;text-align:center;color:#7A7268;font-size:.8rem&quot;>indisponible</div>\')"></div>' +
+      '</div>' + actions + '</div>';
+  }).join('');
+
+  return head + exportBtn + '<div style="display:grid;gap:1.2rem">' + cards + '</div>';
+}
+
+function piecesToCsv(rows) {
+  const q = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+  const lines = [PIECE_COLS.join(',')];
+  rows.forEach((r) => lines.push(PIECE_COLS.map((c) => q(r[c])).join(',')));
+  return lines.join('\r\n');
+}
+
 const SECTIONS = {
   '/admin/modeles': () => viewModeles(),
   '/admin/comptabilite': () => viewSoon('Comptabilité', 'Paiements et reversements.',
@@ -586,6 +851,12 @@ export default {
       return htmlResponse('<!doctype html><meta charset=utf-8><div style="font-family:sans-serif;text-align:center;margin-top:4rem">Lien invalide.</div>', 400);
     }
 
+    // 3 ter) API publique « Pièces » (pas de session : token pipeline ou lecture publique)
+    if (path === '/api/pieces' && request.method === 'POST') return apiPiecesPost(request, env);
+    if (path === '/api/wishlist' && request.method === 'POST') return apiWishlistPost(request, env);
+    if (path === '/api/pieces.json') return apiPiecesJson(env);
+    if (path.startsWith('/img/h4f/')) return serveR2(env, 'h4f/' + decodeURIComponent(path.slice('/img/h4f/'.length)));
+
     // 4) Zone protégée
     const sess = await readToken(env.SESSION_SECRET, getCookie(request, 'h4f_session'));
     if (!sess) {
@@ -600,6 +871,38 @@ export default {
     }
 
     const seen = getCookie(request, 'h4f_seen');
+
+    // Image originale (privée) — réservée aux admins connectés (pas de cache Sheet).
+    if (path.startsWith('/img/orig/')) return serveR2(env, 'orig/' + decodeURIComponent(path.slice('/img/orig/'.length)));
+
+    // Base « Pièces » chargée une fois : sert le compteur "à valider" (badge + bandeau,
+    // visibles sur toutes les sections) et la section Shadow List.
+    const pdata = await loadPieces(env);
+    const toValidate = pdata.error ? 0 : countToValidate(pdata.rows);
+
+    // Shadow List : validation (POST publish/reject) puis affichage (GET).
+    if (request.method === 'POST' && path === '/admin/shadowlist') {
+      const form = await request.formData();
+      const id = (form.get('id') || '').toString();
+      const action = (form.get('action') || '').toString();
+      if (id && action === 'publish') {
+        await patchPiece(env, id, { status: 'published', validatedBy: sess.email, validatedAt: nowIso() });
+        await audit(env, sess.email, 'piece-publish', id);
+      } else if (id && action === 'reject') {
+        await patchPiece(env, id, { status: 'pending', validatedBy: sess.email, validatedAt: nowIso() });
+        await audit(env, sess.email, 'piece-reject', id);
+      }
+      return new Response(null, { status: 302, headers: { Location: '/admin/shadowlist' } });
+    }
+    if (path === '/admin/shadowlist') {
+      return shell('/admin/shadowlist', sess, viewShadowList(pdata), 0, toValidate);
+    }
+    if (path === '/admin/pieces.csv') {
+      const csv = pdata.error ? '' : piecesToCsv(pdata.rows);
+      return new Response('﻿' + csv, {
+        headers: { 'Content-Type': 'text/csv; charset=utf-8', 'Content-Disposition': 'attachment; filename="hub4fix-pieces.csv"', 'Cache-Control': 'no-store' },
+      });
+    }
 
     // POST : changement de rôle (réservé au rôle admin)
     if (request.method === 'POST' && path === '/admin/admins') {
@@ -616,7 +919,7 @@ export default {
       const admins = await listAdmins(env);
       const data = await loadInscriptions(env);
       const newCount = data.error ? 0 : countNew(data.rows, seen);
-      return shell('/admin/admins', sess, viewAdmins(admins, sess), newCount);
+      return shell('/admin/admins', sess, viewAdmins(admins, sess), newCount, toValidate);
     }
 
     // Appareils : approbation / révocation (POST réservé admin), liste (GET)
@@ -634,21 +937,21 @@ export default {
       const devices = await listDevices(env);
       const data = await loadInscriptions(env);
       const newCount = data.error ? 0 : countNew(data.rows, seen);
-      return shell('/admin/appareils', sess, viewDevices(devices, sess, url.searchParams.get('e')), newCount);
+      return shell('/admin/appareils', sess, viewDevices(devices, sess, url.searchParams.get('e')), newCount, toValidate);
     }
 
     // Tableau de bord
     if (path === '/' || path === '/admin') {
       const data = await loadInscriptions(env);
       const newCount = data.error ? 0 : countNew(data.rows, seen);
-      return shell('/admin', sess, viewDashboard(sess, data, seen), newCount);
+      return shell('/admin', sess, viewDashboard(sess, data, seen, toValidate), newCount, toValidate);
     }
 
     // Inscriptions : marque comme "vues" (met à jour le repère) après affichage
     if (path === '/admin/inscriptions') {
       const data = await loadInscriptions(env);
       data.seen = seen;
-      const resp = shell('/admin/inscriptions', sess, viewInscriptions(data), 0);
+      const resp = shell('/admin/inscriptions', sess, viewInscriptions(data), 0, toValidate);
       // après consultation, on déplace le repère "dernière visite" à maintenant
       resp.headers.append('Set-Cookie', setCookie('h4f_seen', new Date().toISOString(), SEEN_TTL));
       return resp;
@@ -657,7 +960,7 @@ export default {
     if (SECTIONS[path]) {
       const data = await loadInscriptions(env);
       const newCount = data.error ? 0 : countNew(data.rows, seen);
-      return shell(path, sess, SECTIONS[path](), newCount);
+      return shell(path, sess, SECTIONS[path](), newCount, toValidate);
     }
 
     return new Response(null, { status: 302, headers: { Location: '/admin' } });

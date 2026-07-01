@@ -91,6 +91,26 @@ nav{position:sticky;top:0;z-index:100;padding:1rem 4rem;display:flex;justify-con
 .product-photo{background:var(--warm-white);border:1px solid var(--cream);border-radius:3px;overflow:visible;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;perspective:800px;position:relative;z-index:1}
 .product-photo img{width:100%;height:100%;object-fit:cover;border-radius:3px;transition:transform .5s cubic-bezier(.25,.46,.45,.94),box-shadow .5s ease;transform-origin:center center;will-change:transform}
 .product-photo:hover img{transform:scale(1.12) translateZ(40px);box-shadow:0 24px 60px rgba(0,0,0,.18),0 8px 20px rgba(0,0,0,.1);border-radius:4px}
+.product-photo img.img-missing{display:none}
+.photo-missing-note{display:none;position:absolute;inset:0;align-items:center;justify-content:center;text-align:center;padding:2rem;color:var(--stone,#A89F91);font-size:.85rem;font-style:italic}
+.product-photo img.img-missing ~ .photo-missing-note{display:flex}
+.product-additive-note{margin-top:1rem;font-size:.78rem;font-style:italic;color:var(--stone,#A89F91);line-height:1.5;border-left:2px solid var(--cream,#EDE6DC);padding-left:.8rem}
+/* Pièce pas encore modélisée : pas de fichier -> pas d'achat/estimation, prix N/C */
+body[data-modeled="true"] .rt-banner{display:none}
+body[data-modeled="false"] .flux-section{display:none}
+/* CTA wishlist : conversion des pièces non disponibles (alerte + signal de demande) */
+.wishlist-cta{display:none;margin-top:1rem;padding:1.2rem 1.4rem;background:var(--gold-pale);border:1px solid rgba(184,150,62,.25);border-radius:3px}
+body[data-modeled="false"] .wishlist-cta{display:block}
+.wishlist-cta-text strong{display:block;font-family:var(--font-serif);font-size:1.05rem;color:var(--night);margin-bottom:.2rem}
+.wishlist-cta-text span{font-size:.82rem;color:var(--earth);line-height:1.5}
+.wishlist-form{display:flex;gap:.6rem;margin-top:.9rem;flex-wrap:wrap}
+.wishlist-form input{flex:1;min-width:170px;padding:.6rem .8rem;font-family:var(--font-sans);font-size:.88rem;color:var(--charcoal);background:#fff;border:1px solid var(--sand);border-radius:3px;outline:none}
+.wishlist-form input:focus{border-color:var(--gold)}
+.wishlist-form button{padding:.6rem 1.3rem;font-family:var(--font-sans);font-size:.75rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:var(--red);color:#fff;border:none;border-radius:3px;cursor:pointer;transition:background .2s}
+.wishlist-form button:hover{background:#A00D24}
+.wishlist-done{display:none;margin-top:.8rem;font-size:.85rem;font-weight:600;color:var(--green)}
+.wishlist-cta.sent .wishlist-form{display:none}
+.wishlist-cta.sent .wishlist-done{display:block}
 .product-info{padding-top:1rem}
 .product-tag{display:inline-flex;align-items:center;gap:.4rem;font-size:.65rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--green);margin-bottom:1rem}
 body[data-lang="zh"] .product-tag,body[data-lang="hi"] .product-tag{text-transform:none;letter-spacing:.04em}
@@ -533,6 +553,7 @@ body[data-lang="zh"] .roi-result-label,body[data-lang="hi"] .roi-result-label{te
 .section-watermark::before{content:attr(data-watermark);position:absolute;font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,6vw,5rem);font-weight:300;font-style:italic;color:rgba(180,160,130,.07);white-space:nowrap;pointer-events:none;z-index:0;top:50%;left:50%;transform:translate(-50%,-50%);width:max-content}
 .section-watermark>*{position:relative;z-index:1}
 </style>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
 </head>
 <body data-lang="fr">
 
@@ -623,7 +644,9 @@ body[data-lang="zh"] .roi-result-label,body[data-lang="hi"] .roi-result-label{te
 <!-- HEADER PIÈCE -->
 <section class="product-header section-watermark" data-watermark="Dématérialiser le stock, rematérialiser l'objet.">
   <div class="product-photo">
-    <img id="productPhoto" src="" alt="">
+    <img id="productPhoto" src="" alt="" onerror="this.classList.add('img-missing');this.removeAttribute('src')">
+    <model-viewer id="product3d" style="display:none;width:100%;height:100%;background:transparent;--progress-bar-color:var(--red,#C8102E)" camera-controls disable-zoom auto-rotate interaction-prompt="none" ar="false"></model-viewer>
+    <div class="photo-missing-note" id="photoMissing" data-i18n="visual_pending">Visuel Hub⁴Fix en préparation</div>
   </div>
   <div class="product-info">
     <div class="product-tag" data-i18n="tag">Pièce active · Catalogue Hub⁴Fix</div>
@@ -658,12 +681,26 @@ body[data-lang="zh"] .roi-result-label,body[data-lang="hi"] .roi-result-label{te
       </div>
     </div>
 
+    <p class="product-additive-note" data-i18n="additive_note">Ces pièces sont conçues et pensées pour la fabrication additive : elles peuvent légèrement varier de la pièce d'origine.</p>
+
     <div class="product-price-block">
       <div>
         <div class="product-price-label" data-i18n="price_label">Prix du fichier TTC</div>
         <div class="product-price-sub" data-i18n="price_sub">TVA incluse — imprimez-le autant de fois que nécessaire</div>
       </div>
       <div class="product-price" id="productPrice">—</div>
+    </div>
+
+    <div class="wishlist-cta" id="wishlistCta">
+      <div class="wishlist-cta-text">
+        <strong data-i18n="wl_title">En cours d'acquisition</strong>
+        <span data-i18n="wl_sub">Soyez averti de la disponibilité.</span>
+      </div>
+      <form class="wishlist-form" id="wishlistForm">
+        <input type="email" id="wishlistEmail" required data-i18n-placeholder="wl_placeholder" placeholder="votre@email.fr" autocomplete="email">
+        <button type="submit" data-i18n="wl_btn">M'alerter</button>
+      </form>
+      <div class="wishlist-done" id="wishlistDone" data-i18n="wl_done">Merci — on vous préviendra dès sa mise en ligne.</div>
     </div>
 
     <a href="repair-together.html" class="rt-banner">
@@ -977,6 +1014,13 @@ const I18N = {
     nav_back: "Nouvelle recherche",
     bc_search: "Recherche",
     tag: "Pièce active · Catalogue Hub⁴Fix",
+    additive_note: "Ces pièces sont conçues et pensées pour la fabrication additive : elles peuvent légèrement varier de la pièce d'origine.",
+    visual_pending: "Visuel Hub⁴Fix en préparation",
+    wl_title: "En cours d'acquisition",
+    wl_sub: "Soyez averti de la disponibilité.",
+    wl_placeholder: "votre@email.fr",
+    wl_btn: "M'alerter",
+    wl_done: "Merci — on vous préviendra dès sa mise en ligne.",
     spec_dimensions: "Dimensions",
     spec_weight: "Poids",
     spec_material: "Matière conseillée",
@@ -1821,12 +1865,32 @@ function renderPiece(id) {
 
   const info = data.pieces[id];
 
-  document.getElementById('productPhoto').src = piece.photo;
-  document.getElementById('productPhoto').alt = info.name;
+  // Modélisée ? Les pièces héritées (démo, codées en dur) le sont implicitement.
+  const modeled = piece.modeled !== false;
+  document.body.setAttribute('data-modeled', modeled ? 'true' : 'false');
+
+  // Réinitialiser le CTA wishlist à chaque changement de pièce.
+  const wc = document.getElementById('wishlistCta');
+  if (wc) { wc.classList.remove('sent'); const we = document.getElementById('wishlistEmail'); if (we) we.value = ''; }
+
+  // Affichage visuel : visualiseur 3D (GLB) si dispo, sinon visuel 2D, sinon placeholder.
+  const photoImg = document.getElementById('productPhoto');
+  const viewer = document.getElementById('product3d');
+  if (piece.model3d) {
+    if (viewer) { viewer.setAttribute('src', piece.model3d); viewer.style.display = 'block'; }
+    photoImg.classList.add('img-missing');
+  } else {
+    if (viewer) viewer.style.display = 'none';
+    photoImg.classList.remove('img-missing');
+    if (piece.photo) photoImg.src = piece.photo; else { photoImg.classList.add('img-missing'); photoImg.removeAttribute('src'); }
+  }
+  photoImg.alt = info.name;
+
   document.getElementById('productName').textContent = info.name;
   document.getElementById('productMachine').textContent = info.machine;
   document.getElementById('productDescription').textContent = info.description;
-  document.getElementById('productPrice').textContent = info.price;
+  // Prix : N/C tant que la pièce n'est pas modélisée (pas de fichier -> pas de prix).
+  document.getElementById('productPrice').textContent = modeled ? info.price : 'N/C';
   document.getElementById('specDimensions').textContent = piece.spec.dimensions;
   document.getElementById('specWeight').textContent = piece.spec.weight;
   document.getElementById('specMaterial').textContent = piece.spec.material;
@@ -3583,7 +3647,59 @@ document.getElementById('langDropdownList').addEventListener('click', e => {
 // INIT
 // ════════════════════════════════════════════════
 
-function init() {
+// ════════════════════════════════════════════════
+// BASE CENTRALE — pièces publiées (Google Sheet via worker)
+// La page s'alimente automatiquement : fiche technique issue du tableur.
+// Fallback sur les pièces codées en dur si le worker est injoignable.
+// ════════════════════════════════════════════════
+const H4F_API = 'https://h4f-admin.duclosjulien.workers.dev'; // worker base centrale
+
+function _printMinutes(t) {
+  t = String(t || '');
+  const hm = t.match(/(\d+)\s*h\s*(\d+)?/i);
+  if (hm) return parseInt(hm[1], 10) * 60 + (hm[2] ? parseInt(hm[2], 10) : 0);
+  const mn = t.match(/(\d+)\s*min/i);
+  return mn ? parseInt(mn[1], 10) : 0;
+}
+function mergeSheetPieces(products) {
+  products.forEach(function (r) {
+    const id = r.id;
+    if (!id) return;
+    const wm = String(r.weight || '').match(/(\d+(?:[.,]\d+)?)/);
+    const weight = wm ? parseFloat(wm[1].replace(',', '.')) : 0;
+    PIECES_DATA[id] = {
+      photo: r.image ? (H4F_API + r.image) : '',
+      realPartCost: 0,
+      hourlyRate: PRICING.defaultHourlyRate,
+      spec: {
+        dimensions: r.dimensions || '—', weight: r.weight || '—',
+        material: r.material || '—', time: r.printTime || '—',
+        compat: r.compat || '—', ref: r.ref || id,
+      },
+      printMinutes: _printMinutes(r.printTime),
+      matWeight: weight, matLength: 0,
+      matCost: +(weight * 0.025).toFixed(2),
+      modeled: r.modeled === true, // pas encore modélisée -> prix N/C
+      model3d: r.model3d || '',    // GLB d'affichage (lecture seule) si fourni
+      _fromSheet: true,
+    };
+    const info = { name: r.name || id, machine: r.machine || '', description: r.description || '', price: r.price || '' };
+    Object.keys(I18N).forEach(function (lg) {
+      if (I18N[lg] && I18N[lg].pieces) I18N[lg].pieces[id] = info;
+    });
+  });
+}
+
+async function init() {
+  // Charger les pièces publiées depuis la base centrale (fiche technique auto).
+  try {
+    const res = await fetch(H4F_API + '/api/pieces.json', { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && Array.isArray(data.products)) mergeSheetPieces(data.products);
+    }
+  } catch (e) { /* hors-ligne : on garde les pièces codées en dur */ }
+
   // Récupérer pièce et langue depuis l'URL
   const id = getQueryParam('id') || 'dyson';
   const lang = getQueryParam('lang');
@@ -3601,6 +3717,24 @@ function init() {
 }
 
 init();
+
+// ════════ Wishlist : inscription pour être alerté (pièce non disponible) ════════
+(function(){
+  var form = document.getElementById('wishlistForm');
+  if (!form) return;
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var input = document.getElementById('wishlistEmail');
+    var email = (input.value || '').trim();
+    if (!email) return;
+    var cta = document.getElementById('wishlistCta');
+    var body = new URLSearchParams({ id: currentPieceId || '', email: email });
+    // Requête simple (form-urlencoded) -> pas de préflight CORS.
+    fetch(H4F_API + '/api/wishlist', { method: 'POST', body: body })
+      .then(function(){ cta.classList.add('sent'); })
+      .catch(function(){ cta.classList.add('sent'); }); // optimiste si worker injoignable
+  });
+})();
 
 // ════════ 3D Lenticular tilt effect on product photo ════════
 (function() {
