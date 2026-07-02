@@ -3680,7 +3680,8 @@ function mergeSheetPieces(products) {
       matWeight: weight, matLength: 0,
       matCost: +(weight * 0.025).toFixed(2),
       modeled: r.modeled === true, // pas encore modélisée -> prix N/C
-      model3d: r.model3d || '',    // GLB d'affichage (lecture seule) si fourni
+      // GLB d'affichage (lecture seule) : URL relative au worker -> préfixer
+      model3d: r.model3d ? (String(r.model3d).indexOf('http') === 0 ? r.model3d : H4F_API + r.model3d) : '',
       _fromSheet: true,
     };
     const info = { name: r.name || id, machine: r.machine || '', description: r.description || '', price: r.price || '' };

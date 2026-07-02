@@ -205,6 +205,11 @@ function countToValidate(rows) {
   return rows ? rows.filter((r) => (r.status || '') === 'to-validate').length : 0;
 }
 
+// Compteurs « vivants » : amorcés à la création, mais jamais écrasés ensuite par
+// le pipeline (la wishlist incrémente alerts en direct — un re-push ne doit pas
+// ramener le compteur à sa valeur locale).
+const LIVE_COLS = ['demand', 'alerts'];
+
 // Upsert par id. Les champs vides entrants ne SUPPRIMENT pas une valeur existante
 // (permet de compléter la fiche technique à la main dans le Sheet sans être écrasé).
 async function upsertPiece(env, piece) {
@@ -219,8 +224,11 @@ async function upsertPiece(env, piece) {
   if (found >= 0) {
     const existing = v[found];
     const merged = header.map((h, i) => {
+      const cur = existing[i] != null ? existing[i] : '';
+      // compteurs vivants : la valeur du Sheet fait foi une fois posée
+      if (LIVE_COLS.includes(h) && cur !== '') return cur;
       const inc = piece[h];
-      return (inc == null || inc === '') ? (existing[i] != null ? existing[i] : '') : String(inc);
+      return (inc == null || inc === '') ? cur : String(inc);
     });
     await sheetsWrite(env, 'update', `${tab}!A${found + 1}`, [merged]);
   } else {
@@ -243,18 +251,60 @@ async function patchPiece(env, id, patch) {
   return { ok: true };
 }
 
-// ---- R2 (stockage images privé) ----
-async function r2Put(env, key, buf, ct) {
+// ---- R2 (stockage images + fichiers 3D privé) ----
+async function r2Put(env, key, buf, ct, filename) {
   if (!env.PIECES_R2) return false;
-  await env.PIECES_R2.put(key, buf, { httpMetadata: { contentType: ct || 'application/octet-stream' } });
+  await env.PIECES_R2.put(key, buf, {
+    httpMetadata: { contentType: ct || 'application/octet-stream' },
+    customMetadata: filename ? { filename } : undefined,
+  });
   return true;
 }
-async function serveR2(env, key) {
+async function serveR2(env, key, extraHeaders) {
   if (!env.PIECES_R2) return json({ error: 'r2-unbound' }, 503);
   const obj = await env.PIECES_R2.get(key);
   if (!obj) return new Response('Not found', { status: 404 });
   const ct = (obj.httpMetadata && obj.httpMetadata.contentType) || 'image/png';
-  return new Response(obj.body, { headers: { 'Content-Type': ct, 'Cache-Control': 'private, max-age=300' } });
+  return new Response(obj.body, {
+    headers: Object.assign({ 'Content-Type': ct, 'Cache-Control': 'private, max-age=300' }, extraHeaders || {}),
+  });
+}
+
+// Extensions acceptées pour le fichier source 3D (jamais servi publiquement).
+const SRC_3D_EXTS = ['.stl', '.3mf', '.step', '.stp', '.f3d'];
+function extOf(name) { const m = String(name || '').toLowerCase().match(/\.[a-z0-9]+$/); return m ? m[0] : ''; }
+
+// POST /admin/upload3d — dépôt du fichier 3D prêt (+ GLB d'affichage optionnel).
+// Source -> R2 src/<id> (PRIVÉ). GLB -> R2 glb/<id> (public via /model/<id>).
+// Le dépôt du source marque la pièce modeled=true dans le Sheet.
+async function adminUpload3d(request, env, sess) {
+  let form;
+  try { form = await request.formData(); } catch { return new Response('Formulaire invalide', { status: 400 }); }
+  const id = (form.get('id') || '').toString();
+  if (!id) return new Response('id manquant', { status: 400 });
+  const src = form.get('source');
+  const glb = form.get('glb');
+  const patch = {};
+  const done = [];
+  if (src && src.arrayBuffer && src.name) {
+    if (!SRC_3D_EXTS.includes(extOf(src.name))) {
+      return new Response('Format source non accepté (' + esc(extOf(src.name)) + ') — attendu : ' + SRC_3D_EXTS.join(', '), { status: 400 });
+    }
+    await r2Put(env, 'src/' + id, await src.arrayBuffer(), 'application/octet-stream', src.name);
+    patch.modeled = 'true';
+    done.push('source ' + src.name);
+  }
+  if (glb && glb.arrayBuffer && glb.name) {
+    if (extOf(glb.name) !== '.glb') return new Response('Le mesh d\'affichage doit être un .glb', { status: 400 });
+    await r2Put(env, 'glb/' + id, await glb.arrayBuffer(), 'model/gltf-binary', glb.name);
+    patch.model3d = '/model/' + id;
+    done.push('glb ' + glb.name);
+  }
+  if (done.length) {
+    try { await patchPiece(env, id, patch); } catch { /* fichier stocké, patch Sheet à rejouer */ }
+    await audit(env, sess.email, 'piece-file', id + ' — ' + done.join(', '));
+  }
+  return new Response(null, { status: 302, headers: { Location: '/admin/shadowlist' } });
 }
 
 // POST /api/pieces — le pipeline pousse méta + original + visuel (auth token).
@@ -704,6 +754,23 @@ function viewShadowList(data) {
         '<input type="hidden" name="id" value="' + esc(id) + '">' +
         (isTV ? publish + reject : reject) + '</form>';
     }
+    // Canal fichiers 3D : source privé (STL/3MF/STEP) + GLB d'affichage optionnel.
+    const isModeled = truthy(r.modeled);
+    const fileState =
+      (isModeled ? '<span class="tag" style="background:var(--green);color:#fff">Fichier source ✓</span> <a href="/admin/file/' + enc + '" style="font-size:.75rem;color:var(--earth)">télécharger</a>'
+                 : '<span class="tag" style="background:var(--cream);color:var(--earth)">Pas de fichier source</span>') +
+      (r.model3d ? ' <span class="tag" style="background:var(--green);color:#fff">GLB 3D ✓</span>' : '');
+    const inp = 'font-size:.72rem;color:var(--earth)';
+    const upload =
+      '<details style="margin-top:.8rem;border-top:1px solid var(--line);padding-top:.7rem">' +
+        '<summary style="cursor:pointer;font-size:.78rem;font-weight:600;color:var(--earth)">Fichiers 3D — ' + fileState + '</summary>' +
+        '<form method="post" action="/admin/upload3d" enctype="multipart/form-data" style="display:grid;gap:.5rem;margin-top:.7rem">' +
+          '<input type="hidden" name="id" value="' + esc(id) + '">' +
+          '<label style="' + inp + '">Fichier source (privé, jamais distribué) : <input type="file" name="source" accept=".stl,.3mf,.step,.stp,.f3d"></label>' +
+          '<label style="' + inp + '">Mesh d\'affichage GLB (visualiseur fiche produit, optionnel) : <input type="file" name="glb" accept=".glb"></label>' +
+          '<button style="justify-self:start;font-family:inherit;font-size:.75rem;font-weight:600;border:none;border-radius:7px;padding:.5rem 1rem;cursor:pointer;background:var(--ink);color:#fff">Déposer</button>' +
+        '</form>' +
+      '</details>';
     return '<div class="card" style="padding:1.1rem 1.2rem">' +
       '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:1rem;margin-bottom:.8rem">' +
         '<div><div style="font-weight:600">' + esc(r.name || id) + '</div>' +
@@ -716,7 +783,7 @@ function viewShadowList(data) {
         '<div style="' + box + '"><div style="' + lbl + '">Version Hub⁴Fix</div>' +
           '<img style="' + img + '" src="/img/h4f/' + enc + '" alt="version H4F" ' +
           'onerror="this.style.display=\'none\';this.insertAdjacentHTML(\'afterend\',\'<div style=&quot;padding:2rem;text-align:center;color:#7A7268;font-size:.8rem&quot;>indisponible</div>\')"></div>' +
-      '</div>' + actions + '</div>';
+      '</div>' + actions + upload + '</div>';
   }).join('');
 
   return head + exportBtn + '<div style="display:grid;gap:1.2rem">' + cards + '</div>';
@@ -856,6 +923,11 @@ export default {
     if (path === '/api/wishlist' && request.method === 'POST') return apiWishlistPost(request, env);
     if (path === '/api/pieces.json') return apiPiecesJson(env);
     if (path.startsWith('/img/h4f/')) return serveR2(env, 'h4f/' + decodeURIComponent(path.slice('/img/h4f/'.length)));
+    // Mesh d'affichage GLB (lecture seule, public) — CORS requis pour model-viewer sur hub4fix.com.
+    if (path.startsWith('/model/')) {
+      return serveR2(env, 'glb/' + decodeURIComponent(path.slice('/model/'.length)),
+        { 'Access-Control-Allow-Origin': '*', 'Cache-Control': 'public, max-age=3600' });
+    }
 
     // 4) Zone protégée
     const sess = await readToken(env.SESSION_SECRET, getCookie(request, 'h4f_session'));
@@ -879,6 +951,24 @@ export default {
     // visibles sur toutes les sections) et la section Shadow List.
     const pdata = await loadPieces(env);
     const toValidate = pdata.error ? 0 : countToValidate(pdata.rows);
+
+    // Fichier source 3D : upload (POST) et téléchargement (GET) — admin connecté uniquement.
+    if (request.method === 'POST' && path === '/admin/upload3d') {
+      return adminUpload3d(request, env, sess);
+    }
+    if (path.startsWith('/admin/file/')) {
+      const id = decodeURIComponent(path.slice('/admin/file/'.length));
+      const obj = env.PIECES_R2 ? await env.PIECES_R2.get('src/' + id) : null;
+      if (!obj) return new Response('Aucun fichier source pour cette pièce.', { status: 404 });
+      const fname = (obj.customMetadata && obj.customMetadata.filename) || id.replace(/\//g, '_') + '.stl';
+      return new Response(obj.body, {
+        headers: {
+          'Content-Type': 'application/octet-stream',
+          'Content-Disposition': 'attachment; filename="' + fname.replace(/"/g, '') + '"',
+          'Cache-Control': 'no-store',
+        },
+      });
+    }
 
     // Shadow List : validation (POST publish/reject) puis affichage (GET).
     if (request.method === 'POST' && path === '/admin/shadowlist') {

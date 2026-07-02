@@ -1,0 +1,23 @@
+# Hub4Fix — worker "h4f-admin" (espace administrateur + base centrale Pièces).
+# Déploiement : npx wrangler deploy   (depuis hub4fix.com/worker/)
+#
+# keep_vars = true : IMPÉRATIF — préserve les variables/secrets déjà configurés
+# dans le dashboard Cloudflare (ISSUER, CLIENT_ID, SESSION_SECRET, ADMIN_EMAILS,
+# SHEET_ID, GOOGLE_SA_EMAIL, GOOGLE_SA_KEY, PIPELINE_TOKEN…). Sans lui, un
+# `wrangler deploy` les écraserait.
+
+name = "h4f-admin"
+main = "admin.js"
+compatibility_date = "2026-01-01"
+keep_vars = true
+
+# Base D1 (admins / appareils / audit).
+[[d1_databases]]
+binding = "DB"
+database_name = "h4f_admin"
+database_id = "02cfcaa2-c331-48a0-8699-d669cb7ccce4"
+
+# Stockage privé des images pièces (orig/<id> privé, h4f/<id> public).
+[[r2_buckets]]
+binding = "PIECES_R2"
+bucket_name = "h4f-pieces"
