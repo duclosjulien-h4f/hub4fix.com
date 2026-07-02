@@ -149,6 +149,7 @@ const PIECE_COLS = [
   'description', 'price', 'dimensions', 'weight', 'material', 'printTime', 'compat', 'ref',
   'model3d',
   'status', 'sourceUrl', 'sha256', 'dhash', 'validatedBy', 'validatedAt',
+  'rejectReason', // en DERNIER : la migration d'en-tête ajoute en fin, jamais au milieu
 ];
 const PIECE_PUBLIC_COLS = [
   'id', 'group', 'brand', 'range', 'model', 'piece', 'name', 'machine', 'category',
@@ -210,6 +211,17 @@ function countToValidate(rows) {
 // ramener le compteur à sa valeur locale).
 const LIVE_COLS = ['demand', 'alerts'];
 
+// Migration d'en-tête : si PIECE_COLS a gagné des colonnes (ajoutées en FIN),
+// met à jour la ligne 1 du Sheet pour que les nouvelles colonnes soient écrites.
+async function syncHeader(env, tab, v) {
+  const cur = v[0] || [];
+  if (cur.length >= PIECE_COLS.length) return cur;
+  if (!PIECE_COLS.slice(0, cur.length).every((c, i) => c === cur[i])) return cur; // ordre inconnu : ne pas toucher
+  await sheetsWrite(env, 'update', `${tab}!A1`, [PIECE_COLS]);
+  v[0] = PIECE_COLS.slice();
+  return v[0];
+}
+
 // Upsert par id. Les champs vides entrants ne SUPPRIMENT pas une valeur existante
 // (permet de compléter la fiche technique à la main dans le Sheet sans être écrasé).
 async function upsertPiece(env, piece) {
@@ -217,7 +229,7 @@ async function upsertPiece(env, piece) {
   let v = [];
   try { v = await sheetsValues(env, tab); } catch { v = []; }
   if (!v.length) { await sheetsWrite(env, 'append', tab, [PIECE_COLS]); v = [PIECE_COLS]; }
-  const header = v[0];
+  const header = await syncHeader(env, tab, v);
   const idIdx = header.indexOf('id');
   let found = -1;
   for (let i = 1; i < v.length; i++) { if ((v[i][idIdx] || '') === piece.id) { found = i; break; } }
@@ -241,7 +253,7 @@ async function patchPiece(env, id, patch) {
   const tab = piecesTab(env);
   const v = await sheetsValues(env, tab);
   if (!v.length) return { ok: false };
-  const header = v[0];
+  const header = await syncHeader(env, tab, v);
   const idIdx = header.indexOf('id');
   let found = -1;
   for (let i = 1; i < v.length; i++) { if ((v[i][idIdx] || '') === id) { found = i; break; } }
@@ -359,6 +371,16 @@ async function apiWishlistPost(request, env) {
     return json({ error: 'store', detail: String(e) }, 200, cors); // on ne bloque pas le visiteur
   }
   return json({ ok: true }, 200, cors);
+}
+
+// GET /api/pieces/regen — ids dont l'admin a demandé la régénération du visuel
+// (non-correspondance original/H4F). Réservé au pipeline (Bearer PIPELINE_TOKEN).
+async function apiPiecesRegen(request, env) {
+  const token = (request.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
+  if (!env.PIPELINE_TOKEN || token !== env.PIPELINE_TOKEN) return json({ error: 'unauthorized' }, 401);
+  const data = await loadPieces(env);
+  if (data.error) return json({ ids: [] });
+  return json({ ids: data.rows.filter((r) => (r.status || '') === 'regenerate').map((r) => r.id) });
 }
 
 // GET /api/pieces.json — feed public (pièces publiées, colonnes sûres uniquement).
@@ -715,6 +737,8 @@ function statusTag(s) {
   const map = {
     'to-validate': ['À valider', 'var(--red)', '#fff'],
     'published': ['Publié', 'var(--green)', '#fff'],
+    'regenerate': ['Régénération demandée', '#b8860b', '#fff'],
+    'rejected': ['Écarté — FA non pertinente', 'var(--earth)', '#fff'],
     'pending': ['En attente', 'var(--cream)', 'var(--earth)'],
   };
   const m = map[s] || [s || '—', 'var(--cream)', 'var(--earth)'];
@@ -731,8 +755,8 @@ function viewShadowList(data) {
     return head + '<div class="soon">Aucune pièce dans la base pour le moment. ' +
       'Le pipeline les ajoute automatiquement après génération (statut <b>à valider</b>).</div>';
   }
-  const order = { 'to-validate': 0, 'published': 1 };
-  rows.sort((a, b) => (order[a.status] == null ? 2 : order[a.status]) - (order[b.status] == null ? 2 : order[b.status]));
+  const order = { 'to-validate': 0, 'regenerate': 1, 'published': 2, 'rejected': 3 };
+  rows.sort((a, b) => (order[a.status] == null ? 4 : order[a.status]) - (order[b.status] == null ? 4 : order[b.status]));
 
   const exportBtn = '<a href="/admin/pieces.csv" style="display:inline-block;margin-bottom:1.2rem;font-size:.82rem;font-weight:600;color:var(--earth);text-decoration:none;border:1px solid var(--line);border-radius:7px;padding:.45rem .9rem">⤓ Exporter la base en tableur (CSV)</a>';
 
@@ -743,16 +767,29 @@ function viewShadowList(data) {
   const cards = rows.map((r) => {
     const id = String(r.id || '');
     const enc = id.split('/').map(encodeURIComponent).join('/');
-    const isTV = (r.status || '') === 'to-validate';
-    const isPub = (r.status || '') === 'published';
+    const st = r.status || '';
     let actions = '';
-    if (isTV || isPub) {
+    {
       const btn = 'font-family:inherit;font-size:.78rem;font-weight:600;border:none;border-radius:7px;padding:.55rem 1.1rem;cursor:pointer';
       const publish = '<button name="action" value="publish" style="' + btn + ';background:var(--green);color:#fff">Publier</button>';
-      const reject = '<button name="action" value="reject" style="' + btn + ';background:#fff;color:var(--red);border:1px solid #f3c2c2">Rejeter</button>';
-      actions = '<form method="post" action="/admin/shadowlist" style="display:flex;gap:.6rem;margin-top:.9rem">' +
-        '<input type="hidden" name="id" value="' + esc(id) + '">' +
-        (isTV ? publish + reject : reject) + '</form>';
+      // Régénérer = le visuel ne correspond pas -> le pipeline refait l'image
+      const regen = '<button name="action" value="regenerate" style="' + btn + ';background:#b8860b;color:#fff" title="Le visuel ne correspond pas : relancer la génération">Régénérer</button>';
+      // Rejeter = verdict métier : la fabrication additive n\'est pas pertinente pour cette pièce
+      const reject = '<button name="action" value="reject" style="' + btn + ';background:#fff;color:var(--red);border:1px solid #f3c2c2" title="Écarter : fabrication additive non pertinente (transparence, sécurité…)">Rejeter</button>';
+      const reason = '<input type="text" name="reason" placeholder="raison (ex. transparence requise)" style="flex:1;min-width:150px;font-size:.75rem;padding:.45rem .6rem;border:1px solid var(--line);border-radius:7px">';
+      const reactivate = '<button name="action" value="reactivate" style="' + btn + ';background:#fff;color:var(--ink);border:1px solid var(--line)">Réactiver</button>';
+      let inner = '';
+      if (st === 'to-validate') inner = publish + regen + reason + reject;
+      else if (st === 'published') inner = regen + reason + reject;
+      else if (st === 'regenerate') inner = publish + reason + reject;
+      else if (st === 'rejected') inner = reactivate;
+      if (inner) {
+        actions = '<form method="post" action="/admin/shadowlist" style="display:flex;gap:.6rem;margin-top:.9rem;flex-wrap:wrap;align-items:center">' +
+          '<input type="hidden" name="id" value="' + esc(id) + '">' + inner + '</form>';
+      }
+      if (st === 'rejected' && r.rejectReason) {
+        actions = '<div class="muted" style="font-size:.78rem;margin-top:.6rem">Motif : ' + esc(r.rejectReason) + '</div>' + actions;
+      }
     }
     // Canal fichiers 3D : source privé (STL/3MF/STEP) + GLB d'affichage optionnel.
     const isModeled = truthy(r.modeled);
@@ -920,6 +957,7 @@ export default {
 
     // 3 ter) API publique « Pièces » (pas de session : token pipeline ou lecture publique)
     if (path === '/api/pieces' && request.method === 'POST') return apiPiecesPost(request, env);
+    if (path === '/api/pieces/regen') return apiPiecesRegen(request, env);
     if (path === '/api/wishlist' && request.method === 'POST') return apiWishlistPost(request, env);
     if (path === '/api/pieces.json') return apiPiecesJson(env);
     if (path.startsWith('/img/h4f/')) return serveR2(env, 'h4f/' + decodeURIComponent(path.slice('/img/h4f/'.length)));
@@ -975,12 +1013,23 @@ export default {
       const form = await request.formData();
       const id = (form.get('id') || '').toString();
       const action = (form.get('action') || '').toString();
+      const stamp = { validatedBy: sess.email, validatedAt: nowIso() };
       if (id && action === 'publish') {
-        await patchPiece(env, id, { status: 'published', validatedBy: sess.email, validatedAt: nowIso() });
+        await patchPiece(env, id, Object.assign({ status: 'published' }, stamp));
         await audit(env, sess.email, 'piece-publish', id);
+      } else if (id && action === 'regenerate') {
+        // Non-correspondance original/H4F : le pipeline refera le visuel puis
+        // repoussera la pièce (elle repassera automatiquement en to-validate).
+        await patchPiece(env, id, Object.assign({ status: 'regenerate' }, stamp));
+        await audit(env, sess.email, 'piece-regenerate', id);
       } else if (id && action === 'reject') {
-        await patchPiece(env, id, { status: 'pending', validatedBy: sess.email, validatedAt: nowIso() });
-        await audit(env, sess.email, 'piece-reject', id);
+        // Verdict métier définitif : fabrication additive non pertinente.
+        const reason = (form.get('reason') || '').toString().slice(0, 200);
+        await patchPiece(env, id, Object.assign({ status: 'rejected', rejectReason: reason }, stamp));
+        await audit(env, sess.email, 'piece-reject', id + (reason ? ' — ' + reason : ''));
+      } else if (id && action === 'reactivate') {
+        await patchPiece(env, id, Object.assign({ status: 'to-validate', rejectReason: '' }, stamp));
+        await audit(env, sess.email, 'piece-reactivate', id);
       }
       return new Response(null, { status: 302, headers: { Location: '/admin/shadowlist' } });
     }
