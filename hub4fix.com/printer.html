@@ -169,6 +169,14 @@ nav{position:sticky;top:0;z-index:100;padding:1rem 4rem;display:flex;justify-con
 @media(max-width:600px){.machine-row{grid-template-columns:1fr 1fr auto;gap:.4rem}.machine-row .m-modele{grid-column:1 / -1}}
 .form-submit{width:100%;margin-top:1.5rem;padding:1rem;background:var(--red);color:white;border:none;border-radius:2px;font-family:'Karla',sans-serif;font-size:.85rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .3s}
 .form-submit:hover{background:#A00D24;transform:translateY(-1px);box-shadow:0 6px 20px rgba(200,16,46,.2)}
+.b2b-quickstart{display:flex;flex-wrap:wrap;align-items:center;gap:.9rem;margin-bottom:1.4rem}
+.gsi-btn-wrap{min-height:40px}
+.geoloc-btn{font-family:'Karla',sans-serif;font-size:.78rem;font-weight:600;letter-spacing:.02em;border:1px solid var(--gold);color:var(--gold);background:none;border-radius:2px;padding:.62rem 1rem;cursor:pointer;transition:all .25s;white-space:nowrap}
+.geoloc-btn:hover{background:var(--gold-pale)}
+.geoloc-btn:disabled{opacity:.6;cursor:wait}
+.b2b-divider{display:flex;align-items:center;gap:.8rem;margin:0 0 1.6rem;color:var(--stone);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase}
+.b2b-divider::before,.b2b-divider::after{content:'';flex:1;height:1px;background:var(--cream)}
+.gsi-status{display:none;font-size:.8rem;color:var(--green);font-weight:600;margin:-.8rem 0 1.4rem;padding:.55rem .8rem;background:rgba(45,139,94,.08);border-radius:2px}
 .form-note{font-size:.78rem;color:var(--stone);font-style:italic;text-align:center;margin-top:1rem}
 .form-success{text-align:center;padding:3rem}
 .form-success-icon{width:56px;height:56px;border-radius:50%;background:rgba(45,139,94,.1);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:700;margin:0 auto 1.5rem}
@@ -406,6 +414,13 @@ footer{padding:3rem 4rem;border-top:1px solid var(--cream);display:flex;justify-
   <h2 data-i18n-html="form_title">Inscription <em style="color:var(--red)">printer</em></h2>
   <p class="form-intro" data-i18n="form_intro">Renseignez votre parc d'impression pour rejoindre le réseau. Nous vous contactons sous 5 jours pour finaliser votre intégration.</p>
 
+  <div class="b2b-quickstart">
+    <div id="gsi-print" class="gsi-btn-wrap"></div>
+    <button type="button" id="geoloc-print" class="geoloc-btn">📍 Utiliser ma position</button>
+  </div>
+  <p id="gsi-status-print" class="gsi-status"></p>
+  <div class="b2b-divider"><span>ou remplissez le formulaire</span></div>
+
   <form id="printer-form" onsubmit="return submitPrintForm(event)">
     <div class="form-row">
       <div class="form-group">
@@ -546,6 +561,14 @@ footer{padding:3rem 4rem;border-top:1px solid var(--cream);display:flex;justify-
 </section>
 
 <script src="js/collect-email.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="js/b2b-auth.js"></script>
+<script>
+window.addEventListener('load', function(){
+  H4FGoogleSignIn('gsi-print', 'printer-form', 'gsi-status-print');
+  H4FGeoloc('geoloc-print', 'printer-form');
+});
+</script>
 <footer>
   <div class="footer-brand">
     <div class="footer-logo"><svg viewBox="0 0 202.6 265.4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><linearGradient id="flg1"><stop style="stop-color:#2a00fe" offset="0.336"/><stop style="stop-color:#fff" offset="1"/></linearGradient><linearGradient id="flg2"><stop style="stop-color:#fff" offset="0.107"/><stop style="stop-color:#fe0000" offset="0.684"/></linearGradient><linearGradient xlink:href="#flg1" id="fgr1" x1="129.89" y1="808.83" x2="194.31" y2="808.83" gradientUnits="userSpaceOnUse"/><linearGradient xlink:href="#flg2" id="fgr2" x1="271.02" y1="731.42" x2="327.45" y2="731.42" gradientUnits="userSpaceOnUse" spreadMethod="pad"/></defs><g transform="translate(-129.894,-634.847)"><g transform="translate(-114.063,-139.373)"><path d="m 353.331,791.185 -24.32,66.818 c -8.972,24.651 9.283,50.722 35.516,50.722 h 72.08 c 5.218,0 9.449,4.23 9.449,9.449 0,5.218 -4.231,9.449 -9.449,9.449 h -72.08 c -39.35,0 -66.732,-39.106 -53.274,-76.083 l 7.123,-19.57 17.2,-47.256 c 1.787,-4.903 7.21,-7.428 12.113,-5.642 4.903,1.787 7.429,7.21 5.643,12.112 z" style="fill:#000;stroke:#000"/><path d="m 314.879,1026.411 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#000;stroke:#000"/><path d="m 249.987,1019.877 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:#000;stroke:#000"/><path d="m 359.24,904.532 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#000;stroke:#000"/><path d="m 436.607,884.024 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:#000;stroke:#000"/></g><g><path d="m 234.225,648.032 -24.32,66.818 a 37.795,37.795 0 0 0 35.516,50.722 h 72.08 a 9.449,9.449 0 0 1 0,18.898 h -72.08 a 56.693,56.693 0 0 1 -53.274,-76.083 l 24.323,-66.826 a 9.449,9.449 0 0 1 17.755,6.471 z" style="fill:#fff;stroke:#000"/><path d="m 195.773,883.258 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#fff;stroke:#000"/><path d="m 130.881,876.724 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:url(#fgr1);stroke:#000"/><path d="m 240.133,761.379 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#fff;stroke:#000"/><path d="m 317.5,740.871 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:url(#fgr2);stroke:#000"/></g></g></svg></div>
