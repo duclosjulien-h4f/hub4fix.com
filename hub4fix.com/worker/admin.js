@@ -437,11 +437,15 @@ async function apiPiecesRegen(request, env) {
   const token = (request.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
   if (!env.PIPELINE_TOKEN || token !== env.PIPELINE_TOKEN) return json({ error: 'unauthorized' }, 401);
   const data = await loadPieces(env);
-  if (data.error) return json({ ids: [], items: [] });
+  if (data.error) return json({ ids: [], items: [], verify: [] });
   const rows = data.rows.filter((r) => (r.status || '') === 'regenerate');
+  const verify = data.rows.filter((r) => (r.status || '') === 'verify-original');
   return json({
     ids: rows.map((r) => r.id),
     items: rows.map((r) => ({ id: r.id, hint: r.regenHint || '' })),
+    // originaux à re-sourcer (commande /original) : le pipeline invalide la
+    // référence locale et repasse la pièce dans la découverte
+    verify: verify.map((r) => ({ id: r.id, hint: r.regenHint || '' })),
   });
 }
 
@@ -800,6 +804,7 @@ function statusTag(s) {
     'to-validate': ['À valider', 'var(--red)', '#fff'],
     'published': ['Publié', 'var(--green)', '#fff'],
     'regenerate': ['Régénération demandée', '#b8860b', '#fff'],
+    'verify-original': ['Original à vérifier', '#2c6e9b', '#fff'],
     'rejected': ['Écarté — FA non pertinente', 'var(--earth)', '#fff'],
     'pending': ['En attente', 'var(--cream)', 'var(--earth)'],
   };
@@ -817,8 +822,8 @@ function viewShadowList(data) {
     return head + '<div class="soon">Aucune pièce dans la base pour le moment. ' +
       'Le pipeline les ajoute automatiquement après génération (statut <b>à valider</b>).</div>';
   }
-  const order = { 'to-validate': 0, 'regenerate': 1, 'published': 2, 'rejected': 3 };
-  rows.sort((a, b) => (order[a.status] == null ? 4 : order[a.status]) - (order[b.status] == null ? 4 : order[b.status]));
+  const order = { 'to-validate': 0, 'regenerate': 1, 'verify-original': 2, 'published': 3, 'rejected': 4 };
+  rows.sort((a, b) => (order[a.status] == null ? 5 : order[a.status]) - (order[b.status] == null ? 5 : order[b.status]));
 
   const exportBtn = '<a href="/admin/pieces.csv" style="display:inline-block;margin-bottom:1.2rem;font-size:.82rem;font-weight:600;color:var(--earth);text-decoration:none;border:1px solid var(--line);border-radius:7px;padding:.45rem .9rem">⤓ Exporter la base en tableur (CSV)</a>';
 
@@ -840,12 +845,13 @@ function viewShadowList(data) {
       const reject = '<button name="action" value="reject" style="' + btn + ';background:#fff;color:var(--red);border:1px solid #f3c2c2" title="Écarter : fabrication additive non pertinente (transparence, sécurité…)">Rejeter</button>';
       // Champ partagé : précision pour l'IA (Régénérer) ou motif (Rejeter).
       // Commande force : /new = repartir à zéro (efface la consigne mémorisée).
-      const note = '<input type="text" name="note" placeholder="précision IA / motif rejet — /new = repartir à zéro" title="Régénérer : consigne transmise à l\'IA (conservée entre essais). /new [consigne] : efface l\'historique et repart de l\'original seul. Rejeter : motif d\'exclusion (réévaluable)." style="flex:1;min-width:190px;font-size:.75rem;padding:.45rem .6rem;border:1px solid var(--line);border-radius:7px">';
+      const note = '<input type="text" name="note" placeholder="précision IA / motif — /new = à zéro · /original = vérifier la réf" title="Régénérer : consigne transmise à l\'IA (conservée entre essais). /new [consigne] : efface l\'historique et repart de l\'original seul. /original [commentaire] : la référence originale est douteuse ou indisponible -> re-sourcing par le pipeline (pas de régénération sur une mauvaise base). Rejeter : motif d\'exclusion (réévaluable)." style="flex:1;min-width:190px;font-size:.75rem;padding:.45rem .6rem;border:1px solid var(--line);border-radius:7px">';
       const reactivate = '<button name="action" value="reactivate" style="' + btn + ';background:#fff;color:var(--ink);border:1px solid var(--line)">Réactiver</button>';
       let inner = '';
       if (st === 'to-validate') inner = publish + regen + note + reject;
       else if (st === 'published') inner = regen + note + reject;
       else if (st === 'regenerate') inner = publish + regen + note + reject;
+      else if (st === 'verify-original') inner = publish + regen + note + reject;
       else if (st === 'rejected') inner = reactivate;
       if (inner) {
         actions = '<form method="post" action="/admin/shadowlist" style="display:flex;gap:.6rem;margin-top:.9rem;flex-wrap:wrap;align-items:center">' +
@@ -853,6 +859,10 @@ function viewShadowList(data) {
       }
       if (st === 'regenerate' && r.regenHint) {
         actions = '<div class="muted" style="font-size:.78rem;margin-top:.6rem">Consigne IA : « ' + esc(r.regenHint) + ' »</div>' + actions;
+      }
+      if (st === 'verify-original') {
+        actions = '<div class="muted" style="font-size:.78rem;margin-top:.6rem">Référence originale en re-sourcing par le pipeline' +
+          (r.regenHint ? ' — « ' + esc(r.regenHint) + ' »' : '') + '</div>' + actions;
       }
       if (st === 'rejected') {
         actions = '<div class="muted" style="font-size:.78rem;margin-top:.6rem">' +
@@ -1095,23 +1105,36 @@ export default {
         // en cas d'échec cloud, le pipeline local prend le relais.
         //
         // Commandes force dans le champ note :
-        //   /new [consigne]  -> repartir à zéro : efface la consigne mémorisée
-        //                       (anti-artefacts quand la proposition est trop
-        //                       éloignée), régénère depuis l'original + prompt
-        //                       de base, avec l'éventuelle consigne neuve.
+        //   /new [consigne]       -> repartir à zéro : efface la consigne mémorisée
+        //                            (anti-artefacts quand la proposition est trop
+        //                            éloignée), régénère depuis l'original + prompt
+        //                            de base, avec l'éventuelle consigne neuve.
+        //   /original [comment]   -> l'ORIGINAL est douteux ou indisponible : pas de
+        //                            régénération (elle tournerait sur une mauvaise
+        //                            base) ; la pièce part en re-sourcing de référence
+        //                            (pipeline/agent), puis regénérera automatiquement.
         const cmd = note.match(/^\/(\w+)\s*([\s\S]*)$/);
-        const freshStart = !!(cmd && cmd[1].toLowerCase() === 'new');
-        const hintNote = freshStart ? (cmd[2] || '').trim() : note;
-        const patch = Object.assign({ status: 'regenerate' }, stamp);
-        if (freshStart) patch.regenHint = hintNote; // remplace TOUJOURS (y compris par vide)
-        else if (hintNote) patch.regenHint = hintNote;
-        await patchPiece(env, id, patch);
-        await audit(env, sess.email, 'piece-regenerate', id + (freshStart ? ' [/new]' : '') + (hintNote ? ' — ' + hintNote : ''));
-        if (env.GEMINI_API_KEY && env.PIECES_R2) {
-          const row = pdata.error ? null : pdata.rows.find((r) => r.id === id);
-          const hint = freshStart ? hintNote : (hintNote || (row && row.regenHint) || '');
-          const bg = regenerateCloud(env, id, hint);
-          if (ctx && ctx.waitUntil) ctx.waitUntil(bg); else await bg;
+        const cmdName = cmd ? cmd[1].toLowerCase() : '';
+        if (cmdName === 'original') {
+          const comment = (cmd[2] || '').trim();
+          const patch = Object.assign({ status: 'verify-original' }, stamp);
+          if (comment) patch.regenHint = comment;
+          await patchPiece(env, id, patch);
+          await audit(env, sess.email, 'piece-verify-original', id + (comment ? ' — ' + comment : ''));
+        } else {
+          const freshStart = cmdName === 'new';
+          const hintNote = freshStart ? (cmd[2] || '').trim() : note;
+          const patch = Object.assign({ status: 'regenerate' }, stamp);
+          if (freshStart) patch.regenHint = hintNote; // remplace TOUJOURS (y compris par vide)
+          else if (hintNote) patch.regenHint = hintNote;
+          await patchPiece(env, id, patch);
+          await audit(env, sess.email, 'piece-regenerate', id + (freshStart ? ' [/new]' : '') + (hintNote ? ' — ' + hintNote : ''));
+          if (env.GEMINI_API_KEY && env.PIECES_R2) {
+            const row = pdata.error ? null : pdata.rows.find((r) => r.id === id);
+            const hint = freshStart ? hintNote : (hintNote || (row && row.regenHint) || '');
+            const bg = regenerateCloud(env, id, hint);
+            if (ctx && ctx.waitUntil) ctx.waitUntil(bg); else await bg;
+          }
         }
       } else if (id && action === 'reject') {
         // Verdict métier définitif : fabrication additive non pertinente.
