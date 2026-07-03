@@ -149,7 +149,9 @@ const PIECE_COLS = [
   'description', 'price', 'dimensions', 'weight', 'material', 'printTime', 'compat', 'ref',
   'model3d',
   'status', 'sourceUrl', 'sha256', 'dhash', 'validatedBy', 'validatedAt',
-  'rejectReason', // en DERNIER : la migration d'en-tête ajoute en fin, jamais au milieu
+  // nouvelles colonnes en FIN uniquement : la migration d'en-tête ajoute en queue
+  'rejectReason',
+  'regenHint', // précision donnée par l'admin à l'IA pour la régénération
 ];
 const PIECE_PUBLIC_COLS = [
   'id', 'group', 'brand', 'range', 'model', 'piece', 'name', 'machine', 'category',
@@ -379,8 +381,12 @@ async function apiPiecesRegen(request, env) {
   const token = (request.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
   if (!env.PIPELINE_TOKEN || token !== env.PIPELINE_TOKEN) return json({ error: 'unauthorized' }, 401);
   const data = await loadPieces(env);
-  if (data.error) return json({ ids: [] });
-  return json({ ids: data.rows.filter((r) => (r.status || '') === 'regenerate').map((r) => r.id) });
+  if (data.error) return json({ ids: [], items: [] });
+  const rows = data.rows.filter((r) => (r.status || '') === 'regenerate');
+  return json({
+    ids: rows.map((r) => r.id),
+    items: rows.map((r) => ({ id: r.id, hint: r.regenHint || '' })),
+  });
 }
 
 // GET /api/pieces.json — feed public (pièces publiées, colonnes sûres uniquement).
@@ -776,16 +782,20 @@ function viewShadowList(data) {
       const regen = '<button name="action" value="regenerate" style="' + btn + ';background:#b8860b;color:#fff" title="Le visuel ne correspond pas : relancer la génération">Régénérer</button>';
       // Rejeter = verdict métier : la fabrication additive n\'est pas pertinente pour cette pièce
       const reject = '<button name="action" value="reject" style="' + btn + ';background:#fff;color:var(--red);border:1px solid #f3c2c2" title="Écarter : fabrication additive non pertinente (transparence, sécurité…)">Rejeter</button>';
-      const reason = '<input type="text" name="reason" placeholder="raison (ex. transparence requise)" style="flex:1;min-width:150px;font-size:.75rem;padding:.45rem .6rem;border:1px solid var(--line);border-radius:7px">';
+      // Champ partagé : précision pour l'IA (Régénérer) ou motif (Rejeter)
+      const note = '<input type="text" name="note" placeholder="précision pour l\'IA (régén.) / motif (rejet)" style="flex:1;min-width:190px;font-size:.75rem;padding:.45rem .6rem;border:1px solid var(--line);border-radius:7px">';
       const reactivate = '<button name="action" value="reactivate" style="' + btn + ';background:#fff;color:var(--ink);border:1px solid var(--line)">Réactiver</button>';
       let inner = '';
-      if (st === 'to-validate') inner = publish + regen + reason + reject;
-      else if (st === 'published') inner = regen + reason + reject;
-      else if (st === 'regenerate') inner = publish + reason + reject;
+      if (st === 'to-validate') inner = publish + regen + note + reject;
+      else if (st === 'published') inner = regen + note + reject;
+      else if (st === 'regenerate') inner = publish + regen + note + reject;
       else if (st === 'rejected') inner = reactivate;
       if (inner) {
         actions = '<form method="post" action="/admin/shadowlist" style="display:flex;gap:.6rem;margin-top:.9rem;flex-wrap:wrap;align-items:center">' +
           '<input type="hidden" name="id" value="' + esc(id) + '">' + inner + '</form>';
+      }
+      if (st === 'regenerate' && r.regenHint) {
+        actions = '<div class="muted" style="font-size:.78rem;margin-top:.6rem">Consigne IA : « ' + esc(r.regenHint) + ' »</div>' + actions;
       }
       if (st === 'rejected' && r.rejectReason) {
         actions = '<div class="muted" style="font-size:.78rem;margin-top:.6rem">Motif : ' + esc(r.rejectReason) + '</div>' + actions;
@@ -1014,19 +1024,23 @@ export default {
       const id = (form.get('id') || '').toString();
       const action = (form.get('action') || '').toString();
       const stamp = { validatedBy: sess.email, validatedAt: nowIso() };
+      const note = (form.get('note') || '').toString().slice(0, 300);
       if (id && action === 'publish') {
-        await patchPiece(env, id, Object.assign({ status: 'published' }, stamp));
+        // publication = consigne de régénération consommée -> on l'efface
+        await patchPiece(env, id, Object.assign({ status: 'published', regenHint: '' }, stamp));
         await audit(env, sess.email, 'piece-publish', id);
       } else if (id && action === 'regenerate') {
         // Non-correspondance original/H4F : le pipeline refera le visuel puis
-        // repoussera la pièce (elle repassera automatiquement en to-validate).
-        await patchPiece(env, id, Object.assign({ status: 'regenerate' }, stamp));
-        await audit(env, sess.email, 'piece-regenerate', id);
+        // repoussera la pièce (retour auto en to-validate). La précision saisie
+        // est transmise à l'IA ; sans saisie, la consigne précédente est gardée.
+        const patch = Object.assign({ status: 'regenerate' }, stamp);
+        if (note) patch.regenHint = note;
+        await patchPiece(env, id, patch);
+        await audit(env, sess.email, 'piece-regenerate', id + (note ? ' — ' + note : ''));
       } else if (id && action === 'reject') {
         // Verdict métier définitif : fabrication additive non pertinente.
-        const reason = (form.get('reason') || '').toString().slice(0, 200);
-        await patchPiece(env, id, Object.assign({ status: 'rejected', rejectReason: reason }, stamp));
-        await audit(env, sess.email, 'piece-reject', id + (reason ? ' — ' + reason : ''));
+        await patchPiece(env, id, Object.assign({ status: 'rejected', rejectReason: note }, stamp));
+        await audit(env, sess.email, 'piece-reject', id + (note ? ' — ' + note : ''));
       } else if (id && action === 'reactivate') {
         await patchPiece(env, id, Object.assign({ status: 'to-validate', rejectReason: '' }, stamp));
         await audit(env, sess.email, 'piece-reactivate', id);
