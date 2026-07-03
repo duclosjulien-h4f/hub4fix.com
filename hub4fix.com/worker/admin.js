@@ -321,6 +321,62 @@ async function adminUpload3d(request, env, sess) {
   return new Response(null, { status: 302, headers: { Location: '/admin/shadowlist' } });
 }
 
+// ---- Régénération cloud (immédiate) : le worker appelle Gemini lui-même ----
+// Déclenchée en tâche de fond (ctx.waitUntil) au clic « Régénérer » : l'admin
+// continue de valider pendant que l'image se refait (~10-25 s). Si l'appel
+// échoue, la pièce reste en 'regenerate' et le pipeline local la reprendra.
+function b64FromBuf(buf) {
+  const bytes = new Uint8Array(buf);
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) {
+    s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  }
+  return btoa(s);
+}
+function b64ToBuf(b64) {
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+async function geminiGenerate(env, prompt, imgBuf, mime) {
+  const model = env.GEMINI_MODEL || 'gemini-2.5-flash-image';
+  const body = {
+    contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: mime || 'image/png', data: b64FromBuf(imgBuf) } }] }],
+    generationConfig: { responseModalities: ['IMAGE'] },
+  };
+  const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${env.GEMINI_API_KEY}`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+  });
+  if (!r.ok) throw new Error('gemini HTTP ' + r.status);
+  const j = await r.json();
+  for (const c of j.candidates || []) {
+    for (const p of (c.content || {}).parts || []) {
+      const blob = p.inline_data || p.inlineData;
+      if (blob && blob.data) return b64ToBuf(blob.data);
+    }
+  }
+  throw new Error('gemini: aucune image dans la reponse');
+}
+async function regenerateCloud(env, id, hint) {
+  try {
+    const orig = await env.PIECES_R2.get('orig/' + id);
+    if (!orig) throw new Error('pas d\'original dans R2');
+    const promptObj = await env.PIECES_R2.get('config/prompt-hotlist.txt');
+    if (!promptObj) throw new Error('prompt config/prompt-hotlist.txt absent de R2');
+    let prompt = await promptObj.text();
+    if (hint) prompt += '\n\nAdmin guidance for this specific piece (must be respected): ' + hint;
+    const mime = (orig.httpMetadata && orig.httpMetadata.contentType) || 'image/png';
+    const out = await geminiGenerate(env, prompt, await orig.arrayBuffer(), mime);
+    await r2Put(env, 'h4f/' + id, out, 'image/png');
+    await patchPiece(env, id, { status: 'to-validate' });
+    await audit(env, 'cloud-regen', 'piece-regen-done', id);
+  } catch (e) {
+    // la pièce reste en 'regenerate' -> le pipeline local prendra le relais
+    await audit(env, 'cloud-regen', 'piece-regen-fail', id + ' — ' + String(e).slice(0, 150));
+  }
+}
+
 // POST /api/pieces — le pipeline pousse méta + original + visuel (auth token).
 async function apiPiecesPost(request, env) {
   const token = (request.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
@@ -797,8 +853,10 @@ function viewShadowList(data) {
       if (st === 'regenerate' && r.regenHint) {
         actions = '<div class="muted" style="font-size:.78rem;margin-top:.6rem">Consigne IA : « ' + esc(r.regenHint) + ' »</div>' + actions;
       }
-      if (st === 'rejected' && r.rejectReason) {
-        actions = '<div class="muted" style="font-size:.78rem;margin-top:.6rem">Motif : ' + esc(r.rejectReason) + '</div>' + actions;
+      if (st === 'rejected') {
+        actions = '<div class="muted" style="font-size:.78rem;margin-top:.6rem">' +
+          (r.rejectReason ? 'Motif : ' + esc(r.rejectReason) + ' — ' : '') +
+          '<em>réévaluable quand l\'état de l\'art FA évolue (transparence, SLS abordable…)</em></div>' + actions;
       }
     }
     // Canal fichiers 3D : source privé (STL/3MF/STEP) + GLB d'affichage optionnel.
@@ -854,7 +912,7 @@ const SECTIONS = {
 // ============================ ROUTAGE ============================
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const origin = url.origin;
     const redirectUri = origin + '/auth/callback';
@@ -1030,13 +1088,20 @@ export default {
         await patchPiece(env, id, Object.assign({ status: 'published', regenHint: '' }, stamp));
         await audit(env, sess.email, 'piece-publish', id);
       } else if (id && action === 'regenerate') {
-        // Non-correspondance original/H4F : le pipeline refera le visuel puis
-        // repoussera la pièce (retour auto en to-validate). La précision saisie
-        // est transmise à l'IA ; sans saisie, la consigne précédente est gardée.
+        // Non-correspondance original/H4F. La précision saisie est transmise à
+        // l'IA ; sans saisie, la consigne précédente est gardée. La régénération
+        // part IMMÉDIATEMENT en tâche de fond (l'admin continue de valider) ;
+        // en cas d'échec cloud, le pipeline local prend le relais.
         const patch = Object.assign({ status: 'regenerate' }, stamp);
         if (note) patch.regenHint = note;
         await patchPiece(env, id, patch);
         await audit(env, sess.email, 'piece-regenerate', id + (note ? ' — ' + note : ''));
+        if (env.GEMINI_API_KEY && env.PIECES_R2) {
+          const row = pdata.error ? null : pdata.rows.find((r) => r.id === id);
+          const hint = note || (row && row.regenHint) || '';
+          const bg = regenerateCloud(env, id, hint);
+          if (ctx && ctx.waitUntil) ctx.waitUntil(bg); else await bg;
+        }
       } else if (id && action === 'reject') {
         // Verdict métier définitif : fabrication additive non pertinente.
         await patchPiece(env, id, Object.assign({ status: 'rejected', rejectReason: note }, stamp));
