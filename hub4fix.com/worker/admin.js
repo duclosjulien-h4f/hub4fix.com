@@ -615,6 +615,18 @@ tr.is-new td{background:rgba(45,139,94,.05)}
 .tag.modelisateur{background:#f5ece5;color:#a0522d}
 .tag.client{background:var(--cream);color:var(--earth)}
 .muted{color:var(--earth)}
+/* Pense-bête des commandes du champ note (bulle +) */
+.cmd-help{display:inline-block}
+.cmd-help summary{list-style:none;cursor:pointer;width:27px;height:27px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--earth);font-weight:700;font-size:1rem;line-height:25px;text-align:center;user-select:none}
+.cmd-help summary::-webkit-details-marker{display:none}
+.cmd-help summary:hover{background:var(--cream);color:var(--ink)}
+.cmd-help[open] summary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.cmd-panel{position:absolute;right:0;top:calc(100% + 6px);z-index:60;width:min(360px,100%);background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 14px 36px rgba(0,0,0,.14);padding:.9rem 1.05rem;font-size:.78rem;line-height:1.55}
+.cmd-panel h4{font-size:.7rem;letter-spacing:.07em;text-transform:uppercase;color:var(--earth);margin:.55rem 0 .25rem}
+.cmd-panel h4:first-child{margin-top:0}
+.cmd-panel .row{display:flex;gap:.55rem;align-items:baseline;margin:.2rem 0}
+.cmd-panel code{flex:0 0 auto;background:var(--cream);border-radius:4px;padding:.05rem .4rem;font-size:.7rem;white-space:nowrap}
+.cmd-panel .row span{color:var(--ink)}
 @media(max-width:760px){
   .wrap{flex-direction:column}
   .side{width:100%;height:auto;position:static}
@@ -845,7 +857,17 @@ function viewShadowList(data) {
       const reject = '<button name="action" value="reject" style="' + btn + ';background:#fff;color:var(--red);border:1px solid #f3c2c2" title="Écarter : fabrication additive non pertinente (transparence, sécurité…)">Rejeter</button>';
       // Champ partagé : précision pour l'IA (Régénérer) ou motif (Rejeter).
       // Commande force : /new = repartir à zéro (efface la consigne mémorisée).
-      const note = '<input type="text" name="note" placeholder="précision IA / motif — /new = à zéro · /original = vérifier la réf" title="Régénérer : consigne transmise à l\'IA (conservée entre essais). /new [consigne] : efface l\'historique et repart de l\'original seul. /original [commentaire] : la référence originale est douteuse ou indisponible -> re-sourcing par le pipeline (pas de régénération sur une mauvaise base). Rejeter : motif d\'exclusion (réévaluable)." style="flex:1;min-width:190px;font-size:.75rem;padding:.45rem .6rem;border:1px solid var(--line);border-radius:7px">';
+      const note = '<input type="text" name="note" placeholder="précision IA / motif — /new = à zéro · /original = vérifier la réf" style="flex:1;min-width:190px;font-size:.75rem;padding:.45rem .6rem;border:1px solid var(--line);border-radius:7px">' +
+        // Bulle (+) : pense-bête du langage complet du champ note
+        '<details class="cmd-help"><summary title="Pense-bête des commandes">+</summary><div class="cmd-panel">' +
+          '<h4>Régénérer</h4>' +
+          '<div class="row"><code>(vide)</code><span>ré-essai avec la consigne mémorisée</span></div>' +
+          '<div class="row"><code>texte</code><span>consigne pour l\'IA — gardée entre essais, effacée à la publication</span></div>' +
+          '<div class="row"><code>/new [texte]</code><span>repartir à zéro : efface l\'historique de consignes, régénère depuis l\'original + prompt de base pur (anti-artefacts)</span></div>' +
+          '<div class="row"><code>/original [texte]</code><span>la référence est douteuse ou indisponible : re-sourcing par le pipeline, aucune régénération sur une mauvaise base</span></div>' +
+          '<h4>Rejeter</h4>' +
+          '<div class="row"><code>texte</code><span>motif d\'exclusion FA — réévaluable quand l\'état de l\'art évolue (bouton Réactiver)</span></div>' +
+        '</div></details>';
       const reactivate = '<button name="action" value="reactivate" style="' + btn + ';background:#fff;color:var(--ink);border:1px solid var(--line)">Réactiver</button>';
       let inner = '';
       if (st === 'to-validate') inner = publish + regen + note + reject;
@@ -854,7 +876,7 @@ function viewShadowList(data) {
       else if (st === 'verify-original') inner = publish + regen + note + reject;
       else if (st === 'rejected') inner = reactivate;
       if (inner) {
-        actions = '<form method="post" action="/admin/shadowlist" style="display:flex;gap:.6rem;margin-top:.9rem;flex-wrap:wrap;align-items:center">' +
+        actions = '<form method="post" action="/admin/shadowlist" style="position:relative;display:flex;gap:.6rem;margin-top:.9rem;flex-wrap:wrap;align-items:center">' +
           '<input type="hidden" name="id" value="' + esc(id) + '">' + inner + '</form>';
       }
       if (st === 'regenerate' && r.regenHint) {
