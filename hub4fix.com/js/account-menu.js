@@ -13,12 +13,17 @@
  * Usage : <script src="js/account-menu.js"></script> en fin de <body>.
  */
 (function () {
-  var DEMO_KEY = 'h4f_demo', CTX_KEY = 'h4f_ctx';
+  var DEMO_KEY = 'h4f_demo', CTX_KEY = 'h4f_ctx', CLIENT_KEY = 'h4f_client_session';
   var PARTNER_URL = 'https://h4f-partenaire.duclosjulien.workers.dev';
   function demoOn() { try { return localStorage.getItem(DEMO_KEY) === '1'; } catch (e) { return false; } }
   function setDemo(v) { try { v ? localStorage.setItem(DEMO_KEY, '1') : localStorage.removeItem(DEMO_KEY); } catch (e) {} }
   function ctx() { try { return localStorage.getItem(CTX_KEY) || 'client'; } catch (e) { return 'client'; } }
   function setCtx(c) { try { localStorage.setItem(CTX_KEY, c); } catch (e) {} }
+  // Session client légère (B2C) : alimente le même pipeline de lead que les
+  // partenaires (worker/collect-email.js), sans back-end de session réel —
+  // à remplacer par une vraie auth serveur si un espace client complet naît.
+  function clientSession() { try { return JSON.parse(localStorage.getItem(CLIENT_KEY) || 'null'); } catch (e) { return null; } }
+  function setClientSession(s) { try { s ? localStorage.setItem(CLIENT_KEY, JSON.stringify(s)) : localStorage.removeItem(CLIENT_KEY); } catch (e) {} }
 
   var CSS =
     '.h4f-nav-tools{display:flex;align-items:center;gap:.8rem}' +
@@ -88,9 +93,13 @@
 
   function menuHtml(on) {
     var c = ctx();
+    var cs = !on ? clientSession() : null;
     var head = on
       ? '<div><div class="nm">Compte Démo</div><div class="em">demo@hub4fix.com</div></div><div class="h4f-tok">⬡ 5</div>'
-      : '<div><div class="nm">Visiteur</div><div class="em">Non connecté</div></div>';
+      : (cs
+        ? '<div><div class="nm">' + (cs.prenom || 'Client') + '</div><div class="em">' + cs.email + '</div></div>'
+        : '<div><div class="nm">Visiteur</div><div class="em">Non connecté</div></div>');
+    var exitLabel = on ? 'Quitter la démo' : (cs ? 'Se déconnecter' : 'Se connecter');
     return '<button class="h4f-acc-btn" id="h4fAccBtn" aria-label="Compte">' +
       '<svg class="h4f-acc-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0112 0v1"/></svg>' +
       tokenBadge(on) + '</button>' +
@@ -103,7 +112,7 @@
         '<div class="h4f-body">' + bodyHtml(on, c) + '</div>' +
         '<div class="h4f-links">' +
           '<a href="mon-compte.html">Mon compte</a>' +
-          (on ? '<a href="#" class="out" id="h4fExit">Quitter la démo</a>' : '<a href="#" class="out" id="h4fExit">Se connecter</a>') +
+          '<a href="#" class="out" id="h4fExit">' + exitLabel + '</a>' +
         '</div>' +
       '</div>';
   }
@@ -140,14 +149,19 @@
       t.addEventListener('click', function () { setCtx(t.getAttribute('data-ctx')); render(); document.getElementById('h4fMenu').classList.add('open'); });
     });
 
-    // quitter démo / se connecter
+    // quitter démo / se déconnecter / se connecter
     var exit = document.getElementById('h4fExit');
     if (exit) exit.addEventListener('click', function (e) {
       e.preventDefault();
-      if (on) { setDemo(false); render(); }
-      else { window.location.href = PARTNER_URL; }
+      if (on) { setDemo(false); render(); return; }
+      if (clientSession()) { setClientSession(null); render(); return; }
+      if (ctx() === 'client') { if (window.H4FClientAuth) window.H4FClientAuth.open(); return; }
+      window.location.href = PARTNER_URL;
     });
   }
+
+  // API exposée pour js/client-auth.js (léger, sans back-end réel — cf. clientSession() ci-dessus)
+  window.H4FAccount = { render: render, setClientSession: function (s) { setClientSession(s); render(); }, clientSession: clientSession };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', render);
   else render();
