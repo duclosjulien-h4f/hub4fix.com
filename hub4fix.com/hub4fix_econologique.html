@@ -171,6 +171,22 @@ p.body,.stat .cap,.third .lab,.tl-item .desc,.step p,.card p{color:#C9C3B8}
 #mmspine{position:absolute;top:0;left:0;width:100%;z-index:0;pointer-events:none}
 #mmspine path{filter:drop-shadow(0 0 6px rgba(184,150,62,.25))}
 
+/* == bouton retour haut : logo H4F qui file vers le haut == */
+#toTop{position:fixed;right:1.6rem;bottom:1.6rem;z-index:180;width:64px;height:64px;border-radius:50%;border:1px solid rgba(184,150,62,.45);background:rgba(21,19,15,.82);backdrop-filter:blur(6px);cursor:pointer;display:flex;align-items:center;justify-content:center;overflow:hidden;opacity:0;transform:translateY(18px);pointer-events:none;transition:opacity .45s,transform .45s,box-shadow .25s}
+#toTop.show{opacity:1;transform:none;pointer-events:auto}
+#toTop:hover{box-shadow:0 10px 28px rgba(184,150,62,.28);border-color:var(--gold)}
+#toTop .mono{font-family:var(--serif);font-weight:600;font-size:1.15rem;color:var(--ivory);line-height:1;position:relative;z-index:2;animation:ttRise 1.15s cubic-bezier(.4,0,.6,1) infinite}
+#toTop .mono sup{color:var(--red);font-size:.6em}
+#toTop .lines{position:absolute;inset:0;z-index:1}
+#toTop .lines line{stroke:rgba(184,150,62,.55);stroke-width:1.6;stroke-linecap:round;animation:ttStreak 1s linear infinite}
+#toTop .lines line:nth-child(2){animation-delay:.33s;stroke:rgba(201,195,184,.4)}
+#toTop .lines line:nth-child(3){animation-delay:.66s}
+@keyframes ttRise{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes ttStreak{0%{transform:translateY(-26px);opacity:0}25%{opacity:1}100%{transform:translateY(30px);opacity:0}}
+#toTop.launch .mono{animation:ttLaunch .6s cubic-bezier(.5,0,1,1) forwards}
+@keyframes ttLaunch{to{transform:translateY(-70px);opacity:0}}
+@media(max-width:760px){#toTop{right:1rem;bottom:1rem;width:54px;height:54px}}
+
 /* == carte maillage (reprise de index.html) == */
 .maillage-map-wrap{display:flex;justify-content:center;align-items:flex-end;gap:1.5rem;margin:2.5rem 0;position:relative}
 .maillage-map svg{width:100%;height:auto}
@@ -479,6 +495,34 @@ p.body,.stat .cap,.third .lab,.tl-item .desc,.step p,.card p{color:#C9C3B8}
   HUB⁴FIX — Kintsugi Numérique · <a href="https://www.lerooftopdeviry.fr/" target="_blank" rel="noopener">Le rooftop de Viry</a>, 53 rue Francoeur, Viry-Châtillon ·
   <a href="cgu.html">CGU</a> · <a href="cgv.html">CGV</a>
 </footer>
+
+<button id="toTop" aria-label="Remonter en haut de page" title="Remonter">
+  <svg class="lines" viewBox="0 0 64 64" aria-hidden="true">
+    <line x1="16" y1="38" x2="16" y2="52"/>
+    <line x1="32" y1="42" x2="32" y2="58"/>
+    <line x1="48" y1="38" x2="48" y2="52"/>
+  </svg>
+  <span class="mono">H<sup>4</sup>F</span>
+</button>
+
+<script>
+// bouton retour haut : visible des que le hero n'est plus a l'ecran
+(function(){
+  var btn = document.getElementById('toTop');
+  var hero = document.querySelector('section');
+  function check(){
+    var out = hero.getBoundingClientRect().bottom <= 0;
+    btn.classList.toggle('show', out);
+  }
+  window.addEventListener('scroll', check, { passive:true });
+  check();
+  btn.addEventListener('click', function(){
+    btn.classList.add('launch');
+    window.scrollTo({ top:0, behavior:'smooth' });
+    setTimeout(function(){ btn.classList.remove('launch'); }, 700);
+  });
+})();
+</script>
 
 <script>
 // reveal au scroll
