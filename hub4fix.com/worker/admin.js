@@ -838,8 +838,9 @@ function viewShadowList(data) {
       const regen = '<button name="action" value="regenerate" style="' + btn + ';background:#b8860b;color:#fff" title="Le visuel ne correspond pas : relancer la génération">Régénérer</button>';
       // Rejeter = verdict métier : la fabrication additive n\'est pas pertinente pour cette pièce
       const reject = '<button name="action" value="reject" style="' + btn + ';background:#fff;color:var(--red);border:1px solid #f3c2c2" title="Écarter : fabrication additive non pertinente (transparence, sécurité…)">Rejeter</button>';
-      // Champ partagé : précision pour l'IA (Régénérer) ou motif (Rejeter)
-      const note = '<input type="text" name="note" placeholder="précision pour l\'IA (régén.) / motif (rejet)" style="flex:1;min-width:190px;font-size:.75rem;padding:.45rem .6rem;border:1px solid var(--line);border-radius:7px">';
+      // Champ partagé : précision pour l'IA (Régénérer) ou motif (Rejeter).
+      // Commande force : /new = repartir à zéro (efface la consigne mémorisée).
+      const note = '<input type="text" name="note" placeholder="précision IA / motif rejet — /new = repartir à zéro" title="Régénérer : consigne transmise à l\'IA (conservée entre essais). /new [consigne] : efface l\'historique et repart de l\'original seul. Rejeter : motif d\'exclusion (réévaluable)." style="flex:1;min-width:190px;font-size:.75rem;padding:.45rem .6rem;border:1px solid var(--line);border-radius:7px">';
       const reactivate = '<button name="action" value="reactivate" style="' + btn + ';background:#fff;color:var(--ink);border:1px solid var(--line)">Réactiver</button>';
       let inner = '';
       if (st === 'to-validate') inner = publish + regen + note + reject;
@@ -1092,13 +1093,23 @@ export default {
         // l'IA ; sans saisie, la consigne précédente est gardée. La régénération
         // part IMMÉDIATEMENT en tâche de fond (l'admin continue de valider) ;
         // en cas d'échec cloud, le pipeline local prend le relais.
+        //
+        // Commandes force dans le champ note :
+        //   /new [consigne]  -> repartir à zéro : efface la consigne mémorisée
+        //                       (anti-artefacts quand la proposition est trop
+        //                       éloignée), régénère depuis l'original + prompt
+        //                       de base, avec l'éventuelle consigne neuve.
+        const cmd = note.match(/^\/(\w+)\s*([\s\S]*)$/);
+        const freshStart = !!(cmd && cmd[1].toLowerCase() === 'new');
+        const hintNote = freshStart ? (cmd[2] || '').trim() : note;
         const patch = Object.assign({ status: 'regenerate' }, stamp);
-        if (note) patch.regenHint = note;
+        if (freshStart) patch.regenHint = hintNote; // remplace TOUJOURS (y compris par vide)
+        else if (hintNote) patch.regenHint = hintNote;
         await patchPiece(env, id, patch);
-        await audit(env, sess.email, 'piece-regenerate', id + (note ? ' — ' + note : ''));
+        await audit(env, sess.email, 'piece-regenerate', id + (freshStart ? ' [/new]' : '') + (hintNote ? ' — ' + hintNote : ''));
         if (env.GEMINI_API_KEY && env.PIECES_R2) {
           const row = pdata.error ? null : pdata.rows.find((r) => r.id === id);
-          const hint = note || (row && row.regenHint) || '';
+          const hint = freshStart ? hintNote : (hintNote || (row && row.regenHint) || '');
           const bg = regenerateCloud(env, id, hint);
           if (ctx && ctx.waitUntil) ctx.waitUntil(bg); else await bg;
         }
