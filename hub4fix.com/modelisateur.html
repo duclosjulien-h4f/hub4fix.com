@@ -418,7 +418,7 @@ footer{padding:3rem 4rem;border-top:1px solid var(--cream);display:flex;justify-
 
     <div class="form-row">
       <div class="form-group">
-        <label data-i18n="form_phone">Téléphone</label>
+        <label data-i18n="form_phone">Téléphone *</label>
         <div class="tel-row">
           <select name="indicatif" class="tel-indicatif" aria-label="Indicatif">
             <option value="+33" selected>🇫🇷 +33</option>
@@ -442,13 +442,18 @@ footer{padding:3rem 4rem;border-top:1px solid var(--cream);display:flex;justify-
             <option value="+225">🇨🇮 +225</option>
             <option value="+237">🇨🇲 +237</option>
           </select>
-          <input type="tel" name="tel">
+          <input type="tel" name="tel" required>
         </div>
       </div>
       <div class="form-group">
         <label data-i18n="form_zip">Code postal *</label>
         <input type="text" name="cp" required>
       </div>
+    </div>
+
+    <div class="form-group">
+      <label data-i18n="form_ville">Ville *</label>
+      <input type="text" name="ville" required>
     </div>
 
     <div class="form-group">
@@ -582,8 +587,9 @@ var I18N = {
     form_firstname: "Prénom *",
     form_lastname: "Nom *",
     form_email: "Email *",
-    form_phone: "Téléphone",
+    form_phone: "Téléphone *",
     form_zip: "Code postal *",
+    form_ville: "Ville *",
     form_status: "Statut professionnel",
     form_status_default: "— Sélectionnez —",
     form_status_micro: "Micro-entrepreneur / Auto-entrepreneur",
@@ -646,8 +652,9 @@ var I18N = {
     form_firstname: "First name *",
     form_lastname: "Last name *",
     form_email: "Email *",
-    form_phone: "Phone",
+    form_phone: "Phone *",
     form_zip: "Postal code *",
+    form_ville: "City *",
     form_status: "Professional status",
     form_status_default: "— Select —",
     form_status_micro: "Sole trader / Micro-enterprise",
@@ -710,8 +717,9 @@ var I18N = {
     form_firstname: "Vorname *",
     form_lastname: "Nachname *",
     form_email: "E-Mail *",
-    form_phone: "Telefon",
+    form_phone: "Telefon *",
     form_zip: "Postleitzahl *",
+    form_ville: "Stadt *",
     form_status: "Beruflicher Status",
     form_status_default: "— Bitte wählen —",
     form_status_micro: "Einzelunternehmer / Kleinunternehmer",
@@ -774,8 +782,9 @@ var I18N = {
     form_firstname: "Nombre *",
     form_lastname: "Apellido *",
     form_email: "Email *",
-    form_phone: "Teléfono",
+    form_phone: "Teléfono *",
     form_zip: "Código postal *",
+    form_ville: "Ciudad *",
     form_status: "Situación profesional",
     form_status_default: "— Seleccione —",
     form_status_micro: "Autónomo / Microempresa",
@@ -838,8 +847,9 @@ var I18N = {
     form_firstname: "Nome *",
     form_lastname: "Cognome *",
     form_email: "Email *",
-    form_phone: "Telefono",
+    form_phone: "Telefono *",
     form_zip: "CAP *",
+    form_ville: "Città *",
     form_status: "Stato professionale",
     form_status_default: "— Seleziona —",
     form_status_micro: "Lavoratore autonomo / Ditta individuale",
@@ -924,6 +934,7 @@ function submitModForm(e){
   var consent=(window.H4FConsent||{}).modelisateur;
   var err=document.getElementById('mod-error');
   if(!consent){ err.textContent='Merci de lire et accepter les CGV Modélisateurs avant d’envoyer votre candidature.'; err.style.display='block'; return false; }
+  if(!data.logiciels || !data.logiciels.length){ err.textContent='Sélectionnez au moins un logiciel de CAO maîtrisé.'; err.style.display='block'; return false; }
   err.style.display='none';
   var btn=form.querySelector('.form-submit');
   btn.disabled=true; var label=btn.textContent; btn.textContent='Envoi…';

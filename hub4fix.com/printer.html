@@ -650,6 +650,7 @@ function submitPrintForm(e){
   if(!consent){ err.textContent='Merci de lire et accepter les CGV Printers avant de rejoindre le réseau.'; err.style.display='block'; return false; }
   var machines=readMachines();
   if(!machines.length){ err.textContent='Indiquez au moins une imprimante (marque / modèle) dans le parc machines.'; err.style.display='block'; return false; }
+  if(!data.materiaux || !data.materiaux.length){ err.textContent='Sélectionnez au moins un matériau maîtrisé.'; err.style.display='block'; return false; }
   data.machines=machines;
   data.parc_machines=machines.map(function(m){ return m.quantite+'× '+m.modele+(m.techno?' ('+m.techno+')':''); }).join(' ; ');
   err.style.display='none';
