@@ -562,11 +562,20 @@ footer{padding:3rem 4rem;border-top:1px solid var(--cream);display:flex;justify-
 
 <script src="js/collect-email.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="js/postal-format.js"></script>
 <script src="js/b2b-auth.js"></script>
 <script>
 window.addEventListener('load', function(){
   H4FGoogleSignIn('gsi-print', 'printer-form', 'gsi-status-print');
   H4FGeoloc('geoloc-print', 'printer-form');
+  (function(){
+    var form = document.getElementById('printer-form');
+    var indicatif = form.querySelector('[name="indicatif"]');
+    var cp = form.querySelector('[name="cp"]');
+    function refresh(){ H4FPostal.apply(cp, H4FPostal.isoFromIndicatif(indicatif.value)); }
+    indicatif.addEventListener('change', refresh);
+    refresh();
+  })();
 });
 </script>
 <footer>

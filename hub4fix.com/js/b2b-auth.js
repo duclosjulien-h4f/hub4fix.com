@@ -156,7 +156,10 @@
     container.appendChild(btn);
   };
 
-  // Géolocalisation navigateur -> code postal / ville (API Base Adresse Nationale, gratuite, sans clé)
+  // Géolocalisation navigateur -> pays / code postal / ville, partout dans le
+  // monde (Nominatim/OpenStreetMap, gratuit — usage ponctuel à l'initiative de
+  // l'utilisateur, dans les clous de la politique d'usage du service public).
+  // Insensible au VPN : lit la position matérielle du device, pas l'IP.
   window.H4FGeoloc = function(btnId, formId){
     var btn = document.getElementById(btnId);
     var form = document.getElementById(formId);
@@ -173,15 +176,26 @@
       btn.textContent = 'Localisation…';
       navigator.geolocation.getCurrentPosition(function(pos){
         var lat = pos.coords.latitude, lon = pos.coords.longitude;
-        fetch('https://api-adresse.data.gouv.fr/reverse/?lon=' + lon + '&lat=' + lat)
+        fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&lat=' + lat + '&lon=' + lon)
           .then(function(r){ return r.json(); })
           .then(function(j){
-            var f = j.features && j.features[0];
             btn.disabled = false; btn.textContent = original;
-            if(!f) return;
-            var p = f.properties;
-            var cp = form.querySelector('[name="cp"]'); if(cp) cp.value = p.postcode || cp.value;
-            var ville = form.querySelector('[name="ville"]'); if(ville) ville.value = p.city || ville.value;
+            var a = j && j.address; if(!a) return;
+            var cp = form.querySelector('[name="cp"]');
+            var ville = form.querySelector('[name="ville"]');
+            if(ville) ville.value = a.city || a.town || a.village || a.municipality || ville.value;
+
+            var iso = a.country_code ? a.country_code.toUpperCase() : null;
+            var indicatifEl = form.querySelector('[name="indicatif"]');
+            if(iso && indicatifEl && window.H4FPostal){
+              var dial = H4FPostal.indicatifFromIso(iso);
+              var hasOpt = dial && Array.prototype.some.call(indicatifEl.options, function(o){ return o.value === dial; });
+              if(hasOpt) indicatifEl.value = dial;
+            }
+            if(cp){
+              if(window.H4FPostal) H4FPostal.apply(cp, iso);
+              cp.value = a.postcode || cp.value;
+            }
           })
           .catch(function(){ btn.disabled = false; btn.textContent = original; });
       }, function(){
