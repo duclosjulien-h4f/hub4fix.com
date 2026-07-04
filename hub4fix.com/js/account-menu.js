@@ -57,7 +57,9 @@
     '.h4f-item.active-role{background:#f5f0ff}' +
     '.h4f-links{border-top:1px solid #EDE6DC;padding:.3rem}' +
     '.h4f-links a{display:block;padding:.55rem .8rem;border-radius:7px;text-decoration:none;color:#3B3632;font-size:.82rem}' +
-    '.h4f-links a:hover{background:#F3EEE8}.h4f-links a.out{color:#7A7268}';
+    '.h4f-links a:hover{background:#F3EEE8}.h4f-links a.out{color:#7A7268}' +
+    '.h4f-item.h4f-primary{font-weight:600}' +
+    '.h4f-partner-label{padding:.55rem .8rem .2rem;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#7A7268}';
 
   var st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
 
@@ -91,20 +93,33 @@
            '<a class="h4f-item" href="modelisateur.html"><span>Devenir Modélisateur</span><span class="badge-cta">S\'inscrire</span></a>';
   }
 
+  // Personne de connecté, pas de démo : pattern classique (pas de tabs contexte,
+  // ça n'a pas de sens avant qu'une identité existe).
+  function loggedOutMenu() {
+    return '<div class="h4f-head"><div><div class="nm">Visiteur</div><div class="em">Non connecté</div></div></div>' +
+      '<div class="h4f-body">' +
+        '<a class="h4f-item h4f-primary" href="#" id="h4fLoginLink"><span>Connexion</span></a>' +
+        '<a class="h4f-item" href="#" id="h4fSignupLink"><span>Inscription</span></a>' +
+      '</div>' +
+      '<div class="h4f-links">' +
+        '<div class="h4f-partner-label">Devenir partenaire</div>' +
+        '<a href="printer.html">Printer</a>' +
+        '<a href="modelisateur.html">Modélisateur</a>' +
+      '</div>';
+  }
+
   function menuHtml(on) {
     var c = ctx();
     var cs = !on ? clientSession() : null;
-    var head = on
-      ? '<div><div class="nm">Compte Démo</div><div class="em">demo@hub4fix.com</div></div><div class="h4f-tok">⬡ 5</div>'
-      : (cs
-        ? '<div><div class="nm">' + (cs.prenom || 'Client') + '</div><div class="em">' + cs.email + '</div></div>'
-        : '<div><div class="nm">Visiteur</div><div class="em">Non connecté</div></div>');
-    var exitLabel = on ? 'Quitter la démo' : (cs ? 'Se déconnecter' : 'Se connecter');
-    return '<button class="h4f-acc-btn" id="h4fAccBtn" aria-label="Compte">' +
-      '<svg class="h4f-acc-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0112 0v1"/></svg>' +
-      tokenBadge(on) + '</button>' +
-      '<div class="h4f-menu" id="h4fMenu">' +
-        '<div class="h4f-head">' + head + '</div>' +
+    var body;
+    if (!on && !cs) {
+      body = loggedOutMenu();
+    } else {
+      var head = on
+        ? '<div><div class="nm">Compte Démo</div><div class="em">demo@hub4fix.com</div></div><div class="h4f-tok">⬡ 5</div>'
+        : '<div><div class="nm">' + (cs.prenom || 'Client') + '</div><div class="em">' + cs.email + '</div></div>';
+      var exitLabel = on ? 'Quitter la démo' : 'Se déconnecter';
+      body = '<div class="h4f-head">' + head + '</div>' +
         '<div class="h4f-tabs">' +
           '<button class="h4f-tab' + (c === 'client' ? ' active' : '') + '" data-ctx="client">Client</button>' +
           '<button class="h4f-tab' + (c === 'partenaire' ? ' active' : '') + '" data-ctx="partenaire">Partenaire</button>' +
@@ -113,8 +128,12 @@
         '<div class="h4f-links">' +
           '<a href="mon-compte.html">Mon compte</a>' +
           '<a href="#" class="out" id="h4fExit">' + exitLabel + '</a>' +
-        '</div>' +
-      '</div>';
+        '</div>';
+    }
+    return '<button class="h4f-acc-btn" id="h4fAccBtn" aria-label="Compte">' +
+      '<svg class="h4f-acc-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0112 0v1"/></svg>' +
+      tokenBadge(on) + '</button>' +
+      '<div class="h4f-menu" id="h4fMenu">' + body + '</div>';
   }
 
   function render() {
@@ -149,14 +168,24 @@
       t.addEventListener('click', function () { setCtx(t.getAttribute('data-ctx')); render(); document.getElementById('h4fMenu').classList.add('open'); });
     });
 
-    // quitter démo / se déconnecter / se connecter
+    // quitter démo / se déconnecter
     var exit = document.getElementById('h4fExit');
     if (exit) exit.addEventListener('click', function (e) {
       e.preventDefault();
       if (on) { setDemo(false); render(); return; }
-      if (clientSession()) { setClientSession(null); render(); return; }
-      if (ctx() === 'client') { if (window.H4FClientAuth) window.H4FClientAuth.open(); return; }
-      window.location.href = PARTNER_URL;
+      setClientSession(null); render();
+    });
+
+    // pattern classique visiteur : connexion / inscription
+    var loginLink = document.getElementById('h4fLoginLink');
+    if (loginLink) loginLink.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (window.H4FClientAuth) window.H4FClientAuth.open('login');
+    });
+    var signupLink = document.getElementById('h4fSignupLink');
+    if (signupLink) signupLink.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (window.H4FClientAuth) window.H4FClientAuth.open('signup');
     });
   }
 

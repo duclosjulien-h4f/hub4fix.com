@@ -77,7 +77,12 @@
   }
 
   window.H4FClientAuth = {
-    open: function(){
+    open: function(mode){
+      // 'login' et 'signup' ouvrent le même formulaire (aucun back-end reel
+      // ne distingue encore un compte existant d'un nouveau) — seul le
+      // libelle change, pour respecter le pattern connexion/inscription
+      // classique attendu depuis le menu compte.
+      var isLogin = mode === 'login';
       injectStyles();
       var overlay = document.createElement('div');
       overlay.className = 'h4fca-overlay';
@@ -90,8 +95,8 @@
         '<div class="h4fca-card">' +
           '<button type="button" class="h4fca-close" aria-label="Fermer">×</button>' +
           '<div class="h4fca-head"><div class="h4fca-badge">Espace client</div>' +
-            '<h3>Trouvez votre pièce en 30 secondes</h3>' +
-            '<p>Un email suffit — pas de CGV à lire en entier, pas de dossier à monter. Ça, c’est réservé aux partenaires.</p>' +
+            '<h3>' + (isLogin ? 'Ravi de vous revoir' : 'Trouvez votre pièce en 30 secondes') + '</h3>' +
+            '<p>' + (isLogin ? 'Reconnectez-vous avec le même e-mail — aucune donnée à ressaisir.' : 'Un email suffit — pas de CGV à lire en entier, pas de dossier à monter. Ça, c’est réservé aux partenaires.') + '</p>' +
           '</div>' +
           '<button type="button" class="h4fca-google">' + GOOGLE_G_SVG + '<span>Continuer avec Google</span></button>' +
           '<div class="h4fca-picker" style="display:none">' + rows + '</div>' +
@@ -100,7 +105,7 @@
             '<input type="text" name="prenom" placeholder="Prénom (facultatif)">' +
             '<input type="email" name="email" placeholder="Email *" required>' +
             '<label class="h4fca-check"><input type="checkbox" name="consent" required> J’accepte les <a href="cgv-clients.html" target="_blank">CGU/CGV Clients</a></label>' +
-            '<button type="submit" class="h4fca-submit">Continuer →</button>' +
+            '<button type="submit" class="h4fca-submit">' + (isLogin ? 'Se connecter →' : 'Continuer →') + '</button>' +
             '<p class="h4fca-error" style="display:none"></p>' +
           '</form>' +
         '</div>';
