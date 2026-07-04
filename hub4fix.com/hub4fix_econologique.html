@@ -147,6 +147,9 @@ p.body{font-size:clamp(1rem,2vw,1.25rem);font-weight:300;color:var(--earth);max-
 
 /* cta */
 .btn{display:inline-block;background:var(--red);color:#fff;text-decoration:none;padding:1rem 2.2rem;border-radius:10px;font-weight:600;font-size:.95rem;letter-spacing:.02em;transition:transform .2s,box-shadow .2s}
+.btn-outline{display:inline-block;background:none;color:var(--ink);border:1px solid var(--earth);text-decoration:none;padding:1rem 2.2rem;border-radius:10px;font-weight:600;font-size:.95rem;letter-spacing:.02em;transition:all .2s}
+.btn-outline:hover{border-color:var(--red);color:var(--red)}
+.cta-row{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
 .btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(200,16,46,.3)}
 footer{background:var(--ink);color:#9b958a;text-align:center;padding:2.6rem 2rem;font-family:var(--mono);font-size:.72rem;letter-spacing:.05em}
 footer a{color:var(--gold);text-decoration:none}
@@ -487,7 +490,10 @@ p.body,.stat .cap,.third .lab,.tl-item .desc,.step p,.card p{color:#C9C3B8}
     <div class="eyebrow reveal">Rejoignez l'aventure</div>
     <h2 class="title reveal d1">Investir dans la pièce<br>qui <em>manquait</em>.</h2>
     <p class="body reveal d2" style="margin:0 auto 2rem">Vous êtes investisseur ou partenaire ? Parlons du dossier complet.</p>
-    <a class="btn reveal d3" href="mailto:contact@hub4fix.com?subject=Hub4Fix%20—%20Dossier%20investisseur">Demander le dossier →</a>
+    <div class="cta-row reveal d3">
+      <a class="btn" href="mailto:contact@hub4fix.com?subject=Hub4Fix%20—%20Dossier%20investisseur">Demander le dossier →</a>
+      <a class="btn-outline" href="index.html#demo" id="ctaSeeDemo">Voir la démo du site →</a>
+    </div>
   </div>
 </section>
 
@@ -758,5 +764,15 @@ document.querySelectorAll('[data-count]').forEach(function(el){ ioCount.observe(
 </script>
 <script src="js/account-menu.js"></script>
 <script src="js/client-auth.js"></script>
+<script>
+// Le prospect qui clique "Voir la démo" atterrit directement dans une
+// expérience explorable (mode démo activé), sans passer par l'écran de
+// connexion des pages verrouillées (cf. js/access-gate.js).
+var seeDemoBtn = document.getElementById('ctaSeeDemo');
+if (seeDemoBtn) seeDemoBtn.addEventListener('click', function(){
+  if (window.H4FAccount) window.H4FAccount.setDemo(true);
+  else { try { localStorage.setItem('h4f_demo', '1'); } catch(e){} }
+});
+</script>
 </body>
 </html>
