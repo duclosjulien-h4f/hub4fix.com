@@ -94,17 +94,14 @@
   }
 
   // Personne de connecté, pas de démo : pattern classique (pas de tabs contexte,
-  // ça n'a pas de sens avant qu'une identité existe).
+  // ça n'a pas de sens avant qu'une identité existe). "Devenir partenaire" ne
+  // vit pas ici : il vit à la fin du parcours d'inscription (cf. client-auth.js)
+  // et dans "Mon compte" pour ceux qui ont déjà un compte.
   function loggedOutMenu() {
     return '<div class="h4f-head"><div><div class="nm">Visiteur</div><div class="em">Non connecté</div></div></div>' +
       '<div class="h4f-body">' +
         '<a class="h4f-item h4f-primary" href="#" id="h4fLoginLink"><span>Connexion</span></a>' +
         '<a class="h4f-item" href="#" id="h4fSignupLink"><span>Inscription</span></a>' +
-      '</div>' +
-      '<div class="h4f-links">' +
-        '<div class="h4f-partner-label">Devenir partenaire</div>' +
-        '<a href="printer.html">Printer</a>' +
-        '<a href="modelisateur.html">Modélisateur</a>' +
       '</div>';
   }
 

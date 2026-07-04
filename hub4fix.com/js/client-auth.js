@@ -168,15 +168,35 @@
 
         submitLead(data).then(function(){
           if(window.H4FAccount) window.H4FAccount.setClientSession({ email:data.email, prenom:data.prenom||'', at:Date.now() });
+
+          function closeOrReload(){
+            if(window.H4F_GATE_ACTIVE) window.location.reload();
+            else overlay.remove();
+          }
+
+          if(isLogin){
+            card.innerHTML =
+              '<div class="h4fca-success"><div class="ic">✓</div>' +
+              '<h3>Bienvenue' + (data.prenom ? ', ' + data.prenom : '') + '</h3>' +
+              '<p>Vous êtes connecté — direction la Hotlist pour trouver votre pièce.</p></div>';
+            setTimeout(closeOrReload, 1600);
+            return;
+          }
+
+          // Inscription seulement : "Devenir partenaire" se propose ici, à la
+          // fin du parcours — pas dans le menu compte (cf. account-menu.js).
           card.innerHTML =
             '<div class="h4fca-success"><div class="ic">✓</div>' +
             '<h3>Bienvenue' + (data.prenom ? ', ' + data.prenom : '') + '</h3>' +
-            '<p>Vous êtes connecté — direction la Hotlist pour trouver votre pièce.</p></div>';
-          setTimeout(function(){
-            // Sur une page verrouillée (js/access-gate.js), on recharge pour lever le verrou.
-            if(window.H4F_GATE_ACTIVE) window.location.reload();
-            else overlay.remove();
-          }, 1600);
+            '<p>Vous êtes connecté — direction la Hotlist pour trouver votre pièce.</p>' +
+            '<div style="margin-top:1.1rem;padding-top:1rem;border-top:1px solid #EDE6DC;font-size:.82rem;color:#7A7268">' +
+              'Vous avez une imprimante 3D, ou vous modélisez des pièces ?<br>' +
+              '<a href="printer.html" style="color:#C8102E;font-weight:600;text-decoration:none">Devenir Printer</a> · ' +
+              '<a href="modelisateur.html" style="color:#C8102E;font-weight:600;text-decoration:none">Devenir Modélisateur</a>' +
+            '</div>' +
+            '<button type="button" class="h4fca-submit" id="h4fcaContinue" style="margin-top:1.1rem">Continuer</button>' +
+            '</div>';
+          document.getElementById('h4fcaContinue').addEventListener('click', closeOrReload);
         }).catch(function(){
           btn.disabled = false; btn.textContent = label;
           err.textContent = 'L’envoi a échoué. Vérifiez votre connexion et réessayez.';
