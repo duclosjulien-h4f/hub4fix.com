@@ -96,7 +96,7 @@
           '<button type="button" class="h4fca-close" aria-label="Fermer">×</button>' +
           '<div class="h4fca-head"><div class="h4fca-badge">Espace client</div>' +
             '<h3>' + (isLogin ? 'Ravi de vous revoir' : 'Trouvez votre pièce en 30 secondes') + '</h3>' +
-            '<p>' + (isLogin ? 'Reconnectez-vous avec le même e-mail — aucune donnée à ressaisir.' : 'Un email suffit — pas de CGV à lire en entier, pas de dossier à monter. Ça, c’est réservé aux partenaires.') + '</p>' +
+            '<p>' + (isLogin ? 'Reconnectez-vous avec le même e-mail — aucune donnée à ressaisir.' : 'Un email suffit — une case à cocher pour nos CGU/CGV, pas de dossier à monter. La lecture intégrale imposée, c’est réservé aux partenaires.') + '</p>' +
           '</div>' +
           '<button type="button" class="h4fca-google">' + GOOGLE_G_SVG + '<span>Continuer avec Google</span></button>' +
           '<div class="h4fca-picker" style="display:none">' + rows + '</div>' +
