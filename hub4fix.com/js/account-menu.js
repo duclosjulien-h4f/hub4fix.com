@@ -160,8 +160,14 @@
     });
   }
 
-  // API exposée pour js/client-auth.js (léger, sans back-end réel — cf. clientSession() ci-dessus)
-  window.H4FAccount = { render: render, setClientSession: function (s) { setClientSession(s); render(); }, clientSession: clientSession };
+  // API exposée pour js/client-auth.js et js/access-gate.js (léger, sans back-end réel)
+  window.H4FAccount = {
+    render: render,
+    setClientSession: function (s) { setClientSession(s); render(); },
+    clientSession: clientSession,
+    demoOn: demoOn,
+    setDemo: function (v) { setDemo(v); render(); }
+  };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', render);
   else render();

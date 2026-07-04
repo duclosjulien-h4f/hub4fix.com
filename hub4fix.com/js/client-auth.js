@@ -167,7 +167,11 @@
             '<div class="h4fca-success"><div class="ic">✓</div>' +
             '<h3>Bienvenue' + (data.prenom ? ', ' + data.prenom : '') + '</h3>' +
             '<p>Vous êtes connecté — direction la Hotlist pour trouver votre pièce.</p></div>';
-          setTimeout(function(){ overlay.remove(); }, 1600);
+          setTimeout(function(){
+            // Sur une page verrouillée (js/access-gate.js), on recharge pour lever le verrou.
+            if(window.H4F_GATE_ACTIVE) window.location.reload();
+            else overlay.remove();
+          }, 1600);
         }).catch(function(){
           btn.disabled = false; btn.textContent = label;
           err.textContent = 'L’envoi a échoué. Vérifiez votre connexion et réessayez.';
