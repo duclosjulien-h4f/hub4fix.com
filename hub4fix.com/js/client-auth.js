@@ -12,6 +12,18 @@
  */
 (function(){
   var WORKER_URL = 'https://h4f-collect.duclosjulien.workers.dev';
+  var ADMIN_ORIGIN = 'https://h4f-admin.duclosjulien.workers.dev';
+
+  // L'email tapé est-il un email admin ? Ne renvoie qu'un booléen (worker/admin.js
+  // /api/is-admin), jamais la liste des emails admin — si ça échoue, on ne bloque
+  // jamais le parcours client normal.
+  function checkAdmin(email){
+    if(!email || email.indexOf('@') < 0) return Promise.resolve(false);
+    return fetch(ADMIN_ORIGIN + '/api/is-admin?email=' + encodeURIComponent(email))
+      .then(function(r){ return r.json(); })
+      .then(function(j){ return !!(j && j.isAdmin); })
+      .catch(function(){ return false; });
+  }
 
   var DEMO_ACCOUNTS = [
     { given_name:'Camille', email:'camille.demo@gmail.com' },
@@ -98,9 +110,23 @@
       var form = overlay.querySelector('.h4fca-form');
       var googleBtn = overlay.querySelector('.h4fca-google');
       var picker = overlay.querySelector('.h4fca-picker');
+      var emailEl = form.querySelector('[name="email"]');
 
       overlay.addEventListener('click', function(e){
         if(e.target === overlay || e.target.classList.contains('h4fca-close')) overlay.remove();
+      });
+
+      // Redirection immédiate vers l'espace admin dès qu'un email admin est reconnu,
+      // sans attendre la soumission du formulaire (case CGU non requise dans ce cas).
+      var adminTimer = null;
+      emailEl.addEventListener('input', function(){
+        clearTimeout(adminTimer);
+        var val = emailEl.value.trim();
+        adminTimer = setTimeout(function(){
+          checkAdmin(val).then(function(isAdmin){
+            if(isAdmin) window.location.href = ADMIN_ORIGIN;
+          });
+        }, 500);
       });
 
       googleBtn.addEventListener('click', function(){
@@ -121,6 +147,16 @@
         err.style.display = 'none';
         var data = {};
         new FormData(form).forEach(function(v,k){ data[k] = v; });
+
+        clearTimeout(adminTimer);
+        checkAdmin((data.email||'').trim()).then(function(isAdmin){
+          if(isAdmin){ window.location.href = ADMIN_ORIGIN; return; }
+          submitAsClient(data);
+        });
+      });
+
+      function submitAsClient(data){
+        var err = form.querySelector('.h4fca-error');
         if(!data.consent){ err.textContent = 'Merci d’accepter les CGU/CGV Clients.'; err.style.display = 'block'; return; }
         var btn = form.querySelector('.h4fca-submit');
         btn.disabled = true; var label = btn.textContent; btn.textContent = 'Connexion…';
@@ -137,7 +173,7 @@
           err.textContent = 'L’envoi a échoué. Vérifiez votre connexion et réessayez.';
           err.style.display = 'block';
         });
-      });
+      }
     }
   };
 })();

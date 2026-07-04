@@ -1056,6 +1056,15 @@ export default {
       return htmlResponse('<!doctype html><meta charset=utf-8><div style="font-family:sans-serif;text-align:center;margin-top:4rem">Lien invalide.</div>', 400);
     }
 
+    // 3 bis bis) L'e-mail tapé sur le site public est-il un e-mail admin ? (pour rediriger
+    // vers l'espace admin depuis le modal de connexion client, cf. js/client-auth.js).
+    // Ne renvoie qu'un booléen — jamais la liste des e-mails admin elle-même.
+    if (path === '/api/is-admin') {
+      const email = (url.searchParams.get('email') || '').toLowerCase().trim();
+      const allow = (env.ADMIN_EMAILS || '').toLowerCase().split(',').map((s) => s.trim()).filter(Boolean);
+      return json({ isAdmin: !!email && allow.includes(email) }, 200, { 'Access-Control-Allow-Origin': '*' });
+    }
+
     // 3 ter) API publique « Pièces » (pas de session : token pipeline ou lecture publique)
     if (path === '/api/pieces' && request.method === 'POST') return apiPiecesPost(request, env);
     if (path === '/api/pieces/regen') return apiPiecesRegen(request, env);
