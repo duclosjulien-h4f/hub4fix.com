@@ -165,28 +165,30 @@
       t.addEventListener('click', function () { setCtx(t.getAttribute('data-ctx')); render(); document.getElementById('h4fMenu').classList.add('open'); });
     });
 
-    // quitter démo / se déconnecter
+    // quitter démo / se déconnecter (vraie déconnexion Zitadel si une session existe)
     var exit = document.getElementById('h4fExit');
     if (exit) exit.addEventListener('click', function (e) {
       e.preventDefault();
       if (on) { setDemo(false); render(); return; }
+      if (window.H4FZitadel) { window.H4FZitadel.logout(); return; }
       setClientSession(null); render();
     });
 
-    // pattern classique visiteur : connexion / inscription
+    // pattern classique visiteur : connexion / inscription — Zitadel héberge
+    // les deux (lien "S'inscrire" sur sa propre page de connexion).
     var loginLink = document.getElementById('h4fLoginLink');
     if (loginLink) loginLink.addEventListener('click', function (e) {
       e.preventDefault();
-      if (window.H4FClientAuth) window.H4FClientAuth.open('login');
+      if (window.H4FZitadel) window.H4FZitadel.login();
     });
     var signupLink = document.getElementById('h4fSignupLink');
     if (signupLink) signupLink.addEventListener('click', function (e) {
       e.preventDefault();
-      if (window.H4FClientAuth) window.H4FClientAuth.open('signup');
+      if (window.H4FZitadel) window.H4FZitadel.login();
     });
   }
 
-  // API exposée pour js/client-auth.js et js/access-gate.js (léger, sans back-end réel)
+  // API exposée pour js/access-gate.js
   window.H4FAccount = {
     render: render,
     setClientSession: function (s) { setClientSession(s); render(); },

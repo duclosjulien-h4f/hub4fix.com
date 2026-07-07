@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connexion… — Hub⁴Fix</title>
+<meta name="robots" content="noindex">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Karla',Arial,sans-serif;background:#FAF8F5;color:#3B3632;display:flex;align-items:center;justify-content:center;height:100vh}
+.box{text-align:center;padding:2rem}
+.spinner{width:32px;height:32px;border:3px solid #EDE6DC;border-top-color:#C8102E;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1.1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+#msg{font-size:.92rem;color:#7A7268}
+#msg.err{color:#C8102E;max-width:380px}
+#retry{display:none;margin-top:1rem;padding:.7rem 1.4rem;border:1px solid #C8102E;background:none;color:#C8102E;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="spinner" id="spinner"></div>
+  <p id="msg">Connexion en cours…</p>
+  <button id="retry" onclick="window.location.href='index.html'">Retour à l'accueil</button>
+</div>
+<script>
+(function(){
+  var ISSUER = 'https://hub4fix-l2itdp.ch1.zitadel.cloud';
+  var CLIENT_ID = '380712988870612363';
+  var REDIRECT_URI = 'https://hub4fix.com/auth-callback.html';
+
+  var params = new URLSearchParams(window.location.search);
+  var code = params.get('code');
+  var state = params.get('state');
+  var oidcError = params.get('error');
+  var msgEl = document.getElementById('msg');
+  var spinnerEl = document.getElementById('spinner');
+  var retryEl = document.getElementById('retry');
+
+  function fail(text){
+    spinnerEl.style.display = 'none';
+    msgEl.className = 'err';
+    msgEl.textContent = text;
+    retryEl.style.display = 'inline-block';
+  }
+
+  if(oidcError){ fail('Connexion annulée ou refusée (' + oidcError + ').'); return; }
+
+  var savedState, verifier, returnTo;
+  try{
+    savedState = sessionStorage.getItem('h4fz_state');
+    verifier = sessionStorage.getItem('h4fz_verifier');
+    returnTo = sessionStorage.getItem('h4fz_return') || 'index.html';
+  }catch(e){}
+
+  if(!code || !state || state !== savedState || !verifier){
+    fail('Session de connexion invalide ou expirée. Merci de réessayer depuis le site.');
+    return;
+  }
+
+  fetch(ISSUER + '/oauth/v2/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'authorization_code',
+      code: code,
+      redirect_uri: REDIRECT_URI,
+      client_id: CLIENT_ID,
+      code_verifier: verifier
+    })
+  })
+  .then(function(r){
+    return r.json().then(function(j){
+      if(!r.ok) throw new Error(j.error_description || j.error || 'Échange du code impossible');
+      return j;
+    });
+  })
+  .then(function(tok){
+    try{
+      sessionStorage.removeItem('h4fz_verifier');
+      sessionStorage.removeItem('h4fz_state');
+      sessionStorage.removeItem('h4fz_return');
+      if(tok.id_token) localStorage.setItem('h4fz_id_token', tok.id_token);
+    }catch(e){}
+    return fetch(ISSUER + '/oidc/v1/userinfo', { headers: { Authorization: 'Bearer ' + tok.access_token } })
+      .then(function(r){ return r.json(); });
+  })
+  .then(function(info){
+    try{
+      localStorage.setItem('h4f_client_session', JSON.stringify({
+        email: info.email || '',
+        prenom: info.given_name || '',
+        sub: info.sub,
+        at: Date.now()
+      }));
+    }catch(e){}
+    window.location.replace(returnTo);
+  })
+  .catch(function(e){
+    fail('Échec de la connexion : ' + e.message);
+  });
+})();
+</script>
+</body>
+</html>

@@ -62,7 +62,7 @@
       window.location.reload();
     });
     document.getElementById('h4fGateLogin').addEventListener('click', function(){
-      if(window.H4FClientAuth) window.H4FClientAuth.open();
+      if(window.H4FZitadel) window.H4FZitadel.login(window.location.href);
     });
   }
 
