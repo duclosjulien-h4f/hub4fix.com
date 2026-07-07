@@ -443,7 +443,7 @@ async function apiPiecesRegen(request, env) {
   return json({
     ids: rows.map((r) => r.id),
     items: rows.map((r) => ({ id: r.id, hint: r.regenHint || '' })),
-    // originaux à re-sourcer (commande /original) : le pipeline invalide la
+    // originaux à re-sourcer (commande /source) : le pipeline invalide la
     // référence locale et repasse la pièce dans la découverte
     verify: verify.map((r) => ({ id: r.id, hint: r.regenHint || '' })),
   });
@@ -816,7 +816,7 @@ function statusTag(s) {
     'to-validate': ['À valider', 'var(--red)', '#fff'],
     'published': ['Publié', 'var(--green)', '#fff'],
     'regenerate': ['Régénération demandée', '#b8860b', '#fff'],
-    'verify-original': ['Original à vérifier', '#2c6e9b', '#fff'],
+    'verify-original': ['Source à vérifier', '#2c6e9b', '#fff'],
     'rejected': ['Écarté — FA non pertinente', 'var(--earth)', '#fff'],
     'pending': ['En attente', 'var(--cream)', 'var(--earth)'],
   };
@@ -857,14 +857,14 @@ function viewShadowList(data) {
       const reject = '<button name="action" value="reject" style="' + btn + ';background:#fff;color:var(--red);border:1px solid #f3c2c2" title="Écarter : fabrication additive non pertinente (transparence, sécurité…)">Rejeter</button>';
       // Champ partagé : précision pour l'IA (Régénérer) ou motif (Rejeter).
       // Commande force : /new = repartir à zéro (efface la consigne mémorisée).
-      const note = '<input type="text" name="note" placeholder="précision IA / motif — /new = à zéro · /original = vérifier la réf" style="flex:1;min-width:190px;font-size:.75rem;padding:.45rem .6rem;border:1px solid var(--line);border-radius:7px">' +
+      const note = '<input type="text" name="note" placeholder="précision IA / motif — /new = à zéro · /source = vérifier la réf" style="flex:1;min-width:190px;font-size:.75rem;padding:.45rem .6rem;border:1px solid var(--line);border-radius:7px">' +
         // Bulle (+) : pense-bête du langage complet du champ note
         '<details class="cmd-help"><summary title="Pense-bête des commandes">+</summary><div class="cmd-panel">' +
           '<h4>Régénérer</h4>' +
           '<div class="row"><code>(vide)</code><span>ré-essai avec la consigne mémorisée</span></div>' +
           '<div class="row"><code>texte</code><span>consigne pour l\'IA — gardée entre essais, effacée à la publication</span></div>' +
           '<div class="row"><code>/new [texte]</code><span>repartir à zéro : efface l\'historique de consignes, régénère depuis l\'original + prompt de base pur (anti-artefacts)</span></div>' +
-          '<div class="row"><code>/original [texte]</code><span>la référence est douteuse ou indisponible : re-sourcing par le pipeline, aucune régénération sur une mauvaise base</span></div>' +
+          '<div class="row"><code>/source [texte]</code><span>la référence est douteuse ou indisponible : re-sourcing par le pipeline, aucune régénération sur une mauvaise base</span></div>' +
           '<h4>Rejeter</h4>' +
           '<div class="row"><code>texte</code><span>motif d\'exclusion FA — réévaluable quand l\'état de l\'art évolue (bouton Réactiver)</span></div>' +
         '</div></details>';
@@ -1140,13 +1140,15 @@ export default {
         //                            (anti-artefacts quand la proposition est trop
         //                            éloignée), régénère depuis l'original + prompt
         //                            de base, avec l'éventuelle consigne neuve.
-        //   /original [comment]   -> l'ORIGINAL est douteux ou indisponible : pas de
+        //   /source [comment]     -> l'ORIGINAL est douteux ou indisponible : pas de
         //                            régénération (elle tournerait sur une mauvaise
         //                            base) ; la pièce part en re-sourcing de référence
         //                            (pipeline/agent), puis regénérera automatiquement.
+        //                            (statut interne 'verify-original' conservé tel
+        //                            quel — deja utilise par des lignes Sheet reelles)
         const cmd = note.match(/^\/(\w+)\s*([\s\S]*)$/);
         const cmdName = cmd ? cmd[1].toLowerCase() : '';
-        if (cmdName === 'original') {
+        if (cmdName === 'source') {
           const comment = (cmd[2] || '').trim();
           const patch = Object.assign({ status: 'verify-original' }, stamp);
           if (comment) patch.regenHint = comment;
