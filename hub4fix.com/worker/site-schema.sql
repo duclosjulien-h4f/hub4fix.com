@@ -44,8 +44,13 @@ CREATE TABLE IF NOT EXISTS partner_profiles (
   ville        TEXT,
   lat          REAL,                           -- chaînon manquant pour tout calcul FIFO — cf. PLAN_BACKEND_SITE.md §5
   lon          REAL,
-  tel_verified INTEGER NOT NULL DEFAULT 0,      -- 0/1 — vérifié par code SMS
-  stripe_account_id TEXT,                       -- Stripe Connect (royalties, jamais d'IBAN stocké ici)
+  -- Pas de 2e facteur SMS : la vraie certification monetaire du partenaire
+  -- est l'onboarding Stripe Connect lui-meme (KYC bancaire, souvent nom +
+  -- piece d'identite + SIRET) — plus solide que la possession d'un
+  -- telephone, et deja obligatoire avant tout reversement. Aucun IBAN
+  -- stocke ici, Stripe le porte.
+  stripe_onboarded  INTEGER NOT NULL DEFAULT 0,  -- 0/1 — onboarding Stripe Connect complete
+  stripe_account_id TEXT,
   updated_at   TEXT
 );
 
