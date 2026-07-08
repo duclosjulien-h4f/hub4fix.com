@@ -227,9 +227,34 @@ nav{position:sticky;top:0;z-index:100;padding:.8rem 4rem;display:flex;justify-co
 <script>
 (function(){
   /* ════════════════════════════════════════════
-     DEMO USER & TREE DATA
-     ════════════════════════════════════════════ */
-  var USER = { name:'Julien D.', email:'demo@hub4fix.com', tokens:5, roles:['client','printer'] };
+     USER : vraie session Zitadel OU persona demo
+     ════════════════════════════════════════════
+     Lecture directe de localStorage (pas de dependance a l'ordre de
+     chargement de js/account-menu.js, inclus plus bas dans la page). */
+  function readDemo(){ try{ return localStorage.getItem('h4f_demo') === '1'; }catch(e){ return false; } }
+  function readSession(){ try{ return JSON.parse(localStorage.getItem('h4f_client_session') || 'null'); }catch(e){ return null; } }
+
+  var _sess = readSession();
+  var _demo = readDemo();
+  var USER = _demo
+    // Mode demo : persona simule complet (toutes les sections riches, c'est le but).
+    ? { name:'Compte Démo', email:'demo@hub4fix.com', tokens:5, roles:['client','printer','modelisateur'], demo:true }
+    : (_sess
+        // Vraie session : identite reelle, roles reels (client par defaut), pas de
+        // donnees fictives — les sections sans backend affichent un etat honnete.
+        ? { name:(_sess.prenom || 'Mon compte'), email:_sess.email || '', tokens:0, roles:['client'], demo:false }
+        : { name:'Visiteur', email:'', tokens:0, roles:['client'], demo:false });
+
+  function initials(name){
+    var p = String(name || '').trim().split(/\s+/);
+    return ((p[0] || '?')[0] + (p[1] ? p[1][0] : '')).toUpperCase();
+  }
+  // Etat vide honnete pour une section reelle sans donnees/backend encore.
+  function emptyState(overline, title, msg){
+    return '<div class="sec-overline">' + overline + '</div><h1 class="sec-title">' + title + '</h1>'+
+      '<div class="card" style="text-align:center;padding:2.6rem 1.5rem">'+
+      '<p style="color:var(--stone);font-size:.9rem;line-height:1.7">' + msg + '</p></div>';
+  }
 
   var IC = {
     user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0112 0v1"/></svg>',
@@ -656,7 +681,24 @@ nav{position:sticky;top:0;z-index:100;padding:.8rem 4rem;display:flex;justify-co
         });
     });
   }
-  var SECTIONS_INIT = { profil: function(){ initProfilForm(); initProfilMachines(); } };
+  var SECTIONS_INIT = {
+    profil: function(){ initProfilForm(); initProfilMachines(); },
+    parametres: function(){
+      var btn = document.getElementById('compteLogoutBtn');
+      if(!btn) return;
+      btn.addEventListener('click', function(){
+        if(USER.demo){
+          try{ localStorage.removeItem('h4f_demo'); }catch(e){}
+          window.location.href = 'index.html';
+        } else if(window.H4FZitadel){
+          window.H4FZitadel.logout();
+        } else {
+          try{ localStorage.removeItem('h4f_client_session'); }catch(e){}
+          window.location.href = 'index.html';
+        }
+      });
+    }
+  };
 
   /* ════ SECTION RENDERERS ════ */
   var SECTIONS = {
@@ -682,6 +724,7 @@ nav{position:sticky;top:0;z-index:100;padding:.8rem 4rem;display:flex;justify-co
       '</div>';
     },
     commandes: function(){
+      if(!USER.demo) return emptyState('Commandes', 'Mes commandes', 'Vous n\'avez pas encore passé de commande. Explorez la <a href="hotlist.html" style="color:var(--red)">Hot List</a> pour trouver votre pièce.');
       return '<div class="sec-overline">Commandes</div><h1 class="sec-title">Mes commandes</h1><p class="sec-desc">Historique de vos achats de fichiers et impressions physiques.</p>'+
       '<table class="data-table"><thead><tr><th>Ref</th><th>Piece</th><th>Type</th><th>Date</th><th>Statut</th><th>Montant</th></tr></thead><tbody>'+
       '<tr><td>#H4F-2024</td><td>Levier Senseo HD7810</td><td><span class="badge badge-gold">Fichier</span></td><td>04/06/2026</td><td><span class="badge badge-green">Livre</span></td><td>3 tokens</td></tr>'+
@@ -691,6 +734,7 @@ nav{position:sticky;top:0;z-index:100;padding:.8rem 4rem;display:flex;justify-co
       '</tbody></table>';
     },
     tokens: function(){
+      if(!USER.demo) return emptyState('Tokens', 'Mes tokens H4F', 'Le système de tokens arrive bientôt. Vos tokens et votre historique s\'afficheront ici.');
       return '<div class="sec-overline">Tokens</div><h1 class="sec-title">Mes tokens H4F</h1><p class="sec-desc">Les tokens sont votre monnaie interne pour acheter des fichiers 3D. 5 tokens offerts a l\'inscription.</p>'+
       '<div class="token-display"><div><div class="token-count">'+USER.tokens+'</div><div class="token-label">tokens disponibles</div></div><button class="btn btn-gold" style="margin-left:auto">Acheter des tokens</button></div>'+
       '<h3 style="font-size:.88rem;font-weight:600;margin-bottom:.8rem">Historique</h3>'+
@@ -703,6 +747,7 @@ nav{position:sticky;top:0;z-index:100;padding:.8rem 4rem;display:flex;justify-co
       '</ul>';
     },
     bibliotheque: function(){
+      if(!USER.demo) return emptyState('Bibliotheque', 'Ma bibliothèque', 'Vos fichiers G-code achetés apparaîtront ici, prêts à imprimer. Vous n\'avez encore rien acheté.');
       return '<div class="sec-overline">Bibliotheque</div><h1 class="sec-title">Ma bibliotheque</h1><p class="sec-desc">Fichiers GCODE achetes, prets a imprimer. Le fichier source n\'est jamais distribue.</p>'+
       '<div class="card-grid">'+
       '<div class="card"><strong style="font-size:.88rem">Levier Senseo HD7810</strong><div style="font-size:.72rem;color:var(--stone);margin:.3rem 0">GCODE Bambu Lab X1C | PLA Blanc | 0.4mm</div><div class="progress"><div class="progress-fill" style="width:100%;background:var(--green)"></div></div><div style="font-size:.68rem;color:var(--green)">Telecharge le 04/06</div></div>'+
@@ -711,6 +756,7 @@ nav{position:sticky;top:0;z-index:100;padding:.8rem 4rem;display:flex;justify-co
       '</div>';
     },
     impressions: function(){
+      if(!USER.demo) return emptyState('Impressions', 'Mes impressions', 'Le suivi de vos commandes d\'impression physique (imprimées et livrées par le réseau de printers) s\'affichera ici.');
       return '<div class="sec-overline">Impressions</div><h1 class="sec-title">Mes impressions</h1><p class="sec-desc">Suivi de vos commandes d\'impression physique. Piece imprimee et livree par un printer du reseau H4F.</p>'+
       '<div class="card" style="margin-bottom:1rem"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem"><strong style="font-size:.88rem">Charniere Bosch SMV — #H4F-2019</strong><span class="badge badge-gold">En impression</span></div>'+
       '<div style="font-size:.78rem;color:var(--earth);margin-bottom:.6rem">Printer : MakerLyon69 (4.8 &#9733;) — 24km de vous</div>'+
@@ -720,6 +766,7 @@ nav{position:sticky;top:0;z-index:100;padding:.8rem 4rem;display:flex;justify-co
       '<div style="font-size:.78rem;color:var(--earth)">Imprime par Print3Dfrance (4.9 &#9733;) — Livre le 25/05</div></div>';
     },
     alertes: function(){
+      if(!USER.demo) return emptyState('Alertes', 'Mes alertes', 'Vous serez notifié ici dès qu\'une pièce que vous suivez devient disponible. Aucune alerte pour le moment.');
       return '<div class="sec-overline">Alertes</div><h1 class="sec-title">Mes alertes</h1><p class="sec-desc">Soyez notifie quand une piece que vous suivez est disponible ou en promotion.</p>'+
       '<div class="alert-item"><span class="alert-dot new"></span><div class="alert-text"><strong>Knee-lever Krups Nespresso</strong> est maintenant disponible en fichier GCODE.</div><span class="alert-date">05/06</span></div>'+
       '<div class="alert-item"><span class="alert-dot new"></span><div class="alert-text">Votre impression <strong>#H4F-2019</strong> est en cours chez MakerLyon69.</div><span class="alert-date">04/06</span></div>'+
@@ -735,7 +782,7 @@ nav{position:sticky;top:0;z-index:100;padding:.8rem 4rem;display:flex;justify-co
       '<div class="toggle-row"><div><div class="toggle-label">Newsletter Hub4Fix</div><div class="toggle-sub">Actualites et nouvelles pieces chaque semaine</div></div><div class="toggle" onclick="this.classList.toggle(\'on\')"></div></div></div>'+
       '<div class="card" style="margin-top:1rem"><h3 style="font-size:.85rem;font-weight:600;margin-bottom:.8rem">Compte</h3>'+
       '<div class="toggle-row"><div><div class="toggle-label">Mode sombre</div><div class="toggle-sub">Interface en couleurs sombres (bientot)</div></div><div class="toggle" onclick="this.classList.toggle(\'on\')" style="opacity:.4;pointer-events:none"></div></div>'+
-      '<div style="margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--cream)"><button class="btn btn-outline" style="color:var(--red);border-color:var(--red-medium)">Deconnexion</button></div></div>';
+      '<div style="margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--cream)"><button type="button" id="compteLogoutBtn" class="btn btn-outline" style="color:var(--red);border-color:var(--red-medium)">' + (USER.demo ? 'Quitter la démo' : 'Déconnexion') + '</button></div></div>';
     },
     missions: function(){
       return '<div class="sec-overline">Printer — Missions</div><h1 class="sec-title">Mes missions</h1><p class="sec-desc">Impressions attribuees par le systeme FIFO aux 5 printers les plus proches du client.</p>'+
@@ -819,6 +866,17 @@ nav{position:sticky;top:0;z-index:100;padding:.8rem 4rem;display:flex;justify-co
   };
 
   /* ════ INIT ════ */
+  // Sidebar : vraie identite (ou persona demo) au lieu du "Julien D." code en dur.
+  (function(){
+    var nameEl = document.querySelector('.sb-name');
+    var emailEl = document.querySelector('.sb-email');
+    var avatarEl = document.querySelector('.sb-avatar');
+    var tokEl = document.querySelector('.sb-tokens strong');
+    if(nameEl) nameEl.textContent = USER.name;
+    if(emailEl) emailEl.textContent = USER.email || 'Non connecté';
+    if(avatarEl) avatarEl.textContent = initials(USER.name);
+    if(tokEl) tokEl.textContent = USER.tokens;
+  })();
   renderSidebar();
   var hash = window.location.hash.slice(1);
   if(!hash || !SECTIONS[hash]) hash = 'profil';

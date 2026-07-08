@@ -92,6 +92,9 @@ body{font-family:'Karla',Arial,sans-serif;background:#FAF8F5;color:#3B3632;displ
         sub: info.sub,
         at: Date.now()
       }));
+      // Une vraie connexion sort du mode demo : session reelle et simulation
+      // sont mutuellement exclusives (sinon l'interface reste en "Compte Demo").
+      localStorage.removeItem('h4f_demo');
     }catch(e){}
     // Centralisation client (Sheet dedie) : ne doit jamais bloquer la connexion
     // si ca echoue — meilleur effort, pas une dependance critique du login.
