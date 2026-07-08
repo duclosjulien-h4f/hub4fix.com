@@ -10,7 +10,7 @@
  *   CLIENT_ID       = 378989531187151592
  *   SESSION_SECRET  = (secret aléatoire long) — signe les cookies            [Secret]
  *   ADMIN_EMAILS    = "julien@exemple.com,..." — liste blanche
- *   SHEET_ID        = 1SQ2HoBMVUzFITHjZEaztyq7yOtyLUA8cH-6WMd6x_s8
+ *   SHEET_ID        = <votre-sheet-id-ici>
  *   GOOGLE_SA_EMAIL = h4f-sheets@hub4fix.iam.gserviceaccount.com
  *   GOOGLE_SA_KEY   = clé privée du compte de service (lecture du Sheet)      [Secret]
  *   SHEET_TAB       = Inscriptions (optionnel)

@@ -10,7 +10,7 @@
  *   ISSUER          = https://hub4fix-l2itdp.ch1.zitadel.cloud
  *   CLIENT_ID       = 379554201174305525   (application "Espace Partenaire")
  *   SESSION_SECRET  = (secret aléatoire long, DIFFÉRENT de l'admin)          [Secret]
- *   SHEET_ID        = 1SQ2HoBMVUzFITHjZEaztyq7yOtyLUA8cH-6WMd6x_s8
+ *   SHEET_ID        = <votre-sheet-id-ici>
  *   GOOGLE_SA_EMAIL = h4f-sheets@hub4fix.iam.gserviceaccount.com
  *   GOOGLE_SA_KEY   = clé privée du compte de service (lecture du Sheet)     [Secret]
  *   SHEET_TAB       = Inscriptions (optionnel)
