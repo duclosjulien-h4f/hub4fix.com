@@ -627,11 +627,24 @@ nav{position:sticky;top:0;z-index:100;padding:.8rem 4rem;display:flex;justify-co
     });
   }
   var PROFILE_API = 'https://h4f-collect.duclosjulien.workers.dev/client-profile';
+  // 20 pays alignes sur postal-format.js (format de CP connu pour chacun).
+  var PAYS = [
+    ['FR','France'],['BE','Belgique'],['CH','Suisse'],['LU','Luxembourg'],['DE','Allemagne'],
+    ['ES','Espagne'],['IT','Italie'],['PT','Portugal'],['NL','Pays-Bas'],['GB','Royaume-Uni'],
+    ['IE','Irlande'],['AT','Autriche'],['PL','Pologne'],['US','États-Unis'],['MA','Maroc'],
+    ['DZ','Algérie'],['TN','Tunisie'],['SN','Sénégal'],['CI',"Côte d'Ivoire"],['CM','Cameroun']
+  ];
+  var PAYS_OPTIONS = '<option value="">— Choisir —</option>' +
+    PAYS.map(function(p){ return '<option value="'+p[0]+'">'+p[1]+'</option>'; }).join('');
+
   function initProfilForm(retriesLeft){
     var prenomEl = document.getElementById('profilPrenom');
     var nomEl = document.getElementById('profilNom');
     var emailEl = document.getElementById('profilEmail');
     var adresseEl = document.getElementById('profilAdresse');
+    var paysEl = document.getElementById('profilPays');
+    var cpEl = document.getElementById('profilCp');
+    var villeEl = document.getElementById('profilVille');
     var telEl = document.getElementById('profilTelephone');
     var saveBtn = document.getElementById('profilSaveBtn');
     var statusEl = document.getElementById('profilStatus');
@@ -642,9 +655,15 @@ nav{position:sticky;top:0;z-index:100;padding:.8rem 4rem;display:flex;justify-co
       return;
     }
 
+    // Format de CP adapte au pays choisi (reutilise js/postal-format.js).
+    function refreshCpFormat(){
+      if(window.H4FPostal) H4FPostal.apply(cpEl, paysEl.value || null);
+    }
+    paysEl.addEventListener('change', refreshCpFormat);
+
     var session = window.H4FAccount && window.H4FAccount.clientSession && window.H4FAccount.clientSession();
     if(!session || !session.email){
-      [nomEl, adresseEl, telEl].forEach(function(el){ el.disabled = true; el.placeholder = 'Connectez-vous pour modifier'; });
+      [nomEl, adresseEl, paysEl, cpEl, villeEl, telEl].forEach(function(el){ el.disabled = true; el.placeholder = 'Connectez-vous pour modifier'; });
       saveBtn.style.display = 'none';
       emailEl.placeholder = 'Non connecte';
       return;
@@ -660,6 +679,10 @@ nav{position:sticky;top:0;z-index:100;padding:.8rem 4rem;display:flex;justify-co
         nomEl.value = j.nom || '';
         adresseEl.value = j.adresse || '';
         telEl.value = j.telephone || '';
+        villeEl.value = j.ville || '';
+        paysEl.value = j.pays || '';
+        refreshCpFormat();
+        cpEl.value = j.cp || '';
       })
       .catch(function(){ statusEl.style.color = '#C8102E'; statusEl.textContent = 'Impossible de charger votre profil.'; });
 
@@ -667,7 +690,10 @@ nav{position:sticky;top:0;z-index:100;padding:.8rem 4rem;display:flex;justify-co
       saveBtn.disabled = true; var label = saveBtn.textContent; saveBtn.textContent = 'Enregistrement…';
       fetch(PROFILE_API, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: session.email, nom: nomEl.value.trim(), adresse: adresseEl.value.trim(), telephone: telEl.value.trim() }),
+        body: JSON.stringify({
+          email: session.email, nom: nomEl.value.trim(), adresse: adresseEl.value.trim(),
+          telephone: telEl.value.trim(), cp: cpEl.value.trim(), ville: villeEl.value.trim(), pays: paysEl.value
+        }),
       })
         .then(function(r){ return r.json(); })
         .then(function(j){
@@ -706,7 +732,9 @@ nav{position:sticky;top:0;z-index:100;padding:.8rem 4rem;display:flex;justify-co
       return '<div class="sec-overline">Profil</div><h1 class="sec-title">Mon profil</h1><p class="sec-desc">Gerez vos informations personnelles et vos preferences de livraison.</p>'+
       '<div class="card"><div class="form-row"><div class="form-group"><label class="form-label">Prenom</label><input id="profilPrenom" class="form-input" disabled/></div><div class="form-group"><label class="form-label">Nom</label><input id="profilNom" class="form-input"/></div></div>'+
       '<div class="form-group"><label class="form-label">Email</label><input id="profilEmail" class="form-input" type="email" disabled/></div>'+
-      '<div class="form-group"><label class="form-label">Adresse de livraison</label><input id="profilAdresse" class="form-input"/></div>'+
+      '<div class="form-group"><label class="form-label">Adresse (rue et numéro)</label><input id="profilAdresse" class="form-input" placeholder="12 rue de la République"/></div>'+
+      '<div class="form-group"><label class="form-label">Pays</label><select id="profilPays" class="form-input">' + PAYS_OPTIONS + '</select></div>'+
+      '<div class="form-row"><div class="form-group"><label class="form-label" id="profilCpLabel">Code postal</label><input id="profilCp" class="form-input"/></div><div class="form-group"><label class="form-label">Ville</label><input id="profilVille" class="form-input"/></div></div>'+
       '<div class="form-group"><label class="form-label">Telephone</label><input id="profilTelephone" class="form-input"/></div>'+
       '<div style="margin-top:1rem"><button type="button" id="profilSaveBtn" class="btn btn-gold">Sauvegarder</button></div>'+
       '<p id="profilStatus" style="font-size:.78rem;margin-top:.6rem"></p></div>'+
@@ -907,6 +935,7 @@ nav{position:sticky;top:0;z-index:100;padding:.8rem 4rem;display:flex;justify-co
 </script>
 <script src="js/nav-mindmap.js"></script>
 <footer style="border-top:.5px solid rgba(28,26,22,0.08);padding:1.2rem 2rem;display:flex;align-items:center;justify-content:center;gap:1.5rem;font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.06em"><a href="cgu.html" style="color:var(--stone,#A89F91);text-decoration:none">CGU</a> <span style="opacity:.3">&middot;</span> <a href="cgv.html" style="color:var(--stone,#A89F91);text-decoration:none">CGV</a></footer>
+<script src="js/postal-format.js"></script>
 <script src="js/account-menu.js"></script>
 <script src="js/zitadel-client.js"></script>
 <script src="js/access-gate.js"></script>

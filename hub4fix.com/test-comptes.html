@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comptes de test — Hub⁴Fix</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Karla:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ivory:#FAF8F5;--cream:#EDE6DC;--sand:#D4C9B8;--stone:#A89F91;--earth:#7A7268;--charcoal:#3B3632;--night:#1C1A18;--gold:#B8963E;--red:#C8102E;--green:#2D8B5E}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Karla',sans-serif;background:var(--ivory);color:var(--charcoal);-webkit-font-smoothing:antialiased;padding:2rem 1.5rem 4rem}
+.wrap{max-width:920px;margin:0 auto}
+.warn{background:rgba(200,16,46,.06);border:1px solid rgba(200,16,46,.25);border-radius:8px;padding:.9rem 1.1rem;font-size:.82rem;color:#8a1020;margin-bottom:1.6rem;line-height:1.5}
+h1{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:2rem;color:var(--night);margin-bottom:.3rem}
+.sub{font-size:.9rem;color:var(--earth);margin-bottom:1.8rem;line-height:1.6}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
+.card{background:#fff;border:1px solid var(--cream);border-radius:12px;padding:1.3rem}
+.card h3{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:600;color:var(--night);margin-bottom:.15rem}
+.card .tag{font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.7rem}
+.card .line{font-size:.8rem;color:var(--earth);line-height:1.6}
+.card .line b{color:var(--charcoal);font-weight:600}
+.card button{margin-top:1rem;width:100%;padding:.7rem;background:var(--night);color:#fff;border:none;border-radius:7px;font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:background .2s}
+.card button:hover{background:#000}
+.card button:disabled{opacity:.6;cursor:wait}
+.tools{margin-top:2rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+.btn-clean{padding:.7rem 1.2rem;border:1px solid var(--red);color:var(--red);background:none;border-radius:7px;font-size:.8rem;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-clean:hover{background:rgba(200,16,46,.06)}
+#status{font-size:.82rem;font-weight:600}
+a.back{font-size:.8rem;color:var(--earth);text-decoration:none}
+@media(max-width:680px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="index.html" class="back">← Accueil</a>
+  <h1 style="margin-top:.6rem">Comptes de test</h1>
+  <p class="sub">Prends l'identité d'un client fictif pour tester l'expérience (Mon compte, parcours…). Un clic pose la fiche complète dans le Sheet clients (marquée <b>test</b>) et te connecte comme ce client — sans passer par Zitadel.</p>
+  <div class="warn"><b>Page privée</b> — non indexée, réservée aux tests. Les comptes créés ici sont marqués <code>test=true</code> et supprimables en masse via le bouton en bas. Ne pas partager cette URL.</div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="tools">
+    <button type="button" class="btn-clean" id="cleanBtn">Supprimer tous les comptes test</button>
+    <span id="status"></span>
+  </div>
+</div>
+
+<script>
+var API = 'https://h4f-collect.duclosjulien.workers.dev';
+
+// Personas variés : FR complet, FR sans imprimante, étranger (US, DE), minimal.
+var PERSONAS = [
+  { tag:'FR · maker complet', email:'test.marie.dupont@hub4fix-test.example', prenom:'Marie', nom:'Dupont',
+    adresse:'12 rue de la République', cp:'69001', ville:'Lyon', pays:'FR', telephone:'0612345678',
+    machines:['Bambu Lab P1S','Prusa MK4'] },
+  { tag:'FR · sans imprimante', email:'test.thomas.bernard@hub4fix-test.example', prenom:'Thomas', nom:'Bernard',
+    adresse:'8 avenue Jean Jaurès', cp:'44000', ville:'Nantes', pays:'FR', telephone:'0698765432',
+    machines:[] },
+  { tag:'US · New York', email:'test.john.miller@hub4fix-test.example', prenom:'John', nom:'Miller',
+    adresse:'350 5th Avenue', cp:'10118', ville:'New York', pays:'US', telephone:'12125550100',
+    machines:['Creality K1'] },
+  { tag:'DE · Berlin', email:'test.anna.schmidt@hub4fix-test.example', prenom:'Anna', nom:'Schmidt',
+    adresse:'Unter den Linden 77', cp:'10117', ville:'Berlin', pays:'DE', telephone:'4930123456',
+    machines:['Bambu Lab X1 Carbon','Anycubic Kobra 2'] },
+  { tag:'Nouveau · fiche vide', email:'test.nouveau@hub4fix-test.example', prenom:'Léa', nom:'',
+    adresse:'', cp:'', ville:'', pays:'', telephone:'', machines:[] }
+];
+
+var statusEl = document.getElementById('status');
+function setStatus(msg, ok){ statusEl.textContent = msg; statusEl.style.color = ok ? '#2D8B5E' : '#C8102E'; }
+
+function become(p, btn){
+  btn.disabled = true; var label = btn.textContent; btn.textContent = 'Préparation…';
+  fetch(API + '/client-seed', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(p)
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(j){
+    if(j.error) throw new Error(j.error);
+    try{
+      localStorage.setItem('h4f_client_session', JSON.stringify({ email:p.email, prenom:p.prenom, sub:'test', at:Date.now() }));
+      localStorage.removeItem('h4f_demo'); // impersonation reelle : hors mode demo
+    }catch(e){}
+    window.location.href = 'mon-compte.html';
+  })
+  .catch(function(e){
+    btn.disabled = false; btn.textContent = label;
+    setStatus('Échec : ' + e.message, false);
+  });
+}
+
+var grid = document.getElementById('grid');
+PERSONAS.forEach(function(p){
+  var card = document.createElement('div');
+  card.className = 'card';
+  var machines = p.machines.length ? p.machines.join(', ') : '<span style="color:var(--stone)">aucune</span>';
+  var adr = p.adresse ? (p.adresse + ', ' + p.cp + ' ' + p.ville + ' (' + p.pays + ')') : '<span style="color:var(--stone)">non renseignée</span>';
+  card.innerHTML =
+    '<div class="tag">' + p.tag + '</div>' +
+    '<h3>' + p.prenom + ' ' + (p.nom || '') + '</h3>' +
+    '<div class="line"><b>Email</b> · ' + p.email + '<br>' +
+    '<b>Adresse</b> · ' + adr + '<br>' +
+    '<b>Tél</b> · ' + (p.telephone || '<span style="color:var(--stone)">—</span>') + '<br>' +
+    '<b>Imprimantes</b> · ' + machines + '</div>';
+  var btn = document.createElement('button');
+  btn.type = 'button'; btn.textContent = 'Se connecter comme ' + p.prenom;
+  btn.addEventListener('click', function(){ become(p, btn); });
+  card.appendChild(btn);
+  grid.appendChild(card);
+});
+
+document.getElementById('cleanBtn').addEventListener('click', function(){
+  var btn = this; btn.disabled = true; var label = btn.textContent; btn.textContent = 'Nettoyage…';
+  fetch(API + '/client-cleanup-test', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })
+  .then(function(r){ return r.json(); })
+  .then(function(j){
+    btn.disabled = false; btn.textContent = label;
+    if(j.error){ setStatus('Échec : ' + j.error, false); return; }
+    setStatus((j.removed || 0) + ' compte(s) test supprimé(s).', true);
+  })
+  .catch(function(e){ btn.disabled = false; btn.textContent = label; setStatus('Échec : ' + e.message, false); });
+});
+</script>
+</body>
+</html>

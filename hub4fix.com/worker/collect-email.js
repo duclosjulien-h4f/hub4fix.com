@@ -209,14 +209,22 @@ async function appendToSheet(env, row) {
 // a la main, juste creer un classeur vide et le partager. Nouvelles colonnes
 // ajoutees en FIN uniquement (jamais reordonnees) : une feuille deja en prod
 // avec un en-tete plus court est migree automatiquement (cf. ensureClientHeader).
-const CLIENT_COLS = ['date', 'email', 'prenom', 'sub', 'machines', 'nom', 'adresse', 'telephone'];
+// A=date B=email C=prenom D=sub E=machines F=nom G=adresse H=telephone
+// I=cp J=ville K=pays L=test  (colonnes ajoutees en FIN, migration auto)
+const CLIENT_COLS = ['date', 'email', 'prenom', 'sub', 'machines', 'nom', 'adresse', 'telephone', 'cp', 'ville', 'pays', 'test'];
 
 // Etend l'en-tete en place si CLIENT_COLS a gagne des colonnes depuis la
 // creation du Sheet — n'ecrase jamais une colonne existante, ne reordonne
 // jamais (memes garde-fous que la migration PIECE_COLS de worker/admin.js).
 async function ensureClientHeader(env, token, tab, header) {
-  if (header.length >= CLIENT_COLS.length) return header;
-  if (!CLIENT_COLS.slice(0, header.length).every((c, i) => c === header[i])) return header; // ordre inconnu : ne pas toucher
+  // Deja exactement CLIENT_COLS ? rien a faire.
+  if (header.length === CLIENT_COLS.length && CLIENT_COLS.every((c, i) => header[i] === c)) return header;
+  // On ne compare que les cellules NON VIDES : Google peut renvoyer l'en-tete
+  // pad d'empties si des lignes de donnees ont plus de colonnes. Si le prefixe
+  // connu correspond a CLIENT_COLS, on reecrit l'en-tete complet (comble les
+  // colonnes manquantes/mal nommees). Sinon ordre inconnu : ne pas toucher.
+  const known = header.filter((h) => h);
+  if (!CLIENT_COLS.slice(0, known.length).every((c, i) => c === known[i])) return header;
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${env.CLIENT_SHEET_ID}/values/${encodeURIComponent(tab + '!A1')}?valueInputOption=RAW`;
   const w = await fetch(url, {
     method: 'PUT',
@@ -321,23 +329,84 @@ async function getClientProfile(env, email) {
     nom: row[5] || '',
     adresse: row[6] || '',
     telephone: row[7] || '',
+    cp: row[8] || '',
+    ville: row[9] || '',
+    pays: row[10] || '',
   };
 }
 
-async function setClientProfile(env, email, { nom, adresse, telephone }) {
+// Ecrit les colonnes F..K (nom, adresse, telephone, cp, ville, pays).
+async function setClientProfile(env, email, { nom, adresse, telephone, cp, ville, pays }) {
   if (!env.CLIENT_SHEET_ID) throw new Error('CLIENT_SHEET_ID non configure');
   const { token, tab, idx } = await findClientRow(env, email);
   if (idx === -1) return { error: 'not-found' };
   const rowNumber = idx + 2;
-  const range = `${tab}!F${rowNumber}:H${rowNumber}`;
+  const range = `${tab}!F${rowNumber}:K${rowNumber}`;
   const writeUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.CLIENT_SHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=RAW`;
   const w = await fetch(writeUrl, {
     method: 'PUT',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ values: [[nom || '', adresse || '', telephone || '']] }),
+    body: JSON.stringify({ values: [[nom || '', adresse || '', telephone || '', cp || '', ville || '', pays || '']] }),
   });
   if (!w.ok) throw new Error(`Sheets write ${w.status}: ${await w.text()}`);
   return { ok: true };
+}
+
+// Upsert d'un compte de test COMPLET (panneau d'impersonation test-comptes.html).
+// Marque la colonne "test"=true pour un nettoyage en masse ulterieur.
+async function seedTestClient(env, p) {
+  if (!env.CLIENT_SHEET_ID) throw new Error('CLIENT_SHEET_ID non configure');
+  const email = (p.email || '').toLowerCase().trim();
+  const { token, tab, idx } = await findClientRow(env, email);
+  const rowVals = [
+    p.date || new Date().toISOString(), email, p.prenom || '', p.sub || 'test',
+    (p.machines || []).join('; '), p.nom || '', p.adresse || '', p.telephone || '',
+    p.cp || '', p.ville || '', p.pays || '', 'true',
+  ];
+  if (idx === -1) {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${env.CLIENT_SHEET_ID}/values/${encodeURIComponent(tab + '!A1')}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
+    const r = await fetch(url, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ values: [rowVals] }) });
+    if (!r.ok) throw new Error(`Sheets seed append ${r.status}: ${await r.text()}`);
+  } else {
+    const range = `${tab}!A${idx + 2}:L${idx + 2}`;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${env.CLIENT_SHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=RAW`;
+    const r = await fetch(url, { method: 'PUT', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ values: [rowVals] }) });
+    if (!r.ok) throw new Error(`Sheets seed update ${r.status}: ${await r.text()}`);
+  }
+  return { ok: true };
+}
+
+// Supprime physiquement toutes les lignes marquees test=true du Sheet clients.
+// Ne touche JAMAIS les vrais clients (test != true). Reservee au nettoyage des
+// comptes de test crees via le panneau d'impersonation.
+async function cleanupTestClients(env) {
+  if (!env.CLIENT_SHEET_ID) throw new Error('CLIENT_SHEET_ID non configure');
+  const token = await getAccessToken(env);
+  const tab = env.CLIENT_SHEET_TAB || 'Clients';
+  const readUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.CLIENT_SHEET_ID}/values/${encodeURIComponent(tab)}`;
+  const r = await fetch(readUrl, { headers: { Authorization: `Bearer ${token}` } });
+  if (!r.ok) throw new Error(`Sheets read ${r.status}: ${await r.text()}`);
+  const values = (await r.json()).values || [];
+  if (values.length < 2) return { ok: true, removed: 0 };
+  const header = values[0];
+  // Colonne "test" lue par POSITION du schema (fixe, index 11) : robuste meme si
+  // l'en-tete du Sheet n'a pas encore la cellule nommee. Un vrai client n'a jamais
+  // de valeur en colonne L (ecrite uniquement par le seed de test).
+  const testCol = CLIENT_COLS.indexOf('test');
+  const kept = [header];
+  let removed = 0;
+  for (const row of values.slice(1)) {
+    if (String(row[testCol] || '').toLowerCase() === 'true') { removed++; continue; }
+    kept.push(row);
+  }
+  if (!removed) return { ok: true, removed: 0 };
+  // Reecrit toute la plage, puis efface les lignes en trop en dessous.
+  const clearUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.CLIENT_SHEET_ID}/values/${encodeURIComponent(tab)}:clear`;
+  await fetch(clearUrl, { method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: '{}' });
+  const writeUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.CLIENT_SHEET_ID}/values/${encodeURIComponent(tab + '!A1')}?valueInputOption=RAW`;
+  const w = await fetch(writeUrl, { method: 'PUT', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ values: kept }) });
+  if (!w.ok) throw new Error(`Sheets rewrite ${w.status}: ${await w.text()}`);
+  return { ok: true, removed };
 }
 
 export default {
@@ -416,7 +485,7 @@ export default {
       }
     }
 
-    // Mise a jour du profil d'un client (Mon compte) : { email, nom?, adresse?, telephone? }
+    // Mise a jour du profil d'un client (Mon compte) : { email, nom?, adresse?, telephone?, cp?, ville?, pays? }
     if (url.pathname === '/client-profile') {
       if (!data.email || !isValidEmail(data.email)) {
         return jsonResponse({ error: 'Email invalide' }, 400, origin);
@@ -427,6 +496,31 @@ export default {
         return jsonResponse(result, 200, origin);
       } catch (err) {
         console.error('set client-profile failed:', err.message);
+        return jsonResponse({ error: 'Erreur serveur' }, 500, origin);
+      }
+    }
+
+    // Cree/maj un compte de TEST complet (panneau d'impersonation test-comptes.html).
+    if (url.pathname === '/client-seed') {
+      if (!data.email || !isValidEmail(data.email)) {
+        return jsonResponse({ error: 'Email invalide' }, 400, origin);
+      }
+      try {
+        const result = await seedTestClient(env, data);
+        return jsonResponse(result, 200, origin);
+      } catch (err) {
+        console.error('client-seed failed:', err.message);
+        return jsonResponse({ error: 'Erreur serveur' }, 500, origin);
+      }
+    }
+
+    // Supprime tous les comptes marques test=true du Sheet clients.
+    if (url.pathname === '/client-cleanup-test') {
+      try {
+        const result = await cleanupTestClients(env);
+        return jsonResponse(result, 200, origin);
+      } catch (err) {
+        console.error('client-cleanup-test failed:', err.message);
         return jsonResponse({ error: 'Erreur serveur' }, 500, origin);
       }
     }
