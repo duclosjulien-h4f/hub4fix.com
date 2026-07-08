@@ -197,6 +197,11 @@ async function appendToSheet(env, row) {
   if (!res.ok) throw new Error(`Sheets ${res.status}: ${await res.text()}`);
 }
 
+// Colonnes du Sheet clients — auto-creees en ligne 1 si la feuille est vide
+// (meme mecanisme que le Sheet "Pieces" de worker/admin.js) : rien a taper
+// a la main, juste creer un classeur vide et le partager.
+const CLIENT_COLS = ['date', 'email', 'prenom', 'sub', 'machines'];
+
 // Centralisation des clients B2C — Sheet DEDIE (env.CLIENT_SHEET_ID), separe
 // des inscriptions partenaires. Un seul enregistrement par email (pas de ligne
 // dupliquee a chaque reconnexion) : appele depuis auth-callback.html apres un
@@ -209,6 +214,18 @@ async function appendClientIfNew(env, { email, prenom, sub }) {
   const r = await fetch(readUrl, { headers: { Authorization: `Bearer ${token}` } });
   if (!r.ok) throw new Error(`Sheets read ${r.status}: ${await r.text()}`);
   const { values } = await r.json();
+
+  if (!values || !values.length) {
+    const headerUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.CLIENT_SHEET_ID}/values/${encodeURIComponent(tab + '!A1')}`
+      + `:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+    const hr = await fetch(headerUrl, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values: [CLIENT_COLS] }),
+    });
+    if (!hr.ok) throw new Error(`Sheets header ${hr.status}: ${await hr.text()}`);
+  }
+
   const emailLower = email.toLowerCase().trim();
   if (values && values.length > 1) {
     const exists = values.slice(1).some((row) => (row[1] || '').toLowerCase().trim() === emailLower);
