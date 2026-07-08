@@ -13,13 +13,24 @@
  *   GOOGLE_SA_EMAIL  — email du compte de service (xxx@yyy.iam.gserviceaccount.com)
  *   GOOGLE_SA_KEY    — "private_key" du JSON de compte de service (PEM, secret)
  *   SHEET_TAB        — nom de l'onglet (optionnel, defaut "Inscriptions")
+ *   CLIENT_SHEET_ID  — Sheet DEDIE aux clients B2C (separe des partenaires),
+ *                      utilise par la route POST /client-login
+ *   CLIENT_SHEET_TAB — nom de l'onglet clients (optionnel, defaut "Clients")
  *
- * Prerequis : partager la feuille avec GOOGLE_SA_EMAIL en "Editeur".
+ * Prerequis : partager les deux feuilles avec GOOGLE_SA_EMAIL en "Editeur".
+ *
+ * Route POST /client-login { email, prenom?, sub? } — appelee par
+ * auth-callback.html apres un vrai login Zitadel reussi. Un seul
+ * enregistrement par email (pas de doublon a chaque reconnexion).
  *
  * Ordre des colonnes (header a coller en ligne 1 de la feuille) :
  *   date | type | email | name | prenom | nom | tel | cp | ville | statut |
  *   parc_machines | materiaux | espace | dispo | logiciels | experience |
- *   capa | portfolio | message | consent_version | consent_at | source | ip_country
+ *   capa | portfolio | message | consent_version | consent_at | source | ip_country | test
+ *
+ * "test" = "true" pour un compte genere par tools/generate-test-partners.mjs
+ * (nettoyable en masse via POST /admin/inscriptions/nettoyer-test, worker h4f-admin).
+ * "supprime_le" est ajoutee automatiquement en fin de colonnes par ce nettoyage.
  */
 
 const ALLOWED_ORIGINS = [
@@ -124,6 +135,7 @@ function buildRow(record) {
     record.date, record.type, record.email, record.name || '',
     ...FIELDS_ORDER.map((k) => fmt(f[k])),
     c.version || '', c.at || '', record.source || '', record.ip_country || '',
+    record.test ? 'true' : '', // colonne "test" : marque un compte genere pour les tests, nettoyable en masse
   ];
 }
 
@@ -136,19 +148,24 @@ function normalizeTel(v) {
 
 // Doublon verifie PAR TYPE (modelisateur/printer/client) : un meme email peut
 // legitimement cumuler plusieurs profils (ex. modelisateur + printer), donc on
-// ne bloque que si le MEME type est deja enregistre pour cet email/tel.
+// ne bloque que si le MEME type est deja enregistre pour cet email/tel. Les
+// lignes marquees "supprime_le" (nettoyage admin) sont ignorees — un email
+// nettoye redevient utilisable.
 async function findDuplicate(env, type, email, tel) {
   const token = await getAccessToken(env);
   const tab = env.SHEET_TAB || 'Inscriptions';
-  const range = encodeURIComponent(`${tab}!A2:G`); // date|type|email|name|prenom|nom|tel
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${env.SHEET_ID}/values/${range}`;
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${env.SHEET_ID}/values/${encodeURIComponent(tab)}`;
   const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   if (!res.ok) throw new Error(`Sheets read ${res.status}: ${await res.text()}`);
   const { values } = await res.json();
-  if (!values) return null;
+  if (!values || values.length < 2) return null;
 
+  const header = values[0];
+  const delCol = header.findIndex((h) => h === 'supprime_le');
   const telNorm = tel ? normalizeTel(tel) : null;
-  for (const row of values) {
+
+  for (const row of values.slice(1)) {
+    if (delCol !== -1 && row[delCol]) continue; // ligne nettoyee : ignoree
     const rowType = (row[1] || '').trim();
     if (rowType !== type) continue;
     const rowEmail = (row[2] || '').trim().toLowerCase();
@@ -175,9 +192,39 @@ async function appendToSheet(env, row) {
   if (!res.ok) throw new Error(`Sheets ${res.status}: ${await res.text()}`);
 }
 
+// Centralisation des clients B2C — Sheet DEDIE (env.CLIENT_SHEET_ID), separe
+// des inscriptions partenaires. Un seul enregistrement par email (pas de ligne
+// dupliquee a chaque reconnexion) : appele depuis auth-callback.html apres un
+// vrai login Zitadel reussi.
+async function appendClientIfNew(env, { email, prenom, sub }) {
+  if (!env.CLIENT_SHEET_ID) throw new Error('CLIENT_SHEET_ID non configure');
+  const token = await getAccessToken(env);
+  const tab = env.CLIENT_SHEET_TAB || 'Clients';
+  const readUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.CLIENT_SHEET_ID}/values/${encodeURIComponent(tab)}`;
+  const r = await fetch(readUrl, { headers: { Authorization: `Bearer ${token}` } });
+  if (!r.ok) throw new Error(`Sheets read ${r.status}: ${await r.text()}`);
+  const { values } = await r.json();
+  const emailLower = email.toLowerCase().trim();
+  if (values && values.length > 1) {
+    const exists = values.slice(1).some((row) => (row[1] || '').toLowerCase().trim() === emailLower);
+    if (exists) return { ok: true, alreadyExists: true };
+  }
+  const range = encodeURIComponent(`${tab}!A1`);
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${env.CLIENT_SHEET_ID}/values/${range}:append`
+    + `?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ values: [[new Date().toISOString(), emailLower, prenom || '', sub || '']] }),
+  });
+  if (!res.ok) throw new Error(`Sheets ${res.status}: ${await res.text()}`);
+  return { ok: true, alreadyExists: false };
+}
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get('Origin') || '';
+    const url = new URL(request.url);
 
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: corsHeaders(origin) });
@@ -193,7 +240,21 @@ export default {
       return jsonResponse({ error: 'Invalid JSON' }, 400, origin);
     }
 
-    const { email, type, name, consent, fields } = data;
+    // Centralisation client (post-login Zitadel reel) : { email, prenom?, sub? }
+    if (url.pathname === '/client-login') {
+      if (!data.email || !isValidEmail(data.email)) {
+        return jsonResponse({ error: 'Email invalide' }, 400, origin);
+      }
+      try {
+        const result = await appendClientIfNew(env, data);
+        return jsonResponse(result, 200, origin);
+      } catch (err) {
+        console.error('client-login failed:', err.message);
+        return jsonResponse({ error: 'Erreur serveur' }, 500, origin);
+      }
+    }
+
+    const { email, type, name, consent, fields, test } = data;
     if (!email || !isValidEmail(email)) {
       return jsonResponse({ error: 'Email invalide' }, 400, origin);
     }
@@ -210,6 +271,7 @@ export default {
       ip_country: request.cf?.country || null,
       consent: consent || null,
       fields: fields || null,
+      test: !!test,
     };
 
     try {

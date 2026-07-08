@@ -132,6 +132,91 @@ async function loadInscriptions(env) {
     return { rows };
   } catch { return { error: 'exception' }; }
 }
+// Colonne "supprime_le" : marquage (pas de suppression physique) + la ligne est
+// deplacee en fin de feuille pour ne pas gener la lecture des inscriptions actives.
+function colLetter(n) {
+  let s = '';
+  while (n > 0) { const r = (n - 1) % 26; s = String.fromCharCode(65 + r) + s; n = Math.floor((n - 1) / 26); }
+  return s;
+}
+async function markInscriptionDeleted(env, type, email) {
+  const tab = env.SHEET_TAB || 'Inscriptions';
+  const token = await googleToken(env);
+  const readUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.SHEET_ID}/values/${encodeURIComponent(tab)}`;
+  const r = await fetch(readUrl, { headers: { Authorization: 'Bearer ' + token } });
+  if (!r.ok) throw new Error('sheets read ' + r.status);
+  const values = (await r.json()).values || [];
+  if (!values.length) return { error: 'empty' };
+
+  let header = values[0].slice();
+  let delCol = header.findIndex((h) => h === 'supprime_le');
+  if (delCol === -1) { header.push('supprime_le'); delCol = header.length - 1; }
+  const width = header.length;
+  const pad = (row) => { const a = row.slice(0, width); while (a.length < width) a.push(''); return a; };
+
+  const emailLower = String(email || '').toLowerCase().trim();
+  const rows = values.slice(1).map(pad);
+  const idx = rows.findIndex((row) => row[1] === type && (row[2] || '').toLowerCase().trim() === emailLower && !row[delCol]);
+  if (idx === -1) return { error: 'not-found' };
+
+  const [match] = rows.splice(idx, 1);
+  match[delCol] = new Date().toISOString();
+  rows.push(match); // en fin de liste
+
+  const outValues = [header, ...rows];
+  const range = `${tab}!A1:${colLetter(width)}${outValues.length}`;
+  const writeUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.SHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
+  const w = await fetch(writeUrl, {
+    method: 'PUT',
+    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ values: outValues }),
+  });
+  if (!w.ok) throw new Error('sheets write ' + w.status);
+  return { ok: true };
+}
+
+// Nettoyage en masse : toutes les lignes marquees test=true (et pas deja
+// supprimees) sont marquees "supprime_le" et deplacees en fin de feuille, en
+// une seule ecriture.
+async function markAllTestDeleted(env) {
+  const tab = env.SHEET_TAB || 'Inscriptions';
+  const token = await googleToken(env);
+  const readUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.SHEET_ID}/values/${encodeURIComponent(tab)}`;
+  const r = await fetch(readUrl, { headers: { Authorization: 'Bearer ' + token } });
+  if (!r.ok) throw new Error('sheets read ' + r.status);
+  const values = (await r.json()).values || [];
+  if (!values.length) return { ok: true, count: 0 };
+
+  let header = values[0].slice();
+  let delCol = header.findIndex((h) => h === 'supprime_le');
+  if (delCol === -1) { header.push('supprime_le'); delCol = header.length - 1; }
+  let testCol = header.findIndex((h) => h === 'test');
+  const width = header.length;
+  const pad = (row) => { const a = row.slice(0, width); while (a.length < width) a.push(''); return a; };
+
+  const rows = values.slice(1).map(pad);
+  if (testCol === -1) return { ok: true, count: 0 };
+
+  const kept = [], toDelete = [];
+  const now = new Date().toISOString();
+  for (const row of rows) {
+    if (truthy(row[testCol]) && !row[delCol]) { row[delCol] = now; toDelete.push(row); }
+    else kept.push(row);
+  }
+  if (!toDelete.length) return { ok: true, count: 0 };
+
+  const outValues = [header, ...kept, ...toDelete];
+  const range = `${tab}!A1:${colLetter(width)}${outValues.length}`;
+  const writeUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.SHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
+  const w = await fetch(writeUrl, {
+    method: 'PUT',
+    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ values: outValues }),
+  });
+  if (!w.ok) throw new Error('sheets write ' + w.status);
+  return { ok: true, count: toDelete.length };
+}
+
 function countNew(rows, seen) {
   if (!rows) return 0;
   if (!seen) return rows.length;
@@ -1103,6 +1188,36 @@ export default {
     // Fichier source 3D : upload (POST) et téléchargement (GET) — admin connecté uniquement.
     if (request.method === 'POST' && path === '/admin/upload3d') {
       return adminUpload3d(request, env, sess);
+    }
+
+    // Nettoyage des inscriptions (comptes test, doublons...) : marque "supprime_le"
+    // et deplace la ligne en fin de feuille — jamais de suppression physique.
+    if (request.method === 'POST' && path === '/admin/inscriptions/supprimer') {
+      let body;
+      try { body = await request.json(); } catch { return json({ error: 'bad-json' }, 400); }
+      const { type, email } = body || {};
+      if (!type || !email) return json({ error: 'type et email requis' }, 400);
+      try {
+        const result = await markInscriptionDeleted(env, type, email);
+        if (result.error === 'not-found') return json({ error: 'Inscription introuvable ou deja supprimee' }, 404);
+        if (result.error) return json({ error: result.error }, 500);
+        await audit(env, sess.email, 'inscription-supprimer', type + ':' + email);
+        return json({ ok: true });
+      } catch (e) {
+        return json({ error: 'Erreur serveur' }, 500);
+      }
+    }
+
+    // Nettoyage en masse de tous les comptes marques test=true (genere par
+    // tools/generate-test-partners.mjs).
+    if (request.method === 'POST' && path === '/admin/inscriptions/nettoyer-test') {
+      try {
+        const result = await markAllTestDeleted(env);
+        await audit(env, sess.email, 'inscriptions-nettoyer-test', String(result.count) + ' ligne(s)');
+        return json(result);
+      } catch (e) {
+        return json({ error: 'Erreur serveur' }, 500);
+      }
     }
     if (path.startsWith('/admin/file/')) {
       const id = decodeURIComponent(path.slice('/admin/file/'.length));

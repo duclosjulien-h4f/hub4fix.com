@@ -93,6 +93,13 @@ body{font-family:'Karla',Arial,sans-serif;background:#FAF8F5;color:#3B3632;displ
         at: Date.now()
       }));
     }catch(e){}
+    // Centralisation client (Sheet dedie) : ne doit jamais bloquer la connexion
+    // si ca echoue — meilleur effort, pas une dependance critique du login.
+    fetch('https://h4f-collect.duclosjulien.workers.dev/client-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: info.email || '', prenom: info.given_name || '', sub: info.sub })
+    }).catch(function(){});
     window.location.replace(returnTo);
   })
   .catch(function(e){
