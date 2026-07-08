@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Réparer avec Hub⁴Fix — Trouvez votre pièce</title>
+<meta name="description" content="Hub4Fix répare vos appareils : téléchargez le fichier 3D et imprimez chez vous, ou recevez la pièce imprimée et livrée. Inscription gratuite, 5 tokens offerts.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/glass-sphere.css">
+<style>
+:root{--ivory:#FAF8F5;--warm-white:#F3EEE8;--cream:#EDE6DC;--sand:#D4C9B8;--stone:#A89F91;--earth:#7A7268;--charcoal:#3B3632;--night:#1C1A18;--gold:#B8963E;--gold-light:#D4B15F;--gold-pale:rgba(184,150,62,0.08);--red:#C8102E;--red-soft:rgba(200,16,46,0.06);--green:#2D8B5E}
+*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+body{font-family:'Karla',sans-serif;background:var(--ivory);color:var(--charcoal);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+::selection{background:rgba(200,16,46,0.12);color:var(--night)}
+
+nav{position:sticky;top:0;z-index:100;padding:1rem 4rem;display:flex;justify-content:space-between;align-items:center;background:rgba(243,238,232,0.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(237,230,220,0.4)}
+.nav-brand{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.nav-logo{width:auto;height:36px}
+.nav-wordmark{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:500;color:var(--night);letter-spacing:.02em}
+.nav-wordmark sup{color:var(--red);font-size:.7em;vertical-align:super;line-height:0}
+.nav-right{display:flex;align-items:center;gap:1rem}
+.nav-back{font-size:.78rem;font-weight:500;color:var(--earth);text-decoration:none;letter-spacing:.04em}
+.nav-back:hover{color:var(--red)}
+
+.page-hero{padding:4rem 4rem 3rem;max-width:900px;margin:0 auto}
+.page-overline{font-size:.68rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;margin-bottom:1.5rem;display:flex;align-items:center;gap:.8rem;color:var(--red)}
+.page-overline::before{content:'';width:24px;height:1px;background:var(--red)}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,5vw,4rem);font-weight:300;color:var(--night);line-height:1.1;margin-bottom:1.5rem}
+.page-title em{font-style:italic;font-weight:400;color:var(--red)}
+.page-intro{font-size:1.1rem;line-height:1.75;color:var(--earth);font-weight:300;max-width:680px;margin-bottom:2rem}
+
+.hero-cta{display:inline-flex;align-items:center;gap:.6rem;background:var(--red);color:#fff;text-decoration:none;padding:1rem 2rem;border-radius:2px;font-weight:600;font-size:.9rem;letter-spacing:.02em;border:none;cursor:pointer;transition:all .25s}
+.hero-cta:hover{background:#A00D24;transform:translateY(-1px);box-shadow:0 10px 28px rgba(200,16,46,.22)}
+.hero-sub{font-size:.8rem;color:var(--stone);margin-top:.8rem}
+
+.content-section{padding:3rem 4rem;max-width:900px;margin:0 auto}
+.content-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:2rem;margin-bottom:3rem}
+.content-card{padding:2rem;border-radius:3px;background:rgba(255,255,255,0.45);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(237,230,220,0.5);transition:all .3s}
+.content-card:hover{box-shadow:0 4px 24px rgba(0,0,0,.04)}
+.content-card h4{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;color:var(--night);margin-bottom:.6rem}
+.content-card p{font-size:.92rem;line-height:1.7;color:var(--earth);font-weight:300}
+.hotlist-cta{display:inline-flex;align-items:center;gap:.4rem;margin-top:.8rem;padding:.45rem 1.2rem;font-size:.72rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--red);border:1px solid var(--red);border-radius:2px;text-decoration:none;transition:all .25s}
+.hotlist-cta:hover{background:var(--red);color:white}
+.hotlist-cta::after{content:'\2192';font-size:.85rem}
+
+.rewards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-bottom:3rem}
+.reward{padding:2rem 1.5rem;text-align:center;border-radius:3px;background:rgba(255,255,255,0.45);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(237,230,220,0.5)}
+.reward-value{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:500;color:var(--red);line-height:1;margin-bottom:.5rem}
+.reward-label{font-size:.88rem;color:var(--night);font-weight:500;margin-bottom:.3rem}
+.reward-detail{font-size:.78rem;color:var(--stone);font-style:italic}
+
+.requirements{padding:3rem;border-radius:3px;background:rgba(243,238,232,0.4);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);margin-bottom:3rem;border-left:3px solid var(--red)}
+.requirements h3{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:500;color:var(--night);margin-bottom:1.5rem}
+.requirements ul{list-style:none;display:flex;flex-direction:column;gap:.8rem}
+.requirements li{display:flex;align-items:baseline;gap:.8rem;font-size:.92rem;line-height:1.6;color:var(--charcoal);font-weight:300}
+.requirements li::before{content:'✓';color:var(--red);font-weight:600;flex-shrink:0}
+
+.final-cta{padding:4rem;max-width:720px;margin:0 auto 4rem;background:rgba(255,255,255,0.45);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:3px;border:1px solid rgba(237,230,220,0.5);text-align:center}
+.final-cta h2{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--night);margin-bottom:.8rem}
+.final-cta h2 em{font-style:italic;font-weight:400;color:var(--red)}
+.final-cta p{font-size:.95rem;color:var(--earth);line-height:1.7;font-weight:300;margin-bottom:2rem;max-width:520px;margin-left:auto;margin-right:auto}
+.final-cta .hero-cta{font-size:1rem;padding:1.1rem 2.4rem}
+.final-cta .form-note{font-size:.78rem;color:var(--stone);font-style:italic;margin-top:1.2rem}
+
+footer{padding:3rem 4rem;border-top:1px solid var(--cream);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.footer-copy{font-size:.78rem;color:var(--stone)}
+.footer-tagline{font-family:'Cormorant Garamond',serif;font-size:.85rem;font-style:italic;color:var(--sand)}
+
+@media(max-width:900px){
+  nav{padding:1rem 1.5rem}
+  .page-hero{padding:5rem 1.5rem 2rem}
+  .content-section{padding:2rem 1.5rem}
+  .content-grid,.rewards-grid{grid-template-columns:1fr}
+  .requirements{padding:2rem 1.5rem}
+  .final-cta{padding:2rem 1.5rem;margin:0 1rem 2rem}
+  footer{padding:2rem 1.5rem}
+}
+@media(max-width:600px){
+  nav{padding:.6rem 1rem}
+  .page-title{font-size:clamp(1.8rem,5vw,2.5rem)}
+  .content-card{padding:1.5rem}
+  footer{padding:1.5rem 1rem;flex-direction:column;align-items:flex-start;gap:.8rem}
+}
+
+.section-watermark{position:relative;overflow:hidden}
+.section-watermark::before{content:attr(data-watermark);position:absolute;font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,6vw,5rem);font-weight:300;font-style:italic;color:rgba(180,160,130,.07);white-space:nowrap;pointer-events:none;z-index:0;top:50%;left:50%;transform:translate(-50%,-50%);width:max-content}
+.section-watermark>*{position:relative;z-index:1}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand">
+    <svg class="nav-logo" viewBox="0 0 202.6 265.4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><linearGradient id="lg1"><stop style="stop-color:#2a00fe" offset="0.336"/><stop style="stop-color:#fff" offset="1"/></linearGradient><linearGradient id="lg2"><stop style="stop-color:#fff" offset="0.107"/><stop style="stop-color:#fe0000" offset="0.684"/></linearGradient><linearGradient xlink:href="#lg1" id="grad1" x1="129.89" y1="808.83" x2="194.31" y2="808.83" gradientUnits="userSpaceOnUse"/><linearGradient xlink:href="#lg2" id="grad2" x1="271.02" y1="731.42" x2="327.45" y2="731.42" gradientUnits="userSpaceOnUse" spreadMethod="pad"/></defs><g transform="translate(-129.894,-634.847)"><g transform="translate(-114.063,-139.373)"><path d="m 353.331,791.185 -24.32,66.818 c -8.972,24.651 9.283,50.722 35.516,50.722 h 72.08 c 5.218,0 9.449,4.23 9.449,9.449 0,5.218 -4.231,9.449 -9.449,9.449 h -72.08 c -39.35,0 -66.732,-39.106 -53.274,-76.083 l 7.123,-19.57 17.2,-47.256 c 1.787,-4.903 7.21,-7.428 12.113,-5.642 4.903,1.787 7.429,7.21 5.643,12.112 z" style="fill:#000;stroke:#000"/><path d="m 314.879,1026.411 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#000;stroke:#000"/><path d="m 249.987,1019.877 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:#000;stroke:#000"/><path d="m 359.24,904.532 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#000;stroke:#000"/><path d="m 436.607,884.024 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:#000;stroke:#000"/></g><g><path d="m 234.225,648.032 -24.32,66.818 a 37.795,37.795 0 0 0 35.516,50.722 h 72.08 a 9.449,9.449 0 0 1 0,18.898 h -72.08 a 56.693,56.693 0 0 1 -53.274,-76.083 l 24.323,-66.826 a 9.449,9.449 0 0 1 17.755,6.471 z" style="fill:#fff;stroke:#000"/><path d="m 195.773,883.258 a 9.449,9.449 0 1 0 17.758,6.463 l 36.933,-101.472 -5.045,0 a 60.472,60.472 0 0 1 -14.43,-1.747 z" style="fill:#fff;stroke:#000"/><path d="m 130.881,876.724 a 9.449,9.449 0 0 0 17.842,6.223 l 45.037,-123.737 a 60.472,60.472 0 0 1 -8.81,-31.039 z" style="fill:url(#grad1);stroke:#000"/><path d="m 240.133,761.379 a 34.016,34.016 0 0 0 5.287,0.413 h 14.673 l 41.406,-113.761 a 9.449,9.449 0 0 0 -17.758,-6.463 z" style="fill:#fff;stroke:#000"/><path d="m 317.5,740.871 a 9.449,9.449 0 0 0 0,-18.898 h -38.892 l -6.878,18.898 z" style="fill:url(#grad2);stroke:#000"/></g></g></svg>
+    <span class="nav-wordmark">Hub<sup>4</sup>Fix</span>
+  </a>
+  <div class="nav-right">
+    <a href="index.html" class="nav-back">← Accueil</a>
+  </div>
+</nav>
+
+<section class="page-hero section-watermark" data-watermark="Réparer plutôt que jeter.">
+  <div class="page-overline"><span>Pour tout le monde</span></div>
+  <h1 class="page-title">Votre appareil est en panne ?<br>Trouvez <em>la pièce</em> qui manque.</h1>
+  <p class="page-intro">Que vous ayez une imprimante 3D ou pas la moindre envie d'en posséder une, Hub⁴Fix a une réponse : téléchargez le fichier et imprimez chez vous, ou recevez la pièce déjà imprimée. Inscription en 30 secondes, 5 tokens offerts.</p>
+  <button type="button" class="hero-cta" id="clientHeroCta">Créer mon compte gratuitement →</button>
+  <p class="hero-sub">Aucune carte bancaire requise pour s'inscrire.</p>
+</section>
+
+<section class="content-section section-watermark" data-watermark="Un fichier ne s'épuise jamais.">
+  <div class="content-grid">
+    <div class="content-card">
+      <h4>Le catalogue Hot List</h4>
+      <p>Les pièces les plus recherchées, identifiées par notre veille automatique et classées par demande réelle. Certaines sont déjà disponibles, d'autres attendent un modélisateur.</p>
+      <a href="hotlist.html" class="hotlist-cta">Consulter la Hot List</a>
+    </div>
+    <div class="content-card">
+      <h4>Deux façons de recevoir votre pièce</h4>
+      <p><strong>Numérique</strong> : vous achetez le G-code, vous le déposez sur votre imprimante, vous lancez — aucun réglage. <strong>Physique</strong> : vous commandez la pièce finie, imprimée et livrée par le printer le plus proche de chez vous.</p>
+    </div>
+    <div class="content-card">
+      <h4>Repair Together</h4>
+      <p>Votre pièce n'est pas encore disponible ? Recevez votre première pièce gratuitement (valeur ≤ 15 €) en échange de l'envoi de la pièce cassée — vous repartez réparé, et des milliers d'autres propriétaires en profitent après vous.</p>
+      <a href="repair-together.html" class="hotlist-cta">Découvrir le programme</a>
+    </div>
+    <div class="content-card">
+      <h4>Aucun engagement</h4>
+      <p>Pas d'abonnement, pas de carte bancaire à l'inscription. Vous payez uniquement ce que vous achetez, quand vous en avez besoin.</p>
+    </div>
+  </div>
+
+  <div class="requirements">
+    <h3>Ce qu'il vous faut</h3>
+    <ul>
+      <li>Un appareil en panne (électroménager, cuisine, café, lave-linge…)</li>
+      <li>Une adresse email — c'est tout pour vous inscrire</li>
+      <li>Une imprimante 3D <strong>si</strong> vous choisissez le numérique — sinon, la pièce vous est livrée</li>
+    </ul>
+  </div>
+
+  <div class="rewards-grid">
+    <div class="reward">
+      <div class="reward-value">5</div>
+      <div class="reward-label">tokens offerts</div>
+      <div class="reward-detail">Dès l'inscription</div>
+    </div>
+    <div class="reward">
+      <div class="reward-value">30s</div>
+      <div class="reward-label">pour s'inscrire</div>
+      <div class="reward-detail">Un email suffit</div>
+    </div>
+    <div class="reward">
+      <div class="reward-value">2</div>
+      <div class="reward-label">façons d'être réparé</div>
+      <div class="reward-detail">Numérique ou physique</div>
+    </div>
+  </div>
+</section>
+
+<section class="final-cta">
+  <h2>Prêt à <em>réparer</em> ?</h2>
+  <p>La création de compte se fait en un clic — email ou Google, aucun formulaire à remplir.</p>
+  <button type="button" class="hero-cta" id="clientFinalCta">Créer mon compte gratuitement →</button>
+  <p class="form-note">Vos données sont traitées conformément au RGPD.</p>
+</section>
+
+<footer>
+  <div class="footer-copy">© 2026 Hub⁴Fix — Le <a href="https://www.lerooftopdeviry.fr/" target="_blank" rel="noopener" style="color:inherit">rooftop de Viry</a>, Viry-Châtillon</div>
+  <span class="footer-tagline">Un fichier numérique ne s'épuise jamais.</span>
+</footer>
+
+<script src="js/zitadel-client.js"></script>
+<script src="js/account-menu.js"></script>
+<script>
+function goSignup(){ if(window.H4FZitadel) window.H4FZitadel.login('hotlist.html'); }
+document.getElementById('clientHeroCta').addEventListener('click', goSignup);
+document.getElementById('clientFinalCta').addEventListener('click', goSignup);
+</script>
+</body>
+</html>

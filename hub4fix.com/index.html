@@ -502,7 +502,7 @@ footer{padding:3rem 4rem;border-top:1px solid var(--cream);display:flex;justify-
     </svg>
     <span class="nav-wordmark">Hub<sup>4</sup>Fix</span>
   </a>
-  <ul class="nav-links"><li><a href="#flux" data-i18n="nav_how">Comment ca marche</a></li><li><a href="#demo" class="nav-demo-link" data-i18n-html="nav_demo">Démo<span class="nav-demo-badge">Beta</span></a></li><li><a href="#maillage" data-i18n="nav_maillage">Maillage</a></li><li><a href="#partenaires" class="nav-partner-link" data-i18n="nav_partenaires">Devenir partenaire</a></li><li><a href="#inscription" class="nav-cta-link" data-i18n="nav_join">Rejoindre</a></li><li class="nav-sep"></li><li><a href="hotlist.html">Hotlist</a></li><li><a href="repair-together.html" class="nav-rt-link" data-i18n="nav_repair_together">Repair Together</a></li><li><a href="hub4fix_econologique.html" data-i18n="nav_impact">Notre impact</a></li></ul>
+  <ul class="nav-links"><li><a href="#flux" data-i18n="nav_how">Comment ca marche</a></li><li><a href="#demo" class="nav-demo-link" data-i18n-html="nav_demo">Démo<span class="nav-demo-badge">Beta</span></a></li><li><a href="#maillage" data-i18n="nav_maillage">Maillage</a></li><li><a href="#partenaires" class="nav-partner-link" data-i18n="nav_partenaires">Devenir partenaire</a></li><li><a href="client.html" class="nav-cta-link" data-i18n="nav_join">Rejoindre</a></li><li class="nav-sep"></li><li><a href="hotlist.html">Hotlist</a></li><li><a href="repair-together.html" class="nav-rt-link" data-i18n="nav_repair_together">Repair Together</a></li><li><a href="hub4fix_econologique.html" data-i18n="nav_impact">Notre impact</a></li></ul>
   <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menu">
     <span></span><span></span><span></span>
   </button>
@@ -875,19 +875,12 @@ footer{padding:3rem 4rem;border-top:1px solid var(--cream);display:flex;justify-
 </section>
 
 <section class="cta-section section-watermark" id="inscription" data-watermark="Votre objet, une seconde vie.">
-  <h2 data-i18n-html="cta_title">Restez informé,<br>rejoignez la <em>liste</em></h2>
-  <p data-i18n="cta_desc">Hub⁴Fix est en cours de construction. Inscrivez-vous pour être prévenu du lancement, recevoir vos 5 tokens offerts et suivre l'avancée du catalogue.</p>
+  <h2>Réparez votre appareil,<br>rejoignez <em>Hub⁴Fix</em></h2>
+  <p>Téléchargez le fichier et imprimez chez vous, ou recevez la pièce déjà imprimée. Inscription en 30 secondes, 5 tokens offerts.</p>
   <div class="cta-form" id="cta-form">
-    <input type="text" class="cta-input" id="cta-name" data-i18n-placeholder="cta_name_placeholder" placeholder="Votre prénom" required>
-    <input type="email" class="cta-input" id="cta-email" data-i18n-placeholder="cta_email_placeholder" placeholder="votre@email.fr" required>
-    <button class="cta-btn" id="cta-submit" type="button" data-i18n="cta_btn">Rejoindre →</button>
+    <a href="client.html" class="cta-btn" style="text-decoration:none;display:inline-block">Créer mon compte →</a>
   </div>
-  <div class="cta-success" id="cta-success" style="display:none">
-    <div class="cta-success-icon">✓</div>
-    <p class="cta-success-msg" data-i18n="cta_success_msg">Bienvenue dans l'aventure Hub⁴Fix.</p>
-    <p class="cta-success-detail" data-i18n="cta_success_detail">Vos 5 tokens vous attendent. On vous tient informé.</p>
-  </div>
-  <div class="cta-sub" data-i18n="cta_sub">+5 tokens offerts · Aucun spam · Désinscription en un clic</div>
+  <div class="cta-sub">+5 tokens offerts · Aucun spam · Aucune carte bancaire requise</div>
 </section>
 
 <script src="js/collect-email.js"></script>
@@ -901,36 +894,6 @@ containers.forEach(function(c){
   var items=c.querySelectorAll('.reveal');
   var co=new IntersectionObserver(function(entries){entries.forEach(function(x){if(x.isIntersecting){items.forEach(function(it,i){setTimeout(function(){it.classList.add('visible')},i*150)});co.unobserve(x.target)}})},{threshold:0.1});
   co.observe(c);
-});
-
-// Mailing list form
-document.getElementById('cta-submit').addEventListener('click', function(){
-  var name = document.getElementById('cta-name').value.trim();
-  var email = document.getElementById('cta-email').value.trim();
-  if(!name || !email || email.indexOf('@') === -1){
-    var inputs = document.querySelectorAll('.cta-input');
-    inputs.forEach(function(inp){
-      if(!inp.value.trim() || (inp.type==='email' && inp.value.indexOf('@')===-1)){
-        inp.style.borderColor='var(--red)';
-        setTimeout(function(){inp.style.borderColor='var(--cream)'},2000);
-      }
-    });
-    return;
-  }
-  var btn = document.getElementById('cta-submit');
-  btn.textContent = '...';
-  btn.disabled = true;
-  h4fCollect({ email: email, type: 'client', name: name })
-    .then(function(){
-      document.getElementById('cta-form').style.display='none';
-      document.getElementById('cta-success').style.display='block';
-    })
-    .catch(function(err){
-      console.error('Collect error:', err);
-      // Fallback : afficher le succes quand meme (le Worker n'est pas encore deploye)
-      document.getElementById('cta-form').style.display='none';
-      document.getElementById('cta-success').style.display='block';
-    });
 });
 
 // ════════ Mini search démo : redirige vers test-marchand.html avec la requête ════════
