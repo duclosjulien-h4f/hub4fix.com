@@ -510,7 +510,98 @@ nav{position:sticky;top:0;z-index:100;padding:.8rem 4rem;display:flex;justify-co
     var fn = SECTIONS[sectionId];
     content.innerHTML = fn ? fn() : '<p>Section non disponible</p>';
     content.scrollTop = 0;
+    if(SECTIONS_INIT[sectionId]) SECTIONS_INIT[sectionId]();
   }
+
+  /* ════ MES IMPRIMANTES (liste courante — a completer au fil des profils Cloud Slicer) ════ */
+  var MACHINES_LIST = [
+    'Bambu Lab A1 mini', 'Bambu Lab A1', 'Bambu Lab P1S', 'Bambu Lab P1P', 'Bambu Lab X1 Carbon',
+    'Prusa MK4', 'Prusa MK3S+', 'Prusa MINI+', 'Prusa XL',
+    'Creality Ender 3 V3', 'Creality Ender 3 S1', 'Creality K1', 'Creality K1 Max', 'Creality CR-10 Smart',
+    'Anycubic Kobra 2', 'Anycubic Kobra 3', 'Anycubic Vyper',
+    'Elegoo Neptune 4', 'Elegoo Neptune 3 Pro',
+    'FlashForge Adventurer 5M',
+    'Artillery Sidewinder X2',
+  ];
+  var MACHINES_OPTIONS = '<option value="">— Choisir un modele —</option>' +
+    MACHINES_LIST.map(function(m){ return '<option value="'+m+'">'+m+'</option>'; }).join('') +
+    '<option value="Autre">Autre (preciser)</option>';
+
+  var MACHINES_API = 'https://h4f-collect.duclosjulien.workers.dev/client-machines';
+  function initProfilMachines(retriesLeft){
+    var listEl = document.getElementById('machinesList');
+    var selectEl = document.getElementById('machineSelect');
+    var otherWrap = document.getElementById('machineOtherWrap');
+    var otherEl = document.getElementById('machineOther');
+    var addBtn = document.getElementById('machineAddBtn');
+    var saveBtn = document.getElementById('machinesSaveBtn');
+    var statusEl = document.getElementById('machinesStatus');
+    if(!listEl) return; // section pas montee (autre onglet)
+
+    // Au tout premier rendu, js/account-menu.js (charge plus bas dans la page)
+    // n'a pas encore expose window.H4FAccount — on retente brievement avant
+    // de conclure "non connecte".
+    if(!window.H4FAccount && retriesLeft !== 0){
+      setTimeout(function(){ initProfilMachines((retriesLeft || 10) - 1); }, 30);
+      return;
+    }
+
+    var session = window.H4FAccount && window.H4FAccount.clientSession && window.H4FAccount.clientSession();
+    if(!session || !session.email){
+      listEl.innerHTML = '<p style="color:var(--stone);font-size:.82rem">Connectez-vous (hors mode demo) pour gerer vos imprimantes.</p>';
+      selectEl.disabled = true; addBtn.disabled = true; saveBtn.style.display = 'none';
+      return;
+    }
+
+    var current = [];
+    function renderList(){
+      listEl.innerHTML = current.length
+        ? current.map(function(m, i){
+            return '<span style="display:inline-flex;align-items:center;gap:.4rem;background:var(--warm-white);border:1px solid var(--cream);border-radius:20px;padding:.35rem .5rem .35rem .9rem;font-size:.8rem">'+m+
+              '<button type="button" data-i="'+i+'" style="background:none;border:none;cursor:pointer;color:var(--stone);font-size:1rem;line-height:1;padding:0 .2rem">&times;</button></span>';
+          }).join('')
+        : '<p style="color:var(--stone);font-size:.82rem">Aucune imprimante enregistree pour l\'instant.</p>';
+      listEl.querySelectorAll('button[data-i]').forEach(function(btn){
+        btn.addEventListener('click', function(){ current.splice(+btn.getAttribute('data-i'), 1); renderList(); });
+      });
+    }
+
+    fetch(MACHINES_API + '?email=' + encodeURIComponent(session.email))
+      .then(function(r){ return r.json(); })
+      .then(function(j){ current = j.machines || []; renderList(); })
+      .catch(function(){ statusEl.style.color = '#C8102E'; statusEl.textContent = 'Impossible de charger vos imprimantes.'; });
+
+    selectEl.addEventListener('change', function(){
+      otherWrap.style.display = selectEl.value === 'Autre' ? 'block' : 'none';
+    });
+
+    addBtn.addEventListener('click', function(){
+      var val = selectEl.value === 'Autre' ? otherEl.value.trim() : selectEl.value;
+      if(!val || current.indexOf(val) !== -1) return;
+      current.push(val);
+      selectEl.value = ''; otherEl.value = ''; otherWrap.style.display = 'none';
+      renderList();
+    });
+
+    saveBtn.addEventListener('click', function(){
+      saveBtn.disabled = true; var label = saveBtn.textContent; saveBtn.textContent = 'Enregistrement…';
+      fetch(MACHINES_API, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: session.email, machines: current }),
+      })
+        .then(function(r){ return r.json(); })
+        .then(function(j){
+          saveBtn.disabled = false; saveBtn.textContent = label;
+          statusEl.style.color = j.error ? '#C8102E' : '#2D8B5E';
+          statusEl.textContent = j.error || 'Imprimantes enregistrees.';
+        })
+        .catch(function(){
+          saveBtn.disabled = false; saveBtn.textContent = label;
+          statusEl.style.color = '#C8102E'; statusEl.textContent = 'Echec de l\'enregistrement.';
+        });
+    });
+  }
+  var SECTIONS_INIT = { profil: initProfilMachines };
 
   /* ════ SECTION RENDERERS ════ */
   var SECTIONS = {
@@ -520,7 +611,19 @@ nav{position:sticky;top:0;z-index:100;padding:.8rem 4rem;display:flex;justify-co
       '<div class="form-group"><label class="form-label">Email</label><input class="form-input" value="demo@hub4fix.com" type="email"/></div>'+
       '<div class="form-group"><label class="form-label">Adresse de livraison</label><input class="form-input" value="12 rue de la Republique, 69001 Lyon"/></div>'+
       '<div class="form-group"><label class="form-label">Telephone</label><input class="form-input" value="+33 6 12 34 56 78"/></div>'+
-      '<div style="margin-top:1rem"><button class="btn btn-gold">Sauvegarder</button></div></div>';
+      '<div style="margin-top:1rem"><button class="btn btn-gold">Sauvegarder</button></div></div>'+
+      '<div class="card" style="margin-top:1.2rem">'+
+        '<h3 style="font-size:.88rem;font-weight:600;margin-bottom:.4rem">Mes imprimantes</h3>'+
+        '<p style="font-size:.78rem;color:var(--stone);margin-bottom:1rem">Necessaire pour l\'achat numerique (Drop &amp; Print) : le Cloud Slicer genere le G-code pour votre modele exact.</p>'+
+        '<div id="machinesList" style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem"></div>'+
+        '<div class="form-row">'+
+          '<div class="form-group"><label class="form-label">Ajouter une imprimante</label><select id="machineSelect" class="form-input">'+MACHINES_OPTIONS+'</select></div>'+
+          '<div class="form-group" id="machineOtherWrap" style="display:none"><label class="form-label">Precisez le modele</label><input id="machineOther" class="form-input" placeholder="Marque et modele"/></div>'+
+        '</div>'+
+        '<button type="button" id="machineAddBtn" class="btn btn-outline">+ Ajouter a la liste</button>'+
+        '<div style="margin-top:1rem"><button type="button" id="machinesSaveBtn" class="btn btn-gold">Enregistrer mes imprimantes</button></div>'+
+        '<p id="machinesStatus" style="font-size:.78rem;margin-top:.6rem"></p>'+
+      '</div>';
     },
     commandes: function(){
       return '<div class="sec-overline">Commandes</div><h1 class="sec-title">Mes commandes</h1><p class="sec-desc">Historique de vos achats de fichiers et impressions physiques.</p>'+

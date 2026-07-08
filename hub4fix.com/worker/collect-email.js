@@ -23,6 +23,11 @@
  * auth-callback.html apres un vrai login Zitadel reussi. Un seul
  * enregistrement par email (pas de doublon a chaque reconnexion).
  *
+ * Routes machines (colonne E du Sheet clients, liste "; ") :
+ *   GET  /client-machines?email=...              -> { machines: [...] }
+ *   POST /client-machines { email, machines:[] }  -> met a jour la liste
+ * Utilisees par la section "Mes imprimantes" de mon-compte.html.
+ *
  * Ordre des colonnes (header a coller en ligne 1 de la feuille) :
  *   date | type | email | name | prenom | nom | tel | cp | ville | statut |
  *   parc_machines | materiaux | espace | dispo | logiciels | experience |
@@ -54,7 +59,7 @@ function corsHeaders(origin) {
   const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
   return {
     'Access-Control-Allow-Origin': allowed,
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
   };
 }
@@ -221,6 +226,46 @@ async function appendClientIfNew(env, { email, prenom, sub }) {
   return { ok: true, alreadyExists: false };
 }
 
+// Colonne E (5eme) = "machines" du client, liste separee par "; ". Collectee
+// dans "Mon compte" (parcours numerique : le Cloud Slicer a besoin du profil
+// machine pour generer le bon G-code), modifiable a tout moment.
+async function findClientRow(env, email) {
+  const token = await getAccessToken(env);
+  const tab = env.CLIENT_SHEET_TAB || 'Clients';
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${env.CLIENT_SHEET_ID}/values/${encodeURIComponent(tab)}`;
+  const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  if (!r.ok) throw new Error(`Sheets read ${r.status}: ${await r.text()}`);
+  const { values } = await r.json();
+  if (!values || values.length < 2) return { token, tab, idx: -1, row: null };
+  const emailLower = email.toLowerCase().trim();
+  const idx = values.slice(1).findIndex((row) => (row[1] || '').toLowerCase().trim() === emailLower);
+  return { token, tab, idx, row: idx === -1 ? null : values[idx + 1] };
+}
+
+async function getClientMachines(env, email) {
+  if (!env.CLIENT_SHEET_ID) throw new Error('CLIENT_SHEET_ID non configure');
+  const { row } = await findClientRow(env, email);
+  if (!row) return [];
+  const cell = row[4] || '';
+  return cell ? cell.split(';').map((s) => s.trim()).filter(Boolean) : [];
+}
+
+async function setClientMachines(env, email, machines) {
+  if (!env.CLIENT_SHEET_ID) throw new Error('CLIENT_SHEET_ID non configure');
+  const { token, tab, idx } = await findClientRow(env, email);
+  if (idx === -1) return { error: 'not-found' };
+  const rowNumber = idx + 2; // +1 header, +1 index base-1 des Sheets
+  const range = `${tab}!E${rowNumber}`;
+  const writeUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.CLIENT_SHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
+  const w = await fetch(writeUrl, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ values: [[(machines || []).join('; ')]] }),
+  });
+  if (!w.ok) throw new Error(`Sheets write ${w.status}: ${await w.text()}`);
+  return { ok: true };
+}
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get('Origin') || '';
@@ -229,6 +274,20 @@ export default {
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: corsHeaders(origin) });
     }
+
+    // Lecture des machines d'un client (Mon compte) — seule route en GET.
+    if (request.method === 'GET' && url.pathname === '/client-machines') {
+      const email = url.searchParams.get('email') || '';
+      if (!email || !isValidEmail(email)) return jsonResponse({ error: 'Email invalide' }, 400, origin);
+      try {
+        const machines = await getClientMachines(env, email);
+        return jsonResponse({ machines }, 200, origin);
+      } catch (err) {
+        console.error('get client-machines failed:', err.message);
+        return jsonResponse({ error: 'Erreur serveur' }, 500, origin);
+      }
+    }
+
     if (request.method !== 'POST') {
       return jsonResponse({ error: 'Method not allowed' }, 405, origin);
     }
@@ -250,6 +309,21 @@ export default {
         return jsonResponse(result, 200, origin);
       } catch (err) {
         console.error('client-login failed:', err.message);
+        return jsonResponse({ error: 'Erreur serveur' }, 500, origin);
+      }
+    }
+
+    // Mise a jour des machines d'un client (Mon compte) : { email, machines: [...] }
+    if (url.pathname === '/client-machines') {
+      if (!data.email || !isValidEmail(data.email)) {
+        return jsonResponse({ error: 'Email invalide' }, 400, origin);
+      }
+      try {
+        const result = await setClientMachines(env, data.email, data.machines || []);
+        if (result.error === 'not-found') return jsonResponse({ error: 'Client introuvable' }, 404, origin);
+        return jsonResponse(result, 200, origin);
+      } catch (err) {
+        console.error('set client-machines failed:', err.message);
         return jsonResponse({ error: 'Erreur serveur' }, 500, origin);
       }
     }
