@@ -28,6 +28,13 @@
  *   POST /client-machines { email, machines:[] }  -> met a jour la liste
  * Utilisees par la section "Mes imprimantes" de mon-compte.html.
  *
+ * Routes profil (colonnes F/G/H = nom/adresse/telephone du Sheet clients) :
+ *   GET  /client-profile?email=...                          -> {email,prenom,machines,nom,adresse,telephone}
+ *   POST /client-profile {email, nom?, adresse?, telephone?} -> met a jour
+ * email/prenom restent geres par Zitadel (identite de connexion), non
+ * modifiables via cette route. Utilisees par la section "Profil" de
+ * mon-compte.html.
+ *
  * Ordre des colonnes (header a coller en ligne 1 de la feuille) :
  *   date | type | email | name | prenom | nom | tel | cp | ville | statut |
  *   parc_machines | materiaux | espace | dispo | logiciels | experience |
@@ -188,7 +195,7 @@ async function appendToSheet(env, row) {
   const tab = env.SHEET_TAB || 'Inscriptions';
   const range = encodeURIComponent(`${tab}!A1`);
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${env.SHEET_ID}/values/${range}:append`
-    + `?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+    + `?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
   const res = await fetch(url, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -199,8 +206,26 @@ async function appendToSheet(env, row) {
 
 // Colonnes du Sheet clients — auto-creees en ligne 1 si la feuille est vide
 // (meme mecanisme que le Sheet "Pieces" de worker/admin.js) : rien a taper
-// a la main, juste creer un classeur vide et le partager.
-const CLIENT_COLS = ['date', 'email', 'prenom', 'sub', 'machines'];
+// a la main, juste creer un classeur vide et le partager. Nouvelles colonnes
+// ajoutees en FIN uniquement (jamais reordonnees) : une feuille deja en prod
+// avec un en-tete plus court est migree automatiquement (cf. ensureClientHeader).
+const CLIENT_COLS = ['date', 'email', 'prenom', 'sub', 'machines', 'nom', 'adresse', 'telephone'];
+
+// Etend l'en-tete en place si CLIENT_COLS a gagne des colonnes depuis la
+// creation du Sheet — n'ecrase jamais une colonne existante, ne reordonne
+// jamais (memes garde-fous que la migration PIECE_COLS de worker/admin.js).
+async function ensureClientHeader(env, token, tab, header) {
+  if (header.length >= CLIENT_COLS.length) return header;
+  if (!CLIENT_COLS.slice(0, header.length).every((c, i) => c === header[i])) return header; // ordre inconnu : ne pas toucher
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${env.CLIENT_SHEET_ID}/values/${encodeURIComponent(tab + '!A1')}?valueInputOption=RAW`;
+  const w = await fetch(url, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ values: [CLIENT_COLS] }),
+  });
+  if (!w.ok) throw new Error(`Sheets header migration ${w.status}: ${await w.text()}`);
+  return CLIENT_COLS.slice();
+}
 
 // Centralisation des clients B2C — Sheet DEDIE (env.CLIENT_SHEET_ID), separe
 // des inscriptions partenaires. Un seul enregistrement par email (pas de ligne
@@ -217,7 +242,7 @@ async function appendClientIfNew(env, { email, prenom, sub }) {
 
   if (!values || !values.length) {
     const headerUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.CLIENT_SHEET_ID}/values/${encodeURIComponent(tab + '!A1')}`
-      + `:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+      + `:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
     const hr = await fetch(headerUrl, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -233,7 +258,7 @@ async function appendClientIfNew(env, { email, prenom, sub }) {
   }
   const range = encodeURIComponent(`${tab}!A1`);
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${env.CLIENT_SHEET_ID}/values/${range}:append`
-    + `?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+    + `?valueInputOption=RAW&insertDataOption=INSERT_ROWS`;
   const res = await fetch(url, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -243,9 +268,9 @@ async function appendClientIfNew(env, { email, prenom, sub }) {
   return { ok: true, alreadyExists: false };
 }
 
-// Colonne E (5eme) = "machines" du client, liste separee par "; ". Collectee
-// dans "Mon compte" (parcours numerique : le Cloud Slicer a besoin du profil
-// machine pour generer le bon G-code), modifiable a tout moment.
+// Colonnes (E=machines, F=nom, G=adresse, H=telephone). Le profil est modifiable
+// a tout moment depuis "Mon compte" (email/prenom restent geres par Zitadel,
+// non modifiables ici — ce sont l'identite de connexion, pas des donnees libres).
 async function findClientRow(env, email) {
   const token = await getAccessToken(env);
   const tab = env.CLIENT_SHEET_TAB || 'Clients';
@@ -253,7 +278,9 @@ async function findClientRow(env, email) {
   const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   if (!r.ok) throw new Error(`Sheets read ${r.status}: ${await r.text()}`);
   const { values } = await r.json();
-  if (!values || values.length < 2) return { token, tab, idx: -1, row: null };
+  if (!values || !values.length) return { token, tab, idx: -1, row: null };
+  await ensureClientHeader(env, token, tab, values[0]);
+  if (values.length < 2) return { token, tab, idx: -1, row: null };
   const emailLower = email.toLowerCase().trim();
   const idx = values.slice(1).findIndex((row) => (row[1] || '').toLowerCase().trim() === emailLower);
   return { token, tab, idx, row: idx === -1 ? null : values[idx + 1] };
@@ -273,11 +300,41 @@ async function setClientMachines(env, email, machines) {
   if (idx === -1) return { error: 'not-found' };
   const rowNumber = idx + 2; // +1 header, +1 index base-1 des Sheets
   const range = `${tab}!E${rowNumber}`;
-  const writeUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.CLIENT_SHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
+  const writeUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.CLIENT_SHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=RAW`;
   const w = await fetch(writeUrl, {
     method: 'PUT',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ values: [[(machines || []).join('; ')]] }),
+  });
+  if (!w.ok) throw new Error(`Sheets write ${w.status}: ${await w.text()}`);
+  return { ok: true };
+}
+
+async function getClientProfile(env, email) {
+  if (!env.CLIENT_SHEET_ID) throw new Error('CLIENT_SHEET_ID non configure');
+  const { row } = await findClientRow(env, email);
+  if (!row) return null;
+  return {
+    email: row[1] || '',
+    prenom: row[2] || '',
+    machines: (row[4] || '').split(';').map((s) => s.trim()).filter(Boolean),
+    nom: row[5] || '',
+    adresse: row[6] || '',
+    telephone: row[7] || '',
+  };
+}
+
+async function setClientProfile(env, email, { nom, adresse, telephone }) {
+  if (!env.CLIENT_SHEET_ID) throw new Error('CLIENT_SHEET_ID non configure');
+  const { token, tab, idx } = await findClientRow(env, email);
+  if (idx === -1) return { error: 'not-found' };
+  const rowNumber = idx + 2;
+  const range = `${tab}!F${rowNumber}:H${rowNumber}`;
+  const writeUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.CLIENT_SHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=RAW`;
+  const w = await fetch(writeUrl, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ values: [[nom || '', adresse || '', telephone || '']] }),
   });
   if (!w.ok) throw new Error(`Sheets write ${w.status}: ${await w.text()}`);
   return { ok: true };
@@ -301,6 +358,20 @@ export default {
         return jsonResponse({ machines }, 200, origin);
       } catch (err) {
         console.error('get client-machines failed:', err.message);
+        return jsonResponse({ error: 'Erreur serveur' }, 500, origin);
+      }
+    }
+
+    // Lecture du profil complet d'un client (Mon compte).
+    if (request.method === 'GET' && url.pathname === '/client-profile') {
+      const email = url.searchParams.get('email') || '';
+      if (!email || !isValidEmail(email)) return jsonResponse({ error: 'Email invalide' }, 400, origin);
+      try {
+        const profile = await getClientProfile(env, email);
+        if (!profile) return jsonResponse({ error: 'Client introuvable' }, 404, origin);
+        return jsonResponse(profile, 200, origin);
+      } catch (err) {
+        console.error('get client-profile failed:', err.message);
         return jsonResponse({ error: 'Erreur serveur' }, 500, origin);
       }
     }
@@ -341,6 +412,21 @@ export default {
         return jsonResponse(result, 200, origin);
       } catch (err) {
         console.error('set client-machines failed:', err.message);
+        return jsonResponse({ error: 'Erreur serveur' }, 500, origin);
+      }
+    }
+
+    // Mise a jour du profil d'un client (Mon compte) : { email, nom?, adresse?, telephone? }
+    if (url.pathname === '/client-profile') {
+      if (!data.email || !isValidEmail(data.email)) {
+        return jsonResponse({ error: 'Email invalide' }, 400, origin);
+      }
+      try {
+        const result = await setClientProfile(env, data.email, data);
+        if (result.error === 'not-found') return jsonResponse({ error: 'Client introuvable' }, 404, origin);
+        return jsonResponse(result, 200, origin);
+      } catch (err) {
+        console.error('set client-profile failed:', err.message);
         return jsonResponse({ error: 'Erreur serveur' }, 500, origin);
       }
     }

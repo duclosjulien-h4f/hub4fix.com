@@ -601,17 +601,73 @@ nav{position:sticky;top:0;z-index:100;padding:.8rem 4rem;display:flex;justify-co
         });
     });
   }
-  var SECTIONS_INIT = { profil: initProfilMachines };
+  var PROFILE_API = 'https://h4f-collect.duclosjulien.workers.dev/client-profile';
+  function initProfilForm(retriesLeft){
+    var prenomEl = document.getElementById('profilPrenom');
+    var nomEl = document.getElementById('profilNom');
+    var emailEl = document.getElementById('profilEmail');
+    var adresseEl = document.getElementById('profilAdresse');
+    var telEl = document.getElementById('profilTelephone');
+    var saveBtn = document.getElementById('profilSaveBtn');
+    var statusEl = document.getElementById('profilStatus');
+    if(!prenomEl) return; // section pas montee
+
+    if(!window.H4FAccount && retriesLeft !== 0){
+      setTimeout(function(){ initProfilForm((retriesLeft || 10) - 1); }, 30);
+      return;
+    }
+
+    var session = window.H4FAccount && window.H4FAccount.clientSession && window.H4FAccount.clientSession();
+    if(!session || !session.email){
+      [nomEl, adresseEl, telEl].forEach(function(el){ el.disabled = true; el.placeholder = 'Connectez-vous pour modifier'; });
+      saveBtn.style.display = 'none';
+      emailEl.placeholder = 'Non connecte';
+      return;
+    }
+
+    emailEl.value = session.email;
+    prenomEl.value = session.prenom || '';
+
+    fetch(PROFILE_API + '?email=' + encodeURIComponent(session.email))
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        if(j.error) return;
+        nomEl.value = j.nom || '';
+        adresseEl.value = j.adresse || '';
+        telEl.value = j.telephone || '';
+      })
+      .catch(function(){ statusEl.style.color = '#C8102E'; statusEl.textContent = 'Impossible de charger votre profil.'; });
+
+    saveBtn.addEventListener('click', function(){
+      saveBtn.disabled = true; var label = saveBtn.textContent; saveBtn.textContent = 'Enregistrement…';
+      fetch(PROFILE_API, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: session.email, nom: nomEl.value.trim(), adresse: adresseEl.value.trim(), telephone: telEl.value.trim() }),
+      })
+        .then(function(r){ return r.json(); })
+        .then(function(j){
+          saveBtn.disabled = false; saveBtn.textContent = label;
+          statusEl.style.color = j.error ? '#C8102E' : '#2D8B5E';
+          statusEl.textContent = j.error || 'Profil enregistre.';
+        })
+        .catch(function(){
+          saveBtn.disabled = false; saveBtn.textContent = label;
+          statusEl.style.color = '#C8102E'; statusEl.textContent = 'Echec de l\'enregistrement.';
+        });
+    });
+  }
+  var SECTIONS_INIT = { profil: function(){ initProfilForm(); initProfilMachines(); } };
 
   /* ════ SECTION RENDERERS ════ */
   var SECTIONS = {
     profil: function(){
       return '<div class="sec-overline">Profil</div><h1 class="sec-title">Mon profil</h1><p class="sec-desc">Gerez vos informations personnelles et vos preferences de livraison.</p>'+
-      '<div class="card"><div class="form-row"><div class="form-group"><label class="form-label">Prenom</label><input class="form-input" value="Julien"/></div><div class="form-group"><label class="form-label">Nom</label><input class="form-input" value="Dupont"/></div></div>'+
-      '<div class="form-group"><label class="form-label">Email</label><input class="form-input" value="demo@hub4fix.com" type="email"/></div>'+
-      '<div class="form-group"><label class="form-label">Adresse de livraison</label><input class="form-input" value="12 rue de la Republique, 69001 Lyon"/></div>'+
-      '<div class="form-group"><label class="form-label">Telephone</label><input class="form-input" value="+33 6 12 34 56 78"/></div>'+
-      '<div style="margin-top:1rem"><button class="btn btn-gold">Sauvegarder</button></div></div>'+
+      '<div class="card"><div class="form-row"><div class="form-group"><label class="form-label">Prenom</label><input id="profilPrenom" class="form-input" disabled/></div><div class="form-group"><label class="form-label">Nom</label><input id="profilNom" class="form-input"/></div></div>'+
+      '<div class="form-group"><label class="form-label">Email</label><input id="profilEmail" class="form-input" type="email" disabled/></div>'+
+      '<div class="form-group"><label class="form-label">Adresse de livraison</label><input id="profilAdresse" class="form-input"/></div>'+
+      '<div class="form-group"><label class="form-label">Telephone</label><input id="profilTelephone" class="form-input"/></div>'+
+      '<div style="margin-top:1rem"><button type="button" id="profilSaveBtn" class="btn btn-gold">Sauvegarder</button></div>'+
+      '<p id="profilStatus" style="font-size:.78rem;margin-top:.6rem"></p></div>'+
       '<div class="card" style="margin-top:1.2rem">'+
         '<h3 style="font-size:.88rem;font-weight:600;margin-bottom:.4rem">Mes imprimantes</h3>'+
         '<p style="font-size:.78rem;color:var(--stone);margin-bottom:1rem">Necessaire pour l\'achat numerique (Drop &amp; Print) : le Cloud Slicer genere le G-code pour votre modele exact.</p>'+

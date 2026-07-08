@@ -165,7 +165,7 @@ async function markInscriptionDeleted(env, type, email) {
 
   const outValues = [header, ...rows];
   const range = `${tab}!A1:${colLetter(width)}${outValues.length}`;
-  const writeUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.SHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
+  const writeUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.SHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=RAW`;
   const w = await fetch(writeUrl, {
     method: 'PUT',
     headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
@@ -207,7 +207,7 @@ async function markAllTestDeleted(env) {
 
   const outValues = [header, ...kept, ...toDelete];
   const range = `${tab}!A1:${colLetter(width)}${outValues.length}`;
-  const writeUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.SHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
+  const writeUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.SHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=RAW`;
   const w = await fetch(writeUrl, {
     method: 'PUT',
     headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
