@@ -127,6 +127,40 @@ function buildRow(record) {
   ];
 }
 
+// Normalise un numero de tel pour comparaison (garde uniquement les chiffres,
+// tronque a 9 chiffres pour ignorer les variations d'indicatif/0 initial).
+function normalizeTel(v) {
+  const digits = String(v || '').replace(/\D/g, '');
+  return digits.slice(-9);
+}
+
+// Doublon verifie PAR TYPE (modelisateur/printer/client) : un meme email peut
+// legitimement cumuler plusieurs profils (ex. modelisateur + printer), donc on
+// ne bloque que si le MEME type est deja enregistre pour cet email/tel.
+async function findDuplicate(env, type, email, tel) {
+  const token = await getAccessToken(env);
+  const tab = env.SHEET_TAB || 'Inscriptions';
+  const range = encodeURIComponent(`${tab}!A2:G`); // date|type|email|name|prenom|nom|tel
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${env.SHEET_ID}/values/${range}`;
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  if (!res.ok) throw new Error(`Sheets read ${res.status}: ${await res.text()}`);
+  const { values } = await res.json();
+  if (!values) return null;
+
+  const telNorm = tel ? normalizeTel(tel) : null;
+  for (const row of values) {
+    const rowType = (row[1] || '').trim();
+    if (rowType !== type) continue;
+    const rowEmail = (row[2] || '').trim().toLowerCase();
+    if (rowEmail === email) return 'email';
+    if (telNorm && telNorm.length >= 8) {
+      const rowTel = normalizeTel(row[6]);
+      if (rowTel && rowTel === telNorm) return 'tel';
+    }
+  }
+  return null;
+}
+
 async function appendToSheet(env, row) {
   const token = await getAccessToken(env);
   const tab = env.SHEET_TAB || 'Inscriptions';
@@ -179,6 +213,12 @@ export default {
     };
 
     try {
+      const tel = (fields && fields.tel) || null;
+      const dup = await findDuplicate(env, type, record.email, tel);
+      if (dup) {
+        const label = dup === 'email' ? 'cet email' : 'ce numero de telephone';
+        return jsonResponse({ error: `Une inscription ${type} existe deja avec ${label}.` }, 409, origin);
+      }
       await appendToSheet(env, buildRow(record));
       return jsonResponse({ ok: true, message: 'Inscription enregistree' }, 201, origin);
     } catch (err) {

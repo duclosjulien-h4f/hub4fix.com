@@ -676,7 +676,9 @@ function submitPrintForm(e){
     .catch(function(error){
       console.error('Collect error:', error);
       btn.disabled=false; btn.textContent=label;
-      err.textContent='L’envoi a échoué. Vérifiez votre connexion et réessayez, ou écrivez-nous à contact@hub4fix.com.';
+      err.textContent = (error && error.message && error.message.indexOf('existe deja') > -1)
+        ? error.message
+        : 'L’envoi a échoué. Vérifiez votre connexion et réessayez, ou écrivez-nous à contact@hub4fix.com.';
       err.style.display='block';
     });
   return false;
