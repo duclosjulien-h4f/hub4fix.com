@@ -635,7 +635,7 @@ footer{padding:3rem 4rem;border-top:1px solid var(--cream);display:flex;justify-
       return '<a class="psr-item" href="produit.html?id=' + encodeURIComponent(p.id) + '">' +
         (img ? '<img class="psr-thumb" src="' + esc(img) + '" alt="" loading="lazy" onerror="this.style.visibility=\'hidden\'">' : '<div class="psr-thumb"></div>') +
         '<div class="psr-body"><div class="psr-name">' + esc(p.name) + '</div><div class="psr-machine">' + esc(p.machine || '') + '</div></div>' +
-        '<span class="psr-badge ' + (has ? 'has' : 'no') + '">' + (has ? 'Modèle 3D' : 'Sans modèle') + '</span></a>';
+        '<span class="psr-badge ' + (has ? 'has' : 'no') + '">' + (has ? 'Modèle 3D' : 'En cours d\'acquisition') + '</span></a>';
     }).join('');
     box.classList.add('open');
   }
