@@ -735,6 +735,7 @@ function shell(activePath, sess, content, newCount, toValidate) {
   return htmlResponse(
     '<!doctype html><html lang="fr"><head><meta charset="utf-8">' +
     '<meta name="viewport" content="width=device-width,initial-scale=1"><title>Hub4Fix — Admin</title>' +
+    '<link rel="icon" type="image/svg+xml" href="https://hub4fix.com/favicon-admin.svg">' +
     '<link rel="preconnect" href="https://fonts.googleapis.com">' +
     '<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Karla:wght@400;500;600&display=swap" rel="stylesheet">' +
     '<style>' + STYLE + '</style></head><body><div class="wrap">' +
@@ -1167,6 +1168,7 @@ export default {
     if (!sess) {
       return htmlResponse(
         '<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">' +
+        '<link rel="icon" type="image/svg+xml" href="https://hub4fix.com/favicon-admin.svg">' +
         '<div style="font-family:system-ui,sans-serif;max-width:480px;margin:5rem auto;text-align:center;color:#1C1A18">' +
         '<h1 style="font-weight:500">Hub<sup>4</sup>Fix — Admin</h1>' +
         '<p style="color:#7A7268">Espace réservé aux administrateurs.</p>' +
