@@ -405,8 +405,8 @@
       "age": 16,
       "addedDate": "2026-07-07",
       "modeled": false,
-      "image": null,
-      "imageStatus": "pending"
+      "image": "images/hotlist/Electrolux/AEG/lave-vaisselle/aeg/roulette-panier-inferieur-lave-vaisselle-clip-pl.png",
+      "imageStatus": "to-validate"
     },
     {
       "group": "BSH",
@@ -423,8 +423,8 @@
       "age": 16,
       "addedDate": "2026-07-07",
       "modeled": false,
-      "image": null,
-      "imageStatus": "pending"
+      "image": "images/hotlist/BSH/Bosch/lave-vaisselle/00611475/roulette-panier-inferieur-lave-vaisselle-corps-c.png",
+      "imageStatus": "to-validate"
     },
     {
       "group": "BSH",
@@ -441,8 +441,8 @@
       "age": 18,
       "addedDate": "2026-07-07",
       "modeled": false,
-      "image": null,
-      "imageStatus": "pending"
+      "image": "images/hotlist/BSH/Bosch/lave-vaisselle/00418674/clips-arretoirs-butees-de-rail-support-du-panier.png",
+      "imageStatus": "to-validate"
     },
     {
       "group": "De'Longhi",
@@ -531,8 +531,8 @@
       "age": 10,
       "addedDate": "2026-07-07",
       "modeled": false,
-      "image": null,
-      "imageStatus": "pending"
+      "image": "images/hotlist/Indépendant/Dyson/aspirateur-balai-sans-fi/generic/gachette-trigger-mecanisme-d-ouverture-du-recept.png",
+      "imageStatus": "to-validate"
     }
   ]
 }
