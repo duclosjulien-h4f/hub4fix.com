@@ -1,0 +1,30 @@
+# Hub4Fix — worker "h4f-api" : auth B2C maison + bibliothèque + tokens (base D1 "h4f_site").
+# Déploiement : cd hub4fix.com/worker/api && npx wrangler deploy
+#
+# Prérequis (une fois) :
+#   1. Créer la base :        npx wrangler d1 create h4f_site
+#      -> copier le database_id renvoyé ci-dessous.
+#   2. Appliquer le schéma :  npx wrangler d1 execute h4f_site --remote --file ../site-schema.sql
+#   3. Poser le secret :      npx wrangler secret put SESSION_SECRET   (chaîne aléatoire longue)
+#   4. Cookie 1re partie : mapper ce worker sur api.hub4fix.com (custom domain) — voir note ci-dessous.
+#
+# keep_vars = true : préserve SESSION_SECRET (secret) entre deux déploiements.
+
+name = "h4f-api"
+main = "api.js"
+compatibility_date = "2026-01-01"
+keep_vars = true
+
+# COOKIE_DOMAIN : ".hub4fix.com" pour que le cookie de session soit partagé entre
+# hub4fix.com (front) et api.hub4fix.com (ce worker) -> cookie 1re partie, envoyé
+# par le navigateur (SameSite=Lax). Sans custom domain sur *.hub4fix.com, le cookie
+# serait tiers et bloqué par les navigateurs : mapper ce worker sur api.hub4fix.com.
+[vars]
+COOKIE_DOMAIN = ".hub4fix.com"
+# Expéditeur des e-mails transactionnels (domaine send.hub4fix.com vérifié chez Resend).
+MAIL_FROM = "Hub4Fix <noreply@send.hub4fix.com>"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "h4f_site"
+database_id = "d3f3a9a5-674f-4b00-858b-bbe187b99556"

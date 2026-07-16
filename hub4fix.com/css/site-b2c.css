@@ -1,0 +1,247 @@
+/* ============================================================
+   Hub4Fix — Design system partagé du nouveau tronc B2C "drop&print"
+   Chargé par : kintsugi.html, comment-ca-marche.html, produits.html,
+                partenaires.html, impact.html
+   Complète css/glass-sphere.css. Reprend la charte de index.html.
+   UI/UX en français, code en anglais.
+   ============================================================ */
+
+/* ---- Design tokens (charte H4F : ivoire / rouge / or / vert) ---- */
+:root{
+  --ivory:#FAF8F5; --warm-white:#F3EEE8; --cream:#EDE6DC; --sand:#D4C9B8;
+  --stone:#A89F91; --earth:#7A7268; --charcoal:#3B3632; --night:#1C1A18;
+  --gold:#B8963E; --gold-light:#D4B15F; --gold-pale:rgba(184,150,62,0.08); --gold-glow:rgba(184,150,62,0.15);
+  --red:#C8102E; --red-soft:rgba(200,16,46,0.06); --red-medium:rgba(200,16,46,0.18);
+  --green:#2D8B5E;
+  --font-serif:'Cormorant Garamond',serif; --font-sans:'Karla',sans-serif; --font-mono:'DM Mono',monospace;
+  --wrap:1180px;
+  --shadow-sm:0 4px 24px rgba(0,0,0,.05);
+  --shadow-md:0 16px 48px rgba(0,0,0,.10);
+}
+
+/* ---- Reset & base ---- */
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-sans);background:var(--ivory);color:var(--charcoal);-webkit-font-smoothing:antialiased;overflow-x:hidden;line-height:1.6}
+/* Grain de papier, comme sur l'index */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+::selection{background:var(--gold-glow);color:var(--night)}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+h1,h2,h3{font-family:var(--font-serif);font-weight:400;color:var(--night);line-height:1.15}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 2rem}
+
+/* ============================================================
+   HEADER / NAV  (repris de index.html, allégé pour le tronc B2C)
+   ============================================================ */
+.site-nav{position:sticky;top:0;z-index:100;padding:1rem 2.5rem;display:flex;justify-content:space-between;align-items:center;
+  background:rgba(243,238,232,0.6);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(237,230,220,0.5)}
+.nav-brand{display:flex;align-items:center;gap:.7rem}
+.nav-logo{width:auto;height:36px;transition:transform .5s cubic-bezier(.25,.46,.45,.94);transform-origin:center;position:relative;z-index:101}
+.nav-brand:hover .nav-logo{transform:scale(2.4);filter:drop-shadow(0 8px 24px rgba(0,0,0,.2))}
+.nav-wordmark{font-family:var(--font-serif);font-size:1.15rem;font-weight:500;color:var(--night);letter-spacing:.02em}
+.nav-wordmark sup{color:var(--red);font-size:.7em;vertical-align:super;line-height:0}
+.nav-links{display:flex;gap:1.5rem;list-style:none;align-items:center}
+.nav-links a{font-size:.78rem;font-weight:500;color:var(--earth);letter-spacing:.04em;transition:color .3s,text-shadow .3s;white-space:nowrap}
+.nav-links a:hover,.nav-links a.active{color:var(--red);text-shadow:0 0 8px rgba(200,16,46,.35)}
+.nav-links a.nav-partner-link:hover,.nav-links a.nav-partner-link.active{color:var(--gold);text-shadow:0 0 8px rgba(184,150,62,.4)}
+.nav-right{display:flex;align-items:center;gap:1rem}
+.nav-account-btn{display:flex;align-items:center;gap:.35rem;background:none;border:none;cursor:pointer;padding:.35rem;border-radius:3px;color:var(--charcoal);transition:background .2s}
+.nav-account-btn:hover{background:var(--cream)}
+.nav-account-btn svg{width:22px;height:22px}
+.nav-account-btn .label{font-size:.78rem;font-weight:600;letter-spacing:.03em}
+.nav-account-btn .nav-token-badge{background:var(--red);color:#fff;font-size:.62rem;font-weight:700;min-width:17px;height:17px;
+  border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 5px;line-height:1;margin-left:.1rem}
+
+/* ---- Menu compte (dropdown : connexion rapide / infos compte) ---- */
+.nav-account{position:relative}
+.acct-menu{position:absolute;top:calc(100% + 10px);right:0;width:322px;background:#fff;border:1px solid var(--cream);
+  border-radius:8px;box-shadow:var(--shadow-md);display:none;z-index:200;overflow:hidden}
+.acct-menu.open{display:block;animation:acctFade .2s ease}
+@keyframes acctFade{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.acct-head{padding:1.1rem 1.2rem;background:var(--warm-white);border-bottom:1px solid var(--cream)}
+.acct-head .title{font-family:var(--font-serif);font-size:1.2rem;color:var(--night);line-height:1.2}
+.acct-head .sub{font-size:.8rem;color:var(--earth);margin-top:.15rem;word-break:break-word}
+.acct-body{padding:1.1rem 1.2rem}
+.acct-field{margin-bottom:.8rem}
+.acct-field label{display:block;font-size:.72rem;font-weight:600;color:var(--earth);letter-spacing:.02em;margin-bottom:.3rem}
+.acct-field input{width:100%;padding:.6rem .75rem;border:1px solid var(--sand);border-radius:4px;
+  font-family:var(--font-sans);font-size:.9rem;color:var(--night);outline:none;transition:border-color .2s;background:#fff}
+.acct-field input:focus{border-color:var(--gold)}
+.acct-menu .btn{width:100%;justify-content:center;margin-top:.2rem}
+.acct-forgot{display:block;text-align:right;font-size:.74rem;color:var(--stone);margin:-.2rem 0 .7rem;cursor:pointer}
+.acct-forgot:hover{color:var(--red)}
+.acct-alt{font-size:.8rem;color:var(--earth);text-align:center;margin-top:.9rem}
+.acct-alt a{color:var(--red);font-weight:600;cursor:pointer}
+.acct-msg{margin-top:.7rem;font-size:.78rem;color:var(--red);background:var(--red-soft);border-radius:4px;padding:.5rem .7rem}
+/* état connecté */
+.acct-tokens{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.2rem;
+  background:var(--gold-pale);border-bottom:1px solid var(--cream)}
+.acct-tokens .lbl{font-size:.78rem;color:var(--earth)}
+.acct-tokens .val{font-family:var(--font-mono);font-weight:600;color:var(--gold);font-size:1.05rem}
+.acct-links{padding:.4rem 0}
+.acct-link{display:flex;align-items:center;gap:.7rem;padding:.62rem 1.2rem;font-size:.88rem;color:var(--charcoal);cursor:pointer;transition:background .15s}
+.acct-link:hover{background:var(--warm-white)}
+.acct-link svg{width:17px;height:17px;color:var(--earth);flex-shrink:0}
+.acct-link.danger{color:var(--red)}
+.acct-link.danger svg{color:var(--red)}
+.acct-count{margin-left:auto;font-family:var(--font-mono);font-size:.7rem;color:var(--stone);background:var(--warm-white);border-radius:10px;padding:.1rem .5rem}
+/* Sous-vue bibliothèque */
+.acct-head-row{display:flex;align-items:center;gap:.6rem}
+.acct-back{background:none;border:none;cursor:pointer;color:var(--earth);padding:.2rem;display:flex;border-radius:4px}
+.acct-back:hover{background:var(--cream);color:var(--night)}
+.acct-back svg{width:18px;height:18px}
+.acct-empty{padding:2rem 1.2rem;text-align:center;color:var(--earth);font-size:.86rem;font-weight:300;line-height:1.6}
+.acct-lib{max-height:280px;overflow-y:auto}
+.acct-lib-item{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.7rem 1.2rem;border-bottom:1px solid var(--warm-white)}
+.acct-lib-item:last-child{border-bottom:none}
+.acct-lib-name{font-size:.88rem;color:var(--charcoal)}
+.acct-lib-flux{font-family:var(--font-mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.06em;color:var(--gold)}
+
+/* ---- Roue "100% gagnant" (modale d'inscription) ---- */
+.wheel-overlay{position:fixed;inset:0;z-index:1000;background:rgba(20,18,16,.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;padding:1.5rem;animation:acctFade .25s ease}
+.wheel-card{background:var(--ivory);border-radius:14px;max-width:400px;width:100%;padding:2rem 1.8rem 1.6rem;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.35)}
+.wheel-eyebrow{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem}
+.wheel-title{font-size:1.5rem;font-weight:400;color:var(--night);margin-bottom:1.3rem;line-height:1.2}
+.wheel-stage{position:relative;width:300px;max-width:100%;margin:0 auto 1.4rem}
+.wheel-svg{width:100%;height:auto;display:block;filter:drop-shadow(0 8px 20px rgba(0,0,0,.15))}
+.wheel-rot{transform-box:fill-box;transform-origin:center;transform:rotate(0deg)}
+.wheel-lbl{fill:#fff;font-family:var(--font-serif);font-size:26px;font-weight:600}
+.wheel-pointer{position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:0;height:0;
+  border-left:13px solid transparent;border-right:13px solid transparent;border-top:20px solid var(--night);
+  z-index:2;filter:drop-shadow(0 2px 3px rgba(0,0,0,.3))}
+.wheel-hub{fill:#fff;stroke:var(--cream);stroke-width:2}
+.wheel-spin{width:100%}
+.wheel-result{margin-top:1.1rem;font-size:1.05rem;color:var(--charcoal);animation:acctFade .3s ease}
+.wheel-amount{font-family:var(--font-mono);font-weight:700;color:var(--gold);font-size:1.35rem}
+.wheel-legal{margin-top:1rem;font-size:.68rem;color:var(--stone);line-height:1.45}
+
+/* Hamburger (mobile) */
+.hamburger-btn{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:.4rem;z-index:101}
+.hamburger-btn span{width:24px;height:2px;background:var(--charcoal);transition:.3s}
+
+/* ============================================================
+   BARRE DE RECHERCHE "IA" (langage naturel — moteur v1 dictionnaire)
+   ============================================================ */
+.ai-search-band{position:relative;z-index:98;background:rgba(243,238,232,0.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(237,230,220,0.5);padding:.9rem 2.5rem}
+.ai-search-wrap{max-width:720px;margin:0 auto;position:relative}
+.ai-search-row{display:flex;align-items:center;gap:.7rem;background:rgba(255,255,255,0.78);border:1px solid rgba(212,201,184,0.65);border-radius:4px;
+  padding:.7rem 1.1rem;transition:border-color .2s,box-shadow .2s}
+.ai-search-row:focus-within{border-color:var(--gold);box-shadow:0 4px 24px var(--gold-pale)}
+.ai-search-row>svg{width:19px;height:19px;color:var(--stone);flex-shrink:0}
+.ai-search-row input{flex:1;border:none;background:none;outline:none;font-family:var(--font-sans);font-size:.98rem;color:var(--night)}
+.ai-search-row input::placeholder{color:var(--stone);font-weight:300}
+.ai-search-badge{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);
+  border:1px solid var(--gold);border-radius:2px;padding:.15rem .4rem;flex-shrink:0}
+.ai-search-hint{font-size:.72rem;color:var(--stone);text-align:center;margin-top:.5rem;font-style:italic}
+.ai-search-results{position:absolute;top:calc(100% + 8px);left:0;right:0;background:#fff;border:1px solid var(--cream);border-radius:6px;
+  box-shadow:var(--shadow-md);max-height:min(60vh,440px);overflow-y:auto;display:none;z-index:120}
+.ai-search-results.visible{display:block}
+.ai-result{display:flex;align-items:center;gap:.9rem;padding:.8rem 1.1rem;border-bottom:1px solid var(--warm-white);transition:background .15s}
+.ai-result:last-child{border-bottom:none}
+.ai-result:hover{background:var(--warm-white)}
+.ai-result-thumb{width:44px;height:44px;border-radius:4px;object-fit:cover;background:var(--cream);flex-shrink:0}
+.ai-result-body{flex:1;min-width:0}
+.ai-result-name{font-size:.9rem;font-weight:600;color:var(--night);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ai-result-meta{font-size:.74rem;color:var(--earth)}
+.ai-result-empty{padding:1.2rem;text-align:center;color:var(--earth);font-size:.85rem}
+
+/* ============================================================
+   BOUTONS
+   ============================================================ */
+.btn{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--font-sans);font-weight:600;font-size:.82rem;letter-spacing:.05em;
+  text-transform:uppercase;padding:.85rem 1.7rem;border-radius:3px;border:1px solid transparent;cursor:pointer;transition:all .25s}
+.btn-primary{background:var(--red);color:#fff}
+.btn-primary:hover{background:var(--night);transform:translateY(-1px)}
+.btn-gold{background:transparent;border-color:var(--gold);color:var(--gold)}
+.btn-gold:hover{background:var(--gold);color:#fff}
+.btn-ghost{background:transparent;border-color:var(--sand);color:var(--charcoal)}
+.btn-ghost:hover{border-color:var(--night);color:var(--night)}
+
+/* ============================================================
+   HERO & SECTIONS génériques
+   ============================================================ */
+.hero{position:relative;padding:6rem 2rem 5rem;text-align:center;overflow:hidden}
+.hero .eyebrow{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:1.2rem}
+.hero h1{font-size:clamp(2.6rem,6vw,4.6rem);font-weight:300;margin-bottom:1.4rem}
+.hero h1 em{font-style:italic;color:var(--red)}
+.hero .lede{max-width:640px;margin:0 auto 2.2rem;font-size:1.15rem;color:var(--earth);font-weight:300}
+.hero-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+
+.section{padding:5rem 0}
+.section-alt{background:var(--warm-white)}
+.section-head{max-width:680px;margin:0 auto 3rem;text-align:center}
+.section-head .eyebrow{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem}
+.section-head h2{font-size:clamp(2rem,4vw,2.9rem);font-weight:300;margin-bottom:1rem}
+.section-head p{color:var(--earth);font-size:1.05rem;font-weight:300}
+.lead-serif{font-family:var(--font-serif);font-size:clamp(1.4rem,3vw,2rem);font-weight:300;line-height:1.5;color:var(--charcoal)}
+
+/* Grille de "steps" / cartes génériques */
+.grid{display:grid;gap:1.6rem}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-2{grid-template-columns:repeat(2,1fr)}
+.card{background:#fff;border:1px solid var(--cream);border-radius:8px;padding:2rem;transition:transform .3s,box-shadow .3s}
+.card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.card .num{font-family:var(--font-serif);font-size:2.4rem;color:var(--gold-light);line-height:1;margin-bottom:.8rem}
+.card h3{font-size:1.35rem;margin-bottom:.6rem}
+.card p{color:var(--earth);font-size:.95rem;font-weight:300}
+
+/* ============================================================
+   GRILLE PRODUITS (page "Nos produits" / shadowlist)
+   ============================================================ */
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.5rem}
+.product-card{background:#fff;border:1px solid var(--cream);border-radius:8px;overflow:hidden;transition:transform .3s,box-shadow .3s;display:flex;flex-direction:column}
+.product-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.product-thumb{aspect-ratio:4/3;width:100%;object-fit:cover;background:var(--cream)}
+.product-thumb-fallback{aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--warm-white),var(--cream));color:var(--sand)}
+.product-thumb-fallback svg{width:48px;height:48px}
+.product-body{padding:1.1rem 1.2rem 1.3rem;flex:1;display:flex;flex-direction:column}
+.product-name{font-size:1.02rem;font-weight:600;color:var(--night);margin-bottom:.3rem;line-height:1.3}
+.product-machine{font-size:.8rem;color:var(--earth);margin-bottom:.8rem}
+.product-foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.badge{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;padding:.28rem .55rem;border-radius:2px}
+.badge-modeled{background:var(--green);color:#fff}
+.badge-pending{background:var(--gold-pale);color:var(--gold);border:1px solid var(--gold)}
+.badge-demand{background:var(--red-soft);color:var(--red)}
+
+/* États de chargement / vide */
+.state-msg{text-align:center;color:var(--earth);padding:3rem 1rem;font-weight:300}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.site-footer{background:var(--night);color:var(--warm-white);padding:4rem 2.5rem 2rem;margin-top:4rem}
+.footer-grid{max-width:var(--wrap);margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2.5rem}
+.footer-brand .nav-wordmark{color:#fff;font-size:1.4rem}
+.footer-brand p{color:var(--stone);font-size:.88rem;font-weight:300;margin-top:.8rem;max-width:280px}
+.footer-col h4{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold-light);margin-bottom:1rem}
+.footer-col a{display:block;color:var(--stone);font-size:.86rem;padding:.28rem 0;transition:color .2s}
+.footer-col a:hover{color:#fff}
+.footer-bottom{max-width:var(--wrap);margin:2.5rem auto 0;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,.1);
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;color:var(--stone);font-size:.78rem}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media(max-width:900px){
+  .grid-3{grid-template-columns:1fr}
+  .grid-2{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:720px){
+  .site-nav{padding:.9rem 1.2rem}
+  .nav-links{display:none}
+  .hamburger-btn{display:flex}
+  .ai-search-band{padding:.8rem 1.2rem}
+  .hero{padding:4rem 1.2rem 3.5rem}
+  .footer-grid{grid-template-columns:1fr}
+  .wrap{padding:0 1.2rem}
+}
+
+/* Menu mobile déroulant simple (activé par js/site-nav.js) */
+.mobile-nav{display:none;flex-direction:column;background:var(--ivory);border-bottom:1px solid var(--cream);padding:1rem 1.2rem}
+.mobile-nav.open{display:flex}
+.mobile-nav a{padding:.7rem 0;font-size:.95rem;font-weight:500;color:var(--charcoal);border-bottom:1px solid var(--warm-white)}
+.mobile-nav a:last-child{border-bottom:none}

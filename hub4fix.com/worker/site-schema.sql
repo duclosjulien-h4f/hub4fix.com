@@ -8,15 +8,24 @@
 -- fait foi pour savoir quels espaces sont réellement ouverts).
 CREATE TABLE IF NOT EXISTS users (
   id         TEXT PRIMARY KEY,                 -- identifiant interne (uuid)
-  sub        TEXT,                             -- identifiant Zitadel (rempli au 1er login)
+  sub        TEXT,                             -- identifiant Zitadel (rempli au 1er login, pros/admins)
   email      TEXT UNIQUE NOT NULL,
   prenom     TEXT,
   nom        TEXT,
   role       TEXT NOT NULL DEFAULT 'client',   -- client | modelisateur | printer | admin
   auth_provider TEXT,                          -- password | google | passkey
+  password_hash TEXT,                          -- B2C : PBKDF2 au format "pbkdf2$<iter>$<saltb64>$<hashb64>". NULL pour les comptes OIDC.
+  email_verified INTEGER NOT NULL DEFAULT 0,   -- 0/1 — pour le B2C, la livraison numérique par e-mail fait office de validation
+  -- Profil (obligatoires : email + nom + prenom ; les suivants sont FACULTATIFS) --
+  adresse      TEXT,                           -- FACULTATIF — cf. note RGPD/minimisation : la livraison passe par point relais à la commande
+  telephone    TEXT,                           -- FACULTATIF
+  pseudo       TEXT,                           -- FACULTATIF (unique seulement s'il est affiché publiquement — à décider)
+  avatar_key   TEXT,                           -- FACULTATIF — clé R2 "avatars/<id>" ; l'image vit dans R2, pas dans D1
+  social_links TEXT,                           -- FACULTATIF — JSON [{"reseau":"instagram","url":"..."}]
   created_at TEXT,
   last_login TEXT
 );
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 
 -- Client B2C : localisation DÉCLARATIVE uniquement (CP/commune/quartier), jamais
 -- l'adresse complète, jamais liée à une commande précise. Sert au maillage/zones
@@ -73,6 +82,32 @@ CREATE TABLE IF NOT EXISTS token_ledger (
   ref      TEXT,                               -- id de commande / de piece liée, le cas échéant
   created_at TEXT
 );
+
+-- Réinitialisation de mot de passe : code à 6 chiffres, jamais stocké en clair
+-- (on garde son empreinte SHA-256), à usage unique, expirant vite (15 min).
+CREATE TABLE IF NOT EXISTS password_resets (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id    TEXT NOT NULL REFERENCES users(id),
+  code_hash  TEXT NOT NULL,                  -- SHA-256 du code envoyé par e-mail
+  expires_at INTEGER NOT NULL,               -- epoch (secondes)
+  used       INTEGER NOT NULL DEFAULT 0,     -- 0/1 — invalidé après usage
+  created_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_resets_user ON password_resets(user_id);
+
+-- Bibliothèque B2C : produits achetés par un client (vue "Ma bibliothèque").
+-- Séparé de `orders` (qui porte le cycle logistique/paiement) : ici on ne garde
+-- que ce qu'il faut pour ré-télécharger/retrouver un achat côté client.
+CREATE TABLE IF NOT EXISTS purchases (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id      TEXT NOT NULL REFERENCES users(id),
+  product_id   TEXT NOT NULL,                  -- id de la pièce (feed /api/pieces.json)
+  product_name TEXT,
+  flux         TEXT,                           -- numerique | physique
+  order_id     TEXT REFERENCES orders(id),      -- lien vers la commande, le cas échéant
+  created_at   TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_purchases_user ON purchases(user_id);
 
 -- Commande. locker_lat/lon capturés AU MOMENT DE LA COMMANDE (widget Mondial
 -- Relay), indépendants de client_profiles : un achat pour un tiers change le

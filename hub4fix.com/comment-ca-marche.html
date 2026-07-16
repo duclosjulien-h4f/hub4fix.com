@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hub⁴Fix — Comment ça marche : de la panne à la pièce imprimée</title>
+<meta name="description" content="De la panne à la pièce imprimée en 3D : identification, modélisation, slicing expert et impression. Pourquoi on ne copie pas à l'identique, et pourquoi le modèle fait gagner du temps aux réparateurs pros et reste avantageux pour les particuliers.">
+<link rel="icon" type="image/svg+xml" href="favicon.svg"><link rel="alternate icon" href="favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Karla:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site-b2c.css">
+<style>
+/* --- Spécifique page Comment ça marche --- */
+.ccm-hero{padding:7rem 2rem 5rem;background:
+  radial-gradient(60% 80% at 50% 0%, rgba(200,16,46,0.06), transparent 70%),
+  linear-gradient(180deg, var(--warm-white), var(--ivory))}
+/* Chaîne d'étapes : la carte porte le numéro dans une pastille */
+.steps{counter-reset:step}
+.step-card{position:relative}
+.step-card .num{display:inline-flex;align-items:center;justify-content:center;width:2.6rem;height:2.6rem;border-radius:50%;
+  background:var(--gold-pale);border:1px solid var(--gold);font-size:1.3rem;color:var(--gold);margin-bottom:1rem}
+.step-card .tag{display:block;font-family:var(--font-mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--stone);margin-bottom:.9rem}
+/* Comparaison injection vs impression */
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem;max-width:var(--wrap);margin:0 auto}
+.compare .card h3{display:flex;align-items:center;gap:.6rem}
+.compare .card .ico{width:26px;height:26px;flex-shrink:0}
+.compare .card.origin .ico{color:var(--stone)}
+.compare .card.print .ico{color:var(--red)}
+.compare .card ul{list-style:none;margin-top:1rem}
+.compare .card li{position:relative;padding-left:1.3rem;margin-bottom:.55rem;color:var(--earth);font-weight:300;font-size:.95rem}
+.compare .card li::before{content:'';position:absolute;left:0;top:.55em;width:6px;height:6px;border-radius:50%;background:var(--sand)}
+/* Bandeau valeur (pros / particuliers) */
+.value-split{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem;max-width:var(--wrap);margin:0 auto}
+.value-col{background:#fff;border:1px solid var(--cream);border-radius:8px;padding:2.2rem}
+.value-col h3{font-size:1.5rem;margin-bottom:.4rem}
+.value-col .sub{font-family:var(--font-mono);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:1.4rem}
+.value-col ul{list-style:none}
+.value-col li{position:relative;padding-left:1.5rem;margin-bottom:1rem;color:var(--earth);font-weight:300}
+.value-col li strong{color:var(--charcoal);font-weight:600}
+.value-col li::before{content:'';position:absolute;left:0;top:.5em;width:8px;height:8px;border-radius:2px;background:var(--gold-light)}
+/* Répartition des tiers */
+.thirds{display:flex;gap:.5rem;margin-top:1.4rem}
+.thirds span{flex:1;text-align:center;padding:.7rem .4rem;border-radius:4px;font-family:var(--font-mono);font-size:.7rem;letter-spacing:.05em;
+  background:var(--warm-white);border:1px solid var(--cream);color:var(--charcoal)}
+/* Infographie coût / récurrence (timeline) */
+.tco-wrap{max-width:960px;margin:0 auto;background:#fff;border:1px solid var(--cream);border-radius:12px;padding:2.2rem 2rem;box-shadow:var(--shadow-sm)}
+.tco-chart{width:100%;height:auto;display:block}
+.tco-legend{display:flex;gap:1.6rem;flex-wrap:wrap;justify-content:center;margin-top:1.3rem}
+.tco-legend span{display:inline-flex;align-items:center;gap:.55rem;font-size:.82rem;color:var(--charcoal);font-weight:500}
+.tco-legend i{width:24px;border-top:3px solid;border-radius:2px}
+.tco-calc{text-align:center;margin-top:1.3rem;font-family:var(--font-mono);font-size:.85rem;color:var(--charcoal)}
+.tco-calc b{color:var(--red)}
+.tco-hyp{font-size:.74rem;color:var(--stone);text-align:center;margin-top:.9rem;font-style:italic;max-width:640px;margin-left:auto;margin-right:auto}
+.tco-grid{stroke:var(--cream);stroke-width:1}
+.tco-axis{stroke:var(--sand);stroke-width:1.5}
+.tco-tick{fill:var(--stone);font-family:var(--font-mono);font-size:11px}
+.tco-cap{fill:var(--earth);font-family:var(--font-sans);font-size:12px;font-weight:500}
+.tco-line{fill:none;stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.tco-indep{stroke:var(--red)}
+.tco-num{stroke:var(--gold)}
+.tco-print{stroke:var(--green)}
+.tco-econ{fill:var(--gold-pale);stroke:none}
+.tco-endlbl{font-family:var(--font-sans);font-size:12.5px;font-weight:700}
+.tco-note{fill:var(--stone);font-family:var(--font-sans);font-size:12px;font-style:italic}
+/* Rappel Kintsugi */
+.kint-note{max-width:760px;margin:0 auto;text-align:center}
+.kint-note blockquote{font-family:var(--font-serif);font-size:clamp(1.5rem,3vw,2.1rem);font-weight:300;font-style:italic;line-height:1.45;color:var(--charcoal);margin-bottom:1.6rem}
+@media(max-width:900px){
+  .compare{grid-template-columns:1fr}
+  .value-split{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== HEADER PARTAGÉ (gabarit) ===================== -->
+<nav class="site-nav">
+  <a href="kintsugi.html" class="nav-brand">
+    <img class="nav-logo" src="images/logo-h4f.svg" alt="Hub4Fix">
+    <span class="nav-wordmark">Hub<sup>4</sup>Fix</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="kintsugi.html">Philosophie</a></li>
+    <li><a href="comment-ca-marche.html" class="active">Comment ça marche</a></li>
+    <li><a href="produits.html">Nos produits</a></li>
+    <li><a href="partenaires.html" class="nav-partner-link">Partenaires</a></li>
+    <li><a href="impact.html">Notre impact</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="client.html" class="nav-account-btn" aria-label="Mon compte">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0112 0v1"/></svg>
+      <span class="label">Mon compte</span>
+    </a>
+    <button class="hamburger-btn" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-nav">
+  <a href="kintsugi.html">Philosophie</a>
+  <a href="comment-ca-marche.html">Comment ça marche</a>
+  <a href="produits.html">Nos produits</a>
+  <a href="partenaires.html">Partenaires</a>
+  <a href="impact.html">Notre impact</a>
+  <a href="client.html">Mon compte</a>
+</div>
+
+<!-- Barre de recherche "IA" (langage naturel) -->
+<div class="ai-search-band">
+  <div class="ai-search-wrap">
+    <div class="ai-search-row">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="aiSearch" autocomplete="off" placeholder="Dites-nous ce qui est cassé — « la poignée de mon lave-linge Bosch »">
+      <span class="ai-search-badge">IA</span>
+    </div>
+    <div class="ai-search-results" id="aiSearchResults"></div>
+  </div>
+</div>
+<!-- =================== FIN HEADER PARTAGÉ =================== -->
+
+<header class="hero ccm-hero">
+  <p class="eyebrow">De la panne à la pièce</p>
+  <h1>Comment on passe d'une panne<br>à une pièce <em>imprimée</em></h1>
+  <p class="lede">Réimprimer une pièce détachée en 3D n'est pas un « copier-coller ». Entre la pièce
+    d'origine et l'objet qui répare votre appareil, il y a de l'identification, de la modélisation
+    et un slicing expert. On vous explique chaque étape — et pourquoi c'est rentable pour tous.</p>
+  <div class="hero-actions">
+    <a href="produits.html" class="btn btn-primary">Trouver ma pièce</a>
+    <a href="#processus" class="btn btn-ghost">Voir le processus</a>
+  </div>
+</header>
+
+<!-- ===================== LE PROCESSUS ===================== -->
+<section class="section" id="processus">
+  <div class="section-head">
+    <p class="eyebrow">Le processus</p>
+    <h2>Quatre étapes, un vrai savoir-faire</h2>
+    <p>Chaque pièce livrée est le résultat d'une chaîne d'expertise. Rien n'est laissé au hasard,
+      et presque tout reste invisible pour vous.</p>
+  </div>
+  <div class="grid grid-2 steps">
+    <div class="card step-card">
+      <span class="num">1</span>
+      <span class="tag">Shadow List</span>
+      <h3>Identifier la pièce orpheline</h3>
+      <p>Notre intelligence artificielle repère les pièces devenues introuvables : appareils vendus
+        à plus de 100 000 unités, sur le marché depuis plus de 3 ans, et pour lesquels le fournisseur
+        est en rupture. C'est là que le besoin de réparation est réel et durable.</p>
+    </div>
+    <div class="card step-card">
+      <span class="num">2</span>
+      <span class="tag">CAO / CMFAO</span>
+      <h3>Modéliser au dixième</h3>
+      <p>Un modélisateur reprend les cotes, respecte les tolérances d'assemblage et reconstruit la
+        géométrie en Conception Assistée par Ordinateur. C'est un temps d'expertise : c'est là que
+        naît la valeur, bien plus que dans les quelques grammes de matière.</p>
+    </div>
+    <div class="card step-card">
+      <span class="num">3</span>
+      <span class="tag">Cloud Slicer</span>
+      <h3>Préparer le G-code (slicing)</h3>
+      <p>Orientation de la pièce, taux de remplissage, supports, contraintes matière : le slicing
+        expert traduit le modèle en instructions machine. Entièrement piloté côté Pro, il reste
+        invisible pour le client — aucun paramètre technique à régler.</p>
+    </div>
+    <div class="card step-card">
+      <span class="num">4</span>
+      <span class="tag">Impression & contrôle</span>
+      <h3>Imprimer, vérifier, livrer</h3>
+      <p>La pièce est imprimée couche par couche, puis contrôlée : dimensions, résistance, qualité
+        des surfaces d'appui. Ce n'est validé que si ça répare vraiment et que ça tient dans le temps.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== POURQUOI ON NE COPIE PAS ===================== -->
+<section class="section section-alt">
+  <div class="section-head">
+    <p class="eyebrow">Contraintes de fabrication</p>
+    <h2>Pourquoi on ne copie pas à l'identique</h2>
+    <p>Une pièce d'origine et une pièce imprimée en 3D ne sont pas fabriquées de la même manière.
+      Reproduire l'une avec l'autre demande de la reconcevoir — pas de la photocopier.</p>
+  </div>
+  <div class="compare">
+    <div class="card origin">
+      <h3>
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16M6 8V5h12v3M8 8v12h8V8"/><path d="M10 12h4"/></svg>
+        La pièce d'origine : injectée
+      </h3>
+      <p>Un moule en acier, de la matière fondue injectée sous pression. Le procédé autorise des
+        parois très fines, des surfaces parfaitement lisses et des formes complexes en série.</p>
+      <ul>
+        <li>Matière homogène, dense, sans strates</li>
+        <li>Géométries impossibles à déposer couche par couche</li>
+        <li>Rentable seulement en très grandes quantités (le moule coûte cher)</li>
+        <li>Production centralisée en usine, loin du besoin ponctuel et local du client</li>
+      </ul>
+    </div>
+    <div class="card print">
+      <h3>
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v6H6z"/><path d="M6 9v6a3 3 0 003 3h6a3 3 0 003-3V9"/><path d="M9 21h6"/></svg>
+        Notre pièce : imprimée
+      </h3>
+      <p>La matière est déposée couche après couche. C'est ce qui rend possible la fabrication à
+        l'unité — mais ce procédé a ses propres règles, différentes de l'injection.</p>
+      <ul>
+        <li>Contre-dépouilles et parois très fines à repenser</li>
+        <li>Clips fragiles à renforcer pour éviter la casse</li>
+        <li>Surfaces d'étanchéité à reconcevoir pour rester fiables</li>
+        <li>Rentable dès une seule pièce, produite à la demande et au plus près du client</li>
+      </ul>
+    </div>
+  </div>
+  <div class="wrap" style="margin-top:2.6rem">
+    <p class="lead-serif" style="text-align:center;max-width:820px;margin:0 auto">
+      Copier tel quel un simple scan n'est ni toujours faisable, ni toujours fiable. Notre travail,
+      c'est de <strong>reconcevoir la pièce POUR le procédé</strong> : imprimable, solide, durable.
+    </p>
+  </div>
+</section>
+
+<!-- ===================== RAPPEL KINTSUGI ===================== -->
+<section class="section">
+  <div class="kint-note">
+    <blockquote>« On n'imite pas l'origine. On répare l'objet, et on assume la différence — comme le kintsugi souligne la fêlure à l'or. »</blockquote>
+    <a href="kintsugi.html" class="btn btn-gold">Notre philosophie</a>
+  </div>
+</section>
+
+<!-- ===================== RENTABLE / AVANTAGEUX ===================== -->
+<section class="section section-alt">
+  <div class="section-head">
+    <p class="eyebrow">Le modèle économique</p>
+    <h2>Rentable pour les pros, avantageux pour les particuliers</h2>
+    <p>La valeur ne vient pas de la matière — quelques grammes de plastique — mais du temps de
+      modélisation et de l'expertise de slicing. Ce qui bénéficie aux deux côtés.</p>
+  </div>
+  <div class="value-split">
+    <div class="value-col">
+      <h3>Pour le particulier</h3>
+      <p class="sub">Réparer plutôt que remplacer</p>
+      <ul>
+        <li><strong>Moins cher que racheter l'appareil</strong> : quelques grammes de pièce contre un produit entier encore viable.</li>
+        <li><strong>Disponible même en fin de vie</strong> : la pièce existe même quand le fabricant ne la fournit plus.</li>
+        <li><strong>Trois flux au choix</strong> :
+          <span style="display:block;margin-top:.5rem;color:var(--earth)">
+            — <strong>Numérique</strong> : vous achetez le fichier et imprimez vous-même.<br>
+            — <strong>Physique</strong> : la pièce est imprimée et livrée chez vous.<br>
+            — <strong>Résilient</strong> : vous vous équipez d'une imprimante via Hub4Fix.
+          </span>
+        </li>
+      </ul>
+    </div>
+    <div class="value-col">
+      <h3>Pour le réparateur pro</h3>
+      <p class="sub">Gagner du temps, élargir son offre</p>
+      <ul>
+        <li><strong>Ni modélisation, ni slicing à faire</strong> : concevoir puis préparer une pièce,
+          c'est environ 4&nbsp;heures de travail expert — pour une pièce qui vaut moins de 12&nbsp;€.
+          Le faire soi-même n'a aucun sens économique. Hub4Fix l'a déjà fait.</li>
+        <li><strong>La pièce, prête à l'emploi</strong> : vous recevez le fichier prêt à imprimer, ou la
+          pièce imprimée et livrée. Rien à reconcevoir, rien à paramétrer.</li>
+        <li><strong>Vous facturez votre vraie valeur</strong> : le diagnostic et la main-d'œuvre de
+          réparation, pas la R&amp;D d'une pièce en plastique.</li>
+        <li><strong>Plus de dossiers réparables</strong> : les pannes que vous refusiez faute de pièce
+          fournisseur redeviennent des réparations facturables.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== INFOGRAPHIE COÛT / RÉCURRENCE ===================== -->
+<section class="section" id="cout-compare">
+  <div class="section-head">
+    <p class="eyebrow">Le vrai coût</p>
+    <h2>Sans récurrence, la conception ne s'amortit jamais</h2>
+    <p>Un indépendant qui modélise une pièce à l'unité facture toute la conception sur une seule vente.
+      Hub4Fix répartit ce même coût sur chaque réparation de la même pièce.</p>
+  </div>
+  <div class="tco-wrap">
+    <svg class="tco-chart" viewBox="0 0 820 400" role="img"
+         aria-label="Coût par pièce selon le nombre de réparations : l'indépendant reste à 170 euros, Hub4Fix décroît vers quelques euros.">
+      <!-- Economy band (independent vs Hub4Fix digital) -->
+      <path class="tco-econ" d="M110,57.8 L780,57.8 L780,354 L668.3,344.9 L556.7,329.8 L445,299.6 L333.3,259.2 L221.7,208.9 L110,57.8 Z"/>
+      <!-- Horizontal gridlines (50 / 100 / 150 euros) -->
+      <line class="tco-grid" x1="110" y1="271.1" x2="780" y2="271.1"/>
+      <line class="tco-grid" x1="110" y1="182.2" x2="780" y2="182.2"/>
+      <line class="tco-grid" x1="110" y1="93.3"  x2="780" y2="93.3"/>
+      <!-- Axes -->
+      <line class="tco-axis" x1="110" y1="40"  x2="110" y2="360"/>
+      <line class="tco-axis" x1="110" y1="360" x2="780" y2="360"/>
+      <!-- Y ticks -->
+      <text class="tco-tick" x="100" y="364" text-anchor="end">0 €</text>
+      <text class="tco-tick" x="100" y="275" text-anchor="end">50 €</text>
+      <text class="tco-tick" x="100" y="186" text-anchor="end">100 €</text>
+      <text class="tco-tick" x="100" y="97"  text-anchor="end">150 €</text>
+      <!-- X ticks (number of successive repairs of the same part) -->
+      <text class="tco-tick" x="110"   y="378" text-anchor="middle">1</text>
+      <text class="tco-tick" x="221.7" y="378" text-anchor="middle">2</text>
+      <text class="tco-tick" x="333.3" y="378" text-anchor="middle">3</text>
+      <text class="tco-tick" x="445"   y="378" text-anchor="middle">5</text>
+      <text class="tco-tick" x="556.7" y="378" text-anchor="middle">10</text>
+      <text class="tco-tick" x="668.3" y="378" text-anchor="middle">25</text>
+      <text class="tco-tick" x="780"   y="378" text-anchor="middle">50</text>
+      <text class="tco-cap" x="445" y="396" text-anchor="middle">réparations de la même pièce →</text>
+      <!-- Independent : flat 170 € -->
+      <path class="tco-line tco-indep" d="M110,57.8 L780,57.8"/>
+      <!-- Hub4Fix printed part : conception amortie + impression -->
+      <path class="tco-line tco-print" d="M110,48.9 L221.7,200 L333.3,250.4 L445,290.7 L556.7,320.9 L668.3,336 L780,345.1"/>
+      <!-- Hub4Fix digital file : conception amortie -->
+      <path class="tco-line tco-num" d="M110,57.8 L221.7,208.9 L333.3,259.2 L445,299.6 L556.7,329.8 L668.3,344.9 L780,354"/>
+      <!-- Convergence note (1st part) -->
+      <text class="tco-note" x="120" y="34">1re pièce : ~170 € pour tous</text>
+      <!-- Band label -->
+      <text class="tco-note" x="360" y="150" text-anchor="middle">économie apportée par la récurrence</text>
+      <!-- End-of-line values -->
+      <text class="tco-endlbl" x="775" y="52"  text-anchor="end" fill="#C8102E">170 €</text>
+      <text class="tco-endlbl" x="786" y="341" text-anchor="start" fill="#2D8B5E">≈ 8 €</text>
+      <text class="tco-endlbl" x="786" y="360" text-anchor="start" fill="#B8963E">≈ 3 €</text>
+    </svg>
+    <div class="tco-legend">
+      <span><i style="border-color:var(--red)"></i> Indépendant (sans récurrence)</span>
+      <span><i style="border-color:var(--green)"></i> Hub4Fix — pièce imprimée</span>
+      <span><i style="border-color:var(--gold)"></i> Hub4Fix — fichier numérique</span>
+    </div>
+    <p class="tco-calc">Conception facturée : <b>4 h × 30 €/h</b> + <b>50 € de slicing</b> = <b>170 €</b></p>
+    <p class="tco-hyp">Hypothèses : 4 h de modélisation à 30 €/h, forfait slicing 50 €, coût d'impression estimé à ~5 € par pièce
+      (matière + machine) pour la version imprimée. L'axe horizontal représente le nombre de réparations successives de la
+      même pièce — la récurrence dont un indépendant ne dispose pas.</p>
+  </div>
+</section>
+
+<!-- ===================== CTA FINAL ===================== -->
+<section class="section">
+  <div class="section-head">
+    <h2>Une pièce à réparer, une compétence à partager ?</h2>
+    <p>Que vous cherchiez la pièce qui remet votre appareil en marche ou que vous vouliez mettre
+      votre savoir-faire au service de la réparation, tout commence ici.</p>
+  </div>
+  <div style="text-align:center;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+    <a href="produits.html" class="btn btn-primary">Trouver ma pièce</a>
+    <a href="partenaires.html" class="btn btn-gold">Devenir partenaire</a>
+  </div>
+</section>
+
+<!-- ===================== FOOTER PARTAGÉ (gabarit) ===================== -->
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <span class="nav-wordmark">Hub<sup>4</sup>Fix</span>
+      <p>La marketplace des pièces détachées imprimées en 3D. On répare ce que l'industrie a cessé de fournir.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Explorer</h4>
+      <a href="kintsugi.html">Philosophie</a>
+      <a href="comment-ca-marche.html">Comment ça marche</a>
+      <a href="produits.html">Nos produits</a>
+      <a href="impact.html">Notre impact</a>
+    </div>
+    <div class="footer-col">
+      <h4>Communauté</h4>
+      <a href="partenaires.html">Devenir partenaire</a>
+      <a href="repair-together.html">Repair Together</a>
+      <a href="client.html">Mon compte</a>
+    </div>
+    <div class="footer-col">
+      <h4>Légal</h4>
+      <a href="cgu.html">CGU</a>
+      <a href="cgv-clients.html">CGV clients</a>
+      <a href="cgv.html">Mentions légales</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Hub4Fix — Timeless3D</span>
+    <span>Réparer, c'est résister à l'obsolescence.</span>
+  </div>
+</footer>
+
+<script src="js/ai-search.js"></script>
+<script src="js/site-nav.js"></script>
+<script src="js/account-menu-b2c.js"></script>
+</body>
+</html>

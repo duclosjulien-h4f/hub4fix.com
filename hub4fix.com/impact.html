@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hub⁴Fix — Notre impact : réparer plutôt que jeter</title>
+<meta name="description" content="Des millions d'appareils encore fonctionnels sont jetés faute d'une petite pièce introuvable. Hub4Fix modélise et imprime la pièce orpheline, au plus près du besoin, pour prolonger la vie des objets.">
+<link rel="icon" type="image/svg+xml" href="favicon.svg"><link rel="alternate icon" href="favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Karla:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site-b2c.css">
+<style>
+/* --- Spécifique page Impact (accent vert, couleur écologique de la charte) --- */
+.impact-hero{padding:7rem 2rem 5rem;background:
+  radial-gradient(60% 80% at 50% 0%, rgba(45,139,94,0.10), transparent 70%),
+  linear-gradient(180deg, var(--warm-white), var(--ivory))}
+.impact-hero .eyebrow{color:var(--green)}
+.leaf-seam{position:relative;display:inline-block}
+.leaf-seam::after{content:'';position:absolute;left:8%;right:8%;bottom:-.12em;height:2px;
+  background:linear-gradient(90deg,transparent,var(--green),#4FB585,var(--green),transparent);
+  filter:drop-shadow(0 0 6px rgba(45,139,94,0.30))}
+.impact-hero h1 em{color:var(--green)}
+
+/* Problème : deux colonnes texte + visuel abstrait */
+.problem{display:grid;grid-template-columns:1.1fr .9fr;gap:3rem;align-items:center;max-width:var(--wrap);margin:0 auto;padding:0 2rem}
+.problem .txt h2{font-size:clamp(1.9rem,3.6vw,2.7rem);font-weight:300;margin-bottom:1.2rem}
+.problem .txt p{color:var(--earth);font-weight:300;margin-bottom:1rem}
+.problem .txt strong{color:var(--charcoal);font-weight:500}
+.problem .visual{aspect-ratio:1;border-radius:12px;background:
+  radial-gradient(circle at 30% 25%, var(--warm-white), var(--cream) 72%);
+  display:flex;align-items:center;justify-content:center;border:1px solid var(--cream);position:relative;overflow:hidden}
+.problem .visual svg{width:66%;height:66%}
+
+/* Cartes "Notre réponse" : accent vert sur le numéro/icone */
+.impact-cards .card .ico{width:44px;height:44px;color:var(--green);margin-bottom:1rem}
+.impact-cards .card h3{margin-bottom:.6rem}
+
+/* Le maillage : constellation de printers */
+.mesh-wrap{max-width:var(--wrap);margin:0 auto;padding:0 2rem;display:grid;grid-template-columns:.9fr 1.1fr;gap:3rem;align-items:center}
+.mesh-wrap .txt h2{font-size:clamp(1.9rem,3.6vw,2.7rem);font-weight:300;margin-bottom:1.2rem}
+.mesh-wrap .txt p{color:var(--earth);font-weight:300;margin-bottom:1rem}
+.mesh-figure{border-radius:12px;background:radial-gradient(circle at 50% 40%, var(--warm-white), var(--cream) 78%);
+  border:1px solid var(--cream);padding:1.4rem;overflow:hidden}
+.mesh-figure svg{width:100%;height:auto;display:block}
+.mesh-figure .link{stroke:var(--stone);stroke-width:1;opacity:.45}
+.mesh-figure .node{fill:var(--stone)}
+.mesh-figure .hub{fill:var(--green)}
+.mesh-figure .halo{fill:none;stroke:var(--green);stroke-width:1.2;opacity:.35}
+.mesh-caption{text-align:center;font-family:var(--font-mono);font-size:.68rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--stone);margin-top:1rem}
+
+/* Réemploi / Repair Together : bandeau centré */
+.reuse{max-width:760px;margin:0 auto;text-align:center;padding:0 2rem}
+.reuse h2{font-size:clamp(1.9rem,3.6vw,2.6rem);font-weight:300;margin-bottom:1.2rem}
+.reuse p{color:var(--earth);font-weight:300;margin-bottom:1.4rem;font-size:1.05rem}
+
+@media(max-width:900px){
+  .problem{grid-template-columns:1fr}
+  .mesh-wrap{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== HEADER PARTAGÉ (gabarit) ===================== -->
+<nav class="site-nav">
+  <a href="kintsugi.html" class="nav-brand">
+    <img class="nav-logo" src="images/logo-h4f.svg" alt="Hub4Fix">
+    <span class="nav-wordmark">Hub<sup>4</sup>Fix</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="kintsugi.html">Philosophie</a></li>
+    <li><a href="comment-ca-marche.html">Comment ça marche</a></li>
+    <li><a href="produits.html">Nos produits</a></li>
+    <li><a href="partenaires.html" class="nav-partner-link">Partenaires</a></li>
+    <li><a href="impact.html" class="active">Notre impact</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="client.html" class="nav-account-btn" aria-label="Mon compte">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0112 0v1"/></svg>
+      <span class="label">Mon compte</span>
+    </a>
+    <button class="hamburger-btn" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-nav">
+  <a href="kintsugi.html">Philosophie</a>
+  <a href="comment-ca-marche.html">Comment ça marche</a>
+  <a href="produits.html">Nos produits</a>
+  <a href="partenaires.html">Partenaires</a>
+  <a href="impact.html" class="active">Notre impact</a>
+  <a href="client.html">Mon compte</a>
+</div>
+
+<!-- Barre de recherche "IA" (langage naturel) -->
+<div class="ai-search-band">
+  <div class="ai-search-wrap">
+    <div class="ai-search-row">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="aiSearch" autocomplete="off" placeholder="Dites-nous ce qui est cassé — « la poignée de mon lave-linge Bosch »">
+      <span class="ai-search-badge">IA</span>
+    </div>
+    <div class="ai-search-results" id="aiSearchResults"></div>
+  </div>
+</div>
+<!-- =================== FIN HEADER PARTAGÉ =================== -->
+
+<header class="hero impact-hero">
+  <p class="eyebrow">Notre impact</p>
+  <h1>Réparer, c'est un <span class="leaf-seam">acte</span>.</h1>
+  <p class="lede">Une petite pièce en plastique manque, et tout un appareil part à la benne.
+    Notre métier commence exactement là : <em>redonner vie</em> à ce qui fonctionne encore.</p>
+  <div class="hero-actions">
+    <a href="produits.html" class="btn btn-primary">Trouver ma pièce</a>
+    <a href="kintsugi.html" class="btn btn-ghost">Notre philosophie</a>
+  </div>
+</header>
+
+<!-- ===================== LE PROBLÈME ===================== -->
+<section class="section">
+  <div class="problem">
+    <div class="txt">
+      <p class="eyebrow" style="font-family:var(--font-mono);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--green);margin-bottom:1rem">Le problème</p>
+      <h2>L'obsolescence par la pièce manquante</h2>
+      <p>Un appareil ne meurt pas toujours parce qu'il est usé. Souvent, il meurt parce
+        qu'<strong>une seule pièce a lâché</strong> et qu'elle est devenue introuvable :
+        le fabricant ne la fournit plus, le moule d'injection a été détruit, le modèle est trop ancien.</p>
+      <p>Faute de cette pièce, des appareils encore parfaitement fonctionnels sont jetés en masse.
+        C'est du <strong>gaspillage de matière</strong>, de l'<strong>énergie grise</strong>
+        déjà dépensée pour les fabriquer, et de l'argent perdu pour ceux qui les possèdent.</p>
+      <p>Le problème n'est presque jamais l'appareil. C'est le petit composant absent.</p>
+    </div>
+    <div class="problem visual" style="display:flex">
+      <!-- Abstract: a whole object undone by a single missing fragment -->
+      <svg viewBox="0 0 200 200" fill="none" stroke="var(--stone)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="42" y="42" width="116" height="116" rx="10"/>
+        <path d="M42 82 H158 M82 42 V158"/>
+        <!-- missing corner piece, drawn dashed in green -->
+        <path d="M118 82 H158 V122" stroke="var(--green)" stroke-dasharray="6 7" stroke-width="2.4"/>
+        <circle cx="138" cy="102" r="4" fill="var(--green)" stroke="none"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== NOTRE RÉPONSE ===================== -->
+<section class="section section-alt">
+  <div class="section-head">
+    <p class="eyebrow">Notre réponse</p>
+    <h2>Imprimer la pièce, pas remplacer l'appareil</h2>
+    <p>Modéliser une pièce orpheline et l'imprimer à la demande, au plus près de celui qui en a besoin.</p>
+  </div>
+  <div class="wrap">
+    <div class="grid grid-3 impact-cards">
+      <div class="card">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1018 0 9 9 0 00-18 0z"/><path d="M12 7v5l3 2"/></svg>
+        <h3>Prolonger la vie des appareils</h3>
+        <p>Une pièce orpheline modélisée puis imprimée suffit souvent à relancer un appareil entier.
+          On répare le point de rupture plutôt que de condamner le reste.</p>
+      </div>
+      <div class="card">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-4.35-7-10a7 7 0 0114 0c0 5.65-7 10-7 10z"/><circle cx="12" cy="11" r="2.5"/></svg>
+        <h3>Produire local et à la demande</h3>
+        <p>L'impression se fait au plus près du client, via le réseau de printers.
+          Pas de stock, pas de surproduction, pas de transport longue distance inutile.</p>
+      </div>
+      <div class="card">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 7v4l9 5 9-5V7l-9-5z"/><path d="M3 7l9 5 9-5"/><path d="M12 22V12"/></svg>
+        <h3>Sobriété matière</h3>
+        <p>On imprime la pièce qu'il faut, quand il faut, en quelques grammes de plastique —
+          au lieu de remplacer des kilos d'appareil encore viable.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== LE MAILLAGE ===================== -->
+<section class="section">
+  <div class="mesh-wrap">
+    <div class="txt">
+      <p class="eyebrow" style="font-family:var(--font-mono);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--green);margin-bottom:1rem">Le maillage</p>
+      <h2>Un réseau qui rapproche la production du besoin</h2>
+      <p>Plutôt qu'une grande usine centrale, Hub4Fix s'appuie sur un <strong style="color:var(--charcoal);font-weight:500">réseau distribué de points d'impression</strong>
+        — les printers — répartis sur le territoire.</p>
+      <p>Quand une pièce est commandée, elle est imprimée par un point proche du client.
+        La production suit le besoin au lieu de le devancer : moins de kilomètres parcourus,
+        pas d'entrepôt qui se remplit de pièces qui ne serviront peut-être jamais.</p>
+      <p>Chaque nouveau printer densifie le maillage et rapproche un peu plus la réparation de chez vous.</p>
+    </div>
+    <figure class="mesh-figure">
+      <!-- Abstract constellation of distributed printers around central hubs. Decorative. -->
+      <svg viewBox="0 0 480 320" role="img" aria-label="Réseau distribué de points d'impression reliés">
+        <g class="links">
+          <line class="link" x1="240" y1="160" x2="90" y2="70"/>
+          <line class="link" x1="240" y1="160" x2="400" y2="80"/>
+          <line class="link" x1="240" y1="160" x2="80" y2="230"/>
+          <line class="link" x1="240" y1="160" x2="410" y2="240"/>
+          <line class="link" x1="240" y1="160" x2="240" y2="40"/>
+          <line class="link" x1="240" y1="160" x2="240" y2="285"/>
+          <line class="link" x1="90" y1="70" x2="240" y2="40"/>
+          <line class="link" x1="90" y1="70" x2="80" y2="230"/>
+          <line class="link" x1="400" y1="80" x2="240" y2="40"/>
+          <line class="link" x1="400" y1="80" x2="410" y2="240"/>
+          <line class="link" x1="80" y1="230" x2="240" y2="285"/>
+          <line class="link" x1="410" y1="240" x2="240" y2="285"/>
+          <line class="link" x1="150" y1="120" x2="240" y2="160"/>
+          <line class="link" x1="330" y1="200" x2="240" y2="160"/>
+        </g>
+        <g class="nodes">
+          <circle class="node" cx="90" cy="70" r="5"/>
+          <circle class="node" cx="400" cy="80" r="5"/>
+          <circle class="node" cx="80" cy="230" r="5"/>
+          <circle class="node" cx="410" cy="240" r="5"/>
+          <circle class="node" cx="240" cy="40" r="5"/>
+          <circle class="node" cx="240" cy="285" r="5"/>
+          <circle class="node" cx="150" cy="120" r="4"/>
+          <circle class="node" cx="330" cy="200" r="4"/>
+        </g>
+        <!-- central hub with halo -->
+        <circle class="halo" cx="240" cy="160" r="20"/>
+        <circle class="halo" cx="240" cy="160" r="30"/>
+        <circle class="hub" cx="240" cy="160" r="8"/>
+      </svg>
+      <figcaption class="mesh-caption">Réseau distribué de printers — production au plus près du client</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ===================== RÉEMPLOI & COMMUNAUTÉ ===================== -->
+<section class="section section-alt">
+  <div class="reuse">
+    <p class="eyebrow" style="font-family:var(--font-mono);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--green);margin-bottom:1rem">Réemploi et communauté</p>
+    <h2>Chaque pièce cassée enrichit le catalogue</h2>
+    <p>Avec le programme <strong style="color:var(--charcoal);font-weight:500">Repair Together</strong>,
+      la première pièce vous est offerte en échange de l'envoi de la pièce cassée.
+      Cette pièce d'origine nous sert de modèle : elle permet de la numériser fidèlement,
+      puis de la rendre disponible pour tous ceux qui chercheront la même réparation demain.</p>
+    <p>La réparation devient collective : un objet réparé aujourd'hui aide à en réparer d'autres ensuite.</p>
+    <a href="repair-together.html" class="btn btn-gold">Découvrir Repair Together</a>
+  </div>
+</section>
+
+<!-- ===================== CTA FINAL ===================== -->
+<section class="section">
+  <div class="section-head">
+    <h2>Prêt à réparer plutôt que jeter ?</h2>
+    <p>Cherchez la pièce dont vous avez besoin, ou relisez le parti pris qui guide chacune de nos réparations.</p>
+  </div>
+  <div style="text-align:center;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+    <a href="produits.html" class="btn btn-primary">Explorer nos produits</a>
+    <a href="kintsugi.html" class="btn btn-ghost">Notre philosophie</a>
+  </div>
+</section>
+
+<!-- ===================== FOOTER PARTAGÉ (gabarit) ===================== -->
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <span class="nav-wordmark">Hub<sup>4</sup>Fix</span>
+      <p>La marketplace des pièces détachées imprimées en 3D. On répare ce que l'industrie a cessé de fournir.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Explorer</h4>
+      <a href="kintsugi.html">Philosophie</a>
+      <a href="comment-ca-marche.html">Comment ça marche</a>
+      <a href="produits.html">Nos produits</a>
+      <a href="impact.html">Notre impact</a>
+    </div>
+    <div class="footer-col">
+      <h4>Communauté</h4>
+      <a href="partenaires.html">Devenir partenaire</a>
+      <a href="repair-together.html">Repair Together</a>
+      <a href="client.html">Mon compte</a>
+    </div>
+    <div class="footer-col">
+      <h4>Légal</h4>
+      <a href="cgu.html">CGU</a>
+      <a href="cgv-clients.html">CGV clients</a>
+      <a href="cgv.html">Mentions légales</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Hub4Fix — Timeless3D</span>
+    <span>Réparer, c'est résister à l'obsolescence.</span>
+  </div>
+</footer>
+
+<script src="js/ai-search.js"></script>
+<script src="js/site-nav.js"></script>
+<script src="js/account-menu-b2c.js"></script>
+</body>
+</html>

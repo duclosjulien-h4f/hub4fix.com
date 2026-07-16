@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hub⁴Fix — Nos produits : les pièces détachées imprimables</title>
+<meta name="description" content="Le catalogue Hub4Fix des pièces détachées imprimées en 3D. Pièces déjà modélisées et pièces en cours d'acquisition — cherchez votre appareil en langage courant.">
+<link rel="icon" type="image/svg+xml" href="favicon.svg"><link rel="alternate icon" href="favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Karla:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site-b2c.css">
+<style>
+/* --- Spécifique page Produits --- */
+.catalog-head{padding:3.5rem 2rem 2rem;text-align:center}
+.catalog-head h1{font-size:clamp(2.2rem,5vw,3.4rem);font-weight:300;margin-bottom:.8rem}
+.catalog-head h1 em{font-style:italic;color:var(--red)}
+.catalog-head p{color:var(--earth);font-weight:300;max-width:620px;margin:0 auto}
+.catalog-toolbar{max-width:var(--wrap);margin:0 auto 2rem;padding:0 2rem;display:flex;gap:1rem;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.filter-pills{display:flex;gap:.5rem;flex-wrap:wrap}
+.pill{font-family:var(--font-sans);font-size:.78rem;font-weight:600;letter-spacing:.03em;padding:.5rem 1.1rem;border-radius:20px;
+  border:1px solid var(--sand);background:#fff;color:var(--earth);cursor:pointer;transition:all .2s}
+.pill.active{background:var(--night);color:#fff;border-color:var(--night)}
+.result-count{font-family:var(--font-mono);font-size:.74rem;color:var(--stone)}
+.catalog-wrap{max-width:var(--wrap);margin:0 auto 4rem;padding:0 2rem}
+.query-echo{background:var(--gold-pale);border:1px solid var(--gold);border-radius:6px;padding:.8rem 1.2rem;margin-bottom:1.5rem;
+  font-size:.9rem;color:var(--charcoal);display:none;align-items:center;justify-content:space-between;gap:1rem}
+.query-echo.visible{display:flex}
+.query-echo .clear{cursor:pointer;color:var(--red);font-weight:600;font-size:.8rem;white-space:nowrap}
+.wishlist-cta{background:#fff;border:1px dashed var(--sand);border-radius:8px;padding:2rem;text-align:center;margin-top:2rem}
+.wishlist-cta h3{font-size:1.3rem;margin-bottom:.5rem}
+.wishlist-cta p{color:var(--earth);font-weight:300;margin-bottom:1.2rem}
+</style>
+</head>
+<body>
+
+<!-- ===================== HEADER PARTAGÉ ===================== -->
+<nav class="site-nav">
+  <a href="kintsugi.html" class="nav-brand">
+    <img class="nav-logo" src="images/logo-h4f.svg" alt="Hub4Fix">
+    <span class="nav-wordmark">Hub<sup>4</sup>Fix</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="kintsugi.html">Philosophie</a></li>
+    <li><a href="comment-ca-marche.html">Comment ça marche</a></li>
+    <li><a href="produits.html" class="active">Nos produits</a></li>
+    <li><a href="partenaires.html" class="nav-partner-link">Partenaires</a></li>
+    <li><a href="impact.html">Notre impact</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="client.html" class="nav-account-btn" aria-label="Mon compte">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0112 0v1"/></svg>
+      <span class="label">Mon compte</span>
+    </a>
+    <button class="hamburger-btn" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-nav">
+  <a href="kintsugi.html">Philosophie</a>
+  <a href="comment-ca-marche.html">Comment ça marche</a>
+  <a href="produits.html">Nos produits</a>
+  <a href="partenaires.html">Partenaires</a>
+  <a href="impact.html">Notre impact</a>
+  <a href="client.html">Mon compte</a>
+</div>
+
+<div class="ai-search-band">
+  <div class="ai-search-wrap">
+    <div class="ai-search-row">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="aiSearch" autocomplete="off" placeholder="Dites-nous ce qui est cassé — « le bac à couverts de mon lave-vaisselle »">
+      <span class="ai-search-badge">IA</span>
+    </div>
+    <div class="ai-search-results" id="aiSearchResults"></div>
+  </div>
+</div>
+<!-- =================== FIN HEADER PARTAGÉ =================== -->
+
+<header class="catalog-head">
+  <h1>Nos <em>produits</em></h1>
+  <p>Chaque pièce orpheline que nous avons repérée. Certaines sont déjà modélisées et prêtes à imprimer,
+    d'autres sont en cours d'acquisition — signalez votre besoin pour les faire monter en priorité.</p>
+</header>
+
+<div class="catalog-toolbar">
+  <div class="filter-pills" id="filterPills">
+    <button class="pill active" data-filter="all">Toutes</button>
+    <button class="pill" data-filter="modeled">Modèle 3D prêt</button>
+    <button class="pill" data-filter="pending">En cours d'acquisition</button>
+  </div>
+  <span class="result-count" id="resultCount"></span>
+</div>
+
+<div class="catalog-wrap">
+  <div class="query-echo" id="queryEcho">
+    <span id="queryEchoText"></span>
+    <span class="clear" id="queryClear">Effacer la recherche ✕</span>
+  </div>
+  <div class="product-grid" id="productGrid"></div>
+  <div class="state-msg" id="stateMsg">Chargement du catalogue…</div>
+
+  <div class="wishlist-cta">
+    <h3>Vous ne trouvez pas votre pièce ?</h3>
+    <p>Décrivez-la : nous l'ajoutons à la liste de demande. Plus une pièce est demandée, plus vite elle est modélisée.</p>
+    <a href="client.html" class="btn btn-gold">Signaler une pièce manquante</a>
+  </div>
+</div>
+
+<!-- ===================== FOOTER PARTAGÉ ===================== -->
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <span class="nav-wordmark">Hub<sup>4</sup>Fix</span>
+      <p>La marketplace des pièces détachées imprimées en 3D. On répare ce que l'industrie a cessé de fournir.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Explorer</h4>
+      <a href="kintsugi.html">Philosophie</a>
+      <a href="comment-ca-marche.html">Comment ça marche</a>
+      <a href="produits.html">Nos produits</a>
+      <a href="impact.html">Notre impact</a>
+    </div>
+    <div class="footer-col">
+      <h4>Communauté</h4>
+      <a href="partenaires.html">Devenir partenaire</a>
+      <a href="repair-together.html">Repair Together</a>
+      <a href="client.html">Mon compte</a>
+    </div>
+    <div class="footer-col">
+      <h4>Légal</h4>
+      <a href="cgu.html">CGU</a>
+      <a href="cgv-clients.html">CGV clients</a>
+      <a href="cgv.html">Mentions légales</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Hub4Fix — Timeless3D</span>
+    <span>Réparer, c'est résister à l'obsolescence.</span>
+  </div>
+</footer>
+
+<script src="js/ai-search.js"></script>
+<script src="js/site-nav.js"></script>
+<script src="js/account-menu-b2c.js"></script>
+<script>
+/* Page "Nos produits" : rendu du feed central + filtres + requête d'URL (?q=). */
+(function () {
+  'use strict';
+  var API_ORIGIN = 'https://h4f-admin.duclosjulien.workers.dev';
+  var grid = document.getElementById('productGrid');
+  var stateMsg = document.getElementById('stateMsg');
+  var resultCount = document.getElementById('resultCount');
+  var queryEcho = document.getElementById('queryEcho');
+  var queryEchoText = document.getElementById('queryEchoText');
+
+  var ALL = [];         // toutes les pièces (feed)
+  var activeFilter = 'all';
+  var activeQuery = ''; // requête langage naturel éventuelle
+
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function thumb(p){ return p.image ? (API_ORIGIN + p.image) : null; }
+
+  // Le feed ne porte pas (encore) d'état "modélisé" fiable : on considère
+  // qu'une pièce avec une image traitée h4f/ est modélisée. Repli : pending.
+  function isModeled(p){ return !!(p.modeled || (p.image && /\/img\/h4f\//.test(p.image))); }
+
+  function card(p){
+    var t = thumb(p);
+    var modeled = isModeled(p);
+    var el = document.createElement('a');
+    el.className = 'product-card';
+    el.href = 'fiche-piece.html?id=' + encodeURIComponent(p.id || '');
+    el.innerHTML =
+      (t ? '<img class="product-thumb" src="'+t+'" alt="'+esc(p.name)+'" loading="lazy">'
+         : '<div class="product-thumb-fallback"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2L3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5M12 22V12"/></svg></div>') +
+      '<div class="product-body">' +
+        '<div class="product-name">' + esc(p.name || 'Pièce') + '</div>' +
+        '<div class="product-machine">' + esc(p.machine || p.category || '—') + '</div>' +
+        '<div class="product-foot">' +
+          (modeled ? '<span class="badge badge-modeled">Modèle 3D</span>'
+                   : '<span class="badge badge-pending">En cours d\'acquisition</span>') +
+          (p.demand ? '<span class="badge badge-demand">'+parseInt(p.demand,10)+' demandes</span>' : '') +
+        '</div>' +
+      '</div>';
+    return el;
+  }
+
+  function applyFilter(list){
+    if (activeFilter === 'modeled') return list.filter(isModeled);
+    if (activeFilter === 'pending') return list.filter(function(p){return !isModeled(p);});
+    return list;
+  }
+
+  function render(list){
+    grid.innerHTML = '';
+    var shown = applyFilter(list);
+    if (!shown.length){
+      stateMsg.style.display = 'block';
+      stateMsg.textContent = activeQuery
+        ? 'Aucune pièce ne correspond à « ' + activeQuery +' ». Signalez-la ci-dessous.'
+        : 'Aucune pièce dans cette catégorie pour le moment.';
+    } else {
+      stateMsg.style.display = 'none';
+      shown.forEach(function(p){ grid.appendChild(card(p)); });
+    }
+    resultCount.textContent = shown.length + ' pièce' + (shown.length>1?'s':'');
+  }
+
+  // Filtres
+  document.getElementById('filterPills').addEventListener('click', function(e){
+    var b = e.target.closest('.pill'); if(!b) return;
+    this.querySelectorAll('.pill').forEach(function(x){x.classList.remove('active');});
+    b.classList.add('active');
+    activeFilter = b.getAttribute('data-filter');
+    renderCurrent();
+  });
+
+  var _filtered = null; // résultat de la recherche NL en cours (ou null = tout)
+  function renderCurrent(){ render(_filtered || ALL); }
+
+  // Effacer la recherche
+  document.getElementById('queryClear').addEventListener('click', function(){
+    activeQuery=''; _filtered=null; queryEcho.classList.remove('visible');
+    history.replaceState(null,'','produits.html');
+    renderCurrent();
+  });
+
+  // Applique une requête langage naturel (via ?q= ou la barre)
+  function runQuery(q){
+    activeQuery = q;
+    queryEchoText.textContent = 'Résultats pour : « ' + q + ' »';
+    queryEcho.classList.add('visible');
+    if (window.H4FSearch){
+      window.H4FSearch.search(q).then(function(res){ _filtered = res; renderCurrent(); });
+    }
+  }
+
+  // Chargement du feed
+  fetch(API_ORIGIN + '/api/pieces.json', { cache:'no-store' })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(data){ ALL = (data && Array.isArray(data.products)) ? data.products : []; })
+    .catch(function(){ ALL = []; })
+    .then(function(){
+      var params = new URLSearchParams(location.search);
+      var q = params.get('q');
+      if (q) runQuery(q); else renderCurrent();
+      if (!ALL.length && !q){ stateMsg.textContent = 'Catalogue momentanément indisponible.'; stateMsg.style.display='block'; }
+    });
+})();
+</script>
+</body>
+</html>

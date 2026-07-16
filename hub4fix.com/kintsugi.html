@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hub⁴Fix — Kintsugi : sublimer plutôt qu'imiter</title>
+<meta name="description" content="Hub4Fix ne copie pas la pièce d'origine — impossible à l'identique en impression 3D. Nous réparons l'objet et assumons la trace, comme le kintsugi souligne la fêlure à l'or.">
+<link rel="icon" type="image/svg+xml" href="favicon.svg"><link rel="alternate icon" href="favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Karla:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site-b2c.css">
+<style>
+/* --- Spécifique page Kintsugi --- */
+/* Hero en bannière (image reprise du hero de la V1) */
+.hero-banner-v2{position:relative;width:100%;min-height:74vh;max-height:780px;overflow:hidden;display:flex}
+.hbv2-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 40%}
+.hbv2-overlay{position:relative;width:100%;display:flex;align-items:center;
+  background:linear-gradient(90deg,rgba(20,18,16,.86) 0%,rgba(20,18,16,.6) 40%,rgba(20,18,16,.15) 68%,rgba(20,18,16,0) 100%)}
+.hbv2-inner{max-width:640px;padding:3.5rem 4rem}
+.hero-banner-v2 .eyebrow{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-light);margin-bottom:1.1rem}
+.hero-banner-v2 h1{font-size:clamp(2.4rem,5vw,4rem);font-weight:300;color:#fff;line-height:1.12;margin-bottom:1.2rem}
+.hero-banner-v2 h1 em{font-style:italic;color:var(--red)}
+.hero-banner-v2 .lede{color:rgba(255,255,255,.86);font-size:1.12rem;font-weight:300;line-height:1.6;margin-bottom:2rem;max-width:520px}
+.hero-banner-v2 .hero-actions{justify-content:flex-start}
+.btn-hero-ghost{background:transparent;border-color:rgba(255,255,255,.55);color:#fff}
+.btn-hero-ghost:hover{background:#fff;color:var(--night);border-color:#fff}
+@media(max-width:720px){
+  .hero-banner-v2{min-height:80vh}
+  .hbv2-img{object-position:60% 42%}
+  .hbv2-overlay{align-items:flex-end;background:linear-gradient(0deg,rgba(20,18,16,.94) 0%,rgba(20,18,16,.72) 48%,rgba(20,18,16,.5) 100%)}
+  .hbv2-inner{padding:2rem 1.4rem 2.8rem}
+}
+.philo-quote{max-width:760px;margin:0 auto;text-align:center;padding:4rem 2rem}
+.philo-quote blockquote{font-family:var(--font-serif);font-size:clamp(1.6rem,3.4vw,2.4rem);font-weight:300;font-style:italic;line-height:1.45;color:var(--charcoal)}
+.philo-quote cite{display:block;margin-top:1.4rem;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);font-style:normal}
+.pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:1.6rem;max-width:var(--wrap);margin:0 auto}
+.pillar{text-align:center;padding:2rem 1.4rem}
+.pillar .ico{width:52px;height:52px;margin:0 auto 1.2rem;color:var(--gold)}
+.pillar h3{font-size:1.4rem;margin-bottom:.7rem}
+.pillar p{color:var(--earth);font-weight:300;font-size:.96rem}
+.split{display:grid;grid-template-columns:1fr 1.2fr;gap:2.6rem;align-items:center;max-width:var(--wrap);margin:0 auto}
+.split .txt h2{font-size:clamp(1.9rem,3.6vw,2.7rem);font-weight:300;margin-bottom:1.2rem}
+.split .txt p{color:var(--earth);font-weight:300;margin-bottom:1rem}
+.split .visual{border-radius:12px;overflow:hidden;border:1px solid var(--cream);box-shadow:var(--shadow-md)}
+.split .visual img{display:block;width:100%;height:auto}
+.split .visual figcaption{font-size:.74rem;color:var(--stone);text-align:center;padding:.6rem .8rem;background:var(--warm-white);font-style:italic}
+/* Tableau comparatif Injection vs Impression 3D */
+.vs-table{max-width:var(--wrap);margin:2.6rem auto 0;border:1px solid var(--cream);border-radius:12px;overflow:hidden;background:#fff;box-shadow:var(--shadow-sm)}
+.vs-row{display:grid;grid-template-columns:1.05fr 1fr 1fr}
+.vs-row+.vs-row{border-top:1px solid var(--cream)}
+.vs-head .vs-cell{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--charcoal);background:var(--warm-white);font-weight:500}
+.vs-cell{padding:.95rem 1.1rem;display:flex;gap:.55rem;align-items:flex-start}
+.vs-cell.crit{font-weight:600;color:var(--charcoal);align-items:center}
+.vs-cell.col-inj,.vs-cell.col-3d{border-left:1px solid var(--cream)}
+.vs-cell>div{min-width:0}
+.vs-ico{flex:0 0 18px;width:18px;height:18px;margin-top:.1rem}
+.vs-pos{color:var(--green)}
+.vs-neg{color:var(--red)}
+.vs-cell .t{display:block;font-size:.87rem;color:var(--earth);font-weight:300;line-height:1.42}
+.vs-cell .t strong{color:var(--charcoal);font-weight:600}
+.vs-when{display:none;font-family:var(--font-mono);font-size:.63rem;letter-spacing:.08em;text-transform:uppercase;color:var(--stone);margin-bottom:.15rem}
+/* Notes techniques sous le tableau */
+.tech-notes{max-width:var(--wrap);margin:1.8rem auto 0;display:grid;grid-template-columns:1fr 1fr;gap:1.4rem}
+.tech-note{background:var(--warm-white);border:1px solid var(--cream);border-radius:10px;padding:1.6rem 1.7rem}
+.tech-note h3{font-size:1.15rem;margin-bottom:.7rem;display:flex;align-items:center;gap:.55rem}
+.tech-note h3 .dot{width:9px;height:9px;border-radius:2px;background:var(--gold);flex-shrink:0}
+.tech-note p{font-size:.9rem;color:var(--earth);font-weight:300;line-height:1.6}
+.tech-note p+p{margin-top:.7rem}
+.tech-note strong{color:var(--charcoal);font-weight:600}
+@media(max-width:900px){.pillars{grid-template-columns:1fr}.split{grid-template-columns:1fr}.tech-notes{grid-template-columns:1fr}}
+@media(max-width:680px){
+  .vs-row{grid-template-columns:1fr}
+  .vs-head{display:none}
+  .vs-cell.crit{background:var(--warm-white);font-size:1rem}
+  .vs-cell.col-inj,.vs-cell.col-3d{border-left:none;border-top:1px solid var(--warm-white)}
+  .vs-when{display:block}
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== HEADER PARTAGÉ (gabarit) ===================== -->
+<nav class="site-nav">
+  <a href="kintsugi.html" class="nav-brand">
+    <img class="nav-logo" src="images/logo-h4f.svg" alt="Hub4Fix">
+    <span class="nav-wordmark">Hub<sup>4</sup>Fix</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="kintsugi.html" class="active">Philosophie</a></li>
+    <li><a href="comment-ca-marche.html">Comment ça marche</a></li>
+    <li><a href="produits.html">Nos produits</a></li>
+    <li><a href="partenaires.html" class="nav-partner-link">Partenaires</a></li>
+    <li><a href="impact.html">Notre impact</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="client.html" class="nav-account-btn" aria-label="Mon compte">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0112 0v1"/></svg>
+      <span class="label">Mon compte</span>
+    </a>
+    <button class="hamburger-btn" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-nav">
+  <a href="kintsugi.html">Philosophie</a>
+  <a href="comment-ca-marche.html">Comment ça marche</a>
+  <a href="produits.html">Nos produits</a>
+  <a href="partenaires.html">Partenaires</a>
+  <a href="impact.html">Notre impact</a>
+  <a href="client.html">Mon compte</a>
+</div>
+
+<!-- Barre de recherche "IA" (langage naturel) -->
+<div class="ai-search-band">
+  <div class="ai-search-wrap">
+    <div class="ai-search-row">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="aiSearch" autocomplete="off" placeholder="Dites-nous ce qui est cassé — « la poignée de mon lave-linge Bosch »">
+      <span class="ai-search-badge">IA</span>
+    </div>
+    <div class="ai-search-results" id="aiSearchResults"></div>
+  </div>
+</div>
+<!-- =================== FIN HEADER PARTAGÉ =================== -->
+
+<!-- SVG defs pour le dégradé or des fissures -->
+<svg width="0" height="0" style="position:absolute"><defs>
+  <linearGradient id="goldgrad" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#D4B15F"/><stop offset="1" stop-color="#B8963E"/>
+  </linearGradient>
+</defs></svg>
+
+<header class="hero-banner-v2">
+  <img class="hbv2-img" src="images/hero-h4f.jpg"
+       alt="Une pièce d'aspirateur cassée, réimprimée en 3D (poignée rouge Galaxy H4F), remet l'appareil en service à la maison.">
+  <div class="hbv2-overlay">
+    <div class="hbv2-inner">
+      <p class="eyebrow">Kintsugi numérique</p>
+      <h1>On ne copie pas l'origine.<br>On <em>sublime</em> l'objet.</h1>
+      <p class="lede">Une pièce imprimée en 3D ne sera jamais le clone parfait d'une pièce injectée en usine.
+        Plutôt que de cacher cette différence, nous l'assumons — et nous en faisons une signature.</p>
+      <div class="hero-actions">
+        <a href="produits.html" class="btn btn-primary">Trouver ma pièce</a>
+        <a href="comment-ca-marche.html" class="btn btn-hero-ghost">Comment ça marche</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="philo-quote">
+  <blockquote>« Là où l'objet s'est brisé, la réparation ne s'efface pas : elle se souligne, à l'or. »</blockquote>
+  <cite>金継ぎ — Kintsugi, l'art japonais de réparer à l'or</cite>
+</section>
+
+<section class="section section-alt">
+  <div class="section-head">
+    <p class="eyebrow">Notre parti pris</p>
+    <h2>Réparer, c'est prolonger une histoire</h2>
+    <p>Un appareil qui fonctionne encore ne mérite pas la benne pour une pièce en plastique de quelques grammes.</p>
+  </div>
+  <div class="pillars">
+    <div class="pillar">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7.4L12 17l-6.3 4.4L8 14 2 9.4h7.6z"/></svg>
+      <h3>Assumer la trace</h3>
+      <p>La pièce réparée n'imite pas — elle affirme sa fonction. Une touche de personnalisation
+        transforme la contrainte technique en choix esthétique.</p>
+    </div>
+    <div class="pillar">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1018 0 9 9 0 00-18 0z"/><path d="M12 7v5l3 2"/></svg>
+      <h3>Contre le jetable</h3>
+      <p>Modéliser et imprimer une pièce orpheline coûte moins, en argent et en carbone,
+        que remplacer un appareil entier encore parfaitement viable.</p>
+    </div>
+    <div class="pillar">
+      <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 7v4l9 5 9-5V7l-9-5z"/><path d="M3 7l9 5 9-5"/><path d="M12 22V12"/></svg>
+      <h3>Un savoir-faire</h3>
+      <p>Derrière chaque fichier : de la modélisation, un slicing expert et des contraintes
+        de fabrication maîtrisées. Pas un simple « scan-copie ».</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="split">
+    <div class="txt">
+      <h2>L'injection et l'impression 3D ne répondent pas aux mêmes enjeux</h2>
+      <p>Une pièce d'origine est injectée : matière fondue sous pression dans un moule d'acier,
+        finition lisse, résistances impossibles à reproduire couche par couche. Mais heureusement,
+        notre expertise nous permet de trouver des stratégies pour pallier ces faiblesses.</p>
+      <p>Cependant, un moule et sa mise en place coûtent cher : ils ne se rentabilisent qu'en produisant
+        des centaines de milliers d'exemplaires identiques, depuis une usine centralisée. C'est l'inverse
+        du besoin réel — <strong>une seule pièce, précise, disponible près de chez soi, au moment de la panne</strong>.</p>
+      <p>L'impression 3D construit autrement — par dépôt de matière, à l'unité et au plus près du client.
+        Le rendu diffère, certaines formes doivent être repensées pour rester imprimables et solides.</p>
+      <p>Notre réponse n'est pas de faire semblant, mais de <strong>concevoir pour ce procédé</strong> :
+        une pièce fonctionnelle, durable, et une finition qui devient une identité.</p>
+      <a href="comment-ca-marche.html" class="btn btn-gold">Voir le processus</a>
+    </div>
+    <figure class="visual">
+      <img src="images/injection-vs-3d.png"
+           alt="Comparaison côte à côte : à gauche une pièce injectée en ABS (angles nets sans congés, parois minces, nervures) ; à droite la même pièce imprimée en 3D en PETG FDM (congés arrondis partout, lignes de couches visibles, remplissage plein).">
+      <figcaption>Même pièce : injectée en ABS (à gauche) vs imprimée en 3D PETG/FDM (à droite).</figcaption>
+    </figure>
+  </div>
+
+  <!-- Tableau comparatif pour / contre (vert = avantage, rouge = faiblesse) -->
+  <p class="eyebrow" style="text-align:center;margin-top:3rem">En un coup d'œil</p>
+  <div class="vs-table">
+    <div class="vs-row vs-head">
+      <div class="vs-cell">Critère</div>
+      <div class="vs-cell col-inj">Injection</div>
+      <div class="vs-cell col-3d">Impression 3D</div>
+    </div>
+
+    <div class="vs-row">
+      <div class="vs-cell crit">Outillage de départ</div>
+      <div class="vs-cell col-inj">
+        <svg class="vs-ico vs-neg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        <div><span class="vs-when">Injection</span><span class="t">Moule en acier coûteux à fabriquer</span></div>
+      </div>
+      <div class="vs-cell col-3d">
+        <svg class="vs-ico vs-pos" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <div><span class="vs-when">Impression 3D</span><span class="t">Aucun outillage — on imprime directement</span></div>
+      </div>
+    </div>
+
+    <div class="vs-row">
+      <div class="vs-cell crit">Seuil de rentabilité</div>
+      <div class="vs-cell col-inj">
+        <svg class="vs-ico vs-neg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        <div><span class="vs-when">Injection</span><span class="t">Rentable seulement en centaines de milliers d'unités</span></div>
+      </div>
+      <div class="vs-cell col-3d">
+        <svg class="vs-ico vs-pos" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <div><span class="vs-when">Impression 3D</span><span class="t"><strong>Rentable dès une seule pièce</strong></span></div>
+      </div>
+    </div>
+
+    <div class="vs-row">
+      <div class="vs-cell crit">Disponibilité</div>
+      <div class="vs-cell col-inj">
+        <svg class="vs-ico vs-neg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        <div><span class="vs-when">Injection</span><span class="t">Production centralisée, longue à relancer</span></div>
+      </div>
+      <div class="vs-cell col-3d">
+        <svg class="vs-ico vs-pos" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <div><span class="vs-when">Impression 3D</span><span class="t">À la demande, au moment de la panne</span></div>
+      </div>
+    </div>
+
+    <div class="vs-row">
+      <div class="vs-cell crit">Proximité</div>
+      <div class="vs-cell col-inj">
+        <svg class="vs-ico vs-neg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        <div><span class="vs-when">Injection</span><span class="t">Usine centralisée, loin du client</span></div>
+      </div>
+      <div class="vs-cell col-3d">
+        <svg class="vs-ico vs-pos" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <div><span class="vs-when">Impression 3D</span><span class="t">Au plus près du client, via le maillage</span></div>
+      </div>
+    </div>
+
+    <div class="vs-row">
+      <div class="vs-cell crit">Pièces orphelines</div>
+      <div class="vs-cell col-inj">
+        <svg class="vs-ico vs-neg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        <div><span class="vs-when">Injection</span><span class="t">Abandonnées faute de volume</span></div>
+      </div>
+      <div class="vs-cell col-3d">
+        <svg class="vs-ico vs-pos" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <div><span class="vs-when">Impression 3D</span><span class="t"><strong>Leur raison d'être</strong></span></div>
+      </div>
+    </div>
+
+    <div class="vs-row">
+      <div class="vs-cell crit">Personnalisation</div>
+      <div class="vs-cell col-inj">
+        <svg class="vs-ico vs-neg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        <div><span class="vs-when">Injection</span><span class="t">Figée par le moule</span></div>
+      </div>
+      <div class="vs-cell col-3d">
+        <svg class="vs-ico vs-pos" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <div><span class="vs-when">Impression 3D</span><span class="t">Finition et touches personnalisables</span></div>
+      </div>
+    </div>
+
+    <div class="vs-row">
+      <div class="vs-cell crit">Résistance &amp; finition en série</div>
+      <div class="vs-cell col-inj">
+        <svg class="vs-ico vs-pos" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <div><span class="vs-when">Injection</span><span class="t">Matière homogène, lisse, très résistante</span></div>
+      </div>
+      <div class="vs-cell col-3d">
+        <svg class="vs-ico vs-neg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        <div><span class="vs-when">Impression 3D</span><span class="t">Anisotrope par nature — compensé par notre conception</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notes techniques : nervures & coût du moule -->
+  <div class="tech-notes">
+    <div class="tech-note">
+      <h3><span class="dot"></span> Ces nervures ne sont pas décoratives</h3>
+      <p>Les renforts triangulaires visibles sur la pièce injectée sont une <strong>stratégie de conception</strong>.
+        En injection, on fuit les parois épaisses : coûteuses en matière et sujettes aux retassures (creux qui
+        se forment en refroidissant).</p>
+      <p>Les nervures apportent la rigidité <strong>tout en gardant des parois minces</strong> : moins de matière,
+        un refroidissement plus régulier, et une pièce pensée pour sortir proprement du moule — le démoulage.</p>
+    </div>
+    <div class="tech-note">
+      <h3><span class="dot"></span> Pourquoi un moule coûte si cher</h3>
+      <p>Un moule d'injection est un bloc d'acier usiné au centième. Il est parcouru de <strong>circuits de fluide
+        caloporteur</strong> : chauffé pour aider le plastique en fusion à remplir toute l'empreinte, puis refroidi
+        pour figer la pièce et accélérer le démoulage.</p>
+      <p>Ses surfaces sont <strong>polies, parfois à la main</strong> jusqu'au poli miroir — pour l'aspect et pour
+        que la pièce se détache. Ce niveau d'exigence ne se rentabilise que sur d'immenses séries.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="section-head">
+    <h2>Prêt à réparer ?</h2>
+    <p>Décrivez la panne en langage courant. Notre recherche comprend « le bac à couverts de mon
+      lave-vaisselle » aussi bien qu'une référence technique.</p>
+  </div>
+  <div style="text-align:center">
+    <a href="produits.html" class="btn btn-primary">Explorer nos produits</a>
+  </div>
+</section>
+
+<!-- ===================== FOOTER PARTAGÉ (gabarit) ===================== -->
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <span class="nav-wordmark">Hub<sup>4</sup>Fix</span>
+      <p>La marketplace des pièces détachées imprimées en 3D. On répare ce que l'industrie a cessé de fournir.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Explorer</h4>
+      <a href="kintsugi.html">Philosophie</a>
+      <a href="comment-ca-marche.html">Comment ça marche</a>
+      <a href="produits.html">Nos produits</a>
+      <a href="impact.html">Notre impact</a>
+    </div>
+    <div class="footer-col">
+      <h4>Communauté</h4>
+      <a href="partenaires.html">Devenir partenaire</a>
+      <a href="repair-together.html">Repair Together</a>
+      <a href="client.html">Mon compte</a>
+    </div>
+    <div class="footer-col">
+      <h4>Légal</h4>
+      <a href="cgu.html">CGU</a>
+      <a href="cgv-clients.html">CGV clients</a>
+      <a href="cgv.html">Mentions légales</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Hub4Fix — Timeless3D</span>
+    <span>Réparer, c'est résister à l'obsolescence.</span>
+  </div>
+</footer>
+
+<script src="js/ai-search.js"></script>
+<script src="js/site-nav.js"></script>
+<script src="js/account-menu-b2c.js"></script>
+</body>
+</html>

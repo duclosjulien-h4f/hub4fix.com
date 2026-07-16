@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hub⁴Fix — Partenaires : modélisateurs et printers</title>
+<meta name="description" content="Rejoignez le réseau Hub4Fix. Un seul parcours d'entrée, deux rôles à activer par simple toggle : Modélisateur et Printer. Un partenaire peut démarrer depuis un compte client existant.">
+<link rel="icon" type="image/svg+xml" href="favicon.svg"><link rel="alternate icon" href="favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Karla:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site-b2c.css">
+<style>
+/* --- Spécifique page Partenaires (accent OR) --- */
+.partner-hero{padding:7rem 2rem 5rem;background:
+  radial-gradient(60% 80% at 50% 0%, rgba(184,150,62,0.12), transparent 70%),
+  linear-gradient(180deg, var(--warm-white), var(--ivory))}
+.partner-hero .eyebrow{color:var(--gold)}
+.gold-underline{position:relative;display:inline-block;color:var(--gold);font-style:italic}
+.gold-underline::after{content:'';position:absolute;left:6%;right:6%;bottom:-.12em;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),var(--gold-light),var(--gold),transparent);
+  filter:drop-shadow(0 0 6px var(--gold-glow))}
+
+/* Composant toggle rôles */
+.role-switch{max-width:760px;margin:0 auto 2.5rem;padding:0 2rem}
+.role-tabs{display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap}
+.role-tab{flex:1;min-width:200px;max-width:340px;display:flex;flex-direction:column;align-items:center;gap:.3rem;
+  background:#fff;border:1px solid var(--sand);border-radius:8px;padding:1.1rem 1.4rem;cursor:pointer;
+  font-family:var(--font-sans);color:var(--earth);transition:all .25s}
+.role-tab:hover{border-color:var(--gold-light)}
+.role-tab .role-tab-title{font-family:var(--font-serif);font-size:1.35rem;color:var(--charcoal);font-weight:500}
+.role-tab .role-tab-sub{font-size:.78rem;color:var(--stone)}
+.role-tab.active{border-color:var(--gold);background:var(--gold-pale);box-shadow:0 4px 20px var(--gold-pale)}
+.role-tab.active .role-tab-title{color:var(--gold)}
+.role-tab.active .role-tab-sub{color:var(--gold)}
+
+.role-panel{display:none;max-width:var(--wrap);margin:0 auto;animation:fadePanel .3s ease}
+.role-panel.active{display:block}
+@keyframes fadePanel{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.role-panel-inner{background:#fff;border:1px solid var(--cream);border-left:3px solid var(--gold);
+  border-radius:8px;padding:2.4rem 2.2rem;box-shadow:var(--shadow-sm)}
+.role-panel-inner h3{font-size:1.7rem;font-weight:400;margin-bottom:.4rem}
+.role-panel-lede{color:var(--earth);font-weight:300;font-size:1.02rem;margin-bottom:1.6rem}
+.role-facts{list-style:none;display:grid;gap:1.1rem}
+.role-facts li{display:flex;gap:.9rem;align-items:flex-start}
+.role-facts .k{font-family:var(--font-mono);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gold);background:var(--gold-pale);border:1px solid var(--gold);border-radius:2px;
+  padding:.3rem .5rem;white-space:nowrap;flex-shrink:0;margin-top:.15rem}
+.role-facts .v{color:var(--charcoal);font-weight:300;font-size:.98rem}
+.role-facts .v strong{font-weight:600;color:var(--night)}
+
+/* Migration compte client — deux colonnes comparatives */
+.migrate-cols{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem;max-width:var(--wrap);margin:2rem auto 0}
+.migrate-col{background:#fff;border:1px solid var(--cream);border-radius:8px;padding:1.8rem}
+.migrate-col.pro{border-color:var(--gold);background:linear-gradient(180deg,var(--gold-pale),#fff)}
+.migrate-col h4{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--earth);margin-bottom:1rem}
+.migrate-col.pro h4{color:var(--gold)}
+.migrate-col ul{list-style:none;display:grid;gap:.7rem}
+.migrate-col li{font-size:.92rem;font-weight:300;color:var(--charcoal);padding-left:1.3rem;position:relative}
+.migrate-col li::before{content:'';position:absolute;left:0;top:.55em;width:6px;height:6px;border-radius:50%;
+  background:var(--sand)}
+.migrate-col.pro li::before{background:var(--gold)}
+.migrate-arrow{display:flex;align-items:center;justify-content:center;gap:.6rem;margin-top:1.6rem;
+  font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+.migrate-arrow svg{width:20px;height:20px}
+
+/* Repair Together — bandeau court */
+.repair-band{max-width:820px;margin:0 auto;text-align:center;background:var(--gold-pale);
+  border:1px solid var(--gold);border-radius:10px;padding:2.4rem 2rem}
+.repair-band .price-chip{display:inline-block;font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--gold);border:1px solid var(--gold);border-radius:3px;padding:.35rem .7rem;margin-bottom:1rem}
+.repair-band p{color:var(--earth);font-weight:300;margin-bottom:1.4rem}
+
+.cta-note{margin-top:1rem;font-size:.82rem;color:var(--earth);font-weight:300}
+
+@media(max-width:900px){
+  .migrate-cols{grid-template-columns:1fr}
+  .role-tab{min-width:100%}
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== HEADER PARTAGÉ (gabarit) ===================== -->
+<nav class="site-nav">
+  <a href="kintsugi.html" class="nav-brand">
+    <img class="nav-logo" src="images/logo-h4f.svg" alt="Hub4Fix">
+    <span class="nav-wordmark">Hub<sup>4</sup>Fix</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="kintsugi.html">Philosophie</a></li>
+    <li><a href="comment-ca-marche.html">Comment ça marche</a></li>
+    <li><a href="produits.html">Nos produits</a></li>
+    <li><a href="partenaires.html" class="nav-partner-link active">Partenaires</a></li>
+    <li><a href="impact.html">Notre impact</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="client.html" class="nav-account-btn" aria-label="Mon compte">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0112 0v1"/></svg>
+      <span class="label">Mon compte</span>
+    </a>
+    <button class="hamburger-btn" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-nav">
+  <a href="kintsugi.html">Philosophie</a>
+  <a href="comment-ca-marche.html">Comment ça marche</a>
+  <a href="produits.html">Nos produits</a>
+  <a href="partenaires.html" class="nav-partner-link active">Partenaires</a>
+  <a href="impact.html">Notre impact</a>
+  <a href="client.html">Mon compte</a>
+</div>
+
+<!-- Barre de recherche "IA" (langage naturel) -->
+<div class="ai-search-band">
+  <div class="ai-search-wrap">
+    <div class="ai-search-row">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="aiSearch" autocomplete="off" placeholder="Dites-nous ce qui est cassé — « la poignée de mon lave-linge Bosch »">
+      <span class="ai-search-badge">IA</span>
+    </div>
+    <div class="ai-search-results" id="aiSearchResults"></div>
+  </div>
+</div>
+<!-- =================== FIN HEADER PARTAGÉ =================== -->
+
+<header class="hero partner-hero">
+  <p class="eyebrow">Réseau Hub⁴Fix</p>
+  <h1>Rejoignez le réseau.<br>Devenez <span class="gold-underline">partenaire</span>.</h1>
+  <p class="lede">Modéliser les pièces, les imprimer et les livrer, ou les deux. Un seul parcours d'entrée,
+    et vous choisissez les rôles que vous activez.</p>
+  <div class="hero-actions">
+    <a href="client.html" class="btn btn-gold">Rejoindre le réseau</a>
+    <a href="#roles" class="btn btn-ghost">Découvrir les rôles</a>
+  </div>
+</header>
+
+<!-- Principe : un parcours unique, deux rôles à activer -->
+<section class="section section-alt">
+  <div class="section-head">
+    <p class="eyebrow">Un parcours, deux rôles</p>
+    <h2>Tous les partenaires entrent par la même porte</h2>
+    <p>Fini la distinction à l'inscription. Vous rejoignez le réseau une fois, puis vous débloquez
+      deux rôles par un simple toggle : <strong>Modélisateur</strong> et <strong>Printer</strong>.
+      Activez l'un, l'autre, ou les deux — à tout moment.</p>
+  </div>
+
+  <!-- Composant TOGGLE de rôles (piloté par le script en bas de page) -->
+  <div id="roles" class="role-switch">
+    <div class="role-tabs" role="tablist" aria-label="Rôles partenaires">
+      <button class="role-tab active" role="tab" aria-selected="true" aria-controls="panel-modeler" data-role="modeler">
+        <span class="role-tab-title">Modélisateur</span>
+        <span class="role-tab-sub">Il conçoit la pièce</span>
+      </button>
+      <button class="role-tab" role="tab" aria-selected="false" aria-controls="panel-printer" data-role="printer">
+        <span class="role-tab-title">Printer</span>
+        <span class="role-tab-sub">Il imprime et livre</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Panneau MODÉLISATEUR -->
+  <div class="role-panel active" id="panel-modeler" role="tabpanel">
+    <div class="role-panel-inner">
+      <h3>Rôle Modélisateur</h3>
+      <p class="role-panel-lede">Vous concevez les pièces orphelines en conception assistée par ordinateur
+        (CAO / CMFAO). Une pièce modélisée une fois se revend ensuite indéfiniment.</p>
+      <ul class="role-facts">
+        <li>
+          <span class="k">Rémunération</span>
+          <span class="v">Sur le revenu numérique, partage en trois tiers égaux :
+            <strong>un tiers modélisateur</strong>, un tiers de frais, un tiers Hub4Fix.</span>
+        </li>
+        <li>
+          <span class="k">Hot List</span>
+          <span class="v">Tant que la pièce reste en Hot List, une <strong>avance sur royalties de +1&nbsp;€/mois
+            se cumule, sans plafond</strong>. Si le montant grimpe, c'est que le besoin est réel.</span>
+        </li>
+        <li>
+          <span class="k">Rente</span>
+          <span class="v">Une pièce modélisée une seule fois continue de se vendre :
+            <strong>le travail est fait une fois, la vente se répète</strong>.</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Panneau PRINTER -->
+  <div class="role-panel" id="panel-printer" role="tabpanel">
+    <div class="role-panel-inner">
+      <h3>Rôle Printer</h3>
+      <p class="role-panel-lede">Vous imprimez et livrez les pièces commandées : c'est le flux physique
+        du réseau, au plus proche du client.</p>
+      <ul class="role-facts">
+        <li>
+          <span class="k">Attribution</span>
+          <span class="v">Les commandes sont attribuées en <strong>FIFO aux 5 printers les plus proches</strong>
+            du client. Premier disponible, premier servi.</span>
+        </li>
+        <li>
+          <span class="k">Certification</span>
+          <span class="v">La certification passe par l'<strong>onboarding Stripe Connect</strong>
+            (compte bancaire vérifié) — <strong>pas par SMS</strong>.</span>
+        </li>
+        <li>
+          <span class="k">Livraison</span>
+          <span class="v">Vous produisez et expédiez la pièce&nbsp;; le réseau vous positionne
+            sur les commandes de votre zone.</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Migration depuis un compte client -->
+<section class="section">
+  <div class="section-head">
+    <p class="eyebrow">Vous avez déjà un compte&nbsp;?</p>
+    <h2>Devenez partenaire depuis votre compte client</h2>
+    <p>Pas besoin de tout ressaisir. Un partenaire peut s'inscrire à partir d'un compte client B2C
+      existant : les informations déjà renseignées sont automatiquement reprises.</p>
+  </div>
+
+  <div class="migrate-cols">
+    <div class="migrate-col">
+      <h4>Compte client (existant)</h4>
+      <ul>
+        <li>Email, prénom, commune… déjà renseignés</li>
+        <li>Authentification simple : email + mot de passe</li>
+        <li>Achat de fichiers et de pièces</li>
+      </ul>
+    </div>
+    <div class="migrate-col pro">
+      <h4>Compte partenaire (ajouté)</h4>
+      <ul>
+        <li>Vos informations client sont reprises automatiquement</li>
+        <li>Authentification renforcée : double authentification, réservée aux partenaires et admins</li>
+        <li>Rôles Modélisateur et/ou Printer activables</li>
+      </ul>
+    </div>
+  </div>
+  <div class="migrate-arrow">
+    <span>Compte client</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    <span>Compte partenaire</span>
+  </div>
+</section>
+
+<!-- Repair Together -->
+<section class="section section-alt">
+  <div class="repair-band">
+    <span class="price-chip">Programme Repair Together</span>
+    <h2 style="font-weight:300;margin-bottom:1rem;">La première pièce est offerte</h2>
+    <p>Le client qui nous envoie sa pièce cassée reçoit sa première pièce imprimée gratuitement
+      (valeur inférieure ou égale à 15&nbsp;€). La pièce reçue sert de base à la modélisation :
+      la condition, c'est l'envoi de la pièce cassée.</p>
+    <a href="repair-together.html" class="btn btn-gold">En savoir plus sur Repair Together</a>
+  </div>
+</section>
+
+<!-- CTA final -->
+<section class="section">
+  <div class="section-head">
+    <h2>Prêt à rejoindre le réseau&nbsp;?</h2>
+    <p>Tout part d'un simple compte. Créez-le — ou partez de votre compte client existant —
+      puis activez les rôles qui vous correspondent.</p>
+  </div>
+  <div style="text-align:center">
+    <a href="client.html" class="btn btn-gold">Rejoindre le réseau</a>
+    <p class="cta-note">Ça part d'un simple compte, en quelques minutes.</p>
+  </div>
+</section>
+
+<!-- ===================== FOOTER PARTAGÉ (gabarit) ===================== -->
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <span class="nav-wordmark">Hub<sup>4</sup>Fix</span>
+      <p>La marketplace des pièces détachées imprimées en 3D. On répare ce que l'industrie a cessé de fournir.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Explorer</h4>
+      <a href="kintsugi.html">Philosophie</a>
+      <a href="comment-ca-marche.html">Comment ça marche</a>
+      <a href="produits.html">Nos produits</a>
+      <a href="impact.html">Notre impact</a>
+    </div>
+    <div class="footer-col">
+      <h4>Communauté</h4>
+      <a href="partenaires.html">Devenir partenaire</a>
+      <a href="repair-together.html">Repair Together</a>
+      <a href="client.html">Mon compte</a>
+    </div>
+    <div class="footer-col">
+      <h4>Légal</h4>
+      <a href="cgu.html">CGU</a>
+      <a href="cgv-clients.html">CGV clients</a>
+      <a href="cgv.html">Mentions légales</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Hub4Fix — Timeless3D</span>
+    <span>Réparer, c'est résister à l'obsolescence.</span>
+  </div>
+</footer>
+
+<!-- Role toggle: switch between the two partner-role panels -->
+<script>
+(function(){
+  var tabs = document.querySelectorAll('.role-tab');
+  var panels = {
+    modeler: document.getElementById('panel-modeler'),
+    printer: document.getElementById('panel-printer')
+  };
+  function activate(role){
+    tabs.forEach(function(t){
+      var on = t.getAttribute('data-role') === role;
+      t.classList.toggle('active', on);
+      t.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    Object.keys(panels).forEach(function(key){
+      if(panels[key]) panels[key].classList.toggle('active', key === role);
+    });
+  }
+  tabs.forEach(function(t){
+    t.addEventListener('click', function(){ activate(t.getAttribute('data-role')); });
+  });
+})();
+</script>
+
+<script src="js/ai-search.js"></script>
+<script src="js/site-nav.js"></script>
+<script src="js/account-menu-b2c.js"></script>
+</body>
+</html>

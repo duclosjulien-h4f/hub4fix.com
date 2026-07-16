@@ -90,3 +90,10 @@ DEMO_SPEC.md
 *[Rr]oadmap*
 *pipeline_ia*
 *veille*
+# Fichiers de travail a la racine (jamais publier sur le depot public)
+/.agents/
+skills-lock.json
+cartographie_usage_claude_code.md
+/*.dxf.svg
+/*.dxf.png
+/hub4fix_logo_variante1_tricolore.svg
