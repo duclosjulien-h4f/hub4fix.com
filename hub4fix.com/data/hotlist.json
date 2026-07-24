@@ -513,8 +513,8 @@
       "age": 26,
       "addedDate": "2026-07-07",
       "modeled": false,
-      "image": null,
-      "imageStatus": "pending"
+      "image": "images/hotlist/Whirlpool/KitchenAid/robot-patissier/ksm150/pignon-roue-de-securite-plastique-mecanisme-entr.png",
+      "imageStatus": "to-validate"
     },
     {
       "group": "Indépendant",
