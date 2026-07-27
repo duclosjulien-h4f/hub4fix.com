@@ -15,31 +15,34 @@
 (function (w) {
   'use strict';
 
+  // `id` = profil GCODE (consommé par produit.html : ender3/bambua1/bambux1/prusamk4/anycubic
+  // sinon 'other'). `request` = nœud « demander l'ajout » (produit.html ouvre un dialogue ; le
+  // parc l'affiche comme « Autre imprimante »).
   var TREE = [
     { brand:'Creality', ranges:[
-      { name:'Ender', models:[{label:'Ender 3 V3',bed:'235×235'},{label:'Ender 3 V3 SE',bed:'235×235'},{label:'Ender 3 V3 KE',bed:'235×235'},{label:'Ender 5 S1',bed:'220×220'}] },
-      { name:'K1', models:[{label:'K1',bed:'220×220'},{label:'K1C',bed:'220×220'},{label:'K1 Max',bed:'300×300'},{label:'K1 SE',bed:'220×220'}] },
-      { name:'K2', models:[{label:'K2',bed:'350×350'},{label:'K2 Pro',bed:'350×350'},{label:'K2 Plus',bed:'350×350'}] },
-      { name:'CR', models:[{label:'CR-10 SE',bed:'300×300'},{label:'CR-10 Smart Pro',bed:'300×300'}] } ] },
+      { name:'Ender', models:[{id:'ender3',label:'Ender 3 V3',bed:'235×235'},{id:'other',label:'Ender 3 V3 SE',bed:'235×235'},{id:'other',label:'Ender 3 V3 KE',bed:'235×235'},{id:'other',label:'Ender 5 S1',bed:'220×220'}] },
+      { name:'K1', models:[{id:'other',label:'K1',bed:'220×220'},{id:'other',label:'K1C',bed:'220×220'},{id:'other',label:'K1 Max',bed:'300×300'},{id:'other',label:'K1 SE',bed:'220×220'}] },
+      { name:'K2', models:[{id:'other',label:'K2',bed:'350×350'},{id:'other',label:'K2 Pro',bed:'350×350'},{id:'other',label:'K2 Plus',bed:'350×350'}] },
+      { name:'CR', models:[{id:'other',label:'CR-10 SE',bed:'300×300'},{id:'other',label:'CR-10 Smart Pro',bed:'300×300'}] } ] },
     { brand:'Bambu Lab', ranges:[
-      { name:'A', models:[{label:'A1 mini',bed:'180×180'},{label:'A1 mini Combo',bed:'180×180'},{label:'A1',bed:'256×256'},{label:'A1 Combo',bed:'256×256'},{label:'A2',bed:'256×256'},{label:'A2 Combo',bed:'256×256'}] },
-      { name:'X', models:[{label:'X1 Carbon',bed:'256×256'},{label:'X1 Carbon Combo',bed:'256×256'},{label:'X1E',bed:'256×256'}] },
-      { name:'P', models:[{label:'P1S',bed:'256×256'},{label:'P1S Combo',bed:'256×256'},{label:'P1P',bed:'256×256'}] },
-      { name:'H', models:[{label:'H2D',bed:'256×256'},{label:'H2S',bed:'256×256'}] } ] },
+      { name:'A', models:[{id:'bambua1',label:'A1 mini',bed:'180×180'},{id:'other',label:'A1 mini Combo',bed:'180×180'},{id:'other',label:'A1',bed:'256×256'},{id:'other',label:'A1 Combo',bed:'256×256'},{id:'other',label:'A2',bed:'256×256'},{id:'other',label:'A2 Combo',bed:'256×256'}] },
+      { name:'X', models:[{id:'bambux1',label:'X1 Carbon',bed:'256×256'},{id:'other',label:'X1 Carbon Combo',bed:'256×256'},{id:'other',label:'X1E',bed:'256×256'}] },
+      { name:'P', models:[{id:'other',label:'P1S',bed:'256×256'},{id:'other',label:'P1S Combo',bed:'256×256'},{id:'other',label:'P1P',bed:'256×256'}] },
+      { name:'H', models:[{id:'other',label:'H2D',bed:'256×256'},{id:'other',label:'H2S',bed:'256×256'}] } ] },
     { brand:'Prusa', ranges:[
-      { name:'MK', models:[{label:'MK4S',bed:'250×210'},{label:'MK3S+',bed:'250×210'}] },
-      { name:'MINI', models:[{label:'MINI+',bed:'180×180'}] },
-      { name:'XL', models:[{label:'XL (5 têtes)',bed:'360×360'}] },
-      { name:'Core', models:[{label:'Core One',bed:'250×210'},{label:'Core One L',bed:'300×250'},{label:'Core One XL',bed:'360×360'}] } ] },
-    { brand:'Anycubic', ranges:[ { name:'Kobra', models:[{label:'Kobra 2 Neo',bed:'220×220'},{label:'Kobra 3',bed:'250×250'},{label:'Kobra 3 Combo',bed:'250×250'}] } ] },
-    { brand:'Elegoo', ranges:[ { name:'Neptune', models:[{label:'Neptune 4',bed:'235×235'},{label:'Neptune 4 Pro',bed:'235×235'},{label:'Neptune 4 Plus',bed:'320×320'},{label:'Neptune 4 Max',bed:'420×420'}] } ] },
-    { brand:'Sovol', ranges:[ { name:'SV', models:[{label:'SV06',bed:'220×220'},{label:'SV06 Plus',bed:'300×300'},{label:'SV07',bed:'220×220'},{label:'SV08',bed:'350×350'}] } ] },
-    { brand:'Artillery', ranges:[ { name:'Sidewinder', models:[{label:'Sidewinder X4 Plus',bed:'300×300'}] }, { name:'Genius', models:[{label:'Genius Pro',bed:'220×220'}] } ] },
-    { brand:'FlashForge', ranges:[ { name:'Adventurer', models:[{label:'Adventurer 5M',bed:'220×220'},{label:'Adventurer 5M Pro',bed:'220×220'}] } ] },
-    { brand:'Qidi Tech', ranges:[ { name:'X-Max', models:[{label:'X-Max 3',bed:'325×325'},{label:'X-Plus 3',bed:'280×280'}] }, { name:'Q1', models:[{label:'Q1 Pro',bed:'245×245'}] } ] },
-    { brand:'Raise3D', ranges:[ { name:'Pro', models:[{label:'Pro3',bed:'300×300'},{label:'Pro3 Plus',bed:'300×300'}] } ] },
-    { brand:'Voron', ranges:[ { name:'2.4', models:[{label:'2.4 R2 (350)',bed:'350×350'},{label:'2.4 R2 (300)',bed:'300×300'}] }, { name:'Trident', models:[{label:'Trident (300)',bed:'300×300'}] } ] },
-    { brand:'Autre', ranges:[ { name:'—', models:[{label:'Autre imprimante',bed:''}] } ] }
+      { name:'MK', models:[{id:'prusamk4',label:'MK4S',bed:'250×210'},{id:'other',label:'MK3S+',bed:'250×210'}] },
+      { name:'MINI', models:[{id:'other',label:'MINI+',bed:'180×180'}] },
+      { name:'XL', models:[{id:'other',label:'XL (5 têtes)',bed:'360×360'}] },
+      { name:'Core', models:[{id:'other',label:'Core One',bed:'250×210'},{id:'other',label:'Core One L',bed:'300×250'},{id:'other',label:'Core One XL',bed:'360×360'}] } ] },
+    { brand:'Anycubic', ranges:[ { name:'Kobra', models:[{id:'anycubic',label:'Kobra 2 Neo',bed:'220×220'},{id:'other',label:'Kobra 3',bed:'250×250'},{id:'other',label:'Kobra 3 Combo',bed:'250×250'}] } ] },
+    { brand:'Elegoo', ranges:[ { name:'Neptune', models:[{id:'other',label:'Neptune 4',bed:'235×235'},{id:'other',label:'Neptune 4 Pro',bed:'235×235'},{id:'other',label:'Neptune 4 Plus',bed:'320×320'},{id:'other',label:'Neptune 4 Max',bed:'420×420'}] } ] },
+    { brand:'Sovol', ranges:[ { name:'SV', models:[{id:'other',label:'SV06',bed:'220×220'},{id:'other',label:'SV06 Plus',bed:'300×300'},{id:'other',label:'SV07',bed:'220×220'},{id:'other',label:'SV08',bed:'350×350'}] } ] },
+    { brand:'Artillery', ranges:[ { name:'Sidewinder', models:[{id:'other',label:'Sidewinder X4 Plus',bed:'300×300'}] }, { name:'Genius', models:[{id:'other',label:'Genius Pro',bed:'220×220'}] } ] },
+    { brand:'FlashForge', ranges:[ { name:'Adventurer', models:[{id:'other',label:'Adventurer 5M',bed:'220×220'},{id:'other',label:'Adventurer 5M Pro',bed:'220×220'}] } ] },
+    { brand:'Qidi Tech', ranges:[ { name:'X-Max', models:[{id:'other',label:'X-Max 3',bed:'325×325'},{id:'other',label:'X-Plus 3',bed:'280×280'}] }, { name:'Q1', models:[{id:'other',label:'Q1 Pro',bed:'245×245'}] } ] },
+    { brand:'Raise3D', ranges:[ { name:'Pro', models:[{id:'other',label:'Pro3',bed:'300×300'},{id:'other',label:'Pro3 Plus',bed:'300×300'}] } ] },
+    { brand:'Voron', ranges:[ { name:'2.4', models:[{id:'other',label:'2.4 R2 (350)',bed:'350×350'},{id:'other',label:'2.4 R2 (300)',bed:'300×300'}] }, { name:'Trident', models:[{id:'other',label:'Trident (300)',bed:'300×300'}] } ] },
+    { brand:'Autre', ranges:[ { name:'Demande', models:[{id:'other',label:'+ Demander l\'ajout',bed:'',request:true}] } ] }
   ];
   var BRAND_COLORS = { 'Bambu Lab':'#5DBB63','Creality':'#0E5C3A','Prusa':'#FA6831','Anycubic':'#17A2B8','Elegoo':'#2E6DB4','Sovol':'#8E44AD','Artillery':'#E84393','FlashForge':'#E67E22','Qidi Tech':'#16A085','Raise3D':'#C0392B','Voron':'#2C3E50','Autre':'#95A5A6' };
   function colorOf(b){ return BRAND_COLORS[b] || '#95A5A6'; }
@@ -262,7 +265,8 @@
     function renderModels(){
       var ro=findRange(findBrand(s.brand), s.range); if(!ro) return; var c=colorOf(s.brand);
       col('hpsM').innerHTML = ro.models.map(function(m){
-        return '<div class="hps-model hps-anim'+(s.model===m.label?' active':'')+'" data-m="'+esc(m.label)+'" data-bed="'+esc(m.bed||'')+'" style="--c:'+c+'">'+esc(m.label)+(m.bed?' <span class="hps-bed">'+esc(m.bed)+'</span>':'')+'</div>';
+        var lbl = m.request ? 'Autre imprimante' : m.label;   // le parc ne « demande pas l'ajout », il prend générique
+        return '<div class="hps-model hps-anim'+(s.model===lbl?' active':'')+'" data-m="'+esc(lbl)+'" data-bed="'+esc(m.bed||'')+'" style="--c:'+c+'">'+esc(lbl)+(m.bed?' <span class="hps-bed">'+esc(m.bed)+'</span>':'')+'</div>';
       }).join('');
       col('hpsR').classList.add('has-selection');
       col('hpsM').querySelectorAll('.hps-model').forEach(function(el){
