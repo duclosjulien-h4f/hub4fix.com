@@ -533,6 +533,24 @@
       "modeled": false,
       "image": "images/hotlist/Indépendant/Dyson/aspirateur-balai-sans-fi/generic/gachette-trigger-mecanisme-d-ouverture-du-recept.png",
       "imageStatus": "to-validate"
+    },
+    {
+      "group": "SEB",
+      "brand": "Moulinex",
+      "range": "petit-electromenager-rob",
+      "model": "hf800",
+      "piece": "charniere-clip-de-couvercle-joint-mecanisme-de-f",
+      "name": "Charnière/clip de couvercle + joint (mécanisme de fermeture) Companion",
+      "machine": "Companion HF800 (HF800A10/B10/E10), HF802 Touch, HF807, HF900 i-Companion, HF904, HF93x, HF80CB10",
+      "category": "Petit électroménager robot cuiseur",
+      "demand": 1000,
+      "alerts": 10,
+      "units": "N/C",
+      "age": 13,
+      "addedDate": "2026-07-28",
+      "modeled": false,
+      "image": "images/hotlist/SEB/Moulinex/petit-electromenager-rob/hf800/charniere-clip-de-couvercle-joint-mecanisme-de-f.png",
+      "imageStatus": "to-validate"
     }
   ]
 }
