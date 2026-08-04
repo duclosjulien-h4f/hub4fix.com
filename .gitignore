@@ -29,6 +29,11 @@ venv/
 .env
 .env.local
 .env.*.local
+# Secrets de developpement wrangler (SESSION_SECRET, SLICER_SECRET...) : JAMAIS publies
+.dev.vars
+**/.dev.vars
+# Etat local de wrangler (base D1 locale, caches)
+.wrangler/
 
 # Outillage generation d'images (script + sorties brutes — local uniquement)
 genimg/
@@ -91,6 +96,7 @@ DEMO_SPEC.md
 *pipeline_ia*
 *veille*
 # Fichiers de travail a la racine (jamais publier sur le depot public)
+TodoList.md
 /.agents/
 skills-lock.json
 cartographie_usage_claude_code.md

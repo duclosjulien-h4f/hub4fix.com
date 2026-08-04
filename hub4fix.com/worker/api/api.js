@@ -19,6 +19,9 @@
  * Déploiement : cd hub4fix.com/worker/api && npx wrangler deploy
  */
 
+import { handleAiChat } from './ai-chat.js';
+import { handleSliceCreate, handleSliceStatus, handleSliceGcode } from './slice.js';
+
 const ALLOWED_ORIGINS = [
   'https://hub4fix.com',
   'https://www.hub4fix.com',
@@ -30,6 +33,8 @@ const ALLOWED_ORIGINS = [
 const COOKIE_NAME = 'h4f_sess';
 const SESSION_TTL = 60 * 60 * 24 * 30; // 30 jours
 const PBKDF2_ITER = 100000;
+
+
 
 // ---------------------------------------------------------------- CORS / JSON
 function cors(origin) {
@@ -355,6 +360,25 @@ export default {
       if (request.method === 'POST' && url.pathname === '/auth/reset-request') return await handleResetRequest(request, env, origin);
       if (request.method === 'POST' && url.pathname === '/auth/reset-confirm') return await handleResetConfirm(request, env, origin);
       if (request.method === 'POST' && url.pathname === '/auth/logout') return handleLogout(env, origin);
+      // Assistant conversationnel (Workers AI). Les dépendances lui sont passées
+      // explicitement pour qu'il reste testable sans monter tout le worker.
+      if (request.method === 'POST' && url.pathname === '/ai/chat') {
+        return await handleAiChat(request, env, origin, json, readToken, getSessionToken);
+      }
+
+      // Cloud Slicer : le Worker est la passerelle (session, propriété, token),
+      // le calcul vit dans un service externe. Mêmes dépendances explicites.
+      const sliceDeps = { json, cors, readToken, getSessionToken, tokenBalance };
+      if (request.method === 'POST' && url.pathname === '/slice') {
+        return await handleSliceCreate(request, env, origin, sliceDeps);
+      }
+      const sliceMatch = url.pathname.match(/^\/slice\/([A-Za-z0-9-]{1,64})(\/gcode)?$/);
+      if (request.method === 'GET' && sliceMatch) {
+        return sliceMatch[2]
+          ? await handleSliceGcode(request, env, origin, sliceDeps, sliceMatch[1])
+          : await handleSliceStatus(request, env, origin, sliceDeps, sliceMatch[1]);
+      }
+
       return json({ error: 'not_found' }, 404, origin);
     } catch (err) {
       return json({ error: 'server_error', detail: String(err && err.message || err) }, 500, origin);

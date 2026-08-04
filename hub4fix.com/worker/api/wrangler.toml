@@ -24,6 +24,20 @@ COOKIE_DOMAIN = ".hub4fix.com"
 # Expéditeur des e-mails transactionnels (domaine send.hub4fix.com vérifié chez Resend).
 MAIL_FROM = "Hub4Fix <noreply@send.hub4fix.com>"
 
+# Cloud Slicer — service de slicing externe (les Workers ne peuvent pas exécuter
+# OrcaSlicer). Poser aussi le secret partagé :  npx wrangler secret put SLICER_SECRET
+# Schéma à appliquer une fois :
+#   npx wrangler d1 execute h4f_site --remote --file ../slice-schema.sql
+# Tant que SLICER_URL/SLICER_SECRET sont absents, /slice répond 503 et rembourse
+# le token — le reste du worker n'est pas affecté.
+SLICER_URL = ""
+
+# Workers AI — assistant conversationnel (/ai/chat, modèle Gemma 4).
+# À activer une fois dans le dashboard Cloudflare (Workers AI), sinon le binding
+# reste absent et l'endpoint répond 503 "ai_indisponible" sans casser le reste.
+[ai]
+binding = "AI"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "h4f_site"
