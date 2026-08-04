@@ -9,9 +9,13 @@
  *
  * Trois règles portent tout le reste :
  *
- * 1. Le débit d'un token est IDEMPOTENT. La référence du débit est le job_id, et
- *    un index unique (motif, ref) l'impose en base. Un client qui rafraîchit, un
- *    réseau qui renvoie, un retry : le solde ne bouge qu'une fois.
+ * 1. Le débit d'un token est IDEMPOTENT. Le client fournit une `request_key`
+ *    (tirée une fois par intention de générer) dont on DÉRIVE le job_id. Deux
+ *    clics, un rafraîchissement, un second onglet, un renvoi réseau : même clé,
+ *    même job_id, et la base refuse le doublon. Une animation de chargement côté
+ *    écran absorbe le gros des doubles-clics, mais elle vit dans le navigateur :
+ *    elle ne protège ni du rafraîchissement, ni d'un second onglet, ni d'un appel
+ *    direct. Le garde-fou qui compte est ici.
  * 2. Un slice raté REMBOURSE. Le client n'a rien reçu, il ne paie pas. Le
  *    remboursement est protégé par le même index : jamais versé deux fois.
  * 3. Le slice est le POINT DE NON-RETOUR. On exige le consentement à l'exécution
@@ -34,6 +38,17 @@ function nowIso() { return new Date().toISOString(); }
  *  le choix machine du client atteint le service. */
 function sourceIdFor(productId, printer) {
   return printer ? `${productId}--${printer}` : productId;
+}
+
+/** L'identifiant du job est DÉRIVÉ de (client, clé de requête), jamais tiré au
+ *  hasard côté serveur : c'est ce qui permet au même clic répété de retomber sur
+ *  le même job. Le hachage inclut l'identifiant du client, donc deux clients ne
+ *  peuvent pas se marcher dessus en choisissant la même clé. */
+async function jobIdFor(uid, requestKey) {
+  const data = new TextEncoder().encode(uid + ':' + requestKey);
+  const buf = await crypto.subtle.digest('SHA-256', data);
+  const h = Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20, 32)}`;
 }
 
 async function callSlicer(env, path, init) {
@@ -89,9 +104,18 @@ export async function handleSliceCreate(request, env, origin, deps) {
   const body = await request.json().catch(() => ({}));
   const productId = String(body.product_id || '').trim();
   const printer = String(body.printer || '').trim();
+  const requestKey = String(body.request_key || '').trim();
 
   if (!SAFE_ID.test(productId)) return json({ error: 'product_id_invalide' }, 400, origin);
   if (printer && !SAFE_ID.test(printer)) return json({ error: 'printer_invalide' }, 400, origin);
+  // Exigée, pas optionnelle : sans elle il n'y a aucune protection contre le
+  // double débit, et un front qui oublie de l'envoyer la perdrait en silence.
+  if (!SAFE_ID.test(requestKey)) {
+    return json({
+      error: 'request_key_requise',
+      message: 'Fournir une clé de requête (ex. crypto.randomUUID()), tirée une seule fois par intention de générer.',
+    }, 400, origin);
+  }
 
   // Le client doit posséder le fichier. Le service, lui, ne connaît pas les clients.
   if (!await ownsProduct(env, uid, productId)) {
@@ -108,17 +132,32 @@ export async function handleSliceCreate(request, env, origin, deps) {
     }, 428, origin);
   }
 
-  const jobId = crypto.randomUUID();
+  const jobId = await jobIdFor(uid, requestKey);
   const sourceId = sourceIdFor(productId, printer);
 
-  if (!await debitToken(env, uid, jobId)) {
-    return json({ error: 'solde_insuffisant', message: 'Il vous faut au moins 1 token pour générer un G-code.' }, 402, origin);
+  // La création du job passe AVANT le débit : sa clé primaire est le garde-fou.
+  // Un second clic retombe ici et repart avec le job existant, sans rien débiter.
+  try {
+    await env.DB.prepare(
+      'INSERT INTO slice_jobs (id, user_id, product_id, source_id, printer, status, created_at) ' +
+      "VALUES (?, ?, ?, ?, ?, 'queued', ?)"
+    ).bind(jobId, uid, productId, sourceId, printer || null, nowIso()).run();
+  } catch (e) {
+    const existing = await env.DB.prepare('SELECT * FROM slice_jobs WHERE id = ? AND user_id = ?')
+      .bind(jobId, uid).first();
+    if (!existing) return json({ error: 'job_conflit' }, 409, origin);
+    return json({
+      job_id: existing.id, status: existing.status, duplicate: true,
+      tokens: await deps.tokenBalance(env, uid),
+    }, 200, origin);
   }
 
-  await env.DB.prepare(
-    'INSERT INTO slice_jobs (id, user_id, product_id, source_id, printer, status, created_at) ' +
-    "VALUES (?, ?, ?, ?, ?, 'queued', ?)"
-  ).bind(jobId, uid, productId, sourceId, printer || null, nowIso()).run();
+  if (!await debitToken(env, uid, jobId)) {
+    // Rien n'a été prélevé : on efface le job pour que le client puisse
+    // réessayer une fois rechargé, plutôt que de rester bloqué sur cette clé.
+    await env.DB.prepare('DELETE FROM slice_jobs WHERE id = ?').bind(jobId).run();
+    return json({ error: 'solde_insuffisant', message: 'Il vous faut au moins 1 token pour générer un G-code.' }, 402, origin);
+  }
 
   await env.DB.prepare(
     'INSERT INTO consents (user_id, doc, version, accepted_at) VALUES (?, ?, ?, ?)'
