@@ -7,6 +7,12 @@
  *
  *   client -> Worker (session, propriété, token) -> service /slice -> G-code tracé
  *
+ * Le Worker POUSSE le 3MF maître vers le service (lu dans R2 par binding, donc
+ * sans clé d'accès à stocker nulle part). Le service ne détient aucun accès au
+ * stockage et ne connaît aucun catalogue : le compromettre ne donne que les
+ * pièces en cours de traitement à cet instant. « Pas de clé » vaut mieux que
+ * « clé à courte durée », qui vaut mieux que « clé permanente ».
+ *
  * Trois règles portent tout le reste :
  *
  * 1. Le débit d'un token est IDEMPOTENT. Le client fournit une `request_key`
@@ -58,6 +64,21 @@ async function callSlicer(env, path, init) {
     ...init,
     headers: { 'X-H4F-Secret': env.SLICER_SECRET, ...((init && init.headers) || {}) },
   });
+}
+
+/** Lit le 3MF maître dans R2, via le binding — donc sans aucune clé d'accès à
+ *  stocker : Cloudflare relie le bucket au Worker directement.
+ *
+ *  C'est le Worker qui va chercher le fichier et le POUSSE ensuite vers le
+ *  service. Le service de slicing ne détient ainsi aucun accès au stockage : le
+ *  compromettre ne donne que les pièces en cours de traitement, jamais le
+ *  catalogue. Une pièce détachée pèse quelques mégaoctets, largement sous la
+ *  mémoire d'un Worker. */
+async function readMaster(env, sourceId) {
+  if (!env.MASTERS) throw new Error('bucket_maitres_absent');
+  const obj = await env.MASTERS.get(`${sourceId}.3mf`);
+  if (!obj) throw new Error(`maitre_introuvable: ${sourceId}`);
+  return await obj.arrayBuffer();
 }
 
 /** Débit atomique : l'insertion ne se produit QUE si le solde le permet. Écrit en
@@ -168,12 +189,18 @@ export async function handleSliceCreate(request, env, origin, deps) {
   // n'existe pas, un échec après ce point ne laisse rien à annuler côté paiement.
 
   let accepted = false;
+  // Deux pannes très différentes mènent au même remboursement, mais pas au même
+  // diagnostic : un maître absent est un défaut de NOS données, un service muet
+  // est une panne d'infrastructure. Les confondre coûte du temps le jour où ça arrive.
+  let failure = { code: 'slicer_indisponible', status: 503, message: 'Le service de génération est momentanément indisponible. Votre token vous a été rendu.' };
   try {
-    const res = await callSlicer(env, '/slice', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ job_id: jobId, source_id: sourceId }),
-    });
+    const master = await readMaster(env, sourceId);
+    const form = new FormData();
+    form.append('job_id', jobId);
+    form.append('source_id', sourceId);
+    // Pas de Content-Type explicite : FormData pose lui-même sa frontière.
+    form.append('file', new Blob([master], { type: 'application/octet-stream' }), `${sourceId}.3mf`);
+    const res = await callSlicer(env, '/slice', { method: 'POST', body: form });
     accepted = res.ok;
     if (!accepted) {
       const detail = (await res.text()).slice(0, 300);
@@ -181,14 +208,21 @@ export async function handleSliceCreate(request, env, origin, deps) {
         .bind('service ' + res.status + ': ' + detail, nowIso(), jobId).run();
     }
   } catch (err) {
+    const msg = String(err && err.message || err);
+    if (msg.startsWith('maitre_introuvable') || msg === 'bucket_maitres_absent') {
+      failure = {
+        code: 'fichier_indisponible', status: 404,
+        message: "Le fichier de cette pièce n'est pas encore disponible à la génération. Votre token vous a été rendu.",
+      };
+    }
     await env.DB.prepare("UPDATE slice_jobs SET status='failed', error=?, finished_at=? WHERE id=?")
-      .bind(String(err && err.message || err), nowIso(), jobId).run();
+      .bind(msg, nowIso(), jobId).run();
   }
 
   if (!accepted) {
     // Le service n'a jamais pris le travail : le client ne doit pas le payer.
     await refundToken(env, uid, jobId);
-    return json({ error: 'slicer_indisponible', job_id: jobId, refunded: true }, 503, origin);
+    return json({ error: failure.code, message: failure.message, job_id: jobId, refunded: true }, failure.status, origin);
   }
 
   return json({ job_id: jobId, status: 'queued', tokens: await deps.tokenBalance(env, uid) }, 202, origin);

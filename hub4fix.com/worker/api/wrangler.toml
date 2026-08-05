@@ -32,6 +32,14 @@ MAIL_FROM = "Hub4Fix <noreply@send.hub4fix.com>"
 # le token — le reste du worker n'est pas affecté.
 SLICER_URL = ""
 
+# 3MF maîtres (une pièce × une machine). Lus par BINDING : aucune clé d'accès
+# n'existe côté worker, et le service de slicing n'en a aucune non plus — c'est
+# le worker qui lui pousse le fichier. Créer le bucket une fois :
+#   npx wrangler r2 bucket create h4f-masters
+[[r2_buckets]]
+binding = "MASTERS"
+bucket_name = "h4f-masters"
+
 # Workers AI — assistant conversationnel (/ai/chat, modèle Gemma 4).
 # À activer une fois dans le dashboard Cloudflare (Workers AI), sinon le binding
 # reste absent et l'endpoint répond 503 "ai_indisponible" sans casser le reste.
