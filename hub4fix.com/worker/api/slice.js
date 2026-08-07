@@ -180,20 +180,29 @@ export async function handleSliceCreate(request, env, origin, deps) {
     return json({ error: 'solde_insuffisant', message: 'Il vous faut au moins 1 token pour générer un G-code.' }, 402, origin);
   }
 
-  await env.DB.prepare(
-    'INSERT INTO consents (user_id, doc, version, accepted_at) VALUES (?, ?, ?, ?)'
-  ).bind(uid, CONSENT_DOC, CONSENT_VERSION, nowIso()).run();
-
   // ICI viendra la capture du paiement Stripe préautorisé (le slice est
   // l'événement qui déclenche le prélèvement, cf. TodoList.md). Tant qu'elle
   // n'existe pas, un échec après ce point ne laisse rien à annuler côté paiement.
 
   let accepted = false;
-  // Deux pannes très différentes mènent au même remboursement, mais pas au même
+  // Trois pannes très différentes mènent au même remboursement, mais pas au même
   // diagnostic : un maître absent est un défaut de NOS données, un service muet
-  // est une panne d'infrastructure. Les confondre coûte du temps le jour où ça arrive.
+  // est une panne d'infrastructure, un consentement non écrit est une panne de
+  // base. Les confondre coûte du temps le jour où ça arrive.
   let failure = { code: 'slicer_indisponible', status: 503, message: 'Le service de génération est momentanément indisponible. Votre token vous a été rendu.' };
   try {
+    // Le consentement est la trace du point de non-retour : il s'écrit AVANT la
+    // dépêche au service. Il vit dans ce try pour qu'un échec d'écriture emprunte
+    // le chemin de remboursement ci-dessous — sans quoi le token serait débité et
+    // le client repartirait sans G-code ni token.
+    try {
+      await env.DB.prepare(
+        'INSERT INTO consents (user_id, doc, version, accepted_at) VALUES (?, ?, ?, ?)'
+      ).bind(uid, CONSENT_DOC, CONSENT_VERSION, nowIso()).run();
+    } catch (e) {
+      throw new Error('consentement_non_enregistre: ' + String((e && e.message) || e));
+    }
+
     const master = await readMaster(env, sourceId);
     const form = new FormData();
     form.append('job_id', jobId);
@@ -213,6 +222,11 @@ export async function handleSliceCreate(request, env, origin, deps) {
       failure = {
         code: 'fichier_indisponible', status: 404,
         message: "Le fichier de cette pièce n'est pas encore disponible à la génération. Votre token vous a été rendu.",
+      };
+    } else if (msg.startsWith('consentement_non_enregistre')) {
+      failure = {
+        code: 'consentement_non_enregistre', status: 500,
+        message: "Nous n'avons pas pu enregistrer votre consentement : la génération n'a pas démarré. Votre token vous a été rendu.",
       };
     }
     await env.DB.prepare("UPDATE slice_jobs SET status='failed', error=?, finished_at=? WHERE id=?")
