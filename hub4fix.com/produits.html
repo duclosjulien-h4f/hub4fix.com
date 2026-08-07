@@ -84,7 +84,7 @@
 <div class="catalog-toolbar">
   <div class="filter-pills" id="filterPills">
     <button class="pill active" data-filter="all">Toutes</button>
-    <button class="pill" data-filter="modeled">Modèle 3D prêt</button>
+    <button class="pill" data-filter="modeled">Disponibles</button>
     <button class="pill" data-filter="pending">En cours d'acquisition</button>
   </div>
   <span class="result-count" id="resultCount"></span>
@@ -168,7 +168,9 @@
     var modeled = isModeled(p);
     var el = document.createElement('a');
     el.className = 'product-card';
-    el.href = 'fiche-piece.html?id=' + encodeURIComponent(p.id || '');
+    // produit.html (et non fiche-piece.html, qui est une maquette ignorant l'id) :
+    // c'est la fiche reelle, alimentee par /api/pieces.json.
+    el.href = 'produit.html?id=' + encodeURIComponent(p.id || '');
     el.innerHTML =
       (t ? '<img class="product-thumb" src="'+t+'" alt="'+esc(p.name)+'" loading="lazy">'
          : '<div class="product-thumb-fallback"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 2L3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5M12 22V12"/></svg></div>') +
