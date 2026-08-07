@@ -19,7 +19,7 @@
       "image": "images/hotlist/Philips/Philips/Senseo/HD7805-HD7810-HD7864/levier-couvercle.png",
       "imageStatus": "to-validate",
       "source": "veille-casse-28-05-2026",
-      "priority_score": 4.62
+      "priority_score": 3.61
     },
     {
       "group": "Krups",
@@ -39,7 +39,7 @@
       "image": "images/hotlist/Krups/Krups/Nespresso/Inissia-Pixie/knee-lever-capsule.png",
       "imageStatus": "to-validate",
       "source": "veille-casse-28-05-2026",
-      "priority_score": 3.2
+      "priority_score": 2.5
     },
     {
       "group": "BSH",
@@ -79,7 +79,7 @@
       "image": "images/hotlist/Haier/Candy/Lave-linge/43011740/poignee-hublot.png",
       "imageStatus": "to-validate",
       "source": "veille-casse-28-05-2026",
-      "priority_score": 2.67
+      "priority_score": 2.0
     },
     {
       "group": "SEB",
@@ -99,7 +99,7 @@
       "image": "images/hotlist/SEB/Tefal/Actifry/FZ7000-AL8000/entraine-pale.png",
       "imageStatus": "to-validate",
       "source": "veille-casse-28-05-2026",
-      "priority_score": 2.67
+      "priority_score": 2.04
     },
     {
       "group": "Whirlpool",
@@ -158,7 +158,7 @@
       "image": "images/hotlist/SEB/Moulinex/Cookeo/CE701x/bouton-verrouillage.png",
       "imageStatus": "to-validate",
       "source": "veille-casse-28-05-2026",
-      "priority_score": 2.76
+      "priority_score": 2.13
     },
     {
       "group": "SEB",
@@ -178,7 +178,7 @@
       "image": "images/hotlist/SEB/Moulinex/Companion/HF800/entraineur-axe-moteur.png",
       "imageStatus": "to-validate",
       "source": "veille-casse-28-05-2026",
-      "priority_score": 1.33
+      "priority_score": 1.02
     },
     {
       "group": "SEB",
@@ -198,7 +198,7 @@
       "image": "images/hotlist/SEB/Rowenta/Silence-Force/RS-RT3616/roulettes-traineau.png",
       "imageStatus": "to-validate",
       "source": "veille-casse-28-05-2026",
-      "priority_score": 2.84
+      "priority_score": 2.22
     },
     {
       "group": "DeLonghi",
@@ -236,7 +236,7 @@
       "modeled": false,
       "image": "images/hotlist/Electrolux/AEG/lave-vaisselle/aeg/roulette-panier-inferieur-lave-vaisselle-clip-pl.png",
       "imageStatus": "to-validate",
-      "priority_score": 4.12
+      "priority_score": 3.58
     },
     {
       "group": "BSH",
@@ -255,7 +255,7 @@
       "modeled": false,
       "image": "images/hotlist/BSH/Bosch/lave-vaisselle/00611475/roulette-panier-inferieur-lave-vaisselle-corps-c.png",
       "imageStatus": "to-validate",
-      "priority_score": 3.29
+      "priority_score": 2.67
     },
     {
       "group": "BSH",
@@ -274,7 +274,7 @@
       "modeled": false,
       "image": "images/hotlist/BSH/Bosch/lave-vaisselle/00418674/clips-arretoirs-butees-de-rail-support-du-panier.png",
       "imageStatus": "to-validate",
-      "priority_score": 1.78
+      "priority_score": 1.47
     },
     {
       "group": "De'Longhi",
@@ -293,7 +293,7 @@
       "modeled": false,
       "image": null,
       "imageStatus": "pending",
-      "priority_score": 1.39
+      "priority_score": 4.56
     },
     {
       "group": "SEB",
@@ -312,7 +312,7 @@
       "modeled": false,
       "image": "images/hotlist/SEB/Moulinex/petit-electromenager-cui/ce701/cache-valve-du-couvercle-clip-plastique-de-la-va.png",
       "imageStatus": "to-validate",
-      "priority_score": 0.64
+      "priority_score": 0.49
     },
     {
       "group": "Whirlpool",
@@ -329,9 +329,9 @@
       "age": 12,
       "addedDate": "2026-07-07",
       "modeled": false,
-      "image": null,
-      "imageStatus": "pending",
-      "priority_score": 2.18
+      "image": "images/hotlist/Whirlpool/Whirlpool/seche-linge/hscx/trappe-de-condenseur-charniere-joint-bas-avant-g.png",
+      "imageStatus": "to-validate",
+      "priority_score": 1.63
     },
     {
       "group": "Whirlpool",
@@ -350,7 +350,7 @@
       "modeled": false,
       "image": "images/hotlist/Whirlpool/KitchenAid/robot-patissier/ksm150/pignon-roue-de-securite-plastique-mecanisme-entr.png",
       "imageStatus": "to-validate",
-      "priority_score": 3.58
+      "priority_score": 3.03
     },
     {
       "group": "Indépendant",
@@ -369,7 +369,7 @@
       "modeled": false,
       "image": "images/hotlist/Indépendant/Dyson/aspirateur-balai-sans-fi/generic/gachette-trigger-mecanisme-d-ouverture-du-recept.png",
       "imageStatus": "to-validate",
-      "priority_score": 6.84
+      "priority_score": 6.22
     },
     {
       "group": "SEB",
@@ -388,7 +388,123 @@
       "modeled": false,
       "image": "images/hotlist/SEB/Moulinex/petit-electromenager-rob/hf800/charniere-clip-de-couvercle-joint-mecanisme-de-f.png",
       "imageStatus": "to-validate",
-      "priority_score": 3.69
+      "priority_score": 3.38
+    },
+    {
+      "group": "Haier",
+      "brand": "Haier",
+      "range": "Lave-linge-top",
+      "model": "generic",
+      "piece": "cadre-superieur-charniere-capot",
+      "name": "Cadre superieur / charniere-axe de capot (ref. 43013198)",
+      "machine": "Haier lave-linge top RTXSSG684TMH-47, RTXSGP48TMSCE et gamme apparentee (piece mutualisee Candy/Hoover/Haier/Philco/Crystal/Fagor/Zerowatt/Helkama/Thomson/Elvita, ref. 43013198)",
+      "category": "Lave-linge top",
+      "demand": 1000,
+      "alerts": 15,
+      "units": "N/C",
+      "age": 5,
+      "addedDate": "2026-08-01",
+      "modeled": false,
+      "image": "images/hotlist/Haier/Haier/Lave-linge-top/generic/cadre-superieur-charniere-capot.png",
+      "imageStatus": "to-validate",
+      "source": "veille-casse-01-08-2026",
+      "priority_score": 0.99,
+      "notes": "Detection retroactive 24 mois (decision Julien 01/08/2026, temoignages 2021-2025). Reference officielle 43013198 verifiee via Spareka, mutualisee 10 marques. Score preliminaire - a recalculer par le script de scoring habituel (cf. hotlist_scoring_*.csv)."
+    },
+    {
+      "group": "BSH",
+      "brand": "Bosch",
+      "range": "seche-linge",
+      "model": "00497522",
+      "piece": "poignee-de-porte-de-seche-linge-fixation-par-3-t",
+      "name": "Poignee de porte de seche-linge (fixation par 3 tetons plastique)",
+      "machine": "Seche-linge Bosch Maxx 6 / Maxx 7 Sensitive (WTE84103, WTE86300FF...), Logixx 8 Sensitive, Avantixx 8, WTL4512",
+      "category": "Seche-linge",
+      "demand": 1500,
+      "alerts": 15,
+      "units": "N/C",
+      "age": 16,
+      "addedDate": "2026-08-08",
+      "modeled": false,
+      "image": "images/hotlist/BSH/Bosch/seche-linge/00497522/poignee-de-porte-de-seche-linge-fixation-par-3-t.png",
+      "imageStatus": "to-validate",
+      "priority_score": 5.6
+    },
+    {
+      "group": "Haier",
+      "brand": "Hoover",
+      "range": "lave-linge-top",
+      "model": "43013198",
+      "piece": "cadre-superieur-charnieres-axes-de-capot-loquet",
+      "name": "Cadre superieur / charnieres-axes de capot + loquet de fermeture (lave-linge top)",
+      "machine": "Lave-linge top Hoover HAT8134D47, HAT 8134 D, HAT 713P4D et gamme top apparentee",
+      "category": "Lave-linge top",
+      "demand": 500,
+      "alerts": 5,
+      "units": "N/C",
+      "age": 13,
+      "addedDate": "2026-08-08",
+      "modeled": false,
+      "image": "images/hotlist/Haier/Hoover/lave-linge-top/43013198/cadre-superieur-charnieres-axes-de-capot-loquet.png",
+      "imageStatus": "to-validate",
+      "priority_score": 3.96
+    },
+    {
+      "group": "Whirlpool",
+      "brand": "Whirlpool",
+      "range": "refrigerateur-freezer-in",
+      "model": "481244069384",
+      "piece": "charniere-tenons-plastique-de-fixation-du-portil",
+      "name": "Charniere / tenons plastique de fixation du portillon de freezer (compartiment congelation integre)",
+      "machine": "Refrigerateurs 1 porte a freezer integre. Temoignage propre Whirlpool : ARC051Q (achete 2006). Meme mode de casse documente sur Proline PLF210-F-1 et TTR 109, Beko, Arthur Martin Electrolux RU 1453 W",
+      "category": "Réfrigérateur (freezer intégré)",
+      "demand": 1100,
+      "alerts": 11,
+      "units": "N/C",
+      "age": 20,
+      "addedDate": "2026-08-08",
+      "modeled": false,
+      "image": null,
+      "imageStatus": "pending",
+      "priority_score": 3.87
+    },
+    {
+      "group": "BSH",
+      "brand": "Bosch",
+      "range": "lave-vaisselle",
+      "model": "smv",
+      "piece": "support-moyeu-de-clipsage-du-bras-d-aspersion-su",
+      "name": "Support / moyeu de clipsage du bras d'aspersion superieur (raccord rapide plastique a ailettes sur panier)",
+      "machine": "Lave-vaisselle Bosch SMV/SMI/SMS + Siemens SN/SX (iQ) + Neff equivalents ; extension transversale constatee sur Brandt VH1472X, Sauter SVI43WF1, Whirlpool ADP 9728",
+      "category": "Lave-vaisselle",
+      "demand": 1000,
+      "alerts": 10,
+      "units": "N/C",
+      "age": 18,
+      "addedDate": "2026-08-08",
+      "modeled": false,
+      "image": null,
+      "imageStatus": "pending",
+      "priority_score": 2.87
+    },
+    {
+      "group": "BSH",
+      "brand": "Siemens",
+      "range": "seche-linge",
+      "model": "00497522",
+      "piece": "poignee-de-porte-de-seche-linge-fixation-par-3-t",
+      "name": "Poignee de porte de seche-linge (fixation par 3 tetons plastique)",
+      "machine": "Seche-linge Siemens (series WT34/WT36/WT44/WT46) et equivalents BSH",
+      "category": "Seche-linge",
+      "demand": 1500,
+      "alerts": 15,
+      "units": "N/C",
+      "age": 16,
+      "addedDate": "2026-08-08",
+      "modeled": false,
+      "image": "images/hotlist/BSH/Siemens/seche-linge/00497522/poignee-de-porte-de-seche-linge-fixation-par-3-t.png",
+      "imageStatus": "to-validate",
+      "priority_score": 1.87
     }
   ]
 }
