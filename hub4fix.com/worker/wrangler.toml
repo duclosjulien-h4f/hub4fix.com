@@ -17,7 +17,23 @@ binding = "DB"
 database_name = "h4f_admin"
 database_id = "02cfcaa2-c331-48a0-8699-d669cb7ccce4"
 
+# Base D1 de l'espace partenaire (h4f_partner, gérée par le worker h4f-partner).
+# L'admin y accède en lecture/écriture pour VALIDER les candidatures partenaires
+# (partners.status -> active) et gérer les réservations. Back-office unique
+# (technique A) : l'admin tranche directement dans la base partenaire.
+# À créer : npx wrangler d1 create h4f_partner -> coller le database_id ci-dessous.
+[[d1_databases]]
+binding = "DB_PARTNER"
+database_name = "h4f_partner"
+database_id = "c3c71c6a-fdb8-4505-8d7c-1298ae5a6482"
+
 # Stockage privé des images pièces (orig/<id> privé, h4f/<id> public).
 [[r2_buckets]]
 binding = "PIECES_R2"
 bucket_name = "h4f-pieces"
+
+# Photos de réservation (plaque + objet), écrites par h4f-api. L'admin y accède en
+# LECTURE pour les afficher dans l'écran Réservations. Même bucket que h4f-api.
+[[r2_buckets]]
+binding = "RESERV_R2"
+bucket_name = "h4f-reservations"

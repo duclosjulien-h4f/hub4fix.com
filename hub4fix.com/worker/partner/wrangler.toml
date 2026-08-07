@@ -1,0 +1,59 @@
+# Hub4Fix — worker "h4f-partner" : espace partenaires (modélisateurs, printers).
+# Auth Zitadel (comme l'admin) + pont vers D1 : chaque partenaire est lié à un
+# compte B2C (h4f_site.users) par email, retrouvé ou créé -> capacités B2C conservées.
+#
+# Déploiement : cd hub4fix.com/worker/partner && npx wrangler deploy
+# keep_vars = true : préserve les secrets Zitadel posés au dashboard.
+#
+# Prérequis (une fois) :
+#   npx wrangler d1 create h4f_partner    # -> coller database_id ci-dessous
+#   npx wrangler d1 execute h4f_partner --remote --file ../partner-schema.sql
+#   Poser au dashboard (ou wrangler secret put) : ISSUER, CLIENT_ID, SESSION_SECRET.
+#   ISSUER/CLIENT_ID : soit le MÊME client Zitadel que l'admin, soit un client
+#   partenaire séparé — au choix, ce worker ne fait que lire ces variables.
+
+name = "h4f-partner"
+main = "partner.js"
+compatibility_date = "2026-01-01"
+keep_vars = true
+
+# Auth Zitadel — MÊME client que l'admin (identifiants publics OIDC, pas secrets).
+# COOKIE_DOMAIN absent = cookie 1re partie sur le domaine du worker (workers.dev),
+# ce qui suffit puisque la SPA est servie par ce même worker (même origine).
+# SESSION_SECRET reste un SECRET (wrangler secret put), jamais ici.
+[vars]
+ISSUER = "https://hub4fix-l2itdp.ch1.zitadel.cloud"
+CLIENT_ID = "378989531187151592"
+# Emails autorisés à créer une COMMANDE DE TEST (seed P2), en attendant le tunnel
+# d'achat physique B2C. Liste séparée par des virgules. Mets l'email avec lequel tu te
+# connectes à l'espace partenaire. N'ouvre aucune action destructive.
+ADMIN_EMAILS = "duclosjulien@gmail.com"
+
+# Base propre au worker partenaire (partenaires + réservations).
+[[d1_databases]]
+binding = "DB"
+database_name = "h4f_partner"
+database_id = "c3c71c6a-fdb8-4505-8d7c-1298ae5a6482"
+
+# Le PONT : lecture/écriture de la base des clients B2C (h4f_site) pour relier
+# ou créer le compte D1 du partenaire (auto-provision par email).
+[[d1_databases]]
+binding = "DB_SITE"
+database_name = "h4f_site"
+database_id = "d3f3a9a5-674f-4b00-858b-bbe187b99556"
+
+# Photos de réservation (plaque + objet), partagées avec l'admin (lecture).
+[[r2_buckets]]
+binding = "RESERV_R2"
+bucket_name = "h4f-reservations"
+
+# Workers AI — validation IA de cohérence des photos (Gemma vision).
+[ai]
+binding = "AI"
+
+# Lien direct vers le worker admin (feed des pièces). Un fetch worker->worker par
+# URL publique échoue (404) entre workers du même compte : le service binding route
+# en interne, de façon fiable. On l'appelle via env.ADMIN.fetch(...).
+[[services]]
+binding = "ADMIN"
+service = "h4f-admin"

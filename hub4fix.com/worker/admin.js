@@ -652,6 +652,8 @@ const NAV = [
   { path: '/admin', label: 'Tableau de bord', roles: ['admin', 'sous-admin', 'comptabilite'] },
   { path: '/admin/inscriptions', label: 'Inscriptions', roles: ['admin', 'sous-admin'] },
   { path: '/admin/shadowlist', label: 'Shadow List', roles: ['admin', 'sous-admin'] },
+  { path: '/admin/modelisateurs', label: 'Candidatures partenaire', roles: ['admin', 'sous-admin'] },
+  { path: '/admin/reservations', label: 'Réservations', roles: ['admin', 'sous-admin'] },
   { path: '/admin/modeles', label: 'Modèles 3D', roles: ['admin', 'sous-admin'] },
   { path: '/admin/admins', label: 'Administrateurs', roles: ['admin'] },
   { path: '/admin/appareils', label: 'Appareils', roles: ['admin'] },
@@ -723,13 +725,14 @@ tr.is-new td{background:rgba(45,139,94,.05)}
 }
 `;
 
-function shell(activePath, sess, content, newCount, toValidate) {
+function shell(activePath, sess, content, newCount, toValidate, pendingModelers) {
   const role = sess.role || 'admin';
   const items = NAV.filter((n) => n.roles.includes(role))
     .map((n) => {
       let badge = '';
       if (n.path === '/admin/inscriptions' && newCount > 0) badge = `<span class="pill">${newCount}</span>`;
       else if (n.path === '/admin/shadowlist' && toValidate > 0) badge = `<span class="pill">${toValidate}</span>`;
+      else if (n.path === '/admin/modelisateurs' && pendingModelers > 0) badge = `<span class="pill">${pendingModelers}</span>`;
       return `<a href="${n.path}"${n.path === activePath ? ' class="active"' : ''}><span>${esc(n.label)}</span>${badge}</a>`;
     }).join('');
   return htmlResponse(
@@ -1028,6 +1031,245 @@ const SECTIONS = {
     'À venir : <b>journal</b> des connexions, approbations d\'appareils et actions sensibles.'),
 };
 
+// ==================== Candidatures modélisateur ====================
+// Technique A : binding direct vers la base partenaire (DB_PARTNER = h4f_partner).
+// Valider une candidature passe partners.status -> 'active' (l'accès Hot List
+// se lit sur ce statut, plus sur users.role). Tolérant à l'absence du binding.
+
+// Nombre de candidatures modélisateur EN ATTENTE (badge de nav). Tolère l'absence du binding.
+async function countPendingModelers(env) {
+  if (!env.DB_PARTNER) return 0;
+  try {
+    const r = await env.DB_PARTNER.prepare("SELECT COUNT(*) AS n FROM partners WHERE status = 'pending'").first();
+    return (r && r.n) || 0;
+  } catch (e) { return 0; }
+}
+
+async function loadModelerApplications(env) {
+  if (!env.DB_PARTNER) return { error: 'no_binding' };
+  try {
+    const r = await env.DB_PARTNER.prepare(
+      "SELECT p.id, p.user_id, p.email, p.type, p.motivation, p.portfolio, p.status, p.created_at, p.decided_at, p.decided_by, " +
+      "pp.techs, pp.materials, pp.postal_code, pp.ville " +
+      "FROM partners p LEFT JOIN printer_profiles pp ON pp.user_id = p.user_id " +
+      "ORDER BY CASE p.status WHEN 'pending' THEN 0 ELSE 1 END, p.id DESC LIMIT 200"
+    ).all();
+    return { rows: (r && r.results) || [] };
+  } catch (e) { return { error: String(e && e.message || e) }; }
+}
+
+// Approuve (partners.status -> 'active') ou rejette une candidature partenaire.
+async function decideModelerApplication(env, appId, decision, adminEmail) {
+  if (!env.DB_PARTNER) return { ok: false, msg: 'Base partenaire non liée (binding DB_PARTNER manquant).' };
+  const app = await env.DB_PARTNER.prepare('SELECT id, status FROM partners WHERE id = ?').bind(appId).first();
+  if (!app) return { ok: false, msg: 'Candidature introuvable.' };
+  if (app.status !== 'pending') return { ok: false, msg: 'Candidature déjà traitée.' };
+  const ts = nowIso();
+  const status = decision === 'approve' ? 'active' : 'rejected';
+  await env.DB_PARTNER.prepare('UPDATE partners SET status = ?, decided_at = ?, decided_by = ? WHERE id = ?')
+    .bind(status, ts, adminEmail || '', appId).run();
+  await audit(env, adminEmail, 'partner_' + status, 'partner#' + appId);
+  return { ok: true };
+}
+
+// Modifie les champs libres d'une candidature (motivation, portfolio) — ex. retirer un
+// lien suspect sans tout supprimer.
+async function updatePartnerApplication(env, appId, motivation, portfolio, adminEmail) {
+  if (!env.DB_PARTNER) return { ok: false, msg: 'Base partenaire non liée.' };
+  const app = await env.DB_PARTNER.prepare('SELECT id FROM partners WHERE id = ?').bind(appId).first();
+  if (!app) return { ok: false, msg: 'Candidature introuvable.' };
+  await env.DB_PARTNER.prepare('UPDATE partners SET motivation = ?, portfolio = ? WHERE id = ?')
+    .bind(String(motivation || '').slice(0, 2000), String(portfolio || '').slice(0, 500), appId).run();
+  await audit(env, adminEmail, 'partner_edited', 'partner#' + appId);
+  return { ok: true };
+}
+
+// Supprime DÉFINITIVEMENT une candidature + les données de CE rôle uniquement (un
+// modélisateur a des réservations ; un printer a un parc). Ne touche PAS au compte D1
+// (le compte B2C reste), ni à l'autre rôle si le compte cumule les deux.
+async function deletePartner(env, appId, adminEmail) {
+  if (!env.DB_PARTNER) return { ok: false, msg: 'Base partenaire non liée.' };
+  const p = await env.DB_PARTNER.prepare('SELECT id, user_id, type FROM partners WHERE id = ?').bind(appId).first();
+  if (!p) return { ok: false, msg: 'Candidature introuvable.' };
+  if (p.type === 'printer') {
+    await env.DB_PARTNER.prepare('DELETE FROM printer_profiles WHERE user_id = ?').bind(p.user_id).run();
+  } else {
+    await env.DB_PARTNER.prepare('DELETE FROM reservations WHERE user_id = ?').bind(p.user_id).run();
+  }
+  await env.DB_PARTNER.prepare('DELETE FROM partners WHERE id = ?').bind(appId).run();
+  await audit(env, adminEmail, 'partner_deleted', 'partner#' + appId + ' (' + p.type + ')');
+  return { ok: true };
+}
+
+function viewModelerApplications(data, flash, editId) {
+  const head = '<h1 class="page">Candidatures partenaire</h1>' +
+    '<p class="sub">Valider une candidature active le statut correspondant : <b>modélisateur</b> (accès Hot List) ou <b>printer</b> (accès aux commandes de sa zone). Le rejet laisse le compte sans ce statut. <b>Modifier</b> permet de retirer un lien suspect ; <b>Supprimer</b> efface la candidature.</p>';
+  if (data.error === 'no_binding') {
+    return head + dataError('Base « partenaire » non liée. Ajoute le binding DB_PARTNER (base h4f_partner) au worker admin, puis redéploie.');
+  }
+  if (data.error) return head + dataError(data.error);
+  const rows = data.rows || [];
+  const banner = flash ? '<div class="banner">' + esc(flash) + '</div>' : '';
+  if (!rows.length) return head + banner + '<div class="soon">Aucune candidature pour le moment.</div>';
+
+  const tag = (s) => {
+    const m = { pending: ['En attente', '#b8860b'], active: ['Active', 'var(--green)'], rejected: ['Rejetée', 'var(--earth)'], suspended: ['Suspendue', 'var(--earth)'] }[s] || [s, 'var(--earth)'];
+    return '<span class="tag" style="background:' + m[1] + ';color:#fff">' + esc(m[0]) + '</span>';
+  };
+  const typeColor = (t) => t === 'printer' ? '#185FA5' : '#DD7A2B';
+  const typeTag = (t) => t === 'printer'
+    ? '<span class="tag" style="background:#185FA5;color:#fff">Printer</span>'
+    : '<span class="tag" style="background:#DD7A2B;color:#fff">Modélisateur</span>';
+  const btn = 'font-family:inherit;font-size:.78rem;font-weight:600;border:none;border-radius:7px;padding:.5rem 1rem;cursor:pointer';
+  // Tout le contour de la carte prend la couleur du type (bleu printer / violet modélisateur).
+  const cardWrap = (inner, t) => '<div style="border:2px solid ' + typeColor(t) + ';border-radius:9px;padding:1rem;background:var(--cream);margin-bottom:.8rem">' + inner + '</div>';
+  const header = (r) => '<div style="display:flex;justify-content:space-between;align-items:center;gap:.6rem">' +
+    '<div><strong>' + esc([r.prenom, r.nom].filter(Boolean).join(' ') || r.email) + '</strong> <span class="muted" style="font-size:.8rem">' + esc(r.email) + '</span></div>' +
+    '<div style="display:flex;gap:.4rem">' + typeTag(r.type) + tag(r.status) + '</div></div>';
+
+  const cards = rows.map((r) => {
+    // Mode ÉDITION : formulaire pour corriger motivation + portfolio (ex. lien suspect).
+    if (String(editId) === String(r.id)) {
+      return cardWrap(header(r) +
+        '<form method="post" action="/admin/modelisateurs" style="margin-top:.7rem">' +
+        '<input type="hidden" name="id" value="' + esc(r.id) + '"><input type="hidden" name="action" value="edit">' +
+        '<label style="font-size:.78rem;font-weight:600">Motivation</label>' +
+        '<textarea name="motivation" style="width:100%;min-height:80px;margin:.2rem 0 .6rem;font-family:inherit;font-size:.85rem;padding:.5rem;border:1px solid var(--line);border-radius:7px">' + esc(r.motivation || '') + '</textarea>' +
+        '<label style="font-size:.78rem;font-weight:600">Portfolio / lien</label>' +
+        '<input name="portfolio" value="' + esc(r.portfolio || '') + '" style="width:100%;margin:.2rem 0 .7rem;font-family:inherit;font-size:.85rem;padding:.5rem;border:1px solid var(--line);border-radius:7px">' +
+        '<div style="display:flex;gap:.5rem"><button type="submit" style="' + btn + ';background:var(--green);color:#fff">Enregistrer</button>' +
+        '<a href="/admin/modelisateurs" style="' + btn + ';background:#fff;color:var(--earth);border:1px solid var(--line);text-decoration:none">Annuler</a></div></form>', r.type);
+    }
+
+    let detail;
+    if (r.type === 'printer') {
+      const loc = [r.postal_code, r.ville].filter(Boolean).map(esc).join(' ');
+      detail = '<div style="font-size:.8rem;line-height:1.6">' +
+        'Technologies : <b>' + esc(r.techs || '—') + '</b><br>' +
+        'Matériaux : ' + esc(r.materials || '—') + '<br>' +
+        'Zone : ' + (loc || '<span class="muted">—</span>') + '</div>';
+    } else {
+      // SÉCURITÉ : n'afficher un lien cliquable QUE si l'URL est http(s). Sinon texte brut,
+      // pour neutraliser un href="javascript:…"/"data:…" injecté via le portfolio (XSS admin).
+      const port = r.portfolio
+        ? (/^https?:\/\//i.test(String(r.portfolio).trim())
+            ? '<a href="' + esc(r.portfolio) + '" target="_blank" rel="noopener noreferrer" style="color:var(--earth)">' + esc(r.portfolio) + '</a>'
+            : '<span style="color:var(--earth)">' + esc(r.portfolio) + '</span>')
+        : '<span class="muted">—</span>';
+      detail = '<div style="font-size:.8rem">Portfolio : ' + port + '</div>';
+    }
+
+    let decide = '';
+    if (r.status === 'pending') {
+      decide = '<form method="post" action="/admin/modelisateurs" style="display:flex;gap:.5rem">' +
+        '<input type="hidden" name="id" value="' + esc(r.id) + '">' +
+        '<button name="action" value="approve" style="' + btn + ';background:var(--green);color:#fff">Approuver</button>' +
+        '<button name="action" value="reject" style="' + btn + ';background:#fff;color:var(--red);border:1px solid #f3c2c2">Rejeter</button>' +
+        '</form>';
+    } else {
+      decide = '<div class="muted" style="font-size:.78rem">Traitée le ' + esc((r.decided_at || '').slice(0, 10)) + (r.decided_by ? ' par ' + esc(r.decided_by) : '') + '</div>';
+    }
+    // Modifier + Supprimer : toujours disponibles (gestion du contenu / lien suspect).
+    const manage = '<a href="/admin/modelisateurs?edit=' + esc(r.id) + '" style="' + btn + ';background:#fff;color:var(--earth);border:1px solid var(--line);text-decoration:none">Modifier</a>' +
+      '<form method="post" action="/admin/modelisateurs" style="display:inline" onsubmit="return confirm(\'Supprimer définitivement cette candidature ? (le compte client reste)\')">' +
+      '<input type="hidden" name="id" value="' + esc(r.id) + '"><input type="hidden" name="action" value="delete">' +
+      '<button type="submit" style="' + btn + ';background:#fff;color:var(--red);border:1px solid #f3c2c2">Supprimer</button></form>';
+
+    return cardWrap(header(r) +
+      '<p style="margin:.6rem 0 .3rem;font-size:.9rem;white-space:pre-wrap">' + esc(r.motivation || '') + '</p>' +
+      detail +
+      '<div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-top:.7rem">' + decide + manage + '</div>', r.type);
+  }).join('');
+  return head + banner + cards;
+}
+
+// ==================== Réservations (Hot List modélisateur) ====================
+// Lecture via DB_PARTNER (h4f_partner) ; photos servies depuis RESERV_R2. L'admin
+// peut suspendre / annuler une réservation (photo suspecte) ou la réactiver.
+
+async function loadReservations(env) {
+  if (!env.DB_PARTNER) return { error: 'no_binding' };
+  try {
+    // reservations et partners sont dans la même base (h4f_partner) : on joint pour
+    // l'email du modélisateur (LEFT JOIN au cas où le partenaire aurait été purgé).
+    const r = await env.DB_PARTNER.prepare(
+      "SELECT r.id, r.piece_id, r.status, r.ai_check, r.plate_key, r.object_key, r.created_at, r.expires_at, r.decided_by, " +
+      "r.user_id, p.email " +
+      "FROM reservations r LEFT JOIN partners p ON p.user_id = r.user_id AND p.type = 'modelisateur' " +
+      "ORDER BY CASE WHEN r.ai_check LIKE 'suspect%' THEN 0 WHEN r.status='active' THEN 1 ELSE 2 END, r.id DESC LIMIT 300"
+    ).all();
+    return { rows: (r && r.results) || [] };
+  } catch (e) { return { error: String(e && e.message || e) }; }
+}
+
+async function decideReservation(env, resvId, action, adminEmail) {
+  if (!env.DB_PARTNER) return { ok: false, msg: 'Base partenaire non liée.' };
+  const map = { suspend: 'suspended', cancel: 'cancelled', reactivate: 'active' };
+  const status = map[action];
+  if (!status) return { ok: false, msg: 'Action inconnue.' };
+  const row = await env.DB_PARTNER.prepare('SELECT id FROM reservations WHERE id = ?').bind(resvId).first();
+  if (!row) return { ok: false, msg: 'Réservation introuvable.' };
+  await env.DB_PARTNER.prepare('UPDATE reservations SET status = ?, decided_by = ? WHERE id = ?').bind(status, adminEmail || '', resvId).run();
+  await audit(env, adminEmail, 'reservation_' + status, 'reservation#' + resvId);
+  return { ok: true };
+}
+
+function viewReservations(data, flash) {
+  const head = '<h1 class="page">Réservations</h1>' +
+    '<p class="sub">Options posées par les modélisateurs sur la Hot List. Une <b>photo suspecte</b> (verdict IA) ' +
+    'remonte en tête : tu peux <b>suspendre</b> (gèle l\'option) ou <b>annuler</b> (libère la pièce).</p>';
+  if (data.error === 'no_binding') return head + dataError('Base « partenaire » non liée (binding DB_PARTNER manquant).');
+  if (data.error) return head + dataError(data.error);
+  const rows = data.rows || [];
+  const banner = flash ? '<div class="banner">' + esc(flash) + '</div>' : '';
+  if (!rows.length) return head + banner + '<div class="soon">Aucune réservation pour le moment.</div>';
+
+  const stTag = (s) => {
+    const m = { active: ['Active', 'var(--green)'], suspended: ['Suspendue', '#b8860b'], cancelled: ['Annulée', 'var(--earth)'], expired: ['Expirée', 'var(--earth)'], done: ['Terminée', '#2c6e9b'] }[s] || [s, 'var(--earth)'];
+    return '<span class="tag" style="background:' + m[1] + ';color:#fff">' + esc(m[0]) + '</span>';
+  };
+  const aiTag = (a) => {
+    const v = (a || 'pending').split(' | ')[0];
+    const raison = (a || '').split(' | ')[1] || '';
+    const m = { ok: ['IA : cohérent', 'var(--green)'], suspect: ['IA : suspect', 'var(--red)'], pending: ['IA : en attente', 'var(--earth)'] }[v] || [v, 'var(--earth)'];
+    return '<span class="tag" style="background:' + m[1] + ';color:#fff" title="' + esc(raison) + '">' + esc(m[0]) + '</span>' +
+      (raison ? '<div class="muted" style="font-size:.76rem;margin-top:.3rem">« ' + esc(raison) + ' »</div>' : '');
+  };
+  const photo = (key) => key
+    ? '<a href="/admin/reservation-photo/' + key.split('/').map(encodeURIComponent).join('/') + '" target="_blank">' +
+      '<img src="/admin/reservation-photo/' + key.split('/').map(encodeURIComponent).join('/') + '" style="width:120px;height:90px;object-fit:cover;border-radius:6px;border:1px solid var(--line)"></a>'
+    : '<span class="muted">—</span>';
+
+  const btn = 'font-family:inherit;font-size:.76rem;font-weight:600;border:none;border-radius:7px;padding:.45rem .9rem;cursor:pointer';
+  const cards = rows.map((r) => {
+    const who = esc(r.email || r.user_id || '—');
+    let actions = '<form method="post" action="/admin/reservations" style="display:flex;gap:.5rem;margin-top:.7rem;flex-wrap:wrap">' +
+      '<input type="hidden" name="id" value="' + esc(r.id) + '">';
+    if (r.status === 'active' || r.status === 'suspended') {
+      if (r.status === 'active') actions += '<button name="action" value="suspend" style="' + btn + ';background:#b8860b;color:#fff">Suspendre</button>';
+      if (r.status === 'suspended') actions += '<button name="action" value="reactivate" style="' + btn + ';background:var(--green);color:#fff">Réactiver</button>';
+      actions += '<button name="action" value="cancel" style="' + btn + ';background:#fff;color:var(--red);border:1px solid #f3c2c2">Annuler</button>';
+    } else {
+      actions += '<span class="muted" style="font-size:.78rem">' + (r.decided_by ? 'par ' + esc(r.decided_by) : '') + '</span>';
+    }
+    actions += '</form>';
+    return '<div style="border:1px solid var(--line);border-radius:9px;padding:1rem;background:var(--cream);margin-bottom:.8rem">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap">' +
+        '<div><strong style="font-size:.85rem">' + esc(r.piece_id) + '</strong><div class="muted" style="font-size:.8rem">' + who + '</div></div>' +
+        '<div style="display:flex;gap:.4rem;align-items:center">' + stTag(r.status) + '</div>' +
+      '</div>' +
+      '<div style="margin:.6rem 0">' + aiTag(r.ai_check) + '</div>' +
+      '<div style="display:flex;gap:.7rem;margin:.6rem 0">' +
+        '<div><div class="muted" style="font-size:.72rem;margin-bottom:.2rem">Plaque</div>' + photo(r.plate_key) + '</div>' +
+        '<div><div class="muted" style="font-size:.72rem;margin-bottom:.2rem">Objet</div>' + photo(r.object_key) + '</div>' +
+      '</div>' + actions + '</div>';
+  }).join('');
+  return head + banner + cards;
+}
+
+// Exports nommés pour tests unitaires uniquement (le runtime n'utilise que `default`).
+export { loadModelerApplications, decideModelerApplication, updatePartnerApplication, deletePartner, loadReservations, decideReservation };
+
 // ============================ ROUTAGE ============================
 
 export default {
@@ -1186,6 +1428,7 @@ export default {
     // visibles sur toutes les sections) et la section Shadow List.
     const pdata = await loadPieces(env);
     const toValidate = pdata.error ? 0 : countToValidate(pdata.rows);
+    const pendingModelers = await countPendingModelers(env);
 
     // Fichier source 3D : upload (POST) et téléchargement (GET) — admin connecté uniquement.
     if (request.method === 'POST' && path === '/admin/upload3d') {
@@ -1297,8 +1540,61 @@ export default {
       return new Response(null, { status: 302, headers: { Location: '/admin/shadowlist' } });
     }
     if (path === '/admin/shadowlist') {
-      return shell('/admin/shadowlist', sess, viewShadowList(pdata), 0, toValidate);
+      return shell('/admin/shadowlist', sess, viewShadowList(pdata), 0, toValidate, pendingModelers);
     }
+
+    // Candidatures modélisateur : décision (POST, admin/sous-admin) puis liste (GET).
+    if (request.method === 'POST' && path === '/admin/modelisateurs') {
+      if (sess.role !== 'admin' && sess.role !== 'sous-admin') return new Response('Interdit', { status: 403 });
+      const form = await request.formData();
+      const id = parseInt((form.get('id') || '').toString(), 10);
+      const action = (form.get('action') || '').toString();
+      let flash = '';
+      if (id && (action === 'approve' || action === 'reject')) {
+        const r = await decideModelerApplication(env, id, action, sess.email);
+        flash = r.ok ? (action === 'approve' ? 'Candidature approuvée : le statut partenaire est désormais actif.' : 'Candidature rejetée.') : r.msg;
+      } else if (id && action === 'edit') {
+        const r = await updatePartnerApplication(env, id, form.get('motivation') || '', form.get('portfolio') || '', sess.email);
+        flash = r.ok ? 'Candidature modifiée.' : r.msg;
+      } else if (id && action === 'delete') {
+        const r = await deletePartner(env, id, sess.email);
+        flash = r.ok ? 'Candidature supprimée.' : r.msg;
+      }
+      return new Response(null, { status: 302, headers: { Location: '/admin/modelisateurs' + (flash ? '?m=' + encodeURIComponent(flash) : '') } });
+    }
+    if (path === '/admin/modelisateurs') {
+      const apps = await loadModelerApplications(env);
+      return shell('/admin/modelisateurs', sess, viewModelerApplications(apps, url.searchParams.get('m'), url.searchParams.get('edit')), 0, toValidate, pendingModelers);
+    }
+
+    // Photo de réservation (privée) — admin connecté uniquement, lue dans RESERV_R2.
+    if (path.startsWith('/admin/reservation-photo/')) {
+      const key = decodeURIComponent(path.slice('/admin/reservation-photo/'.length));
+      if (!env.RESERV_R2) return new Response('R2 non lié', { status: 503 });
+      const obj = await env.RESERV_R2.get(key);
+      if (!obj) return new Response('Not found', { status: 404 });
+      const ct = (obj.httpMetadata && obj.httpMetadata.contentType) || 'image/jpeg';
+      return new Response(obj.body, { headers: { 'Content-Type': ct, 'Cache-Control': 'private, max-age=300' } });
+    }
+
+    // Réservations : décision (POST, admin/sous-admin) puis liste (GET).
+    if (request.method === 'POST' && path === '/admin/reservations') {
+      if (sess.role !== 'admin' && sess.role !== 'sous-admin') return new Response('Interdit', { status: 403 });
+      const form = await request.formData();
+      const id = parseInt((form.get('id') || '').toString(), 10);
+      const action = (form.get('action') || '').toString();
+      let flash = '';
+      if (id && ['suspend', 'cancel', 'reactivate'].includes(action)) {
+        const r = await decideReservation(env, id, action, sess.email);
+        flash = r.ok ? 'Réservation mise à jour.' : r.msg;
+      }
+      return new Response(null, { status: 302, headers: { Location: '/admin/reservations' + (flash ? '?m=' + encodeURIComponent(flash) : '') } });
+    }
+    if (path === '/admin/reservations') {
+      const resvs = await loadReservations(env);
+      return shell('/admin/reservations', sess, viewReservations(resvs, url.searchParams.get('m')), 0, toValidate, pendingModelers);
+    }
+
     if (path === '/admin/pieces.csv') {
       const csv = pdata.error ? '' : piecesToCsv(pdata.rows);
       return new Response('﻿' + csv, {
@@ -1321,7 +1617,7 @@ export default {
       const admins = await listAdmins(env);
       const data = await loadInscriptions(env);
       const newCount = data.error ? 0 : countNew(data.rows, seen);
-      return shell('/admin/admins', sess, viewAdmins(admins, sess), newCount, toValidate);
+      return shell('/admin/admins', sess, viewAdmins(admins, sess), newCount, toValidate, pendingModelers);
     }
 
     // Appareils : approbation / révocation (POST réservé admin), liste (GET)
@@ -1339,21 +1635,21 @@ export default {
       const devices = await listDevices(env);
       const data = await loadInscriptions(env);
       const newCount = data.error ? 0 : countNew(data.rows, seen);
-      return shell('/admin/appareils', sess, viewDevices(devices, sess, url.searchParams.get('e')), newCount, toValidate);
+      return shell('/admin/appareils', sess, viewDevices(devices, sess, url.searchParams.get('e')), newCount, toValidate, pendingModelers);
     }
 
     // Tableau de bord
     if (path === '/' || path === '/admin') {
       const data = await loadInscriptions(env);
       const newCount = data.error ? 0 : countNew(data.rows, seen);
-      return shell('/admin', sess, viewDashboard(sess, data, seen, toValidate), newCount, toValidate);
+      return shell('/admin', sess, viewDashboard(sess, data, seen, toValidate), newCount, toValidate, pendingModelers);
     }
 
     // Inscriptions : marque comme "vues" (met à jour le repère) après affichage
     if (path === '/admin/inscriptions') {
       const data = await loadInscriptions(env);
       data.seen = seen;
-      const resp = shell('/admin/inscriptions', sess, viewInscriptions(data), 0, toValidate);
+      const resp = shell('/admin/inscriptions', sess, viewInscriptions(data), 0, toValidate, pendingModelers);
       // après consultation, on déplace le repère "dernière visite" à maintenant
       resp.headers.append('Set-Cookie', setCookie('h4f_seen', new Date().toISOString(), SEEN_TTL));
       return resp;
@@ -1362,7 +1658,7 @@ export default {
     if (SECTIONS[path]) {
       const data = await loadInscriptions(env);
       const newCount = data.error ? 0 : countNew(data.rows, seen);
-      return shell(path, sess, SECTIONS[path](), newCount, toValidate);
+      return shell(path, sess, SECTIONS[path](), newCount, toValidate, pendingModelers);
     }
 
     return new Response(null, { status: 302, headers: { Location: '/admin' } });
