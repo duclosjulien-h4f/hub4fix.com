@@ -102,6 +102,8 @@ hub4fix.com/images/hotlist/
 
 # Fichiers de travail a la racine (jamais publier sur le depot public)
 TodoList.md
+# Script de sauvegarde local : contient les chemins du poste (T:\, profil utilisateur)
+sauvegarde.ps1
 /scratch_*
 /Note_*.md
 /hotlist_scoring_*.csv
