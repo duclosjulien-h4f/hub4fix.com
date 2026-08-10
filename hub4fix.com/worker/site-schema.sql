@@ -142,3 +142,13 @@ CREATE TABLE IF NOT EXISTS zones (
   client_count  INTEGER NOT NULL DEFAULT 0,
   updated_at    TEXT
 );
+
+-- Compteur d'usage de l'assistant IA (/ai/chat). Sert uniquement au plafond
+-- horaire : aucune conversation n'est stockée, et l'IP anonyme n'apparaît que
+-- sous forme de haché salé (minimisation RGPD). Purge opportuniste au-delà de 24 h.
+CREATE TABLE IF NOT EXISTS ai_usage (
+  id     INTEGER PRIMARY KEY AUTOINCREMENT,
+  bucket TEXT NOT NULL,                       -- 'u:<user_id>' ou 'ip:<haché tronqué>'
+  ts     INTEGER NOT NULL                     -- epoch secondes
+);
+CREATE INDEX IF NOT EXISTS idx_ai_usage ON ai_usage(bucket, ts);

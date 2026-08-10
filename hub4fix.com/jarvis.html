@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- noindex tant que l'assistant n'est pas ouvert au public (voir déploiement worker + Workers AI). -->
+<meta name="robots" content="noindex, nofollow">
+<title>Assistant H4F</title>
+<link rel="icon" href="images/favicon-h4f.svg">
+<style>
+  /* Repris à l'identique de la maquette jarvis-demo.html (même ton visuel). */
+  :root {
+    --cream: #FDFAF5; --ink: #1E1B18; --muted: #6B6259; --line: #E5DDD1;
+    --red: #C0392B; --green: #2D8B5E; --gold: #B8963E; --panel: #FFFFFF;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--cream); color: var(--ink);
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif; line-height: 1.55;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  h1 { font-family: Georgia, serif; font-size: 1.9rem; margin: 0 0 .3rem; }
+  .sub { color: var(--muted); margin: 0 0 2rem; font-size: .95rem; }
+
+  .jarvis {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    overflow: hidden; box-shadow: 0 8px 30px rgba(30,27,24,.07);
+  }
+  .jarvis-head {
+    display: flex; align-items: center; gap: .7rem;
+    padding: .85rem 1.1rem; border-bottom: 1px solid var(--line); background: #FBF7F1;
+  }
+  .orb {
+    width: 30px; height: 30px; border-radius: 50%; flex: none; position: relative;
+    background: radial-gradient(circle at 35% 35%, #4FD1A0, var(--green) 60%, #1c5c3e);
+    box-shadow: 0 0 0 0 rgba(45,139,94,.5);
+  }
+  .orb.speaking { animation: pulse 1.4s ease-out infinite; }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(45,139,94,.55); }
+    70%  { box-shadow: 0 0 0 12px rgba(45,139,94,0); }
+    100% { box-shadow: 0 0 0 0 rgba(45,139,94,0); }
+  }
+  .jarvis-name { font-weight: 600; font-size: .95rem; }
+  .jarvis-state { color: var(--muted); font-size: .78rem; }
+  .jarvis-head-right { margin-left: auto; display: flex; gap: .4rem; align-items: center; }
+  .voice-toggle {
+    border: 1px solid var(--line); background: #fff; border-radius: 20px;
+    padding: .3rem .7rem; font-size: .78rem; cursor: pointer; color: var(--muted);
+  }
+  .voice-toggle.on { border-color: var(--green); color: var(--green); background: #F1F9F5; }
+
+  .log { padding: 1.1rem; min-height: 340px; max-height: 460px; overflow-y: auto; }
+  .msg { display: flex; margin-bottom: .8rem; }
+  .msg.me { justify-content: flex-end; }
+  .bubble {
+    max-width: 82%; padding: .65rem .9rem; border-radius: 14px; font-size: .93rem;
+    animation: rise .28s ease-out;
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+  .msg.bot .bubble { background: #F3F0EA; border-bottom-left-radius: 4px; }
+  .msg.me  .bubble { background: var(--ink); color: var(--cream); border-bottom-right-radius: 4px; }
+  .bubble .thumb {
+    display: block; width: 150px; border-radius: 8px; margin-bottom: .4rem;
+    border: 1px solid rgba(255,255,255,.2);
+  }
+  .typing span {
+    display: inline-block; width: 6px; height: 6px; margin-right: 3px; border-radius: 50%;
+    background: var(--muted); animation: blink 1.2s infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: .2s; }
+  .typing span:nth-child(3) { animation-delay: .4s; }
+  @keyframes blink { 0%, 60%, 100% { opacity: .25; } 30% { opacity: 1; } }
+
+  /* ---- Carte pièce (résultat catalogue RÉEL) ---- */
+  .part-card {
+    border: 1px solid var(--line); border-radius: 10px; background: #fff;
+    padding: .7rem; display: flex; gap: .7rem; align-items: center; margin-top: .5rem;
+    text-decoration: none; color: inherit;
+  }
+  .part-card:hover { border-color: var(--green); }
+  .part-card .ph {
+    width: 54px; height: 54px; border-radius: 6px; flex: none; object-fit: cover;
+    background: linear-gradient(135deg, #EFE9DF, #DDD3C4);
+    display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+  }
+  .part-name { font-weight: 600; font-size: .9rem; }
+  .part-meta { color: var(--muted); font-size: .78rem; }
+  .badge {
+    margin-left: auto; font-size: .72rem; font-weight: 600; padding: .2rem .55rem;
+    border-radius: 20px; white-space: nowrap;
+  }
+  /* Disponible = MarketList (modélisée). En cours d'acquisition = Shadow List. */
+  .badge.dispo { color: var(--green); background: #EAF6F0; }
+  .badge.acq   { color: var(--gold);  background: #FaF4E6; }
+  .part-card.acq { border-color: var(--gold); background: #FDFBF4; }
+
+  .compose { border-top: 1px solid var(--line); padding: .8rem 1.1rem 1rem; background: #FBF7F1; }
+  .chips { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .6rem; }
+  .chip {
+    border: 1px solid var(--line); background: #fff; border-radius: 20px;
+    padding: .35rem .8rem; font-size: .82rem; cursor: pointer; color: var(--ink);
+    transition: border-color .15s, background .15s;
+  }
+  .chip:hover { border-color: var(--green); background: #F1F9F5; }
+  .composer-row { display: flex; gap: .5rem; }
+  .composer-row input[type=text] {
+    flex: 1; border: 1px solid var(--line); border-radius: 22px; padding: .6rem .95rem;
+    font-size: .92rem; font-family: inherit; background: #fff;
+  }
+  .composer-row input[type=text]:focus { outline: 2px solid rgba(45,139,94,.3); border-color: var(--green); }
+  .icon-btn {
+    border: 1px solid var(--line); background: #fff; border-radius: 50%;
+    width: 40px; height: 40px; flex: none; cursor: pointer; font-size: 1rem;
+  }
+  .icon-btn:hover { border-color: var(--green); }
+  .icon-btn:disabled { opacity: .4; cursor: default; }
+  .icon-btn.rec { border-color: var(--red); color: var(--red); animation: pulse 1.2s infinite; }
+
+  /* ---- Néon d'activité (réflexion IA / upload) ---- */
+  /* Réutilisable : envelopper un champ dans .neon-field, activer avec .active. */
+  @property --neon-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+  .neon-field { position: relative; flex: 1; min-width: 0; display: flex; border-radius: 22px; }
+  .neon-field > input[type=text] { flex: 1; }
+  .neon-field::before {
+    content: ''; position: absolute; inset: -2px; border-radius: 24px; padding: 2px;
+    background: conic-gradient(from var(--neon-angle),
+      transparent 0deg, #2D8B5E 55deg, #4FD1A0 110deg, #7CE0FF 165deg, transparent 250deg, transparent 360deg);
+    /* n'affiche que l'anneau : masque le centre */
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    opacity: 0; transition: opacity .3s ease; pointer-events: none; z-index: 2;
+  }
+  .neon-field.active::before { opacity: 1; animation: neon-spin 1.3s linear infinite; }
+  .neon-field.active { box-shadow: 0 0 16px rgba(79,209,160,.45); border-radius: 24px; }
+  @keyframes neon-spin { to { --neon-angle: 360deg; } }
+  /* Repli navigateurs sans @property : l'anneau reste visible et pulse doucement. */
+  @supports not (background: conic-gradient(from var(--neon-angle), red, blue)) {
+    .neon-field.active::before { animation: pulse 1.3s ease-in-out infinite; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .neon-field.active::before { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1>L'assistant du vaisseau H4F</h1>
+  <p class="sub">Décrivez votre panne en français normal. Vous pouvez parler, ou envoyer une photo de la plaque signalétique.</p>
+
+  <div class="jarvis">
+    <div class="jarvis-head">
+      <div class="orb" id="orb"></div>
+      <div>
+        <div class="jarvis-name">H4F</div>
+        <div class="jarvis-state" id="state">En ligne</div>
+      </div>
+      <div class="jarvis-head-right">
+        <button class="voice-toggle" id="voiceBtn">🔇 Voix coupée</button>
+      </div>
+    </div>
+
+    <div class="log" id="log"></div>
+
+    <div class="compose">
+      <div class="chips" id="chips"></div>
+      <div class="composer-row">
+        <div class="neon-field" id="neonField">
+          <input type="text" id="input" placeholder="Décrivez votre panne…" autocomplete="off">
+        </div>
+        <input type="file" id="file" accept="image/*" hidden>
+        <button class="icon-btn" id="micBtn" title="Parler">🎙</button>
+        <button class="icon-btn" id="camBtn" title="Envoyer une photo">📷</button>
+        <button class="icon-btn" id="sendBtn" title="Envoyer">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---- Configuration de l'endpoint ----
+  // Priorité : ?api=... (tests locaux) > window.H4F_AUTH_ORIGIN (cohérent avec le reste du site) > défaut worker.
+  var params = new URLSearchParams(location.search);
+  var API = params.get('api') || window.H4F_AUTH_ORIGIN || 'https://h4f-api.duclosjulien.workers.dev';
+  var TOKEN_KEY = 'h4f_token'; // même clé que le menu compte B2C (account-menu-b2c.js)
+
+  var log = document.getElementById('log');
+  var chipsBox = document.getElementById('chips');
+  var input = document.getElementById('input');
+  var fileInput = document.getElementById('file');
+  var orb = document.getElementById('orb');
+  var stateEl = document.getElementById('state');
+  var voiceBtn = document.getElementById('voiceBtn');
+  var micBtn = document.getElementById('micBtn');
+  var camBtn = document.getElementById('camBtn');
+  var sendBtn = document.getElementById('sendBtn');
+  var neonField = document.getElementById('neonField');
+
+  var voiceOn = false;
+  var busy = false;
+  // Historique envoyé au serveur : uniquement des tours {role:'user'|'assistant', content}.
+  // La consigne système est ajoutée CÔTÉ SERVEUR — jamais ici.
+  var history = [];
+
+  // ---- Rendu ----
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function bubble(who, html) {
+    var row = document.createElement('div');
+    row.className = 'msg ' + who;
+    var b = document.createElement('div');
+    b.className = 'bubble';
+    b.innerHTML = html;
+    row.appendChild(b);
+    log.appendChild(row);
+    log.scrollTop = log.scrollHeight;
+    return row;
+  }
+  function typing() {
+    return bubble('bot', '<span class="typing"><span></span><span></span><span></span></span>');
+  }
+
+  // Carte pièce RÉELLE : cliquable vers la fiche produit. Le badge traduit la disponibilité.
+  function partCard(p) {
+    var acq = p.disponibilite !== 'disponible';
+    var badge = acq
+      ? '<span class="badge acq">En cours d\'acquisition</span>'
+      : '<span class="badge dispo">Disponible</span>';
+    var meta = [p.appareil, p.marque].filter(Boolean).join(' · ');
+    var href = p.fiche ? escapeHtml(p.fiche) : '#';
+    return '<a class="part-card' + (acq ? ' acq' : '') + '" href="' + href + '">' +
+      '<div class="ph">🔧</div>' +
+      '<div><div class="part-name">' + escapeHtml(p.nom || 'Pièce') + '</div>' +
+      '<div class="part-meta">' + escapeHtml(meta) + '</div></div>' +
+      badge + '</a>';
+  }
+
+  // ---- Voix (navigateur, gratuite) — repris de la maquette ----
+  function frenchVoice() {
+    if (!('speechSynthesis' in window)) return null;
+    var vs = window.speechSynthesis.getVoices() || [];
+    return vs.filter(function (v) { return /^fr/i.test(v.lang); })[0] || null;
+  }
+  function speak(text) {
+    if (!voiceOn || !('speechSynthesis' in window) || !text) return;
+    try {
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = 'fr-FR'; u.rate = 1.02;
+      var v = frenchVoice(); if (v) u.voice = v;
+      orb.classList.add('speaking');
+      u.onend = function () { orb.classList.remove('speaking'); };
+      window.speechSynthesis.speak(u);
+    } catch (e) { /* la voix est un plus, jamais bloquante */ }
+  }
+
+  // ---- Appel au cerveau ----
+  function setBusy(on) {
+    busy = on;
+    sendBtn.disabled = on; camBtn.disabled = on;
+    neonField.classList.toggle('active', on);   // néon d'activité (réflexion IA / upload)
+    stateEl.textContent = on ? 'Réfléchit…' : 'En ligne';
+  }
+
+  function send(userContent, displayHtml) {
+    if (busy) return;
+    bubble('me', displayHtml);
+    history.push({ role: 'user', content: userContent });
+    setBusy(true);
+    var t = typing();
+
+    var headers = { 'Content-Type': 'application/json' };
+    var tok = null;
+    try { tok = localStorage.getItem(TOKEN_KEY); } catch (e) {}
+    if (tok) headers['Authorization'] = 'Bearer ' + tok;
+
+    fetch(API + '/ai/chat', {
+      method: 'POST', headers: headers, credentials: 'include',
+      body: JSON.stringify({ messages: history }),
+    })
+      .then(function (r) { return r.json().then(function (d) { return { status: r.status, d: d }; }); })
+      .then(function (res) {
+        t.remove();
+        var d = res.d || {};
+        if (res.status === 200 && typeof d.reply === 'string') {
+          bubble('bot', escapeHtml(d.reply));
+          history.push({ role: 'assistant', content: d.reply });
+          if (Array.isArray(d.pieces) && d.pieces.length) {
+            bubble('bot', d.pieces.map(partCard).join(''));
+          }
+          speak(d.reply);
+        } else if (res.status === 429) {
+          bubble('bot', escapeHtml(d.message || 'Vous avez atteint la limite de messages pour cette heure.'));
+        } else if (res.status === 503) {
+          bubble('bot', 'L\'assistant est momentanément indisponible. Réessayez dans un instant.');
+        } else {
+          bubble('bot', 'Désolé, je n\'ai pas pu répondre. Pouvez-vous reformuler ?');
+        }
+      })
+      .catch(function () {
+        t.remove();
+        bubble('bot', 'Connexion interrompue. Vérifiez votre réseau et réessayez.');
+      })
+      .then(function () { setBusy(false); input.focus(); });
+  }
+
+  // ---- Saisie texte ----
+  function submitText() {
+    var v = input.value.trim();
+    if (!v || busy) return;
+    input.value = '';
+    setChips(null); // les amorces disparaissent dès le 1er message
+    send(v, escapeHtml(v));
+  }
+  sendBtn.addEventListener('click', submitText);
+  input.addEventListener('keydown', function (e) { if (e.key === 'Enter') submitText(); });
+
+  // ---- Photo : vraie image (plaque signalétique), redimensionnée avant envoi ----
+  camBtn.addEventListener('click', function () { if (!busy) fileInput.click(); });
+  fileInput.addEventListener('change', function () {
+    var f = fileInput.files && fileInput.files[0];
+    fileInput.value = '';
+    if (!f) return;
+    var img = new Image();
+    img.onload = function () {
+      // Redimensionne à 1024 px max : sous la limite serveur (~1,2 Mo base64) et plus rapide.
+      var max = 1024, w = img.width, h = img.height;
+      if (w > max || h > max) { var k = Math.min(max / w, max / h); w = Math.round(w * k); h = Math.round(h * k); }
+      var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(img, 0, 0, w, h);
+      var dataUrl = cv.toDataURL('image/jpeg', 0.82);
+      URL.revokeObjectURL(img.src);
+      var caption = input.value.trim() || 'Voici la plaque signalétique.';
+      input.value = ''; setChips(null);
+      var content = [
+        { type: 'text', text: caption },
+        { type: 'image_url', image_url: { url: dataUrl } },
+      ];
+      var displayHtml = '<img class="thumb" src="' + dataUrl + '" alt="photo">' + escapeHtml(caption);
+      send(content, displayHtml);
+    };
+    img.onerror = function () { bubble('bot', 'Je n\'ai pas pu lire cette image. Réessayez avec une autre photo.'); };
+    img.src = URL.createObjectURL(f);
+  });
+
+  // ---- Voix : activation ----
+  voiceBtn.addEventListener('click', function () {
+    voiceOn = !voiceOn;
+    voiceBtn.classList.toggle('on', voiceOn);
+    voiceBtn.textContent = voiceOn ? '🔊 Voix active' : '🔇 Voix coupée';
+    if (!voiceOn && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+    if (voiceOn && 'speechSynthesis' in window) window.speechSynthesis.getVoices();
+  });
+
+  // ---- Micro : reconnaissance vocale du navigateur (Chrome/Edge/Safari) ----
+  micBtn.addEventListener('click', function () {
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      bubble('bot', 'Ce navigateur ne sait pas écouter le micro (Firefox notamment). Tapez plutôt votre phrase.');
+      return;
+    }
+    var r = new SR();
+    r.lang = 'fr-FR'; r.interimResults = false;
+    micBtn.classList.add('rec'); stateEl.textContent = 'Écoute…';
+    r.onresult = function (e) { input.value = e.results[0][0].transcript; };
+    r.onerror = function () { bubble('bot', 'Je n\'ai rien entendu — le micro est peut-être bloqué.'); };
+    r.onend = function () { micBtn.classList.remove('rec'); if (!busy) stateEl.textContent = 'En ligne'; submitText(); };
+    r.start();
+  });
+
+  // ---- Amorces cliquables (disparaissent au 1er message) ----
+  function setChips(list) {
+    chipsBox.innerHTML = '';
+    if (!list) return;
+    list.forEach(function (label) {
+      var btn = document.createElement('button');
+      btn.className = 'chip'; btn.type = 'button'; btn.textContent = label;
+      btn.addEventListener('click', function () { input.value = label; submitText(); });
+      chipsBox.appendChild(btn);
+    });
+  }
+
+  // ---- Amorçage ----
+  bubble('bot', 'Bonjour ! Ici H4F. Je m\'occupe des pièces qu\'on ne trouve plus nulle part. Racontez-moi ce qui est cassé — en français normal, pas besoin de référence.');
+  setChips([
+    'La poignée de mon aspirateur Dyson est cassée',
+    'Ma cafetière fuit',
+    'Une roulette de mon lave-vaisselle est cassée',
+  ]);
+  input.focus();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Maquette — Assistant H4F</title>
+<link rel="icon" href="images/favicon-h4f.svg">
+<style>
+  /* Maquette jetable : tout est inline pour ne rien impacter du site reel. */
+  :root {
+    --cream: #FDFAF5;
+    --ink: #1E1B18;
+    --muted: #6B6259;
+    --line: #E5DDD1;
+    --red: #C0392B;
+    --green: #2D8B5E;
+    --gold: #B8963E;
+    --panel: #FFFFFF;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--cream); color: var(--ink);
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    line-height: 1.55;
+  }
+  .mock-banner {
+    background: var(--gold); color: #fff; text-align: center;
+    padding: .5rem 1rem; font-size: .82rem; letter-spacing: .04em;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  h1 { font-family: Georgia, serif; font-size: 1.9rem; margin: 0 0 .3rem; }
+  .sub { color: var(--muted); margin: 0 0 2rem; font-size: .95rem; }
+
+  /* ---- Fenetre de l'assistant ---- */
+  .jarvis {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    overflow: hidden; box-shadow: 0 8px 30px rgba(30,27,24,.07);
+  }
+  .jarvis-head {
+    display: flex; align-items: center; gap: .7rem;
+    padding: .85rem 1.1rem; border-bottom: 1px solid var(--line); background: #FBF7F1;
+  }
+  .orb {
+    width: 30px; height: 30px; border-radius: 50%; flex: none; position: relative;
+    background: radial-gradient(circle at 35% 35%, #4FD1A0, var(--green) 60%, #1c5c3e);
+    box-shadow: 0 0 0 0 rgba(45,139,94,.5);
+  }
+  .orb.speaking { animation: pulse 1.4s ease-out infinite; }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(45,139,94,.55); }
+    70%  { box-shadow: 0 0 0 12px rgba(45,139,94,0); }
+    100% { box-shadow: 0 0 0 0 rgba(45,139,94,0); }
+  }
+  .jarvis-name { font-weight: 600; font-size: .95rem; }
+  .jarvis-state { color: var(--muted); font-size: .78rem; }
+  .jarvis-head-right { margin-left: auto; display: flex; gap: .4rem; align-items: center; }
+  .voice-toggle {
+    border: 1px solid var(--line); background: #fff; border-radius: 20px;
+    padding: .3rem .7rem; font-size: .78rem; cursor: pointer; color: var(--muted);
+  }
+  .voice-toggle.on { border-color: var(--green); color: var(--green); background: #F1F9F5; }
+
+  .log { padding: 1.1rem; min-height: 340px; max-height: 460px; overflow-y: auto; }
+  .msg { display: flex; margin-bottom: .8rem; }
+  .msg.me { justify-content: flex-end; }
+  .bubble {
+    max-width: 82%; padding: .65rem .9rem; border-radius: 14px; font-size: .93rem;
+    animation: rise .28s ease-out;
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+  .msg.bot .bubble { background: #F3F0EA; border-bottom-left-radius: 4px; }
+  .msg.me  .bubble { background: var(--ink); color: var(--cream); border-bottom-right-radius: 4px; }
+  .bubble .thumb {
+    display: block; width: 150px; border-radius: 8px; margin-bottom: .4rem;
+    border: 1px solid rgba(255,255,255,.2);
+  }
+  .typing span {
+    display: inline-block; width: 6px; height: 6px; margin-right: 3px; border-radius: 50%;
+    background: var(--muted); animation: blink 1.2s infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: .2s; }
+  .typing span:nth-child(3) { animation-delay: .4s; }
+  @keyframes blink { 0%, 60%, 100% { opacity: .25; } 30% { opacity: 1; } }
+
+  /* ---- Carte piece (resultat catalogue) ---- */
+  .part-card {
+    border: 1px solid var(--line); border-radius: 10px; background: #fff;
+    padding: .7rem; display: flex; gap: .7rem; align-items: center; margin-top: .5rem;
+  }
+  .part-card .ph {
+    width: 54px; height: 54px; border-radius: 6px; flex: none;
+    background: linear-gradient(135deg, #EFE9DF, #DDD3C4);
+    display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+  }
+  .part-name { font-weight: 600; font-size: .9rem; }
+  .part-meta { color: var(--muted); font-size: .78rem; }
+  .part-price { margin-left: auto; font-weight: 600; color: var(--green); font-size: .9rem; }
+  /* Repair Together : offre, pas produit -> on la distingue visuellement. */
+  .part-card.rt { border-color: var(--green); background: #F4FBF7; }
+  .part-card.rt .ph { background: linear-gradient(135deg, #D8F0E4, #B6E2CD); }
+  /* Piece complexe : mise en attente d'un avis, pas un feu vert -> ni vert ni rouge. */
+  .part-card.cx { border-color: var(--gold); background: #FBF7EC; }
+  .part-card.cx .ph { background: linear-gradient(135deg, #F0E6CD, #E2D3AC); }
+  /* Devis sur mesure : hors programme offert -> neutre, ni cadeau ni alerte. */
+  .part-card.dv { border-color: #B9A9D6; background: #F7F4FB; }
+  .part-card.dv .ph { background: linear-gradient(135deg, #E5DBF3, #CDBBE8); }
+  /* Conditions : etape administrative, sobre. */
+  .part-card.cg { border-color: var(--line); background: #FBF9F5; }
+  .part-card.cg .ph { background: linear-gradient(135deg, #ECE6DA, #DAD0BF); }
+  .cond-link { color: var(--muted); text-decoration: underline; }
+  .chip.decor { color: var(--muted); border-style: dashed; }
+
+  /* ---- Zone de saisie ---- */
+  .compose { border-top: 1px solid var(--line); padding: .8rem 1.1rem 1rem; background: #FBF7F1; }
+  .chips { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .6rem; }
+  .chip {
+    border: 1px solid var(--line); background: #fff; border-radius: 20px;
+    padding: .35rem .8rem; font-size: .82rem; cursor: pointer; color: var(--ink);
+    transition: border-color .15s, background .15s;
+  }
+  .chip:hover { border-color: var(--green); background: #F1F9F5; }
+  .chip:disabled { opacity: .35; cursor: default; }
+  .composer-row { display: flex; gap: .5rem; }
+  .composer-row input {
+    flex: 1; border: 1px solid var(--line); border-radius: 22px; padding: .6rem .95rem;
+    font-size: .92rem; font-family: inherit; background: #fff;
+  }
+  .composer-row input:focus { outline: 2px solid rgba(45,139,94,.3); border-color: var(--green); }
+  .icon-btn {
+    border: 1px solid var(--line); background: #fff; border-radius: 50%;
+    width: 40px; height: 40px; flex: none; cursor: pointer; font-size: 1rem;
+  }
+  .icon-btn:hover { border-color: var(--green); }
+  .icon-btn.rec { border-color: var(--red); color: var(--red); animation: pulse 1.2s infinite; }
+
+  .replay {
+    display: block; margin: 1.4rem auto 0; border: 1px solid var(--line); background: #fff;
+    border-radius: 22px; padding: .5rem 1.2rem; font-size: .85rem; cursor: pointer; color: var(--muted);
+  }
+
+  /* ---- Notes de maquette ---- */
+  .notes { margin-top: 2.5rem; border-top: 1px solid var(--line); padding-top: 1.5rem; }
+  .notes h2 { font-family: Georgia, serif; font-size: 1.15rem; margin: 0 0 .8rem; }
+  .notes li { margin-bottom: .5rem; font-size: .9rem; color: var(--muted); }
+  .notes strong { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<div class="mock-banner">MAQUETTE — réponses écrites d'avance, aucune IA branchée. Sert à valider le ton et le parcours.</div>
+
+<div class="wrap">
+  <h1>L'assistant du vaisseau H4F</h1>
+  <p class="sub">Cliquez sur les suggestions pour dérouler le scénario. Activez la voix pour entendre le rendu.</p>
+
+  <div class="jarvis">
+    <div class="jarvis-head">
+      <div class="orb" id="orb"></div>
+      <div>
+        <div class="jarvis-name">H4F</div>
+        <div class="jarvis-state" id="state">En ligne</div>
+      </div>
+      <div class="jarvis-head-right">
+        <button class="voice-toggle" id="voiceBtn">🔇 Voix coupée</button>
+      </div>
+    </div>
+
+    <div class="log" id="log"></div>
+
+    <div class="compose">
+      <div class="chips" id="chips"></div>
+      <div class="composer-row">
+        <input id="input" placeholder="Décrivez votre panne…" autocomplete="off">
+        <button class="icon-btn" id="micBtn" title="Parler">🎙</button>
+        <button class="icon-btn" id="camBtn" title="Envoyer une photo">📷</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="replay" id="replay">↻ Rejouer le scénario</button>
+
+  <div class="notes">
+    <h2>Ce que la maquette montre (et ce qu'elle cache)</h2>
+    <ul>
+      <li><strong>Ce qui est réel ici :</strong> la synthèse vocale (elle vient du navigateur, elle est gratuite) et la reconnaissance vocale du micro. Tout le reste est écrit d'avance.</li>
+      <li><strong>Ce qui est simulé :</strong> la compréhension, la lecture de la plaque, et les pièces proposées. En vrai, l'assistant n'aurait <strong>pas le droit</strong> de citer une pièce sans l'avoir trouvée dans le catalogue.</li>
+      <li><strong>Le cas « je ne trouve pas »</strong> est le cœur de la maquette : l'assistant ne ment pas, et il enchaîne aussitôt sur <strong>Repair Together</strong> — la seule réponse qui répare l'appareil <em>tout de suite</em>, puisqu'elle ne dépend que du client. La Hot List n'arrive qu'en second, pour celui qui ne veut rien envoyer.</li>
+      <li><strong>Les issues jouables</strong> depuis ce point : <em>pièce simple</em> (modélisation directe, on poste), <em>pièce complexe</em> (avis d'expert d'abord, on ne poste rien), <em>Hot List</em> (on n'envoie rien), et — si la pièce est <strong>hors Shadow List</strong> (la Faema du bar) — <em>devis de conception sur mesure</em>, payant, parce que personne ne viendra l'amortir. Rejouez le scénario pour voir les autres.</li>
+      <li><strong>Les conditions arrivent tard, exprès :</strong> Repair Together ne les montre <em>qu'après</em> que H4F s'est engagé à faire la pièce (le seul moment de lecture du parcours). C'est légal tant que le client les a avant de <em>lui</em> s'engager — ici, avant de poster.</li>
+      <li><strong>Les pièces qui dépassent 15 €</strong> (les ~10 %, plutôt les grandes pièces) ont leur propre branche : le <em>cadeau de 15 € devient une réduction</em>. H4F fait une estimation à partir du volume (l'objet du quotidien sur la photo donne l'échelle), déduit 15 €, et le client ne paie que le dépassement — libre de refuser tant que le devis ferme n'est pas accepté.</li>
+      <li><strong>Nuance qui compte :</strong> l'estimation peut s'appuyer sur une pièce approchante <em>pour chiffrer le volume</em>, jamais pour livrer — la pièce reçue reste modélisée sur la vôtre. Sinon ça contredirait la règle « on ne livre jamais un approchant ».</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var log = document.getElementById('log');
+  var chipsBox = document.getElementById('chips');
+  var input = document.getElementById('input');
+  var orb = document.getElementById('orb');
+  var stateEl = document.getElementById('state');
+  var voiceBtn = document.getElementById('voiceBtn');
+  var micBtn = document.getElementById('micBtn');
+  var camBtn = document.getElementById('camBtn');
+  var replay = document.getElementById('replay');
+
+  var voiceOn = false;
+  var step = 0;
+
+  // ---- Scenario ----
+  // Chaque etape propose des `chips` (ce que le client peut dire). Chaque chip
+  // porte SA reponse : ca permet de vraies bifurcations (simple/complexe, Hot List).
+  //   label  : texte du bouton
+  //   decor  : chip presente pour montrer qu'il y aurait d'autres entrees, sans suite ecrite
+  //   photo  : nom du faux cliche a afficher cote client au lieu du texte
+  //   say    : repliques de H4F, jouees l'une apres l'autre
+  //   html   : bloc riche ajoute apres les repliques (carte piece, carte offre)
+  //   goto   : index de l'etape suivante ('end' pour terminer). Defaut : etape+1.
+  var SCRIPT = [
+    // 0 — accueil
+    {
+      chips: [
+        {
+          label: 'Bonjour',
+          say: [
+            'Bonjour ! Ici H4F. Je m\'occupe des pièces qu\'on ne trouve plus nulle part. ' +
+            'Racontez-moi ce qui est cassé — en français normal, pas besoin de référence.'
+          ]
+        },
+        { label: 'Ma poignée d\'aspirateur est cassée', decor: true }
+      ]
+    },
+    // 1 — comprehension de l'intention + demande de plaque
+    {
+      chips: [
+        {
+          label: 'La poignée de mon aspirateur Dyson a cassé net',
+          say: [
+            'Ha, une poignée d\'aspirateur Dyson ? C\'est un grand classique : la pièce casse, ' +
+            'et Dyson ne la vend pas séparément.',
+            'Il me faut le modèle exact — deux V8 se ressemblent mais n\'ont pas la même poignée. ' +
+            'Vous avez une <strong>plaque signalétique</strong> sur l\'appareil : une petite étiquette ' +
+            'avec des chiffres, souvent sous le corps ou près du filtre. Vous pouvez me la photographier ?'
+          ]
+        },
+        { label: 'Mon frigo fait un bruit bizarre', decor: true }
+      ]
+    },
+    // 2 — lecture de la plaque -> piece trouvee
+    {
+      chips: [
+        {
+          label: '📷 Envoyer la photo de la plaque',
+          photo: 'plate',
+          say: [
+            'Je regarde…',
+            'C\'est net, merci. Je lis <strong>SV10 — 245536-01</strong>. C\'est un Dyson V8 Absolute, ' +
+            'série 2017. J\'ai la poignée pour ce modèle-là.'
+          ],
+          html:
+            '<div class="part-card">' +
+              '<div class="ph">🔧</div>' +
+              '<div>' +
+                '<div class="part-name">Poignée de gâchette — Dyson V8</div>' +
+                '<div class="part-meta">SV10 · fichier + impression</div>' +
+              '</div>' +
+              '<div class="part-price">14,90 €</div>' +
+            '</div>'
+        }
+      ]
+    },
+    // 3 — la piece n'existe pas -> refus honnete + Repair Together
+    {
+      chips: [
+        {
+          label: 'Et le clip du bac à poussière, vous l\'avez ?',
+          say: [
+            'Non, celui-là je ne l\'ai pas encore. Et je ne vais pas vous vendre une pièce approchante : ' +
+            'un clip qui ne clipse pas, c\'est un aspirateur toujours cassé et vous, mécontent.',
+            'Mais je ne vous laisse pas comme ça — on a fait un programme exactement pour ce cas. ' +
+            '<strong>Repair Together</strong> : vous nous envoyez le clip cassé, on le modélise à partir ' +
+            'de lui, et <strong>votre première pièce est offerte</strong>. Vous n\'attendez pas que ' +
+            'quelqu\'un d\'autre la demande — c\'est vous qui déclenchez.',
+            'Ça vous intéresse ?'
+          ],
+          html:
+            '<div class="part-card rt">' +
+              '<div class="ph">📦</div>' +
+              '<div>' +
+                '<div class="part-name">Repair Together</div>' +
+                '<div class="part-meta">Envoyez la pièce cassée · 1<sup>re</sup> pièce offerte</div>' +
+              '</div>' +
+              '<div class="part-price">Offert</div>' +
+            '</div>'
+        },
+        {
+          // Piece Shadow List (donc eligible au cadeau) MAIS grosse -> l'impression
+          // depasse 15 EUR. Le cadeau reste acquis, en reduction : devis - 15.
+          label: 'Et le bac à poussière entier ? Il est fendu.',
+          say: [
+            'Le bac entier, oui, je l\'ai en Repair Together — c\'est une pièce qui casse souvent, ' +
+            'elle profitera à d\'autres après vous.',
+            'Mais je joue franc-jeu : ce n\'est pas un petit clip, c\'est une grosse pièce. ' +
+            'L\'impression <strong>dépasse le cadeau de 15 €</strong>. Concrètement, vous ne payez ' +
+            'que le dépassement.',
+            'Je vous fais une <strong>estimation</strong> tout de suite, à partir du volume — le ' +
+            '<strong>cadeau de 15 € est déduit</strong>. Rien n\'est engagé tant que le montant ne ' +
+            'vous convient pas. On regarde ?'
+          ],
+          html:
+            '<div class="part-card rt">' +
+              '<div class="ph">📦</div>' +
+              '<div>' +
+                '<div class="part-name">Repair Together — grande pièce</div>' +
+                '<div class="part-meta">Éligible au cadeau · 15 € déduits du devis</div>' +
+              '</div>' +
+              '<div class="part-price">Devis −15 €</div>' +
+            '</div>',
+          goto: 11
+        },
+        {
+          // Hors Shadow List : volume trop faible pour que la modelisation soit
+          // amortie par d'autres clients -> ce n'est pas Repair Together, c'est un devis.
+          label: 'Et un bouton pour la machine à café du bar, une Faema ?',
+          say: [
+            'Alors là, c\'est un autre cas — et je préfère vous le dire tout de suite plutôt ' +
+            'que de vous faire espérer.',
+            'Ce bouton, on sait le faire. Mais il ne rentre pas dans Repair Together. ' +
+            'Ce programme existe pour les pièces qui vont <strong>resservir</strong> : un appareil vendu ' +
+            'par centaines de milliers, où votre pièce cassée débloque tous les autres propriétaires. ' +
+            'C\'est ça qui nous permet de vous l\'offrir — le travail est payé par ceux qui viennent après.',
+            'Votre Faema, c\'est du matériel de bar : quelques milliers de machines. Personne ne viendra ' +
+            'derrière amortir la modélisation. Si je vous l\'offrais, je vous mentirais sur notre modèle.',
+            'Ce que je peux faire, c\'est un <strong>devis de conception sur mesure</strong> : un ' +
+            'modélisateur dessine la pièce pour vous, spécifiquement. C\'est payant — et c\'est chiffré ' +
+            'avant que vous vous engagiez à quoi que ce soit. Je vous le lance ?'
+          ],
+          html:
+            '<div class="part-card dv">' +
+              '<div class="ph">📐</div>' +
+              '<div>' +
+                '<div class="part-name">Conception sur mesure</div>' +
+                '<div class="part-meta">Hors Shadow List · devis avant engagement</div>' +
+              '</div>' +
+              '<div class="part-price">Sur devis</div>' +
+            '</div>',
+          goto: 8
+        }
+      ]
+    },
+    // 4 — bifurcation : entrer dans le tunnel, ou refuser d'envoyer
+    {
+      chips: [
+        {
+          label: 'Oui, ça m\'intéresse',
+          say: [
+            'Très bien. Pour lancer le dossier il me faut une <strong>photo du clip cassé</strong> — ' +
+            'les deux morceaux côte à côte si vous les avez encore, ça m\'aide énormément.',
+            'La plaque, je l\'ai déjà de tout à l\'heure, ne la refaites pas.'
+          ]
+        },
+        {
+          label: 'Et si je ne veux rien envoyer ?',
+          say: [
+            'Alors je note simplement votre demande. Elle rejoint la <strong>Hot List</strong> : ' +
+            'si d\'autres personnes cherchent le même clip, un modélisateur s\'en occupe et je vous ' +
+            'préviens par mail le jour où la pièce existe.',
+            'C\'est gratuit, mais c\'est plus lent — ça dépend des autres. Repair Together, ' +
+            'ça ne dépend que de vous. Vous pourrez toujours changer d\'avis.'
+          ],
+          goto: 'end'
+        }
+      ]
+    },
+    // 5 — triage sur photo : les deux issues sont jouables
+    {
+      chips: [
+        {
+          label: '📷 Photo du clip — cassure nette',
+          photo: 'clipSimple',
+          say: [
+            'Parfait, cassure nette et les deux morceaux sont là.',
+            'Bonne nouvelle : c\'est une <strong>pièce simple</strong>. Géométrie régulière, ' +
+            'pas de portée fonctionnelle délicate — on la modélise directement à partir de vos morceaux, ' +
+            'sans avis d\'expert. Comptez trois à quatre semaines entre la réception et votre pièce imprimée.',
+            'Dernière chose : <strong>comment puis-je vous recontacter ?</strong>'
+          ],
+          html:
+            '<div class="part-card">' +
+              '<div class="ph">✅</div>' +
+              '<div>' +
+                '<div class="part-name">Pièce simple</div>' +
+                '<div class="part-meta">Modélisation directe · 3 à 4 semaines</div>' +
+              '</div>' +
+            '</div>',
+          goto: 6
+        },
+        {
+          label: '📷 Photo du clip — cassure en miettes',
+          photo: 'clipComplex',
+          say: [
+            'Hmm. Je vais être franc avec vous.',
+            'C\'est une <strong>pièce complexe</strong> : le clip a une lèvre de serrage, et là elle est ' +
+            'partie en plusieurs morceaux. La cote exacte de cette lèvre fait toute la différence — ' +
+            'à deux dixièmes près, ça ne clipse plus.',
+            'Je ne tranche pas tout seul là-dessus : je passe le dossier à un <strong>modélisateur ' +
+            'expert</strong>. Il regarde vos photos et vous dit si c\'est faisable, avant que vous ' +
+            'postiez quoi que ce soit. Comptez une semaine pour son avis.',
+            'Pour vous transmettre sa réponse : <strong>comment puis-je vous recontacter ?</strong>'
+          ],
+          html:
+            '<div class="part-card cx">' +
+              '<div class="ph">🔍</div>' +
+              '<div>' +
+                '<div class="part-name">Pièce complexe — avis d\'expert</div>' +
+                '<div class="part-meta">Un modélisateur se prononce · sous une semaine</div>' +
+              '</div>' +
+            '</div>',
+          goto: 7
+        }
+      ]
+    },
+    // 6 — reprise de contact, PIECE SIMPLE : on s'engage -> c'est ICI que les CGV arrivent
+    {
+      chips: [
+        {
+          label: 'Par mail — julien@exemple.fr',
+          say: [
+            'Noté.',
+            'Alors voilà : <strong>on s\'engage à la faire</strong>. Du coup, maintenant seulement, ' +
+            'je dois vous montrer les conditions du programme — c\'est court, et c\'est le seul moment ' +
+            'où je vous demande de lire quelque chose.',
+            'Vous les acceptez et l\'étiquette part dans la foulée.'
+          ],
+          html:
+            '<div class="part-card cg">' +
+              '<div class="ph">📄</div>' +
+              '<div>' +
+                '<div class="part-name">Conditions — Repair Together</div>' +
+                '<div class="part-meta">Version 1.0 · ~2 min de lecture</div>' +
+              '</div>' +
+            '</div>',
+          goto: 10
+        },
+        { label: 'Par SMS', decor: true }
+      ]
+    },
+    // 7 — reprise de contact, PIECE COMPLEXE : surtout ne rien poster avant l'avis
+    {
+      chips: [
+        {
+          label: 'Par mail — julien@exemple.fr',
+          say: [
+            'Noté. Dès que le modélisateur a tranché, sa réponse part sur cette adresse.',
+            'Et pour être clair : <strong>ne postez rien pour l\'instant</strong>. Si c\'est faisable, ' +
+            'l\'étiquette d\'envoi prépayée arrivera dans le même mail. Si ça ne l\'est pas, vous ' +
+            'gardez votre pièce et ça ne vous aura rien coûté.',
+            'À bientôt — et merci d\'avoir pris le temps des photos, c\'est ce qui permet à l\'expert ' +
+            'de se prononcer sans que vous ayez à envoyer quoi que ce soit.'
+          ],
+          goto: 'end'
+        },
+        { label: 'Par SMS', decor: true }
+      ]
+    },
+    // 8 — devis sur mesure : le client accepte, ou renonce sans frais
+    {
+      chips: [
+        {
+          label: 'Oui, faites-moi un devis',
+          say: [
+            'Très bien. Pour chiffrer, le modélisateur a besoin de voir la pièce cassée sous ' +
+            '<strong>plusieurs angles</strong>, la plaque de la machine, et — si vous avez un pied à ' +
+            'coulisse — deux ou trois cotes.',
+            'Si vous n\'en avez pas, ce n\'est pas grave : posez une pièce de 2 € à côté sur la photo, ' +
+            'ça nous donne l\'échelle.',
+            '<strong>Comment puis-je vous recontacter ?</strong>'
+          ]
+        },
+        {
+          label: 'Non, laissez tomber',
+          say: [
+            'Pas de souci, et merci d\'être passé. Si vous changez d\'avis, revenez me voir.',
+            'Et gardez la Faema en tête : le jour où ce modèle sera vraiment répandu chez les ' +
+            'particuliers, il basculera peut-être dans le programme offert. Ça arrive.'
+          ],
+          goto: 'end'
+        }
+      ]
+    },
+    // 9 — devis : reprise de contact. Le devis EST le moment d'engagement -> CGV avec lui.
+    {
+      chips: [
+        {
+          label: 'Par mail — julien@exemple.fr',
+          say: [
+            'Noté. Vous recevrez le devis sur cette adresse : le prix, le délai, et les conditions ' +
+            'du service.',
+            '<strong>Rien n\'est engagé tant que vous ne l\'avez pas accepté.</strong> Si le montant ne ' +
+            'vous va pas, vous dites non et on en reste là — le devis ne vous coûte rien.'
+          ],
+          goto: 'end'
+        },
+        { label: 'Par SMS', decor: true }
+      ]
+    },
+    // 10 — acceptation des conditions, APRES l'engagement de H4F
+    {
+      chips: [
+        {
+          label: '✓ J\'ai lu et j\'accepte',
+          say: [
+            'Parfait, c\'est enregistré.',
+            'L\'<strong>étiquette d\'envoi prépayée</strong> part sur votre mail, avec le suivi du ' +
+            'dossier. Vous n\'avez qu\'à coller et poster.',
+            'À bientôt — et merci : la pièce que vous débloquez servira à tous ceux qui casseront ' +
+            'la même après vous.'
+          ],
+          goto: 'end'
+        },
+        { label: 'Je veux d\'abord les relire tranquillement', decor: true }
+      ]
+    },
+    // 11 — grosse piece Repair Together : on demande la photo pour estimer le volume
+    {
+      chips: [
+        {
+          label: 'Oui, montrez-moi',
+          say: [
+            'Alors une <strong>photo du bac fendu</strong>, posé à plat avec un objet du quotidien à ' +
+            'côté pour l\'échelle — une pièce de 2 € ou une carte bancaire, ce que vous avez.',
+            'Je m\'en sers juste pour <strong>estimer le volume de plastique</strong> : ça me donne le ' +
+            'coût d\'impression, donc le montant. La pièce que vous recevrez, elle, sera modélisée sur ' +
+            'la vôtre — pas une pièce approchante.'
+          ]
+        },
+        { label: 'Combien à peu près, avant la photo ?', decor: true }
+      ]
+    },
+    // 12 — estimation chiffree : cadeau deduit, le client peut refuser
+    {
+      chips: [
+        {
+          label: '📷 Photo du bac fendu',
+          photo: 'binLarge',
+          say: [
+            'Merci. Je mesure sur l\'échelle…',
+            'Un bac de cette taille, c\'est autour de <strong>380 cm³</strong> de plastique et ~5 h ' +
+            'd\'impression. Estimation : <strong>~32 €</strong>.',
+            'On déduit le cadeau de 15 € → <strong>il vous resterait environ 17 €</strong>. ' +
+            'C\'est une estimation, pas un prix ferme : le devis exact vous sera confirmé, et vous ' +
+            'restez libre de dire non à ce moment-là. On part là-dessus ?'
+          ],
+          html:
+            '<div class="part-card rt">' +
+              '<div class="ph">🧾</div>' +
+              '<div>' +
+                '<div class="part-name">Estimation — bac à poussière</div>' +
+                '<div class="part-meta">~32 € d\'impression − 15 € offerts</div>' +
+              '</div>' +
+              '<div class="part-price">≈ 17 €</div>' +
+            '</div>'
+        }
+      ]
+    },
+    // 13 — reprise de contact, grosse piece : engagement -> devis ferme + CGV, puis paiement du complement
+    {
+      chips: [
+        {
+          label: 'Oui, ~17 € ça me va',
+          say: [
+            'Parfait. Vous recevrez le <strong>devis ferme</strong> sur votre mail — le montant exact, ' +
+            'le délai, et les conditions du programme.',
+            'Une fois que vous l\'acceptez : vous réglez le complément (le dépassement des 15 €), ' +
+            'l\'étiquette d\'envoi prépayée part dans la foulée, et vous postez le bac cassé.',
+            '<strong>Comment puis-je vous recontacter ?</strong>'
+          ]
+        },
+        {
+          label: 'Non, trop cher pour moi',
+          say: [
+            'Ça se comprend, aucun souci. Je garde votre demande dans la <strong>Hot List</strong> : ' +
+            'si le bac passe un jour en série ou si un modélisateur l\'optimise pour baisser le coût, ' +
+            'je reviens vers vous.',
+            'Et vous n\'avez rien payé — l\'estimation est gratuite.'
+          ],
+          goto: 'end'
+        }
+      ]
+    },
+    // 14 — grosse piece : contact note -> devis ferme + conditions a l'engagement
+    {
+      chips: [
+        {
+          label: 'Par mail — julien@exemple.fr',
+          say: [
+            'Noté. Le devis ferme et les conditions du programme partent sur cette adresse.',
+            '<strong>Rien n\'est engagé tant que vous ne l\'avez pas accepté.</strong> Vous lisez, ' +
+            'vous réglez le complément si le montant vous va, et seulement là l\'étiquette arrive.',
+            'À bientôt — et merci : ce bac, une fois modélisé, servira à tous ceux qui le casseront ' +
+            'après vous. C\'est ce qui nous permet de vous offrir les 15 premiers euros.'
+          ],
+          goto: 'end'
+        },
+        { label: 'Par SMS', decor: true }
+      ]
+    }
+  ];
+
+  // ---- Rendu ----
+  function bubble(who, html) {
+    var row = document.createElement('div');
+    row.className = 'msg ' + who;
+    var b = document.createElement('div');
+    b.className = 'bubble';
+    b.innerHTML = html;
+    row.appendChild(b);
+    log.appendChild(row);
+    log.scrollTop = log.scrollHeight;
+    return b;
+  }
+
+  function typing() {
+    var b = bubble('bot', '<span class="typing"><span></span><span></span><span></span></span>');
+    return b.parentNode;
+  }
+
+  function setChips(chips, done) {
+    chipsBox.innerHTML = '';
+    if (!chips) return;
+    chips.forEach(function (chip) {
+      var btn = document.createElement('button');
+      btn.className = 'chip' + (chip.decor ? ' decor' : '');
+      btn.textContent = chip.label;
+      btn.addEventListener('click', function () {
+        if (chip.decor) { nudgeOffScript(chip.label); return; }
+        done(chip);
+      });
+      chipsBox.appendChild(btn);
+    });
+  }
+
+  function nudgeOffScript(label) {
+    bubble('me', escapeHtml(label));
+    setTimeout(function () {
+      bubble('bot', 'Cette piste-là n\'est pas écrite dans la maquette — elle est là pour montrer ' +
+        'qu\'il y aurait d\'autres entrées possibles. Prenez une suggestion sans grisé pour continuer.');
+    }, 450);
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  // ---- Voix (navigateur, gratuite) ----
+  function frenchVoice() {
+    if (!('speechSynthesis' in window)) return null;
+    var vs = window.speechSynthesis.getVoices() || [];
+    return vs.filter(function (v) { return /^fr/i.test(v.lang); })[0] || null;
+  }
+
+  function speak(html, done) {
+    var text = html.replace(/<[^>]+>/g, '');
+    if (!voiceOn || !('speechSynthesis' in window)) { setTimeout(done, 180); return; }
+    try {
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = 'fr-FR'; u.rate = 1.02;
+      var v = frenchVoice(); if (v) u.voice = v;
+      orb.classList.add('speaking');
+      stateEl.textContent = 'Parle…';
+      var finished = false;
+      function end() {
+        if (finished) return; finished = true;
+        orb.classList.remove('speaking');
+        stateEl.textContent = 'En ligne';
+        done();
+      }
+      u.onend = end;
+      window.speechSynthesis.speak(u);
+      // Garde-fou : certaines voix ne declenchent jamais onend.
+      setTimeout(end, Math.max(2500, text.split(/\s+/).length * 420));
+    } catch (e) { done(); }
+  }
+
+  // Enchaine les repliques de H4F une par une (points de suspension puis bulle).
+  function botSequence(lines, html, done) {
+    var i = 0;
+    (function next() {
+      if (i >= lines.length) {
+        if (html) { bubble('bot', html); log.scrollTop = log.scrollHeight; }
+        stateEl.textContent = 'En ligne';
+        return done();
+      }
+      var line = lines[i++];
+      var t = typing();
+      stateEl.textContent = 'Réfléchit…';
+      setTimeout(function () {
+        t.remove();
+        bubble('bot', line);
+        speak(line, next);
+      }, 500 + Math.min(1100, line.length * 7));
+    })();
+  }
+
+  // ---- Deroulement ----
+  function endScenario() {
+    stateEl.textContent = 'Fin du scénario';
+    setChips(null);
+  }
+
+  function runStep() {
+    var s = SCRIPT[step];
+    if (!s) return endScenario();
+    setChips(s.chips, function (chip) {
+      setChips(null);
+      if (chip.photo) {
+        var shot = PHOTOS[chip.photo];
+        bubble('me', '<img class="thumb" src="data:image/svg+xml;utf8,' +
+          encodeURIComponent(shot.svg()) + '" alt="' + shot.alt + '">' + shot.alt);
+      } else {
+        bubble('me', escapeHtml(chip.label));
+      }
+      log.scrollTop = log.scrollHeight;
+      setTimeout(function () {
+        botSequence(chip.say || [], chip.html, function () {
+          var next = (chip.goto === undefined) ? step + 1 : chip.goto;
+          if (next === 'end' || next >= SCRIPT.length) return endScenario();
+          step = next;
+          runStep();
+        });
+      }, 500);
+    });
+  }
+
+  // ---- Faux cliches, dessines en SVG (aucun fichier image a fournir) ----
+  var PHOTOS = {
+    plate: {
+      alt: 'Photo de la plaque',
+      svg: function () {
+        return '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="180">' +
+          '<rect width="300" height="180" fill="#3a3a3c"/>' +
+          '<rect x="18" y="18" width="264" height="144" rx="6" fill="#d9d5cd" stroke="#9a948a"/>' +
+          '<text x="34" y="52" font-family="monospace" font-size="17" fill="#222">dyson</text>' +
+          '<text x="34" y="82" font-family="monospace" font-size="14" fill="#333">MODEL  SV10</text>' +
+          '<text x="34" y="104" font-family="monospace" font-size="14" fill="#333">P/N    245536-01</text>' +
+          '<text x="34" y="126" font-family="monospace" font-size="12" fill="#555">21.6V  DC  2017</text>' +
+          '<rect x="200" y="70" width="60" height="60" fill="#222"/>' +
+          '<rect x="206" y="76" width="48" height="48" fill="#d9d5cd"/>' +
+          '<rect x="214" y="84" width="32" height="32" fill="#222"/>' +
+          '</svg>';
+      }
+    },
+    // Cassure nette : deux morceaux francs, poses cote a cote.
+    clipSimple: {
+      alt: 'Photo du clip cassé',
+      svg: function () {
+        return '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="180">' +
+          '<rect width="300" height="180" fill="#e8e4dc"/>' +
+          '<g fill="#4a4a4f">' +
+            '<path d="M40 70 h85 l6 20 -6 20 h-85 z"/>' +
+            '<path d="M150 70 h95 l0 40 -95 0 -6 -20 z"/>' +
+          '</g>' +
+          '<path d="M131 70 l6 20 -6 20" fill="none" stroke="#c0392b" stroke-width="3"/>' +
+          '<path d="M144 70 l6 20 -6 20" fill="none" stroke="#c0392b" stroke-width="3"/>' +
+          '<text x="40" y="150" font-family="sans-serif" font-size="13" fill="#6b6259">' +
+            'cassure nette — 2 morceaux</text>' +
+          '</svg>';
+      }
+    },
+    // Cassure complexe : la levre de serrage est partie en eclats.
+    clipComplex: {
+      alt: 'Photo du clip cassé',
+      svg: function () {
+        return '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="180">' +
+          '<rect width="300" height="180" fill="#e8e4dc"/>' +
+          '<g fill="#4a4a4f">' +
+            '<path d="M40 70 h70 l-4 18 8 22 h-74 z"/>' +
+            '<path d="M170 74 h75 l0 36 -70 0 -9 -14 4 -10 z"/>' +
+            '<path d="M124 66 l14 6 -5 11 -13 -4 z"/>' +
+            '<path d="M140 96 l13 3 -3 12 -12 -5 z"/>' +
+            '<path d="M120 108 l10 2 -2 9 -9 -3 z"/>' +
+            '<path d="M156 62 l9 5 -4 8 -8 -4 z"/>' +
+          '</g>' +
+          '<text x="40" y="150" font-family="sans-serif" font-size="13" fill="#6b6259">' +
+            'lèvre de serrage en éclats</text>' +
+          '</svg>';
+      }
+    },
+    // Grosse piece (bac fendu) avec une piece de 2 EUR pour l'echelle -> estimation volume.
+    binLarge: {
+      alt: 'Photo du bac fendu',
+      svg: function () {
+        return '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="180">' +
+          '<rect width="300" height="180" fill="#e8e4dc"/>' +
+          '<path d="M60 55 h150 l-14 90 h-122 z" fill="#5a5a5f"/>' +
+          '<path d="M74 55 l6 90" stroke="#2a2a2d" stroke-width="2" fill="none"/>' +
+          '<path d="M135 55 l-3 90" stroke="#c0392b" stroke-width="3" fill="none"/>' +
+          '<circle cx="245" cy="130" r="14" fill="#caa63e" stroke="#8a7020" stroke-width="2"/>' +
+          '<text x="231" y="162" font-family="sans-serif" font-size="10" fill="#6b6259">2 €</text>' +
+          '<text x="60" y="170" font-family="sans-serif" font-size="12" fill="#6b6259">' +
+            'bac fendu — pièce de 2 € pour l\'échelle</text>' +
+          '</svg>';
+      }
+    }
+  };
+
+  // ---- Commandes ----
+  voiceBtn.addEventListener('click', function () {
+    voiceOn = !voiceOn;
+    voiceBtn.classList.toggle('on', voiceOn);
+    voiceBtn.textContent = voiceOn ? '🔊 Voix active' : '🔇 Voix coupée';
+    if (!voiceOn && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+    // Certains navigateurs ne chargent les voix qu'apres une interaction.
+    if (voiceOn && 'speechSynthesis' in window) window.speechSynthesis.getVoices();
+  });
+
+  // Micro : la reconnaissance vocale du navigateur est reelle, elle remplit le champ.
+  micBtn.addEventListener('click', function () {
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      bubble('bot', 'Ce navigateur ne sait pas écouter le micro. Chrome et Edge le font ; ' +
+        'Firefox non. Tapez plutôt votre phrase.');
+      return;
+    }
+    var r = new SR();
+    r.lang = 'fr-FR'; r.interimResults = false;
+    micBtn.classList.add('rec');
+    stateEl.textContent = 'Écoute…';
+    r.onresult = function (e) { input.value = e.results[0][0].transcript; };
+    r.onerror = function () { bubble('bot', 'Je n\'ai rien entendu — le micro est peut-être bloqué.'); };
+    r.onend = function () { micBtn.classList.remove('rec'); stateEl.textContent = 'En ligne'; };
+    r.start();
+  });
+
+  camBtn.addEventListener('click', function () {
+    bubble('bot', 'Dans la maquette, la photo passe par la suggestion « 📷 Envoyer la photo de la plaque ». ' +
+      'En vrai, ce bouton ouvrirait l\'appareil photo du téléphone.');
+  });
+
+  input.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' || !input.value.trim()) return;
+    var v = input.value.trim();
+    input.value = '';
+    bubble('me', escapeHtml(v));
+    setTimeout(function () {
+      bubble('bot', 'La maquette ne comprend rien — elle rejoue un scénario écrit d\'avance. ' +
+        'Utilisez les suggestions au-dessus du champ pour le dérouler.');
+    }, 450);
+  });
+
+  replay.addEventListener('click', function () {
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    log.innerHTML = ''; step = 0; stateEl.textContent = 'En ligne';
+    runStep();
+  });
+
+  runStep();
+})();
+</script>
+</body>
+</html>
