@@ -32,8 +32,16 @@ database_id = "c3c71c6a-fdb8-4505-8d7c-1298ae5a6482"
 binding = "PIECES_R2"
 bucket_name = "h4f-pieces"
 
-# Photos de réservation (plaque + objet), écrites par h4f-api. L'admin y accède en
-# LECTURE pour les afficher dans l'écran Réservations. Même bucket que h4f-api.
+# Photos de réservation (plaque + appareil + pièce), écrites par h4f-partner. L'admin y
+# accède en LECTURE pour les afficher dans l'écran Réservations. Même bucket.
 [[r2_buckets]]
 binding = "RESERV_R2"
 bucket_name = "h4f-reservations"
+
+# Fichiers déposés : source natif + STEP. Deux écrivains — h4f-partner (tunnel
+# modélisateur) et cet admin (dépôt interne, /admin/depot) — dans le même bucket, parce
+# que l'aval est commun. L'écran « Modèles 3D » les relit pour l'examen, et la
+# préparation du 3MF ira y lire le STEP.
+[[r2_buckets]]
+binding = "SUBMIT_R2"
+bucket_name = "h4f-submissions"

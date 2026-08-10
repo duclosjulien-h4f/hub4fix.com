@@ -24,25 +24,37 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_partners_user_type ON partners(user_id, ty
 CREATE INDEX IF NOT EXISTS idx_partners_status ON partners(status, type);
 
 -- Réservations de pièces par les modélisateurs (Hot List). DÉMÉNAGÉES ici depuis
--- h4f_site : une seule réservation active|suspended par piece_id (option EXCLUSIVE),
--- RENOUVELABLE (expires_at repoussé). Photos plaque+objet en R2 ; ai_check = verdict
--- de la validation IA (Gemma vision) ; l'admin peut suspendre/annuler.
+-- h4f_site : une seule réservation bloquante par piece_id (option EXCLUSIVE).
+-- Photos plaque+appareil+pièce en R2 ; ai_check = verdict de la validation IA
+-- (Gemma vision) ; l'admin valide, suspend ou annule.
 -- user_id = compte D1 lié du modélisateur (via le pont).
+--
+-- `expires_at` est la SEULE échéance qui bloque la pièce, et elle change de sens
+-- selon l'étape (voir partner.js, section « horloges ») : 2 h pour envoyer les
+-- photos, 7 j pour notre feu vert, 72 h pour déposer le fichier, 60 j pour
+-- l'examen. Une seule colonne, donc aucun risque de deux vérités qui divergent.
 CREATE TABLE IF NOT EXISTS reservations (
-  id         INTEGER PRIMARY KEY AUTOINCREMENT,
-  piece_id   TEXT NOT NULL,
-  user_id    TEXT NOT NULL,                     -- compte D1 lié du modélisateur
-  status     TEXT NOT NULL DEFAULT 'active',    -- active | suspended | cancelled | expired | done
-  plate_key  TEXT,
-  object_key TEXT,
-  ai_check   TEXT,
-  created_at TEXT,
-  expires_at TEXT,
-  renewed_at TEXT,
-  decided_by TEXT
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  piece_id     TEXT NOT NULL,
+  user_id      TEXT NOT NULL,                     -- compte D1 lié du modélisateur
+  status       TEXT NOT NULL DEFAULT 'active',    -- pending-review | active | submitted | suspended | cancelled | expired | done
+  plate_key    TEXT,
+  object_key   TEXT,
+  part_key     TEXT,                              -- 3e photo : la pièce seule (facultative)
+  ai_check     TEXT,
+  created_at   TEXT,
+  expires_at   TEXT,
+  renewed_at   TEXT,
+  validated_at TEXT,                              -- feu vert admin : ancre les 72 h
+  extended_at  TEXT,                              -- prolongation unique déjà consommée
+  decided_by   TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_reservations_piece ON reservations(piece_id, status);
 CREATE INDEX IF NOT EXISTS idx_reservations_user ON reservations(user_id, status);
+
+-- La table `submissions` (fichiers déposés + acte de cession horodaté) vit dans
+-- `tunnel-schema.sql`, à appliquer ensuite. Elle n'est pas dupliquée ici : un
+-- schéma en deux copies finit toujours par diverger.
 
 -- Profil "parc machines" d'un printer (P1). Un seul profil par compte (user_id = compte
 -- D1 lié via le pont). Rempli à la candidature printer, modifiable ensuite. Sert au

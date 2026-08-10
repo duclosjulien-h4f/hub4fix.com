@@ -127,7 +127,9 @@ async function loadInscriptions(env) {
     const j = await r.json();
     const v = j.values || [];
     const header = v[0] || [];
-    const rows = v.slice(1).map((a) => { const o = {}; header.forEach((h, i) => (o[h] = a[i] || '')); return o; });
+    const rows = v.slice(1)
+      .map((a) => { const o = {}; header.forEach((h, i) => (o[h] = a[i] || '')); return o; })
+      .filter((o) => !o['supprime_le']); // masque les inscriptions supprimées (soft-delete)
     rows.reverse(); // plus récentes en premier
     return { rows };
   } catch { return { error: 'exception' }; }
@@ -654,6 +656,7 @@ const NAV = [
   { path: '/admin/shadowlist', label: 'Shadow List', roles: ['admin', 'sous-admin'] },
   { path: '/admin/modelisateurs', label: 'Candidatures partenaire', roles: ['admin', 'sous-admin'] },
   { path: '/admin/reservations', label: 'Réservations', roles: ['admin', 'sous-admin'] },
+  { path: '/admin/depot', label: 'Dépôt interne', roles: ['admin', 'sous-admin'] },
   { path: '/admin/modeles', label: 'Modèles 3D', roles: ['admin', 'sous-admin'] },
   { path: '/admin/admins', label: 'Administrateurs', roles: ['admin'] },
   { path: '/admin/appareils', label: 'Appareils', roles: ['admin'] },
@@ -783,16 +786,18 @@ function viewDashboard(sess, data, seen, toValidate) {
       : '<div class="soon">Aucune nouvelle inscription depuis ta dernière visite.</div>');
 }
 
-function viewInscriptions(data) {
+function viewInscriptions(data, flash) {
+  const banner = flash ? '<div class="banner">' + esc(flash) + '</div>' : '';
   if (data.error) {
-    return '<h1 class="page">Inscriptions</h1><p class="sub">Printers, modélisateurs et clients.</p>' + dataError(data.error);
+    return '<h1 class="page">Inscriptions</h1><p class="sub">Printers, modélisateurs et clients.</p>' + banner + dataError(data.error);
   }
   const rows = data.rows;
   if (!rows.length) {
-    return '<h1 class="page">Inscriptions</h1><p class="sub">Printers, modélisateurs et clients.</p><div class="soon">Aucune inscription pour le moment.</div>';
+    return '<h1 class="page">Inscriptions</h1><p class="sub">Printers, modélisateurs et clients.</p>' + banner + '<div class="soon">Aucune inscription pour le moment.</div>';
   }
   const seen = data.seen;
-  const head = '<tr><th>Date</th><th>Type</th><th>Nom</th><th>Email</th><th>Ville</th><th>Téléphone</th><th>Détail</th></tr>';
+  const delBtn = 'font-family:inherit;font-size:.72rem;font-weight:600;border:1px solid #f3c2c2;background:#fff;color:var(--red);border-radius:6px;padding:.3rem .6rem;cursor:pointer';
+  const head = '<tr><th>Date</th><th>Type</th><th>Nom</th><th>Email</th><th>Ville</th><th>Téléphone</th><th>Détail</th><th></th></tr>';
   const body = rows.map((r) => {
     const isNew = seen && (r.date || '') > seen;
     const type = (r.type || '').toLowerCase();
@@ -800,6 +805,11 @@ function viewInscriptions(data) {
     const detail = type === 'printer' ? (r.parc_machines || r.materiaux || '')
       : type === 'modelisateur' ? (r.logiciels || r.portfolio || '')
       : (r.message || '');
+    // Suppression (soft-delete par type+email) : form POST + confirmation, ligne archivée dans le Sheet.
+    const del = '<form method="post" action="/admin/inscriptions/supprimer" style="margin:0" onsubmit="return confirm(\'Supprimer cette inscription de la liste ? Elle est archivée (colonne supprime_le), pas effacée du Sheet.\')">' +
+      '<input type="hidden" name="type" value="' + esc(r.type || '') + '">' +
+      '<input type="hidden" name="email" value="' + esc(r.email || '') + '">' +
+      '<button type="submit" style="' + delBtn + '">Supprimer</button></form>';
     return '<tr' + (isNew ? ' class="is-new"' : '') + '>' +
       '<td>' + fmtDate(r.date) + (isNew ? ' <span class="tag" style="background:var(--green);color:#fff">nouveau</span>' : '') + '</td>' +
       '<td><span class="tag ' + esc(type) + '">' + esc(r.type || '?') + '</span></td>' +
@@ -808,10 +818,11 @@ function viewInscriptions(data) {
       '<td>' + esc(r.ville) + '</td>' +
       '<td>' + esc(r.tel) + '</td>' +
       '<td class="muted">' + esc(String(detail).slice(0, 80)) + '</td>' +
+      '<td>' + (r.email ? del : '') + '</td>' +
       '</tr>';
   }).join('');
   return '<h1 class="page">Inscriptions</h1><p class="sub">' + rows.length + ' inscription' + (rows.length > 1 ? 's' : '') + ' — les plus récentes en premier.</p>' +
-    '<table>' + head + body + '</table>';
+    banner + '<table>' + head + body + '</table>';
 }
 
 function dataError(kind) {
@@ -824,19 +835,491 @@ function dataError(kind) {
 function viewSoon(title, sub, text) {
   return '<h1 class="page">' + esc(title) + '</h1><p class="sub">' + esc(sub) + '</p><div class="soon">' + text + '</div>';
 }
-function viewModeles() {
-  // Compteurs en attente de la pipeline de soumission/validation des fichiers.
-  return '<h1 class="page">Modèles 3D</h1>' +
-    '<p class="sub">Fichiers soumis par les modélisateurs et file de validation.</p>' +
-    '<div class="cards">' +
-      '<div class="card"><div class="k">Fichiers 3D</div><div class="v">—</div></div>' +
-      '<div class="card new"><div class="k">En attente de validation</div><div class="v">—</div></div>' +
-      '<div class="card"><div class="k">Validés</div><div class="v">—</div></div>' +
-      '<div class="card"><div class="k">Refusés</div><div class="v">—</div></div>' +
-    '</div>' +
-    '<h2 style="font-family:\'Cormorant Garamond\',serif;font-weight:500;font-size:1.2rem;margin:.4rem 0 .8rem">À valider</h2>' +
-    '<div class="soon">Chaque fichier en attente apparaîtra ici avec un bouton <b>« Examiner »</b> (aperçu du modèle, fiche du modélisateur, accepter / refuser).<br><br>' +
-    '<b>Prérequis :</b> la <b>pipeline de soumission</b> (le modélisateur dépose un 3MF/STEP → stockage → file de relecture → publication au catalogue). C\'est un sous-système à construire, lié au Cloud Slicer.</div>';
+// ==================== Modèles 3D : examen des fichiers déposés ====================
+// Les soumissions vivent dans h4f_partner (écrites par h4f-partner) ; les fichiers
+// dans le bucket h4f-submissions, lu ici par binding.
+
+async function loadSubmissions(env) {
+  if (!env.DB_PARTNER) return { error: 'no_binding' };
+  try {
+    const r = await env.DB_PARTNER.prepare(
+      'SELECT s.*, p.email FROM submissions s ' +
+      "LEFT JOIN partners p ON p.user_id = s.user_id AND p.type = 'modelisateur' " +
+      "ORDER BY CASE s.status WHEN 'review' THEN 0 WHEN 'accepted' THEN 1 WHEN 'prepared' THEN 2 " +
+      "WHEN 'published' THEN 3 ELSE 4 END, s.created_at DESC LIMIT 200"
+    ).all();
+    return { rows: (r && r.results) || [] };
+  } catch (e) { return { error: String(e && e.message || e) }; }
+}
+
+// Trois verbes distincts, trois intentions distinctes :
+//   accept   -> le fichier est bon, il part en préparation (conversion 3MF).
+//   correct  -> il est corrigeable : on REND 72 h au modélisateur, avec la consigne.
+//               Il pourra déposer une version 2. La cession de la version refusée est
+//               résolue (CGV art. 2.5), celle de la v2 sera un acte neuf.
+//   discard  -> non corrigeable : la pièce retourne au pot commun.
+// Confondre « corrige-moi ça » et « on arrête » dans un seul bouton « refuser »
+// forcerait à deviner l'intention à la lecture du motif.
+async function decideSubmission(env, subId, action, note, adminEmail) {
+  if (!env.DB_PARTNER) return { ok: false, msg: 'Base partenaire non liée.' };
+  const sub = await env.DB_PARTNER.prepare('SELECT id, reservation_id, piece_id, status FROM submissions WHERE id = ?')
+    .bind(subId).first();
+  if (!sub) return { ok: false, msg: 'Soumission introuvable.' };
+  if (sub.status !== 'review') return { ok: false, msg: 'Ce dossier a déjà été tranché (' + sub.status + ').' };
+  const ts = nowIso();
+  const trimmed = String(note || '').trim().slice(0, 1000);
+
+  if (action === 'accept') {
+    await env.DB_PARTNER.prepare(
+      "UPDATE submissions SET status = 'accepted', review_note = ?, decided_at = ?, decided_by = ? WHERE id = ?"
+    ).bind(trimmed, ts, adminEmail || '', subId).run();
+    await audit(env, adminEmail, 'submission_acceptee', sub.piece_id + ' — ' + subId);
+    return { ok: true, msg: 'Fichier accepté. Reste la préparation du 3MF.' };
+  }
+
+  if (action === 'correct') {
+    if (trimmed.length < 10) return { ok: false, msg: 'Écris la consigne de correction : sans elle, le modélisateur ne sait pas quoi reprendre.' };
+    await env.DB_PARTNER.prepare(
+      "UPDATE submissions SET status = 'rejected', review_note = ?, decided_at = ?, decided_by = ? WHERE id = ?"
+    ).bind(trimmed, ts, adminEmail || '', subId).run();
+    // Nouvelle fenêtre de 72 h, ancrée sur maintenant. La prolongation déjà consommée
+    // reste consommée : la correction n'est pas une occasion de la récupérer.
+    await env.DB_PARTNER.prepare(
+      "UPDATE reservations SET status = 'active', validated_at = ?, expires_at = ? WHERE id = ?"
+    ).bind(ts, new Date(Date.now() + WORK_WINDOW_MS).toISOString(), sub.reservation_id).run();
+    await audit(env, adminEmail, 'submission_correction', sub.piece_id + ' — ' + subId + ' — ' + trimmed.slice(0, 120));
+    return { ok: true, msg: 'Correction demandée : 72 h de plus pour déposer une version 2.' };
+  }
+
+  if (action === 'discard') {
+    await env.DB_PARTNER.prepare(
+      "UPDATE submissions SET status = 'rejected', review_note = ?, decided_at = ?, decided_by = ? WHERE id = ?"
+    ).bind(trimmed, ts, adminEmail || '', subId).run();
+    // La pièce est libérée immédiatement : expires_at dans le passé suffit, toutes les
+    // lectures filtrent dessus (expiration paresseuse, cf. partner.js).
+    await env.DB_PARTNER.prepare(
+      "UPDATE reservations SET status = 'cancelled', expires_at = ? WHERE id = ?"
+    ).bind(ts, sub.reservation_id).run();
+    await audit(env, adminEmail, 'submission_ecartee', sub.piece_id + ' — ' + subId + ' — ' + trimmed.slice(0, 120));
+    return { ok: true, msg: 'Fichier écarté, pièce rendue à la Hot List.' };
+  }
+  return { ok: false, msg: 'Action inconnue.' };
+}
+
+// ==================== Dépôt interne (/admin/depot) ====================
+// Accès direct : une page, un formulaire, pas besoin de retrouver la pièce dans la
+// Shadow List. Écrit dans la MÊME table `submissions` que le tunnel modélisateur —
+// deux portes, une seule chaîne en aval (examen, conversion, publication).
+
+const DEPOT_MESH_EXTS = ['.3mf', '.stl'];
+const DEPOT_STEP_EXTS = ['.step', '.stp'];
+const DEPOT_MAX_BYTES = 25 * 1024 * 1024;
+const DEPOT_CESSION_VERSION = 'cgv-modelisateurs-2026-08';
+
+function depotExt(name) { const m = String(name || '').toLowerCase().match(/\.[a-z0-9]+$/); return m ? m[0] : ''; }
+async function depotSha256(buf) {
+  const d = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(d)).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Deux fichiers portent le nom « 3MF » et n'ont PAS le même aval (vocabulaire du
+// 09/08/2026) :
+//   3MF SOURCE — géométrie seule. Il lui manque encore un profil machine pour devenir
+//                slicable : la préparation n'est pas terminée.
+//   3MF MASTER — porte déjà les réglages de slicing. Slicable en l'état.
+// Confondre les deux ferait injecter un profil dans un fichier qui en a déjà un, ou
+// envoyer au slicer un fichier qui n'en a aucun. On ne demande donc pas à l'admin de
+// nous le dire : on le lit dans le fichier.
+//
+// Un 3MF est un zip, et les NOMS d'entrées y sont stockés en clair (jamais compressés).
+// Chercher le chemin du fichier de réglages suffit — inutile de dérouler le zip. C'est
+// le même test que `detect_dialect()` du PoC, qui compare les noms d'entrées.
+const MF_CONFIG_ENTRIES = ['Metadata/project_settings.config', 'Metadata/Slic3r_PE.config'];
+function bytesContain(hay, needle) {
+  const n = needle.length;
+  outer: for (let i = 0; i + n <= hay.length; i++) {
+    for (let j = 0; j < n; j++) if (hay[i + j] !== needle[j]) continue outer;
+    return true;
+  }
+  return false;
+}
+function detect3mfKind(buf) {
+  const bytes = new Uint8Array(buf);
+  // Signature zip « PK\x03\x04 ». Absente = ce n'est pas un 3MF exploitable, et on ne
+  // prétend pas savoir ce que c'est.
+  if (bytes.length < 4 || bytes[0] !== 0x50 || bytes[1] !== 0x4b || bytes[2] !== 0x03 || bytes[3] !== 0x04) {
+    return 'indetermine';
+  }
+  const enc = new TextEncoder();
+  for (const entry of MF_CONFIG_ENTRIES) {
+    if (bytesContain(bytes, enc.encode(entry))) return '3mf-master';
+  }
+  return '3mf-source';
+}
+
+// POST /admin/depot — dépôt interne. Renvoie { ok, msg } ; le routeur redirige avec le
+// message. Toute sortie en erreur laisse la base ET le stockage inchangés.
+async function handleDepot(env, form, adminEmail) {
+  if (!env.DB_PARTNER) return { ok: false, msg: 'Base partenaire non liée (DB_PARTNER).' };
+  if (!env.SUBMIT_R2) return { ok: false, msg: 'Stockage non lié (SUBMIT_R2).' };
+
+  const pieceId = String(form.get('piece_id') || '').trim();
+  if (!pieceId) return { ok: false, msg: 'Choisis une pièce.' };
+  const mode = form.get('mode') === 'maillage' ? 'maillage' : 'cao';
+  const origines = ['interne', 'hors-tunnel', 'repair-together'];
+  const origine = origines.includes(String(form.get('origine'))) ? String(form.get('origine')) : 'interne';
+
+  // Auteur tiers : l'acte de cession existe hors plateforme, on garde de quoi le
+  // retrouver. Sans date ni référence, il ne vaut rien le jour où il est contesté
+  // (cession horodatée fichier par fichier, art. L.131-1 CPI / CGV art. 2.1).
+  const authorName = String(form.get('author_name') || '').trim().slice(0, 200);
+  const cessionRef = String(form.get('cession_ref') || '').trim().slice(0, 400);
+  let cessionAt = String(form.get('cession_at') || '').trim();
+  if (origine === 'hors-tunnel') {
+    if (!authorName) return { ok: false, msg: 'Nomme l\'auteur du fichier : sans lui, la cession ne se rattache à personne.' };
+    if (!cessionAt) return { ok: false, msg: 'Donne la date de l\'acte de cession signé par l\'auteur.' };
+    if (!cessionRef) return { ok: false, msg: 'Indique où retrouver l\'acte (référence du mail, nom du PDF signé…).' };
+    // <input type="date"> renvoie AAAA-MM-JJ : on le normalise en horodatage.
+    const parsed = Date.parse(/^\d{4}-\d{2}-\d{2}$/.test(cessionAt) ? cessionAt + 'T12:00:00Z' : cessionAt);
+    if (isNaN(parsed)) return { ok: false, msg: 'Date de cession illisible.' };
+    if (parsed > Date.now() + 86400000) return { ok: false, msg: 'La date de cession est dans le futur.' };
+    cessionAt = new Date(parsed).toISOString();
+  } else {
+    // Interne ou Repair Together : H4F détient déjà les droits, l'acte est ce dépôt.
+    cessionAt = nowIso();
+  }
+
+  // Fichiers. En mode CAO, deux ; en mode maillage, un seul (le stock existant). Le
+  // fichier principal arrive par le même champ dans les deux cas : c'est le mode qui dit
+  // comment le lire, pas deux champs à choisir.
+  const main = form.get('fichier');
+  if (!main || typeof main.arrayBuffer !== 'function' || !main.name) {
+    return { ok: false, msg: mode === 'maillage' ? 'Choisis le fichier maillage.' : 'Choisis le fichier source (CAO).' };
+  }
+  const mainExt = depotExt(main.name);
+  if (!main.size) return { ok: false, msg: 'Le fichier ' + main.name + ' est vide.' };
+  if (main.size > DEPOT_MAX_BYTES) {
+    return { ok: false, msg: main.name + ' pèse ' + Math.round(main.size / 1048576) + ' Mo : maximum ' + Math.round(DEPOT_MAX_BYTES / 1048576) + ' Mo.' };
+  }
+  let step = null;
+  if (mode === 'maillage') {
+    if (!DEPOT_MESH_EXTS.includes(mainExt)) {
+      return { ok: false, msg: 'En mode maillage, le fichier doit être un ' + DEPOT_MESH_EXTS.join(' ou un ') + ' (reçu : ' + (mainExt || 'sans extension') + ').' };
+    }
+  } else {
+    if (DEPOT_MESH_EXTS.includes(mainExt)) {
+      return { ok: false, msg: 'Un ' + mainExt + ' est un maillage : bascule sur « maillage déjà prêt », ou dépose le fichier CAO et son STEP.' };
+    }
+    if (!mainExt) return { ok: false, msg: 'Le fichier source doit porter son extension d\'origine.' };
+    step = form.get('step');
+    if (!step || typeof step.arrayBuffer !== 'function' || !step.name) {
+      return { ok: false, msg: 'Le STEP est obligatoire en mode CAO : c\'est lui que la conversion haute résolution consomme.' };
+    }
+    if (!DEPOT_STEP_EXTS.includes(depotExt(step.name))) {
+      return { ok: false, msg: 'Le second fichier doit être un STEP (' + DEPOT_STEP_EXTS.join(' ou ') + ').' };
+    }
+    if (!step.size) return { ok: false, msg: 'Le STEP est vide.' };
+    if (step.size > DEPOT_MAX_BYTES) return { ok: false, msg: 'Le STEP pèse trop lourd (max ' + Math.round(DEPOT_MAX_BYTES / 1048576) + ' Mo).' };
+  }
+
+  // Version comptée par PIÈCE : le canal interne et le tunnel partagent la numérotation.
+  const last = await env.DB_PARTNER.prepare('SELECT COALESCE(MAX(version), 0) AS v FROM submissions WHERE piece_id = ?')
+    .bind(pieceId).first();
+  const version = ((last && last.v) || 0) + 1;
+
+  const id = crypto.randomUUID();
+  // « natif » et non « source » : « source » est réservé au 3MF SOURCE que la conversion
+  // produira (`submissions/<id>/source.3mf`). Deux choses différentes ne peuvent pas
+  // porter le même nom dans le même dossier.
+  const mainKey = 'submissions/' + id + '/natif' + mainExt;
+  const stepKey = step ? 'submissions/' + id + '/model' + depotExt(step.name) : null;
+  const mainBuf = await main.arrayBuffer();
+  const stepBuf = step ? await step.arrayBuffer() : null;
+
+  // Quel « 3MF » avons-nous reçu ? La réponse change ce qu'il reste à faire.
+  const meshKind = mode !== 'maillage' ? null
+    : mainExt === '.stl' ? 'stl'
+    : detect3mfKind(mainBuf);
+
+  await env.SUBMIT_R2.put(mainKey, mainBuf, {
+    httpMetadata: { contentType: 'application/octet-stream' },
+    customMetadata: { filename: main.name, piece: pieceId, origine },
+  });
+  if (stepKey) {
+    await env.SUBMIT_R2.put(stepKey, stepBuf, {
+      httpMetadata: { contentType: 'application/step' },
+      customMetadata: { filename: step.name, piece: pieceId, origine },
+    });
+  }
+
+  // Un dépôt interne n'a personne à examiner : c'est l'admin qui l'a fait, il ne va pas
+  // relire son propre fichier. Il part donc directement en « accepté, à préparer ». Un
+  // fichier reçu d'un tiers, lui, passe par l'examen comme une soumission du tunnel.
+  const status = origine === 'hors-tunnel' ? 'review' : 'accepted';
+  const ts = nowIso();
+  try {
+    await env.DB_PARTNER.prepare(
+      'INSERT INTO submissions (id, reservation_id, piece_id, user_id, origine, version, ' +
+      'native_key, native_name, native_ext, native_sha256, native_bytes, ' +
+      'step_key, step_name, step_sha256, step_bytes, mesh_only, mesh_kind, status, ' +
+      'cession_at, cession_version, author_name, cession_ref, deposited_by, decided_at, decided_by, created_at) ' +
+      'VALUES (?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    ).bind(
+      id, pieceId, 'admin:' + (adminEmail || 'inconnu'), origine, version,
+      mainKey, main.name.slice(0, 200), mainExt, await depotSha256(mainBuf), mainBuf.byteLength,
+      stepKey, step ? step.name.slice(0, 200) : null, stepBuf ? await depotSha256(stepBuf) : null,
+      stepBuf ? stepBuf.byteLength : 0,
+      mode === 'maillage' ? 1 : 0, meshKind, status,
+      cessionAt, DEPOT_CESSION_VERSION, authorName || null, cessionRef || null, adminEmail || '',
+      status === 'accepted' ? ts : null, status === 'accepted' ? (adminEmail || '') : null, ts
+    ).run();
+  } catch (e) {
+    await env.SUBMIT_R2.delete(mainKey).catch(() => {});
+    if (stepKey) await env.SUBMIT_R2.delete(stepKey).catch(() => {});
+    const msg = String(e && e.message || e);
+    if (/UNIQUE/i.test(msg)) return { ok: false, msg: 'Un dépôt vient d\'être enregistré pour cette pièce — recharge la liste avant de recommencer.' };
+    return { ok: false, msg: 'Enregistrement impossible : ' + msg.slice(0, 200) };
+  }
+
+  await audit(env, adminEmail, 'depot_interne', pieceId + ' — v' + version + ' — ' + origine + (meshKind ? ' — ' + meshKind : ''));
+  // Le message dit ce qu'il RESTE à faire, et ça dépend de ce qu'on a reçu : un 3MF
+  // master est slicable en l'état, un 3MF source attend encore un profil machine.
+  const suite = status === 'review' ? ' Il attend ton examen.'
+    : meshKind === '3mf-master' ? ' 3MF master reconnu : slicable en l\'état, il ne lui manque rien.'
+    : meshKind === '3mf-source' ? ' 3MF source (sans réglages) : il lui faut encore un profil machine.'
+    : meshKind === 'stl' ? ' STL : ni unité déclarée ni réglages — à convertir avant slicing.'
+    : meshKind === 'indetermine' ? ' ⚠ Fichier illisible comme zip : type indéterminé, à vérifier à la main.'
+    : ' Il est prêt à préparer.';
+  return {
+    ok: true,
+    msg: 'Fichier déposé pour ' + pieceId + ' (version ' + version + ').' + suite +
+      (mode === 'maillage' ? ' Résolution non maîtrisée.' : ''),
+  };
+}
+
+function viewDepot(pieces, flash, err) {
+  const head = '<h1 class="page">Dépôt interne</h1>' +
+    '<p class="sub">Déposer un fichier sans passer par le tunnel modélisateur : pièce modélisée par Hub⁴Fix, ' +
+    'fichier reçu hors plateforme, ou Repair Together. Le dossier rejoint la <b>même file</b> que les soumissions ' +
+    'des modélisateurs — même examen, même conversion, même publication.</p>';
+  if (pieces && pieces.error) return head + dataError(pieces.error);
+  const rows = (pieces && pieces.rows) || [];
+  const banner = flash ? '<div class="banner">' + esc(flash) + '</div>' : '';
+  const erreur = err ? '<div class="err">' + esc(err) + '</div>' : '';
+
+  // Les pièces non encore modélisées d'abord : c'est pour elles qu'on dépose.
+  const opts = rows.slice()
+    .sort((a, b) => (truthy(a.modeled) - truthy(b.modeled)) || String(a.name || '').localeCompare(String(b.name || '')))
+    .map((r) => '<option value="' + esc(r.id) + '">' + esc((r.name || r.id) + (r.machine ? ' — ' + r.machine : '') + (truthy(r.modeled) ? ' (déjà modélisée)' : '')) + '</option>')
+    .join('');
+
+  const lbl = 'display:block;font-size:.78rem;font-weight:600;margin:.9rem 0 .3rem';
+  const inp = 'width:100%;border:1px solid var(--line);border-radius:8px;padding:.55rem .7rem;font:inherit;background:#fff';
+  const radio = 'display:flex;gap:.5rem;align-items:flex-start;font-size:.85rem;padding:.5rem .1rem;cursor:pointer';
+  const hint = 'font-size:.76rem;color:var(--earth);margin:.25rem 0 0';
+
+  // Le bloc de cession n'apparaît que pour un auteur tiers. En CSS pur : l'admin n'a
+  // aucun JavaScript, et si :has() manquait, le bloc resterait VISIBLE — dégradation
+  // dans le bon sens (on demande une info en trop plutôt que d'en perdre une).
+  const css = '<style>' +
+    'form.depot:has(#o-interne:checked) .cession, form.depot:has(#o-rt:checked) .cession{display:none}' +
+    'form.depot:has(#m-maillage:checked) .champ-step{display:none}' +
+    'form.depot:has(#m-maillage:checked) .avert-maillage{display:block}' +
+    'form.depot .avert-maillage{display:none}' +
+    '</style>';
+
+  return head + css + banner + erreur +
+    '<form class="depot" method="post" action="/admin/depot" enctype="multipart/form-data" style="max-width:640px">' +
+      '<div class="card" style="display:grid;gap:.2rem">' +
+        '<label style="' + lbl + '">Pièce</label>' +
+        (rows.length
+          ? '<select name="piece_id" required style="' + inp + '"><option value="">— choisir —</option>' + opts + '</select>'
+          : '<div class="err">Aucune pièce dans la base : rien à quoi rattacher un fichier.</div>') +
+
+        '<label style="' + lbl + '">Ce que tu déposes</label>' +
+        '<label style="' + radio + '"><input type="radio" name="mode" id="m-cao" value="cao" checked>' +
+          '<span><b>Fichier CAO + STEP</b><div style="' + hint + '">Le chemin normal. Le STEP est tessellé en ' +
+          'haute résolution (0,01 mm / 0,05 rad) pour donner un <b>3MF source</b>, dont on dérive ensuite un ' +
+          '<b>3MF master</b> par machine. Rien n\'est perdu de la cote.</div></span></label>' +
+        '<label style="' + radio + '"><input type="radio" name="mode" id="m-maillage" value="maillage">' +
+          '<span><b>Maillage déjà prêt</b> (.3mf, .stl)<div style="' + hint + '">Pour le stock existant. ' +
+          'Marqué « résolution non maîtrisée » : sa finesse est celle de son export d\'origine. ' +
+          'Nous lisons le fichier pour savoir s\'il s\'agit d\'un <b>3MF source</b> (géométrie seule) ou d\'un ' +
+          '<b>3MF master</b> (réglages de slicing inclus) — tu n\'as pas à le préciser.</div></span></label>' +
+
+        '<label style="' + lbl + '">Le fichier</label>' +
+        '<input type="file" name="fichier" required style="' + inp + '">' +
+        '<p style="' + hint + '">CAO (.f3d, .fcstd, .sldprt…) ou maillage (.3mf, .stl) selon le mode choisi ci-dessus. ' +
+        '25 Mo maximum.</p>' +
+
+        '<div class="champ-step">' +
+          '<label style="' + lbl + '">Export STEP (.step / .stp)</label>' +
+          '<input type="file" name="step" accept=".step,.stp" style="' + inp + '">' +
+        '</div>' +
+        '<div class="avert-maillage" style="background:#fff8e6;border:1px solid #e3c46a;border-radius:9px;padding:.7rem .9rem;font-size:.8rem;margin-top:.6rem">' +
+          '<b>Résolution non maîtrisée.</b> Ce fichier ne passera pas par notre tessellation : ' +
+          'sa finesse est figée par l\'export qui l\'a produit. À refaire depuis un STEP le jour où une cote pose problème.' +
+        '</div>' +
+
+        '<label style="' + lbl + '">Origine du fichier</label>' +
+        '<label style="' + radio + '"><input type="radio" name="origine" id="o-interne" value="interne" checked>' +
+          '<span><b>Interne Hub⁴Fix</b><div style="' + hint + '">Modélisé par nous. Passe directement en « à préparer ».</div></span></label>' +
+        '<label style="' + radio + '"><input type="radio" name="origine" id="o-rt" value="repair-together">' +
+          '<span><b>Repair Together</b><div style="' + hint + '">Droits à 100 % Hub⁴Fix par le programme.</div></span></label>' +
+        '<label style="' + radio + '"><input type="radio" name="origine" id="o-tiers" value="hors-tunnel">' +
+          '<span><b>Modélisateur, hors tunnel</b><div style="' + hint + '">Reçu par mail ou transfert. Passe par l\'examen, ' +
+          'et l\'acte de cession doit être traçable.</div></span></label>' +
+
+        '<div class="cession" style="border-left:3px solid var(--line);padding-left:.9rem;margin-top:.5rem">' +
+          '<label style="' + lbl + '">Auteur du fichier</label>' +
+          '<input type="text" name="author_name" placeholder="Nom et prénom, ou raison sociale" style="' + inp + '">' +
+          '<label style="' + lbl + '">Date de l\'acte de cession</label>' +
+          '<input type="date" name="cession_at" style="' + inp + '">' +
+          '<label style="' + lbl + '">Où retrouver l\'acte</label>' +
+          '<input type="text" name="cession_ref" placeholder="ex. mail du 04/08/2026 « cession porte-filtre », PDF signé n°12" style="' + inp + '">' +
+          '<p style="' + hint + '">La cession doit être horodatée <b>fichier par fichier</b> pour être opposable ' +
+          '(art. L.131-1 CPI, CGV art. 2.1). L\'empreinte du fichier est calculée automatiquement et rattachée à l\'acte.</p>' +
+        '</div>' +
+
+        '<button type="submit" style="justify-self:start;margin-top:1.1rem;font-family:inherit;font-size:.82rem;font-weight:600;' +
+          'border:none;border-radius:8px;padding:.6rem 1.3rem;cursor:pointer;background:var(--ink);color:#fff">Déposer</button>' +
+      '</div>' +
+    '</form>';
+}
+
+function viewModeles(data, flash) {
+  const head = '<h1 class="page">Modèles 3D</h1>' +
+    '<p class="sub">Fichiers déposés par les modélisateurs. Chaque dossier porte <b>deux fichiers</b> : ' +
+    'le <b>source natif</b> (l\'œuvre, archivée, jamais distribuée) et le <b>STEP</b>, qui alimente la conversion en 3MF. ' +
+    'L\'<b>acte de cession</b> est horodaté et lié au fichier par son empreinte.</p>';
+  if (data.error === 'no_binding') return head + dataError('Base « partenaire » non liée (binding DB_PARTNER manquant).');
+  if (data.error) return head + dataError(data.error);
+  const rows = data.rows || [];
+  const banner = flash ? '<div class="banner">' + esc(flash) + '</div>' : '';
+
+  const count = (s) => rows.filter((r) => r.status === s).length;
+  const cards = '<div class="cards">' +
+    '<div class="card"><div class="k">Dossiers</div><div class="v">' + rows.length + '</div></div>' +
+    '<div class="card' + (count('review') ? ' new' : '') + '"><div class="k">À examiner</div><div class="v">' + count('review') + '</div></div>' +
+    '<div class="card"><div class="k">Acceptés, à préparer</div><div class="v">' + count('accepted') + '</div></div>' +
+    '<div class="card"><div class="k">Publiés</div><div class="v">' + count('published') + '</div></div>' +
+    '</div>';
+
+  if (!rows.length) {
+    return head + banner + cards +
+      '<div class="soon">Aucun fichier déposé pour le moment. Un dossier arrive ici quand un modélisateur dépose ' +
+      'son source et son STEP sur une pièce dont tu as validé la réservation.</div>';
+  }
+
+  const stTag = (s) => {
+    const m = {
+      review: ['À examiner', 'var(--red)'],
+      accepted: ['Accepté — à préparer', '#2c6e9b'],
+      prepared: ['3MF préparé', '#b8860b'],
+      published: ['Publié', 'var(--green)'],
+      rejected: ['Refusé', 'var(--earth)'],
+    }[s] || [s, 'var(--earth)'];
+    return '<span class="tag" style="background:' + m[1] + ';color:#fff">' + esc(m[0]) + '</span>';
+  };
+  const btn = 'font-family:inherit;font-size:.76rem;font-weight:600;border:none;border-radius:7px;padding:.45rem .9rem;cursor:pointer';
+  const dl = (id, slot, name, bytes) =>
+    '<a href="/admin/submission-file/' + encodeURIComponent(id) + '/' + slot + '" ' +
+    'style="font-size:.78rem;color:var(--earth);text-decoration:none;border:1px solid var(--line);border-radius:7px;padding:.4rem .8rem;display:inline-block;background:#fff">' +
+    '⤓ ' + esc(name) + ' <span class="muted">(' + (bytes > 1048576 ? (bytes / 1048576).toFixed(1) + ' Mo' : Math.round(bytes / 1024) + ' Ko') + ')</span></a>';
+
+  const list = rows.map((r) => {
+    let actions = '';
+    if (r.status === 'review') {
+      actions = '<form method="post" action="/admin/modeles" style="display:grid;gap:.5rem;margin-top:.8rem">' +
+        '<input type="hidden" name="id" value="' + esc(r.id) + '">' +
+        '<input type="text" name="note" placeholder="consigne de correction, ou motif d\'exclusion" ' +
+        'style="font-size:.78rem;padding:.5rem .7rem;border:1px solid var(--line);border-radius:7px">' +
+        '<div style="display:flex;gap:.5rem;flex-wrap:wrap">' +
+          '<button name="action" value="accept" style="' + btn + ';background:var(--green);color:#fff">Accepter</button>' +
+          '<button name="action" value="correct" style="' + btn + ';background:#b8860b;color:#fff" title="Rend 72 h au modélisateur pour déposer une version corrigée">Demander une correction</button>' +
+          '<button name="action" value="discard" style="' + btn + ';background:#fff;color:var(--red);border:1px solid #f3c2c2" title="Non corrigeable : la pièce retourne à la Hot List">Écarter</button>' +
+        '</div></form>';
+    } else if (r.status === 'accepted') {
+      // Pas de bouton mort : la préparation n'est pas encore branchée, on dit où en est
+      // la chaîne et on donne le STEP pour la faire à la main entre-temps. Le rappel de
+      // la tolérance n'est pas décoratif : un import STEP au réglage par défaut fige un
+      // maillage grossier, et l'erreur de corde devient une erreur de cote sur la pièce.
+      // Ce qui reste dépend de ce qui a été déposé. Un 3MF master n'a plus besoin de rien ;
+      // un 3MF source attend un profil ; un STEP attend la tessellation.
+      const reste = r.mesh_kind === '3mf-master'
+        ? '<b>Rien à préparer :</b> ce 3MF master porte déjà ses réglages. Il ne reste qu\'à le ranger dans ' +
+          '<code>h4f-masters</code> sous <code>&lt;pièce&gt;--&lt;machine&gt;.3mf</code> pour que le slicer le trouve.'
+        : r.mesh_only
+        // Pas de STEP : il n'y a rien à tesseller, rappeler la tolérance n'aurait aucun
+        // sens ici. Ce qu'il faut savoir, c'est que la finesse est déjà figée.
+        ? '<b>Pas de tessellation à faire :</b> la géométrie est déjà maillée, sa finesse est celle de son export. ' +
+          'Il reste à en dériver un <b>3MF master</b> (injection du profil machine). Si la cote se révèle fausse, ' +
+          'la correction passe par un nouveau dépôt en CAO + STEP.'
+        : '<b>En attendant, préparation à la main dans le slicer — et la tolérance d\'import n\'est pas facultative :</b> ' +
+          'déflexion linéaire <b>0,01 mm</b>, angulaire <b>0,05 rad</b> (≈ 2,9°). ' +
+          'Au réglage par défaut, le maillage est facetté et l\'écart de corde devient un écart de cote sur une pièce ' +
+          'fonctionnelle — irrécupérable ensuite.';
+      actions = '<div class="soon" style="margin-top:.8rem;font-size:.8rem">Étape suivante : ' +
+        '<b>STEP → 3MF source</b> (tessellation + sceau, une fois par pièce), puis ' +
+        '<b>3MF source → 3MF master</b> (profil machine, un par machine). ' +
+        'Cela demande le service de conversion — voir <code>context/PLAN_TUNNEL_MODELISATEUR.md</code>.<br><br>' +
+        reste + '</div>';
+    } else if (r.review_note) {
+      actions = '<div class="muted" style="font-size:.78rem;margin-top:.6rem">« ' + esc(r.review_note) + ' »' +
+        (r.decided_by ? ' — ' + esc(r.decided_by) : '') + '</div>';
+    }
+
+    // D'où vient le dossier : le tunnel n'a pas besoin d'être annoncé (c'est le cas
+    // normal), les autres portes si — elles n'ont pas la même valeur juridique.
+    const origTag = {
+      interne: ['Interne H4F', '#2c6e9b'],
+      'hors-tunnel': ['Hors tunnel', '#b8860b'],
+      'repair-together': ['Repair Together', 'var(--green)'],
+    }[r.origine];
+    const origine = origTag ? ' <span class="tag" style="background:' + origTag[1] + ';color:#fff">' + esc(origTag[0]) + '</span>' : '';
+    // Le type de maillage n'est pas une étiquette : il dit ce qu'il RESTE à faire.
+    const kindSays = {
+      '3mf-master': '<b>3MF master.</b> Il porte déjà les réglages de slicing : slicable en l\'état, rien à lui ajouter.',
+      '3mf-source': '<b>3MF source.</b> Géométrie seule, sans réglages : il lui faut encore un profil machine pour devenir un master.',
+      stl: '<b>STL.</b> Ni unité déclarée ni métadonnée — à convertir avant slicing.',
+      indetermine: '<b>Type indéterminé.</b> Le fichier n\'a pas pu être lu comme un zip : à ouvrir à la main pour savoir ce que c\'est.',
+    }[r.mesh_kind] || '';
+    const meshWarn = r.mesh_only
+      ? '<div style="background:#fff8e6;border:1px solid #e3c46a;border-radius:8px;padding:.55rem .8rem;font-size:.78rem;margin:.6rem 0">' +
+        (kindSays ? kindSays + '<br>' : '') +
+        '<b>Résolution non maîtrisée.</b> Ce fichier n\'est pas passé par notre tessellation ' +
+        '(0,01 mm / 0,05 rad) : sa finesse est celle de son export d\'origine. À refaire depuis un STEP ' +
+        'si une cote pose problème.</div>'
+      : '';
+    const qui = r.origine === 'hors-tunnel' && r.author_name ? esc(r.author_name) + ' (via ' + esc(r.deposited_by || '') + ')'
+      : r.deposited_by ? esc(r.deposited_by)
+      : esc(r.email || r.user_id);
+
+    return '<div style="border:1px solid var(--line);border-radius:9px;padding:1rem;background:var(--cream);margin-bottom:.8rem">' +
+      '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;flex-wrap:wrap">' +
+        '<div><strong style="font-size:.88rem">' + esc(r.piece_id) + '</strong>' +
+          (r.version > 1 ? ' <span class="tag" style="background:var(--cream);color:var(--earth)">version ' + r.version + '</span>' : '') + origine +
+          '<div class="muted" style="font-size:.8rem">' + qui + ' · déposé le ' + fmtDate(r.created_at) + '</div></div>' +
+        stTag(r.status) +
+      '</div>' + meshWarn +
+      '<div style="display:flex;gap:.5rem;margin:.7rem 0;flex-wrap:wrap">' +
+        dl(r.id, 'native', r.native_name, r.native_bytes) +
+        (r.step_key ? dl(r.id, 'step', r.step_name, r.step_bytes) : '') +
+      '</div>' +
+      '<details style="font-size:.76rem"><summary style="cursor:pointer;color:var(--earth);font-weight:600">Acte de cession</summary>' +
+        '<div class="muted" style="margin-top:.4rem;line-height:1.6">' +
+          (r.origine === 'interne' ? 'Fichier Hub⁴Fix — pas de cession de tiers.<br>'
+            : r.origine === 'repair-together' ? 'Repair Together : droits à 100 % Hub⁴Fix par le programme.<br>' : '') +
+          'Acte daté du <b>' + fmtDate(r.cession_at) + '</b> · CGV <code>' + esc(r.cession_version) + '</code><br>' +
+          (r.author_name ? 'Auteur : <b>' + esc(r.author_name) + '</b><br>' : '') +
+          (r.cession_ref ? 'Acte retrouvable : ' + esc(r.cession_ref) + '<br>' : '') +
+          'Empreinte du fichier : <code style="font-size:.7rem">' + esc(String(r.native_sha256 || '').slice(0, 32)) + '…</code>' +
+          (r.step_sha256 ? '<br>Empreinte du STEP : <code style="font-size:.7rem">' + esc(String(r.step_sha256).slice(0, 32)) + '…</code>' : '') +
+        '</div></details>' +
+      actions + '</div>';
+  }).join('');
+
+  return head + banner + cards + list;
 }
 function viewAdmins(admins, sess) {
   if (admins === null) {
@@ -1024,7 +1507,6 @@ function piecesToCsv(rows) {
 }
 
 const SECTIONS = {
-  '/admin/modeles': () => viewModeles(),
   '/admin/comptabilite': () => viewSoon('Comptabilité', 'Paiements et reversements.',
     'À venir : accès <b>comptabilité</b> aux données de paiement (via le Prestataire de Services de Paiement), réservé aux rôles autorisés.'),
   '/admin/journal': () => viewSoon("Journal d'audit", 'Traçabilité des actions.',
@@ -1187,45 +1669,100 @@ function viewModelerApplications(data, flash, editId) {
 // Lecture via DB_PARTNER (h4f_partner) ; photos servies depuis RESERV_R2. L'admin
 // peut suspendre / annuler une réservation (photo suspecte) ou la réactiver.
 
+// La fenêtre de travail du modélisateur, en millisecondes. DUPLIQUÉE depuis
+// worker/partner/partner.js (deux workers, deux déploiements — pas de module commun).
+// Toute modification doit se faire des deux côtés : ici c'est la valeur qui est
+// ÉCRITE à la validation, là-bas celle qui est lue et prolongée.
+const WORK_WINDOW_MS = 72 * 3600 * 1000;
+
 async function loadReservations(env) {
   if (!env.DB_PARTNER) return { error: 'no_binding' };
   try {
     // reservations et partners sont dans la même base (h4f_partner) : on joint pour
     // l'email du modélisateur (LEFT JOIN au cas où le partenaire aurait été purgé).
+    // Tri : ce qui attend une décision d'abord (feu vert à donner, photo suspecte),
+    // le reste ensuite. L'écran doit dire quoi faire, pas seulement ce qui existe.
     const r = await env.DB_PARTNER.prepare(
-      "SELECT r.id, r.piece_id, r.status, r.ai_check, r.plate_key, r.object_key, r.created_at, r.expires_at, r.decided_by, " +
+      "SELECT r.id, r.piece_id, r.status, r.ai_check, r.plate_key, r.object_key, r.part_key, " +
+      "r.created_at, r.expires_at, r.validated_at, r.extended_at, r.decided_by, " +
       "r.user_id, p.email " +
       "FROM reservations r LEFT JOIN partners p ON p.user_id = r.user_id AND p.type = 'modelisateur' " +
-      "ORDER BY CASE WHEN r.ai_check LIKE 'suspect%' THEN 0 WHEN r.status='active' THEN 1 ELSE 2 END, r.id DESC LIMIT 300"
+      "ORDER BY CASE WHEN r.status='pending-review' AND r.plate_key IS NOT NULL THEN 0 " +
+      "WHEN r.ai_check LIKE 'suspect%' THEN 1 WHEN r.status='submitted' THEN 2 " +
+      "WHEN r.status='active' THEN 3 ELSE 4 END, r.id DESC LIMIT 300"
     ).all();
-    return { rows: (r && r.results) || [] };
+    return { rows: (r && r.results) || [], now: nowIso() };
   } catch (e) { return { error: String(e && e.message || e) }; }
 }
 
+// Le FEU VERT est ici, et nulle part ailleurs : c'est cette action qui démarre les
+// 72 h du modélisateur. Tant qu'elle n'est pas donnée, la pièce est tenue mais aucun
+// délai ne court contre lui.
 async function decideReservation(env, resvId, action, adminEmail) {
   if (!env.DB_PARTNER) return { ok: false, msg: 'Base partenaire non liée.' };
-  const map = { suspend: 'suspended', cancel: 'cancelled', reactivate: 'active' };
-  const status = map[action];
-  if (!status) return { ok: false, msg: 'Action inconnue.' };
-  const row = await env.DB_PARTNER.prepare('SELECT id FROM reservations WHERE id = ?').bind(resvId).first();
+  const row = await env.DB_PARTNER.prepare(
+    'SELECT id, status, plate_key, validated_at FROM reservations WHERE id = ?'
+  ).bind(resvId).first();
   if (!row) return { ok: false, msg: 'Réservation introuvable.' };
+  const ts = nowIso();
+
+  if (action === 'validate') {
+    if (!row.plate_key) return { ok: false, msg: 'Pas de photos : rien à valider.' };
+    if (row.status === 'submitted') return { ok: false, msg: 'Le fichier est déjà déposé.' };
+    const deadline = new Date(Date.now() + WORK_WINDOW_MS).toISOString();
+    await env.DB_PARTNER.prepare(
+      "UPDATE reservations SET status = 'active', validated_at = ?, expires_at = ?, decided_by = ? WHERE id = ?"
+    ).bind(ts, deadline, adminEmail || '', resvId).run();
+    await audit(env, adminEmail, 'reservation_validee', 'reservation#' + resvId + ' — dépôt attendu avant ' + deadline);
+    return { ok: true, msg: 'Feu vert donné : 72 h pour déposer le fichier.' };
+  }
+
+  const map = { suspend: 'suspended', cancel: 'cancelled', reactivate: 'active' };
+  let status = map[action];
+  if (!status) return { ok: false, msg: 'Action inconnue.' };
+  // Lever une suspension ne doit pas donner le feu vert par effet de bord : une
+  // réservation suspendue AVANT validation retourne en attente de décision, pas en
+  // 'active' — sinon le délai courrait sans jamais avoir été ouvert.
+  if (action === 'reactivate' && !row.validated_at) status = 'pending-review';
   await env.DB_PARTNER.prepare('UPDATE reservations SET status = ?, decided_by = ? WHERE id = ?').bind(status, adminEmail || '', resvId).run();
   await audit(env, adminEmail, 'reservation_' + status, 'reservation#' + resvId);
   return { ok: true };
 }
 
+// Délai restant en clair. Une date ISO ne dit rien à la lecture ; « 41 h » si.
+function remaining(iso, nowIso) {
+  const end = Date.parse(iso || '');
+  const now = Date.parse(nowIso || '') || Date.now();
+  if (isNaN(end)) return '';
+  const ms = end - now;
+  if (ms <= 0) return 'échu';
+  const h = Math.floor(ms / 3600000);
+  if (h < 48) return h + ' h restantes';
+  return Math.floor(h / 24) + ' j restants';
+}
+
 function viewReservations(data, flash) {
   const head = '<h1 class="page">Réservations</h1>' +
-    '<p class="sub">Options posées par les modélisateurs sur la Hot List. Une <b>photo suspecte</b> (verdict IA) ' +
-    'remonte en tête : tu peux <b>suspendre</b> (gèle l\'option) ou <b>annuler</b> (libère la pièce).</p>';
+    '<p class="sub">Options posées par les modélisateurs sur la Hot List. ' +
+    'Ce qui attend une décision remonte en tête. <b>Valider</b> donne le feu vert et démarre ses <b>72 h</b> pour déposer le fichier — ' +
+    'avant ça, la pièce lui est réservée mais aucun délai ne court contre lui.</p>';
   if (data.error === 'no_binding') return head + dataError('Base « partenaire » non liée (binding DB_PARTNER manquant).');
   if (data.error) return head + dataError(data.error);
   const rows = data.rows || [];
+  const now = data.now || nowIso();
   const banner = flash ? '<div class="banner">' + esc(flash) + '</div>' : '';
   if (!rows.length) return head + banner + '<div class="soon">Aucune réservation pour le moment.</div>';
 
   const stTag = (s) => {
-    const m = { active: ['Active', 'var(--green)'], suspended: ['Suspendue', '#b8860b'], cancelled: ['Annulée', 'var(--earth)'], expired: ['Expirée', 'var(--earth)'], done: ['Terminée', '#2c6e9b'] }[s] || [s, 'var(--earth)'];
+    const m = {
+      'pending-review': ['À valider', 'var(--red)'],
+      active: ['Modélisation en cours', 'var(--green)'],
+      submitted: ['Fichier déposé', '#2c6e9b'],
+      suspended: ['Suspendue', '#b8860b'],
+      cancelled: ['Annulée', 'var(--earth)'],
+      expired: ['Expirée', 'var(--earth)'],
+      done: ['Terminée', '#2c6e9b'],
+    }[s] || [s, 'var(--earth)'];
     return '<span class="tag" style="background:' + m[1] + ';color:#fff">' + esc(m[0]) + '</span>';
   };
   const aiTag = (a) => {
@@ -1243,32 +1780,58 @@ function viewReservations(data, flash) {
   const btn = 'font-family:inherit;font-size:.76rem;font-weight:600;border:none;border-radius:7px;padding:.45rem .9rem;cursor:pointer';
   const cards = rows.map((r) => {
     const who = esc(r.email || r.user_id || '—');
-    let actions = '<form method="post" action="/admin/reservations" style="display:flex;gap:.5rem;margin-top:.7rem;flex-wrap:wrap">' +
+    const noPhotos = !r.plate_key;
+    let actions = '<form method="post" action="/admin/reservations" style="display:flex;gap:.5rem;margin-top:.7rem;flex-wrap:wrap;align-items:center">' +
       '<input type="hidden" name="id" value="' + esc(r.id) + '">';
-    if (r.status === 'active' || r.status === 'suspended') {
-      if (r.status === 'active') actions += '<button name="action" value="suspend" style="' + btn + ';background:#b8860b;color:#fff">Suspendre</button>';
+    if (r.status === 'pending-review') {
+      if (noPhotos) {
+        actions += '<span class="muted" style="font-size:.78rem">En attente de ses photos — la pièce se libère seule si elles n\'arrivent pas.</span>';
+      } else {
+        actions += '<button name="action" value="validate" style="' + btn + ';background:var(--green);color:#fff" ' +
+          'title="Donne le feu vert : 72 h pour déposer le fichier">Valider — démarrer les 72 h</button>';
+      }
+      actions += '<button name="action" value="cancel" style="' + btn + ';background:#fff;color:var(--red);border:1px solid #f3c2c2">Refuser</button>';
+    } else if (r.status === 'active' || r.status === 'submitted' || r.status === 'suspended') {
+      if (r.status !== 'suspended') actions += '<button name="action" value="suspend" style="' + btn + ';background:#b8860b;color:#fff">Suspendre</button>';
       if (r.status === 'suspended') actions += '<button name="action" value="reactivate" style="' + btn + ';background:var(--green);color:#fff">Réactiver</button>';
       actions += '<button name="action" value="cancel" style="' + btn + ';background:#fff;color:var(--red);border:1px solid #f3c2c2">Annuler</button>';
     } else {
       actions += '<span class="muted" style="font-size:.78rem">' + (r.decided_by ? 'par ' + esc(r.decided_by) : '') + '</span>';
     }
     actions += '</form>';
+
+    // La ligne de délai dit ce que l'échéance signifie À CETTE ÉTAPE : la même colonne
+    // porte 2 h, 7 j, 72 h ou 60 j selon le statut, l'afficher sans le dire induirait
+    // en erreur.
+    const sens = r.status === 'pending-review' ? (noPhotos ? 'pour envoyer ses photos' : 'pour notre feu vert')
+      : r.status === 'active' ? 'pour déposer le fichier'
+      : r.status === 'submitted' ? 'de délai d\'examen (CGV art. 2.5)' : '';
+    const rest = remaining(r.expires_at, now);
+    const delai = sens && rest
+      ? '<div class="muted" style="font-size:.78rem;margin:.4rem 0"><b>' + esc(rest) + '</b> ' + esc(sens) +
+        (r.validated_at ? ' · feu vert le ' + fmtDate(r.validated_at) : '') +
+        (r.extended_at ? ' · <span style="color:#b8860b">prolongée le ' + fmtDate(r.extended_at) + ' (non renouvelable)</span>' : '') +
+        '</div>'
+      : '';
+
     return '<div style="border:1px solid var(--line);border-radius:9px;padding:1rem;background:var(--cream);margin-bottom:.8rem">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap">' +
         '<div><strong style="font-size:.85rem">' + esc(r.piece_id) + '</strong><div class="muted" style="font-size:.8rem">' + who + '</div></div>' +
         '<div style="display:flex;gap:.4rem;align-items:center">' + stTag(r.status) + '</div>' +
-      '</div>' +
+      '</div>' + delai +
       '<div style="margin:.6rem 0">' + aiTag(r.ai_check) + '</div>' +
-      '<div style="display:flex;gap:.7rem;margin:.6rem 0">' +
-        '<div><div class="muted" style="font-size:.72rem;margin-bottom:.2rem">Plaque</div>' + photo(r.plate_key) + '</div>' +
-        '<div><div class="muted" style="font-size:.72rem;margin-bottom:.2rem">Objet</div>' + photo(r.object_key) + '</div>' +
+      '<div style="display:flex;gap:.7rem;margin:.6rem 0;flex-wrap:wrap">' +
+        '<div><div class="muted" style="font-size:.72rem;margin-bottom:.2rem">Plaque signalétique</div>' + photo(r.plate_key) + '</div>' +
+        '<div><div class="muted" style="font-size:.72rem;margin-bottom:.2rem">Appareil donneur</div>' + photo(r.object_key) + '</div>' +
+        '<div><div class="muted" style="font-size:.72rem;margin-bottom:.2rem">La pièce' + (r.part_key ? '' : ' (non fournie)') + '</div>' + photo(r.part_key) + '</div>' +
       '</div>' + actions + '</div>';
   }).join('');
   return head + banner + cards;
 }
 
 // Exports nommés pour tests unitaires uniquement (le runtime n'utilise que `default`).
-export { loadModelerApplications, decideModelerApplication, updatePartnerApplication, deletePartner, loadReservations, decideReservation };
+export { loadModelerApplications, decideModelerApplication, updatePartnerApplication, deletePartner, loadReservations, decideReservation,
+  loadSubmissions, decideSubmission, remaining, viewReservations, viewModeles, handleDepot, viewDepot };
 
 // ============================ ROUTAGE ============================
 
@@ -1438,18 +2001,19 @@ export default {
     // Nettoyage des inscriptions (comptes test, doublons...) : marque "supprime_le"
     // et deplace la ligne en fin de feuille — jamais de suppression physique.
     if (request.method === 'POST' && path === '/admin/inscriptions/supprimer') {
-      let body;
-      try { body = await request.json(); } catch { return json({ error: 'bad-json' }, 400); }
-      const { type, email } = body || {};
-      if (!type || !email) return json({ error: 'type et email requis' }, 400);
+      const redirect = (flash) => new Response(null, { status: 302, headers: { Location: '/admin/inscriptions?m=' + encodeURIComponent(flash) } });
+      const form = await request.formData().catch(() => null);
+      const type = form ? String(form.get('type') || '') : '';
+      const email = form ? String(form.get('email') || '') : '';
+      if (!type || !email) return redirect('type et email requis');
       try {
         const result = await markInscriptionDeleted(env, type, email);
-        if (result.error === 'not-found') return json({ error: 'Inscription introuvable ou deja supprimee' }, 404);
-        if (result.error) return json({ error: result.error }, 500);
+        if (result.error === 'not-found') return redirect('Inscription introuvable ou déjà supprimée.');
+        if (result.error) return redirect('Erreur : ' + result.error);
         await audit(env, sess.email, 'inscription-supprimer', type + ':' + email);
-        return json({ ok: true });
+        return redirect('Inscription supprimée (archivée dans le Sheet).');
       } catch (e) {
-        return json({ error: 'Erreur serveur' }, 500);
+        return redirect('Erreur serveur.');
       }
     }
 
@@ -1584,15 +2148,76 @@ export default {
       const id = parseInt((form.get('id') || '').toString(), 10);
       const action = (form.get('action') || '').toString();
       let flash = '';
-      if (id && ['suspend', 'cancel', 'reactivate'].includes(action)) {
+      if (id && ['validate', 'suspend', 'cancel', 'reactivate'].includes(action)) {
         const r = await decideReservation(env, id, action, sess.email);
-        flash = r.ok ? 'Réservation mise à jour.' : r.msg;
+        flash = r.ok ? (r.msg || 'Réservation mise à jour.') : r.msg;
       }
       return new Response(null, { status: 302, headers: { Location: '/admin/reservations' + (flash ? '?m=' + encodeURIComponent(flash) : '') } });
     }
     if (path === '/admin/reservations') {
       const resvs = await loadReservations(env);
       return shell('/admin/reservations', sess, viewReservations(resvs, url.searchParams.get('m')), 0, toValidate, pendingModelers);
+    }
+
+    // Fichier déposé par un modélisateur (source natif ou STEP) — admin connecté
+    // uniquement. La clé R2 est relue EN BASE, jamais prise dans l'URL : sinon
+    // l'adresse deviendrait un droit de lecture sur tout le bucket.
+    if (path.startsWith('/admin/submission-file/')) {
+      const parts = path.slice('/admin/submission-file/'.length).split('/');
+      const subId = decodeURIComponent(parts[0] || '');
+      const slot = parts[1] === 'step' ? 'step' : 'native';
+      if (!env.SUBMIT_R2) return new Response('R2 non lié (SUBMIT_R2)', { status: 503 });
+      if (!env.DB_PARTNER) return new Response('Base partenaire non liée', { status: 503 });
+      const row = await env.DB_PARTNER.prepare(
+        'SELECT native_key, native_name, step_key, step_name FROM submissions WHERE id = ?'
+      ).bind(subId).first();
+      if (!row) return new Response('Not found', { status: 404 });
+      const key = slot === 'step' ? row.step_key : row.native_key;
+      const name = slot === 'step' ? row.step_name : row.native_name;
+      const obj = await env.SUBMIT_R2.get(key);
+      if (!obj) return new Response('Fichier absent du stockage', { status: 404 });
+      return new Response(obj.body, {
+        headers: {
+          'Content-Type': 'application/octet-stream',
+          'Content-Disposition': 'attachment; filename="' + String(name || 'fichier').replace(/[^\w.\-]/g, '_') + '"',
+          'Cache-Control': 'no-store',
+        },
+      });
+    }
+
+    // Dépôt interne : accès direct, sans passer par le tunnel modélisateur.
+    if (request.method === 'POST' && path === '/admin/depot') {
+      if (sess.role !== 'admin' && sess.role !== 'sous-admin') return new Response('Interdit', { status: 403 });
+      let r;
+      try { r = await handleDepot(env, await request.formData(), sess.email); }
+      catch (e) { r = { ok: false, msg: 'Dépôt impossible : ' + String(e && e.message || e).slice(0, 200) }; }
+      const q = r.ok ? '?m=' + encodeURIComponent(r.msg) : '?e=' + encodeURIComponent(r.msg);
+      // Succès -> la file d'examen, là où le dossier vient d'atterrir. Échec -> on reste
+      // sur le formulaire, avec le motif.
+      return new Response(null, { status: 302, headers: { Location: (r.ok ? '/admin/modeles' : '/admin/depot') + q } });
+    }
+    if (path === '/admin/depot') {
+      const pieces = await loadPieces(env);
+      return shell('/admin/depot', sess, viewDepot(pieces, url.searchParams.get('m'), url.searchParams.get('e')), 0, toValidate, pendingModelers);
+    }
+
+    // Modèles 3D : décision d'examen (POST) puis file d'attente (GET).
+    if (request.method === 'POST' && path === '/admin/modeles') {
+      if (sess.role !== 'admin' && sess.role !== 'sous-admin') return new Response('Interdit', { status: 403 });
+      const form = await request.formData();
+      const id = (form.get('id') || '').toString();
+      const action = (form.get('action') || '').toString();
+      const note = (form.get('note') || '').toString();
+      let flash = '';
+      if (id && ['accept', 'correct', 'discard'].includes(action)) {
+        const r = await decideSubmission(env, id, action, note, sess.email);
+        flash = r.ok ? (r.msg || 'Dossier mis à jour.') : r.msg;
+      }
+      return new Response(null, { status: 302, headers: { Location: '/admin/modeles' + (flash ? '?m=' + encodeURIComponent(flash) : '') } });
+    }
+    if (path === '/admin/modeles') {
+      const subs = await loadSubmissions(env);
+      return shell('/admin/modeles', sess, viewModeles(subs, url.searchParams.get('m')), 0, toValidate, pendingModelers);
     }
 
     if (path === '/admin/pieces.csv') {
@@ -1649,7 +2274,7 @@ export default {
     if (path === '/admin/inscriptions') {
       const data = await loadInscriptions(env);
       data.seen = seen;
-      const resp = shell('/admin/inscriptions', sess, viewInscriptions(data), 0, toValidate, pendingModelers);
+      const resp = shell('/admin/inscriptions', sess, viewInscriptions(data, url.searchParams.get('m')), 0, toValidate, pendingModelers);
       // après consultation, on déplace le repère "dernière visite" à maintenant
       resp.headers.append('Set-Cookie', setCookie('h4f_seen', new Date().toISOString(), SEEN_TTL));
       return resp;

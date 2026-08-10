@@ -42,10 +42,18 @@ binding = "DB_SITE"
 database_name = "h4f_site"
 database_id = "d3f3a9a5-674f-4b00-858b-bbe187b99556"
 
-# Photos de réservation (plaque + objet), partagées avec l'admin (lecture).
+# Photos de réservation (plaque + appareil + pièce), partagées avec l'admin (lecture).
 [[r2_buckets]]
 binding = "RESERV_R2"
 bucket_name = "h4f-reservations"
+
+# Fichiers déposés par les modélisateurs : source natif + STEP. Bucket SÉPARÉ des
+# photos — ce sont les œuvres cédées, elles n'ont ni le même volume, ni la même
+# durée de conservation, ni la même sensibilité. L'admin y accède en LECTURE.
+# Créer le bucket une fois :  npx wrangler r2 bucket create h4f-submissions
+[[r2_buckets]]
+binding = "SUBMIT_R2"
+bucket_name = "h4f-submissions"
 
 # Workers AI — validation IA de cohérence des photos (Gemma vision).
 [ai]

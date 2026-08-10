@@ -59,7 +59,10 @@ export const APP_HTML = `<!DOCTYPE html>
   .drop:hover { border-color:var(--green); }
   .drop img { max-width:100%; max-height:160px; border-radius:8px; margin-top:.5rem; }
   .two { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
-  @media (max-width:560px){ .two { grid-template-columns:1fr; } }
+  .three { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+  @media (max-width:760px){ .three { grid-template-columns:1fr 1fr; } }
+  @media (max-width:560px){ .two, .three { grid-template-columns:1fr; } }
+  .opt { font-weight:400; font-size:.72rem; color:var(--muted); }
   /* Néon d'activité (upload + validation IA) */
   @property --neon-angle { syntax:'<angle>'; initial-value:0deg; inherits:false; }
   .neon { position:relative; display:inline-flex; border-radius:10px; }
@@ -310,6 +313,14 @@ export const APP_HTML = `<!DOCTYPE html>
     return out;
   }
   var POLITESSE = 'Le temps machine servant au calcul de votre rémunération est établi sur la base d\\'une imprimante de référence (Bambu Lab A1), afin de garantir une tarification équitable et homogène entre tous nos partenaires. Ce temps de référence ne peut être réévalué selon l\\'ancienneté ou les performances de votre matériel. Nous vous invitons à en tenir compte dans le choix de votre équipement.';
+  // Le plateau de référence est VOLONTAIREMENT plus grand que celui de l'A1 réelle. Sans
+  // cette extension, une pièce de plus de 256 mm n'aurait aucun temps de référence, donc
+  // aucune rémunération calculable. Dit au printer parce qu'il verra la différence entre
+  // le nom de la machine et la taille des pièces qu'on lui propose.
+  // L'enveloppe est celle d'une machine RÉELLE (A2L), pas un plateau inventé : c'est ce qui
+  // rend la phrase tenable devant un printer. On maintient quand même la distinction entre
+  // ÉTALON et prévision — le temps reste calculé sur le profil A1.
+  var POLITESSE_PLATEAU = 'Certaines pièces dépassent le plateau de cette imprimante de référence. Le calcul conserve alors son profil (vitesses, buse, hauteur de couche) et retient l\\'enveloppe de la Bambu Lab A2L, sa remplaçante grand format (330 × 320 × 325 mm) : une machine réelle, pas un format inventé. À profil constant, la taille du plateau n\\'entre pas dans l\\'estimation d\\'une pièce unique. Ce temps reste un étalon commun à tous les partenaires et non une prévision du temps que prendra votre machine. Enfin, l\\'enveloppe de référence ne dit rien de la compatibilité : celle-ci est vérifiée sur votre parc réel.';
 
   function screenPrinterApply(){
     app.innerHTML = '';
@@ -327,7 +338,7 @@ export const APP_HTML = `<!DOCTYPE html>
           '<div class="field"><label>Code postal</label><input id="pcp" inputmode="numeric" placeholder="91170"></div>' +
           '<div class="field"><label>Ville</label><input id="pville" placeholder="Viry-Châtillon"></div>' +
         '</div>' +
-        '<div class="politesse">'+POLITESSE+'</div>' +
+        '<div class="politesse">'+POLITESSE+'<br><br>'+POLITESSE_PLATEAU+'</div>' +
         '<button class="btn" id="pApplyBtn">Envoyer ma candidature</button>' +
       '</div>');
     renderMachineList(document.getElementById('pMachines'), []);
@@ -380,6 +391,7 @@ export const APP_HTML = `<!DOCTYPE html>
             (ME && ME.is_admin ? '<button class="btn secondary seed" id="seedBtn">＋ Commande de test</button>' : '') +
           '</div>' +
           '<div id="jobs"><p class="muted" style="margin:0">Chargement des commandes…</p></div>' +
+          '<div id="jobsRef"></div>' +
         '</div>';
       renderMachineList(document.getElementById('epMachines'), p.machines || []);
       document.getElementById('epAddMachine').addEventListener('click', function(){ addMachineRow(document.getElementById('epMachines')); });
@@ -402,6 +414,21 @@ export const APP_HTML = `<!DOCTYPE html>
     api('/printer/commandes').then(function(r){
       box = document.getElementById('jobs'); if (!box) return;
       if (r.status !== 200){ box.innerHTML = '<div class="msg err">Accès refusé.</div>'; return; }
+      // La base de calcul est rappelée SOUS les montants, pas dans une page d'aide : c'est
+      // là que la question se pose. Le libellé vient du serveur (tarifs.js), donc changer
+      // la machine de référence ne laisse pas un texte périmé derrière.
+      var ref = document.getElementById('jobsRef');
+      if (ref && r.d.reference_label){
+        ref.innerHTML = '<details style="margin-top:.9rem;font-size:.78rem;color:var(--muted)">' +
+          '<summary style="cursor:pointer">Comment ces montants sont calculés</summary>' +
+          '<div style="margin-top:.5rem;line-height:1.6">Base de calcul : <b>'+esc(r.d.reference_label)+'</b>. ' +
+          'Le temps retenu est celui de ce profil, identique pour tous les partenaires, quelle que soit votre machine : ' +
+          'c\\'est un <b>étalon</b>, pas une prévision du temps que prendra la vôtre. ' +
+          'L\\'enveloppe retenue est celle d\\'une machine réelle, plus grande que le plateau de la machine de référence, ' +
+          'afin que les rares grandes pièces aient aussi une base de calcul — à profil constant, la taille du plateau ' +
+          'n\\'entre pas dans l\\'estimation d\\'une pièce unique. Cela ne dit rien de la compatibilité : celle-ci se ' +
+          'vérifie sur votre parc.</div></details>';
+      }
       var jobs = r.d.jobs || [];
       var skew = (Date.parse(r.d.now) || Date.now()) - Date.now();  // ancre le compte à rebours sur l'heure serveur
       if (!jobs.length){ box.innerHTML = '<p class="muted" style="margin:0">Aucune commande dans votre zone pour le moment. On vous préviendra par e-mail dès qu\\'une commande tombe.</p>'; return; }
@@ -599,7 +626,12 @@ export const APP_HTML = `<!DOCTYPE html>
   function screenHotlist(){
     app.innerHTML = '';
     app.appendChild(backLink(screenHome, 'Retour à l\\'espace partenaire'));
-    app.insertAdjacentHTML('beforeend', '<h1 style="margin-top:.5rem">Hot List</h1><p class="sub">Les pièces les plus demandées à modéliser. Réservez-en une pour la travailler : l\\'option est exclusive et renouvelable.</p><div id="list"><p class="muted">Chargement de la liste…</p></div>');
+    app.insertAdjacentHTML('beforeend', '<h1 style="margin-top:.5rem">Hot List</h1>' +
+      '<p class="sub">Les pièces les plus demandées à modéliser. Réservez-en une pour la travailler : l\\'option est <b>exclusive</b>. ' +
+      'Envoyez vos photos, et dès notre feu vert vous avez <b>72 h</b> pour déposer votre fichier.</p>' +
+      '<p style="margin:-.4rem 0 1rem"><a href="#" id="toMine" style="font-size:.85rem;color:var(--earth)">Voir mes réservations en cours →</a></p>' +
+      '<div id="list"><p class="muted">Chargement de la liste…</p></div>');
+    document.getElementById('toMine').addEventListener('click', function(e){ e.preventDefault(); screenMine(); });
     api('/modelisateur/hotlist').then(function(r){
       if (r.status !== 200){ document.getElementById('list').innerHTML = '<div class="msg err">Accès refusé.</div>'; return; }
       var pieces = r.d.pieces || [];
@@ -608,10 +640,113 @@ export const APP_HTML = `<!DOCTYPE html>
       pieces.forEach(function(p){
         var el = document.getElementById('act-' + cssId(p.id));
         if (!el) return;
-        if (p.reserved_by_me) el.addEventListener('click', function(){ screenReserve(p); });
+        // Réservée par moi : l'action dépend de l'étape. Sans photos -> les envoyer ;
+        // au-delà -> le suivi, qui porte le délai et le dépôt.
+        if (p.reserved_by_me) el.addEventListener('click', function(){ p.etape === 'pending-review' ? screenReserve(p) : screenMine(); });
         else if (!p.reserved) el.addEventListener('click', function(){ doReserve(p); });
       });
     });
+  }
+
+  // ---- Suivi : mes réservations, leur délai, le dépôt --------------------------
+  // Le compte à rebours est ancré sur l'heure SERVEUR (champ "now") : une horloge de
+  // poste mal réglée ne doit pas faire croire à un délai qu'on n'a pas. Format en
+  // jours/heures et non HH:MM:SS car une prolongation porte l'échéance à 144 h.
+  function humanLeft(ms){
+    if (ms <= 0) return 'délai écoulé';
+    var m = Math.floor(ms / 60000), h = Math.floor(m / 60), d = Math.floor(h / 24);
+    if (d >= 1) return d + ' j ' + (h % 24) + ' h';
+    if (h >= 1) return h + ' h ' + (m % 60) + ' min';
+    return m + ' min';
+  }
+  function startTextClock(el, deadlineMs, skewMs, onExpire){
+    var fired = false;
+    function tick(){
+      if (!document.body.contains(el)) { clearInterval(t); return; }
+      var left = deadlineMs - (Date.now() + skewMs);
+      el.textContent = humanLeft(left);
+      if (left <= 0 && !fired){ fired = true; clearInterval(t); if (onExpire) onExpire(); }
+    }
+    var t = setInterval(tick, 30000);   // le libellé est en minutes : la seconde n'apporte rien
+    tick();
+    return function(){ clearInterval(t); };
+  }
+
+  function screenMine(){
+    app.innerHTML = '';
+    app.appendChild(backLink(screenHotlist, 'Retour à la Hot List'));
+    app.insertAdjacentHTML('beforeend', '<h1 style="margin-top:.5rem">Mes réservations</h1>' +
+      '<p class="sub">L\\'état de chaque pièce que vous avez réservée, et le temps qu\\'il vous reste.</p>' +
+      '<div id="mine"><p class="muted">Chargement…</p></div>');
+    api('/modelisateur/reservations').then(function(r){
+      var box = document.getElementById('mine');
+      if (r.status !== 200){ box.innerHTML = '<div class="msg err">Accès refusé.</div>'; return; }
+      var list = r.d.reservations || [];
+      var skew = Date.parse(r.d.now) - Date.now();
+      if (!list.length){
+        box.innerHTML = '<p class="muted">Aucune réservation en cours. Réservez une pièce dans la Hot List pour commencer.</p>';
+        return;
+      }
+      box.innerHTML = list.map(function(x){ return resvCard(x, r.d.depot); }).join('');
+      list.forEach(function(x){
+        var clock = document.getElementById('clk-' + x.id);
+        if (clock && x.expires_at) startTextClock(clock, Date.parse(x.expires_at), skew, function(){ screenMine(); });
+        var dep = document.getElementById('dep-' + x.id);
+        if (dep) dep.addEventListener('click', function(){ screenDeposit(x, r.d.depot); });
+        var ext = document.getElementById('ext-' + x.id);
+        if (ext) ext.addEventListener('click', function(){ doExtend(x, ext); });
+        var pho = document.getElementById('pho-' + x.id);
+        if (pho) pho.addEventListener('click', function(){ screenReserve({ id: x.piece_id, nom: x.nom }); });
+      });
+    });
+  }
+
+  function resvCard(x, depot){
+    var etat, aide, actions = '';
+    if (x.status === 'pending-review'){
+      etat = 'En attente de notre feu vert';
+      aide = 'Vos photos sont arrivées. Dès que nous validons, votre délai de 72 h démarre — pas avant.';
+      actions = '<button class="btn secondary" id="pho-'+x.id+'">Renvoyer mes photos</button>';
+    } else if (x.status === 'active'){
+      etat = x.submission ? 'Correction demandée' : 'À vous — 72 h pour déposer';
+      aide = x.submission && x.submission.review_note
+        ? 'Reprenez votre fichier : « ' + esc(x.submission.review_note) + ' »'
+        : 'Déposez le fichier source de votre logiciel et son export STEP.';
+      actions = '<button class="btn" id="dep-'+x.id+'">Déposer mon fichier</button>' +
+        (x.can_extend ? '<button class="btn secondary" id="ext-'+x.id+'" title="Une seule fois, non renouvelable">Prolonger de 72 h</button>' : '');
+    } else if (x.status === 'submitted'){
+      etat = 'Fichier déposé — en examen';
+      aide = 'Nous examinons votre fichier' + (x.submission ? ' (version ' + x.submission.version + ')' : '') + '. Vous serez prévenu de la décision.';
+    } else if (x.status === 'suspended'){
+      etat = 'Réservation suspendue';
+      aide = 'Un administrateur vérifie vos photos. Votre option est gelée le temps de ce contrôle.';
+    } else {
+      etat = x.status;
+      aide = '';
+    }
+    var ext = x.extended_at ? '<div class="muted" style="font-size:.74rem;margin-top:.3rem">Prolongation utilisée — elle n\\'est pas renouvelable.</div>' : '';
+    // L'échéance change de propriétaire selon l'étape : c'est SON délai quand il
+    // travaille, le NÔTRE quand on examine. Le même libellé pour les deux ferait
+    // croire à une pression qui n'existe pas.
+    var libelle = x.status === 'active' ? 'Il vous reste'
+      : x.status === 'pending-review' ? 'Notre réponse sous'
+      : x.status === 'submitted' ? 'Réponse au plus tard sous' : 'Échéance';
+    return '<div class="card" style="margin-bottom:.9rem">' +
+      '<div style="display:flex;justify-content:space-between;gap:.8rem;flex-wrap:wrap;align-items:baseline">' +
+        '<div><strong>'+esc(x.nom)+'</strong><div class="muted" style="font-size:.8rem">'+esc(etat)+'</div></div>' +
+        (x.expires_at ? '<div style="text-align:right"><div class="muted" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em">'+libelle+'</div>' +
+          '<div id="clk-'+x.id+'" style="font-weight:600">…</div></div>' : '') +
+      '</div>' +
+      (aide ? '<p class="muted" style="font-size:.84rem;margin:.6rem 0 0">'+aide+'</p>' : '') + ext +
+      (actions ? '<div style="display:flex;gap:.5rem;margin-top:.9rem;flex-wrap:wrap">'+actions+'</div>' : '') +
+      '</div>';
+  }
+
+  function doExtend(x, btn){
+    btn.disabled = true; btn.innerHTML = '<span class="spin"></span>';
+    api('/modelisateur/reservation/extend', { method:'POST', body: JSON.stringify({ piece_id: x.piece_id }) })
+      .then(function(){ screenMine(); })
+      .catch(function(){ screenMine(); });
   }
 
   function cssId(id){ return btoa(unescape(encodeURIComponent(id))).replace(/[^a-zA-Z0-9]/g,''); }
@@ -619,7 +754,11 @@ export const APP_HTML = `<!DOCTYPE html>
     var meta = [p.appareil, p.marque].filter(Boolean).map(esc).join(' · ');
     var boost = p.boost > 0 ? ' · <span class="boost">avance +'+p.boost+' €</span>' : '';
     var right;
-    if (p.reserved_by_me) right = '<button class="btn secondary" id="act-'+cssId(p.id)+'">Vos photos</button>';
+    // Le libellé annonce ce que fait le bouton à CETTE étape : envoyer les photos
+    // quand elles manquent encore, suivre le délai et déposer une fois lancé.
+    if (p.reserved_by_me) right = '<button class="btn secondary" id="act-'+cssId(p.id)+'">' +
+      (p.etape === 'pending-review' ? 'Vos photos' : 'Votre dossier') + '</button>';
+    else if (p.deja_deposee) right = '<span class="badge taken">Fichier déjà déposé</span>';
     else if (p.reserved) right = '<span class="badge taken">Réservée</span>';
     else right = '<button class="btn" id="act-'+cssId(p.id)+'">Réserver</button>';
     return '<div class="piece"><div class="ph">🔧</div><div class="info"><div class="nom">'+esc(p.nom)+'</div><div class="meta">'+meta+'</div>'+
@@ -635,26 +774,31 @@ export const APP_HTML = `<!DOCTYPE html>
     }).catch(function(){ screenHotlist(); });
   }
 
-  // Écran réservation : upload plaque + objet (redimensionnés), envoi + validation IA.
-  var photos = { plate:null, object:null };
+  // Écran réservation : trois photos (redimensionnées), envoi + validation IA.
+  // La 3e — la pièce seule — est FACULTATIVE : une pièce cassée peut être inaccessible
+  // sans démonter l'appareil, l'exiger bloquerait des réservations légitimes.
+  var photos = { plate:null, object:null, part:null };
   function screenReserve(p){
-    photos = { plate:null, object:null };
+    photos = { plate:null, object:null, part:null };
     app.innerHTML =
       '<a href="#" id="back" class="muted" style="text-decoration:none;font-size:.85rem">← Retour à la Hot List</a>' +
       '<h1 style="margin-top:.5rem">Réservation — '+esc(p.nom)+'</h1>' +
-      '<p class="sub">Envoyez deux photos pour que la modélisation démarre : la <b>plaque signalétique</b> de l\\'appareil, et <b>l\\'objet</b> concerné. Une vérification automatique s\\'assure de leur cohérence.</p>' +
+      '<p class="sub">Envoyez vos photos pour ouvrir la réservation : la <b>plaque signalétique</b> de l\\'appareil et <b>l\\'appareil donneur</b>. ' +
+      'Ajoutez <b>la pièce seule</b> si vous l\\'avez en main. Une vérification automatique contrôle leur cohérence, ' +
+      'puis nous validons — c\\'est <b>notre feu vert</b> qui démarre vos 72 h, pas cet envoi.</p>' +
       '<div id="rMsg"></div>' +
-      '<div class="two">' +
+      '<div class="three">' +
         dropZone('plate', 'Plaque signalétique') +
-        dropZone('object', 'L\\'objet') +
+        dropZone('object', 'Appareil donneur') +
+        dropZone('part', 'La pièce <span class="opt">— si disponible</span>') +
       '</div>' +
       '<div style="margin-top:1.4rem" class="neon" id="neon"><button class="btn" id="sendBtn" disabled>Envoyer les photos</button></div>';
     document.getElementById('back').addEventListener('click', function(e){ e.preventDefault(); screenHotlist(); });
-    ['plate','object'].forEach(function(k){ bindDrop(k); });
+    ['plate','object','part'].forEach(function(k){ bindDrop(k); });
     document.getElementById('sendBtn').addEventListener('click', function(){ sendPhotos(p); });
   }
   function dropZone(k, label){
-    return '<div class="field"><label>'+esc(label)+'</label>' +
+    return '<div class="field"><label>'+label+'</label>' +
       '<div class="drop" id="drop-'+k+'"><span class="muted">📷 Cliquez pour choisir une photo</span>' +
       '<input type="file" accept="image/*" id="file-'+k+'" hidden></div></div>';
   }
@@ -680,21 +824,147 @@ export const APP_HTML = `<!DOCTYPE html>
     var btn = document.getElementById('sendBtn'), neon = document.getElementById('neon'), msg = document.getElementById('rMsg');
     if (!photos.plate || !photos.object) return;
     btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Envoi et vérification…'; neon.classList.add('active');
-    api('/modelisateur/reservation/photos', { method:'POST', body: JSON.stringify({ piece_id: p.id, plate: photos.plate, object: photos.object }) })
+    var payload = { piece_id: p.id, plate: photos.plate, object: photos.object };
+    if (photos.part) payload.part = photos.part;
+    api('/modelisateur/reservation/photos', { method:'POST', body: JSON.stringify(payload) })
       .then(function(r){
         neon.classList.remove('active');
         if (r.status === 200){
           var v = r.d.ai_check;
-          var note = v === 'suspect' ? '<div class="msg err">Photos reçues, mais notre vérification les trouve douteuses : un administrateur va les regarder.</div>'
-                   : '<div class="msg ok">Photos reçues '+(v==='ok'?'et validées':'')+' — votre réservation est confirmée. Vous pouvez commencer la modélisation.</div>';
-          app.innerHTML = '<h1>Réservation confirmée</h1><p class="sub">'+esc(p.nom)+'</p>'+note+'<button class="btn secondary" id="toList">Retour à la Hot List</button>';
+          var note = v === 'suspect'
+            ? '<div class="msg err">Photos reçues, mais notre vérification les trouve douteuses : un administrateur va les regarder.</div>'
+            : '<div class="msg ok">Photos reçues '+(v==='ok'?'et cohérentes':'')+'. La pièce vous est réservée.</div>';
+          app.innerHTML = '<h1>Réservation ouverte</h1><p class="sub">'+esc(p.nom)+'</p>'+note+
+            '<p class="muted" style="font-size:.86rem">Prochaine étape : <b>notre validation</b>. Dès qu\\'elle est donnée, vous disposez de <b>72 h</b> ' +
+            'pour déposer votre fichier — vous verrez le compte à rebours dans « Mes réservations ». Rien ne court contre vous d\\'ici là.</p>' +
+            '<div style="display:flex;gap:.5rem;flex-wrap:wrap"><button class="btn" id="toMine2">Voir mes réservations</button>' +
+            '<button class="btn secondary" id="toList">Retour à la Hot List</button></div>';
+          document.getElementById('toMine2').addEventListener('click', screenMine);
           document.getElementById('toList').addEventListener('click', screenHotlist);
         } else {
           btn.disabled=false; btn.textContent='Envoyer les photos';
-          msg.innerHTML = '<div class="msg err">'+(r.d.error==='photos_invalides'?'Photos invalides.':(r.d.error==='aucune_reservation'?'Réservation introuvable.':'Envoi impossible.'))+'</div>';
+          var e = r.d.error;
+          msg.innerHTML = '<div class="msg err">'+(
+            e==='photos_invalides' ? 'Photos invalides.' :
+            e==='photo_piece_invalide' ? 'La photo de la pièce est illisible — retirez-la ou reprenez-la.' :
+            e==='aucune_reservation' ? 'Réservation introuvable ou expirée.' : 'Envoi impossible.')+'</div>';
         }
       })
       .catch(function(){ neon.classList.remove('active'); btn.disabled=false; btn.textContent='Envoyer les photos'; msg.innerHTML='<div class="msg err">Connexion interrompue.</div>'; });
+  }
+
+  // ---- Dépôt du fichier -------------------------------------------------------
+  // DEUX fichiers, et jamais de maillage : le source natif (l'œuvre) et le STEP
+  // (ce que nous convertissons). L'acte de cession est coché ICI, pour CE fichier :
+  // une case avalée à l'inscription ne vaudrait rien juridiquement.
+  var deposit = { native:null, step:null };
+  function screenDeposit(x, depot){
+    deposit = { native:null, step:null };
+    var natifs = (depot.natifs_connus || []).slice(0, 6).join(', ');
+    var refus = (depot.mesh_refuses || []).join(', ');
+    app.innerHTML =
+      '<a href="#" id="back" class="muted" style="text-decoration:none;font-size:.85rem">← Retour à mes réservations</a>' +
+      '<h1 style="margin-top:.5rem">Déposer — '+esc(x.nom)+'</h1>' +
+      '<p class="sub">Deux fichiers sont attendus. Le <b>fichier de votre logiciel</b> ('+esc(natifs)+'…) : c\\'est votre œuvre, ' +
+      'nous l\\'archivons et ne le distribuons jamais. Et son <b>export STEP</b> — géométrie exacte, c\\'est lui que nous convertissons.<br>' +
+      'Les maillages ('+esc(refus)+') sont refusés, y compris le 3MF : ils figeraient la finesse choisie par votre exportateur, ' +
+      'alors que nous maillons nous-mêmes en <b>très haute résolution</b> pour ne rien perdre de vos cotes. ' +
+      'Exportez un <b>solide</b>, en <b>millimètres</b>.</p>' +
+      (x.submission && x.submission.review_note
+        ? '<div class="msg err" style="margin-bottom:1rem"><b>Correction demandée :</b> '+esc(x.submission.review_note)+'</div>' : '') +
+      '<div id="dMsg"></div>' +
+      '<div class="two">' + fileZone('native', 'Fichier source de votre logiciel') + fileZone('step', 'Export STEP (.step / .stp)') + '</div>' +
+      '<div class="card" style="margin-top:1.2rem">' +
+        '<label style="display:flex;gap:.6rem;align-items:flex-start;font-size:.86rem;cursor:pointer">' +
+          '<input type="checkbox" id="cess" style="margin-top:.25rem">' +
+          '<span>Je déclare être l\\'auteur de ce fichier et <b>céder mes droits à Hub4Fix sur ce fichier</b>, ' +
+          'aux conditions des CGV modélisateurs (art. 2). Cette cession est <b>horodatée maintenant</b> et porte sur ce dépôt précis. ' +
+          'Elle est <b>résolue de plein droit</b> si le fichier est refusé, ou non validé sous 60 jours.</span>' +
+        '</label>' +
+        '<div id="prog" class="muted" style="font-size:.8rem;margin-top:.8rem"></div>' +
+        '<div style="margin-top:.9rem"><button class="btn" id="sendFile" disabled>Déposer le fichier</button></div>' +
+      '</div>';
+    document.getElementById('back').addEventListener('click', function(e){ e.preventDefault(); screenMine(); });
+    ['native','step'].forEach(function(k){ bindFile(k, depot); });
+    document.getElementById('cess').addEventListener('change', refreshDepositBtn);
+    document.getElementById('sendFile').addEventListener('click', function(){ sendDeposit(x, depot); });
+  }
+  function fileZone(k, label){
+    return '<div class="field"><label>'+esc(label)+'</label>' +
+      '<div class="drop" id="fz-'+k+'"><span class="muted">📁 Cliquez pour choisir un fichier</span>' +
+      '<input type="file" id="ff-'+k+'" hidden></div></div>';
+  }
+  function refreshDepositBtn(){
+    var ok = deposit.native && deposit.step && document.getElementById('cess').checked;
+    document.getElementById('sendFile').disabled = !ok;
+  }
+  function bindFile(k, depot){
+    var zone = document.getElementById('fz-'+k), input = document.getElementById('ff-'+k);
+    zone.addEventListener('click', function(){ input.click(); });
+    input.addEventListener('change', function(){
+      var f = input.files && input.files[0];
+      var msg = document.getElementById('dMsg');
+      if (!f) return;
+      // Contrôles côté écran : ils évitent un aller-retour de 25 Mo pour rien. Le
+      // serveur refait les mêmes, c'est lui qui décide.
+      var ext = (f.name.match(/\\.[a-z0-9]+$/i) || [''])[0].toLowerCase();
+      var maxOctets = (depot.max_mo || 25) * 1048576;
+      if (f.size > maxOctets){
+        msg.innerHTML = '<div class="msg err">'+esc(f.name)+' pèse '+Math.round(f.size/1048576)+' Mo : le maximum est '+(depot.max_mo||25)+' Mo par fichier.</div>';
+        input.value = ''; return;
+      }
+      if (k === 'step' && (depot.step_exts || []).indexOf(ext) < 0){
+        msg.innerHTML = '<div class="msg err">Le second fichier doit être un STEP ('+(depot.step_exts||[]).join(' ou ')+').</div>';
+        input.value = ''; return;
+      }
+      if (k === 'native' && (depot.mesh_refuses || []).indexOf(ext) >= 0){
+        msg.innerHTML = '<div class="msg err">'+esc(ext)+' est un maillage, pas un fichier source. Déposez le fichier de votre logiciel de conception.</div>';
+        input.value = ''; return;
+      }
+      msg.innerHTML = '';
+      deposit[k] = f;
+      zone.innerHTML = '<div style="font-weight:600;font-size:.86rem">'+esc(f.name)+'</div>' +
+        '<div class="muted" style="font-size:.75rem;margin-top:.2rem">'+(f.size>1048576?(f.size/1048576).toFixed(1)+' Mo':Math.round(f.size/1024)+' Ko')+' · changer</div>';
+      refreshDepositBtn();
+    });
+  }
+  // XHR et non fetch : c'est le seul moyen d'avoir la progression de l'envoi, et sur
+  // 25 Mo un bouton qui tourne sans rien dire donne l'impression d'un blocage.
+  function sendDeposit(x, depot){
+    var btn = document.getElementById('sendFile'), prog = document.getElementById('prog'), msg = document.getElementById('dMsg');
+    if (!deposit.native || !deposit.step) return;
+    var fd = new FormData();
+    fd.append('piece_id', x.piece_id);
+    fd.append('cession', 'true');
+    fd.append('native', deposit.native, deposit.native.name);
+    fd.append('step', deposit.step, deposit.step.name);
+    btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Envoi…';
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', API + '/modelisateur/submission', true);
+    xhr.withCredentials = true;
+    xhr.upload.addEventListener('progress', function(e){
+      if (e.lengthComputable) prog.textContent = 'Envoi : ' + Math.round(e.loaded / e.total * 100) + ' %';
+    });
+    xhr.addEventListener('load', function(){
+      var d = {}; try { d = JSON.parse(xhr.responseText); } catch (e) {}
+      if (xhr.status === 201 || (xhr.status === 200 && d.ok)){
+        app.innerHTML = '<h1>Fichier déposé</h1><p class="sub">'+esc(x.nom)+'</p>' +
+          '<div class="msg ok">Votre fichier est arrivé' + (d.version > 1 ? ' (version '+d.version+')' : '') + '. ' +
+          'La cession a été enregistrée le '+esc(String(d.cession_at||'').slice(0,10))+'.</div>' +
+          '<p class="muted" style="font-size:.86rem">Nous l\\'examinons, puis nous préparons le fichier d\\'impression. ' +
+          'Vous serez prévenu de la décision.</p>' +
+          '<button class="btn secondary" id="toMine3">Retour à mes réservations</button>';
+        document.getElementById('toMine3').addEventListener('click', screenMine);
+        return;
+      }
+      btn.disabled = false; btn.textContent = 'Déposer le fichier'; prog.textContent = '';
+      msg.innerHTML = '<div class="msg err">'+esc(d.message || 'Dépôt impossible.')+'</div>';
+    });
+    xhr.addEventListener('error', function(){
+      btn.disabled = false; btn.textContent = 'Déposer le fichier'; prog.textContent = '';
+      msg.innerHTML = '<div class="msg err">Connexion interrompue — le fichier n\\'a pas été déposé.</div>';
+    });
+    xhr.send(fd);
   }
 
   load();
