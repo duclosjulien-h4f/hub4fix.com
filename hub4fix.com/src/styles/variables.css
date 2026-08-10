@@ -1,0 +1,40 @@
+/* ════ Hub4Fix Design Tokens ════ */
+:root {
+  /* Neutrals */
+  --ivory: #FAF8F5;
+  --warm-white: #F3EEE8;
+  --cream: #EDE6DC;
+  --sand: #D4C9B8;
+  --stone: #A89F91;
+  --earth: #7A7268;
+  --charcoal: #3B3632;
+  --night: #1C1A18;
+
+  /* Brand */
+  --gold: #B8963E;
+  --gold-light: #D4B15F;
+  --gold-pale: rgba(184, 150, 62, 0.08);
+  --gold-glow: rgba(184, 150, 62, 0.15);
+
+  /* Accent */
+  --red: #C8102E;
+  --red-soft: rgba(200, 16, 46, 0.06);
+  --red-medium: rgba(200, 16, 46, 0.18);
+  --green: #2D8B5E;
+  --green-soft: rgba(45, 139, 94, 0.06);
+
+  /* Typography */
+  --font-serif: 'Cormorant Garamond', serif;
+  --font-sans: 'Karla', sans-serif;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 100px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.12);
+}
