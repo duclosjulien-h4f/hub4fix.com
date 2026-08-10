@@ -25,7 +25,7 @@
       { name:'K2', models:[{id:'other',label:'K2',bed:'350×350'},{id:'other',label:'K2 Pro',bed:'350×350'},{id:'other',label:'K2 Plus',bed:'350×350'}] },
       { name:'CR', models:[{id:'other',label:'CR-10 SE',bed:'300×300'},{id:'other',label:'CR-10 Smart Pro',bed:'300×300'}] } ] },
     { brand:'Bambu Lab', ranges:[
-      { name:'A', models:[{id:'bambua1',label:'A1 mini',bed:'180×180'},{id:'other',label:'A1 mini Combo',bed:'180×180'},{id:'other',label:'A1',bed:'256×256'},{id:'other',label:'A1 Combo',bed:'256×256'},{id:'other',label:'A2',bed:'256×256'},{id:'other',label:'A2 Combo',bed:'256×256'}] },
+      { name:'A', models:[{id:'bambua1',label:'A1 mini',bed:'180×180'},{id:'other',label:'A1 mini Combo',bed:'180×180'},{id:'other',label:'A1',bed:'256×256'},{id:'other',label:'A1 Combo',bed:'256×256'},{id:'other',label:'A2L',bed:'330×320'},{id:'other',label:'A2L Combo',bed:'330×320'}] },
       { name:'X', models:[{id:'bambux1',label:'X1 Carbon',bed:'256×256'},{id:'other',label:'X1 Carbon Combo',bed:'256×256'},{id:'other',label:'X1E',bed:'256×256'}] },
       { name:'P', models:[{id:'other',label:'P1S',bed:'256×256'},{id:'other',label:'P1S Combo',bed:'256×256'},{id:'other',label:'P1P',bed:'256×256'}] },
       { name:'H', models:[{id:'other',label:'H2D',bed:'256×256'},{id:'other',label:'H2S',bed:'256×256'}] } ] },
