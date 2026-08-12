@@ -19,7 +19,7 @@
       "image": "images/hotlist/Philips/Philips/Senseo/HD7805-HD7810-HD7864/levier-couvercle.png",
       "imageStatus": "to-validate",
       "source": "veille-casse-28-05-2026",
-      "priority_score": 3.61
+      "priority_score": 3.03
     },
     {
       "group": "Krups",
@@ -39,7 +39,7 @@
       "image": "images/hotlist/Krups/Krups/Nespresso/Inissia-Pixie/knee-lever-capsule.png",
       "imageStatus": "to-validate",
       "source": "veille-casse-28-05-2026",
-      "priority_score": 2.5
+      "priority_score": 2.1
     },
     {
       "group": "BSH",
@@ -99,7 +99,7 @@
       "image": "images/hotlist/SEB/Tefal/Actifry/FZ7000-AL8000/entraine-pale.png",
       "imageStatus": "to-validate",
       "source": "veille-casse-28-05-2026",
-      "priority_score": 2.04
+      "priority_score": 1.69
     },
     {
       "group": "Whirlpool",
@@ -158,7 +158,7 @@
       "image": "images/hotlist/SEB/Moulinex/Cookeo/CE701x/bouton-verrouillage.png",
       "imageStatus": "to-validate",
       "source": "veille-casse-28-05-2026",
-      "priority_score": 2.13
+      "priority_score": 1.78
     },
     {
       "group": "SEB",
@@ -178,7 +178,7 @@
       "image": "images/hotlist/SEB/Moulinex/Companion/HF800/entraineur-axe-moteur.png",
       "imageStatus": "to-validate",
       "source": "veille-casse-28-05-2026",
-      "priority_score": 1.02
+      "priority_score": 0.84
     },
     {
       "group": "SEB",
@@ -198,7 +198,7 @@
       "image": "images/hotlist/SEB/Rowenta/Silence-Force/RS-RT3616/roulettes-traineau.png",
       "imageStatus": "to-validate",
       "source": "veille-casse-28-05-2026",
-      "priority_score": 2.22
+      "priority_score": 1.87
     },
     {
       "group": "DeLonghi",
@@ -236,7 +236,7 @@
       "modeled": false,
       "image": "images/hotlist/Electrolux/AEG/lave-vaisselle/aeg/roulette-panier-inferieur-lave-vaisselle-clip-pl.png",
       "imageStatus": "to-validate",
-      "priority_score": 3.58
+      "priority_score": 3.27
     },
     {
       "group": "BSH",
@@ -255,7 +255,7 @@
       "modeled": false,
       "image": "images/hotlist/BSH/Bosch/lave-vaisselle/00611475/roulette-panier-inferieur-lave-vaisselle-corps-c.png",
       "imageStatus": "to-validate",
-      "priority_score": 2.67
+      "priority_score": 2.31
     },
     {
       "group": "BSH",
@@ -274,7 +274,7 @@
       "modeled": false,
       "image": "images/hotlist/BSH/Bosch/lave-vaisselle/00418674/clips-arretoirs-butees-de-rail-support-du-panier.png",
       "imageStatus": "to-validate",
-      "priority_score": 1.47
+      "priority_score": 1.29
     },
     {
       "group": "De'Longhi",
@@ -293,7 +293,7 @@
       "modeled": false,
       "image": null,
       "imageStatus": "pending",
-      "priority_score": 4.56
+      "priority_score": 4.33
     },
     {
       "group": "SEB",
@@ -312,7 +312,7 @@
       "modeled": false,
       "image": "images/hotlist/SEB/Moulinex/petit-electromenager-cui/ce701/cache-valve-du-couvercle-clip-plastique-de-la-va.png",
       "imageStatus": "to-validate",
-      "priority_score": 0.49
+      "priority_score": 0.4
     },
     {
       "group": "Whirlpool",
@@ -331,7 +331,7 @@
       "modeled": false,
       "image": "images/hotlist/Whirlpool/Whirlpool/seche-linge/hscx/trappe-de-condenseur-charniere-joint-bas-avant-g.png",
       "imageStatus": "to-validate",
-      "priority_score": 1.63
+      "priority_score": 1.4
     },
     {
       "group": "Whirlpool",
@@ -350,7 +350,7 @@
       "modeled": false,
       "image": "images/hotlist/Whirlpool/KitchenAid/robot-patissier/ksm150/pignon-roue-de-securite-plastique-mecanisme-entr.png",
       "imageStatus": "to-validate",
-      "priority_score": 3.03
+      "priority_score": 2.72
     },
     {
       "group": "Indépendant",
@@ -369,7 +369,7 @@
       "modeled": false,
       "image": "images/hotlist/Indépendant/Dyson/aspirateur-balai-sans-fi/generic/gachette-trigger-mecanisme-d-ouverture-du-recept.png",
       "imageStatus": "to-validate",
-      "priority_score": 6.22
+      "priority_score": 5.87
     },
     {
       "group": "SEB",
@@ -388,7 +388,7 @@
       "modeled": false,
       "image": "images/hotlist/SEB/Moulinex/petit-electromenager-rob/hf800/charniere-clip-de-couvercle-joint-mecanisme-de-f.png",
       "imageStatus": "to-validate",
-      "priority_score": 3.38
+      "priority_score": 3.2
     },
     {
       "group": "Haier",
@@ -408,7 +408,7 @@
       "image": "images/hotlist/Haier/Haier/Lave-linge-top/generic/cadre-superieur-charniere-capot.png",
       "imageStatus": "to-validate",
       "source": "veille-casse-01-08-2026",
-      "priority_score": 0.99,
+      "priority_score": 0.97,
       "notes": "Detection retroactive 24 mois (decision Julien 01/08/2026, temoignages 2021-2025). Reference officielle 43013198 verifiee via Spareka, mutualisee 10 marques. Score preliminaire - a recalculer par le script de scoring habituel (cf. hotlist_scoring_*.csv)."
     },
     {
@@ -428,7 +428,7 @@
       "modeled": false,
       "image": "images/hotlist/BSH/Bosch/seche-linge/00497522/poignee-de-porte-de-seche-linge-fixation-par-3-t.png",
       "imageStatus": "to-validate",
-      "priority_score": 5.6
+      "priority_score": 6.0
     },
     {
       "group": "Haier",
@@ -447,7 +447,7 @@
       "modeled": false,
       "image": "images/hotlist/Haier/Hoover/lave-linge-top/43013198/cadre-superieur-charnieres-axes-de-capot-loquet.png",
       "imageStatus": "to-validate",
-      "priority_score": 3.96
+      "priority_score": 3.87
     },
     {
       "group": "Whirlpool",
@@ -466,7 +466,7 @@
       "modeled": false,
       "image": null,
       "imageStatus": "pending",
-      "priority_score": 3.87
+      "priority_score": 3.69
     },
     {
       "group": "BSH",
@@ -485,7 +485,7 @@
       "modeled": false,
       "image": null,
       "imageStatus": "pending",
-      "priority_score": 2.87
+      "priority_score": 2.73
     },
     {
       "group": "BSH",
@@ -504,7 +504,7 @@
       "modeled": false,
       "image": "images/hotlist/BSH/Siemens/seche-linge/00497522/poignee-de-porte-de-seche-linge-fixation-par-3-t.png",
       "imageStatus": "to-validate",
-      "priority_score": 1.87
+      "priority_score": 2.0
     }
   ]
 }
