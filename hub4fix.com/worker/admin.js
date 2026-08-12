@@ -410,6 +410,33 @@ async function adminUpload3d(request, env, sess) {
   return new Response(null, { status: 302, headers: { Location: '/admin/shadowlist' } });
 }
 
+// POST /admin/replace-original — dépose/remplace la référence privée (orig/<id>)
+// quand aucune photo isolée n'existe (seule une photo d'assemblage complet a
+// été trouvée -> l'admin la recadre côté navigateur avant envoi ; ou l'admin
+// a pris sa propre photo d'une pièce réelle -> rétro-conception). Le crop
+// lui-même est 100% côté client (canvas) : le worker ne reçoit qu'un fichier
+// image, jamais de traitement d'image côté serveur. Réutilise regenerateCloud()
+// telle quelle -- même chemin que le bouton Régénérer, aucune nouvelle logique
+// de génération.
+async function adminReplaceOriginal(request, env, sess, ctx) {
+  let form;
+  try { form = await request.formData(); } catch { return new Response('Formulaire invalide', { status: 400 }); }
+  const id = (form.get('id') || '').toString();
+  if (!id) return new Response('id manquant', { status: 400 });
+  const img = form.get('image');
+  if (!img || !img.arrayBuffer || !img.type || !img.type.startsWith('image/')) {
+    return new Response('Fichier image requis', { status: 400 });
+  }
+  await r2Put(env, 'orig/' + id, await img.arrayBuffer(), img.type);
+  await audit(env, sess.email, 'piece-original-replaced', id);
+  if (env.GEMINI_API_KEY && env.PIECES_R2) {
+    const row = (await loadPieces(env)).rows?.find?.((r) => r.id === id);
+    const bg = regenerateCloud(env, id, row?.regenHint || '');
+    if (ctx && ctx.waitUntil) ctx.waitUntil(bg); else await bg;
+  }
+  return new Response(null, { status: 302, headers: { Location: '/admin/shadowlist' } });
+}
+
 // ---- Régénération cloud (immédiate) : le worker appelle Gemini lui-même ----
 // Déclenchée en tâche de fond (ctx.waitUntil) au clic « Régénérer » : l'admin
 // continue de valider pendant que l'image se refait (~10-25 s). Si l'appel
@@ -1515,6 +1542,37 @@ function viewShadowList(data) {
           '<button style="justify-self:start;font-family:inherit;font-size:.75rem;font-weight:600;border:none;border-radius:7px;padding:.5rem 1rem;cursor:pointer;background:var(--ink);color:#fff">Déposer</button>' +
         '</form>' +
       '</details>';
+    // Remplacer la référence : upload direct (photo prise soi-même — rétro-conception)
+    // ou recadrage d'une photo générale du produit (quand seule une photo de
+    // l'assemblage complet existe). Le recadrage est 100% côté navigateur
+    // (canvas) : le worker ne voit jamais l'image non recadrée.
+    // heuristique d'affichage (auto-ouvrir + badge) : 'pending'/'verify-original'
+    // sont les 2 statuts qui signifient concretement "pas de reference exploitable"
+    const hasOrig = r.status !== 'pending' && r.status !== 'verify-original';
+    const replaceOriginal =
+      '<details' + (hasOrig ? '' : ' open') + ' style="margin-top:.8rem;border-top:1px solid var(--line);padding-top:.7rem">' +
+        '<summary style="cursor:pointer;font-size:.78rem;font-weight:600;color:var(--earth)">Remplacer la référence' +
+          (hasOrig ? '' : ' <span class="tag" style="background:#fdf1da;color:#8a6116">aucune référence — recommandé</span>') +
+        '</summary>' +
+        '<div style="margin-top:.7rem;display:grid;gap:.8rem">' +
+          '<form method="post" action="/admin/replace-original" enctype="multipart/form-data" style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">' +
+            '<input type="hidden" name="id" value="' + esc(id) + '">' +
+            '<label style="' + inp + '">Photo prise soi-même (pièce réelle en main) : <input type="file" name="image" accept="image/*" required></label>' +
+            '<button style="font-family:inherit;font-size:.75rem;font-weight:600;border:none;border-radius:7px;padding:.5rem 1rem;cursor:pointer;background:var(--ink);color:#fff">Remplacer</button>' +
+          '</form>' +
+          '<div class="orig-cropper" data-id="' + esc(id) + '">' +
+            '<label style="' + inp + '">Ou recadrer une photo générale du produit (seule une photo de l\'assemblage complet existe) : ' +
+              '<input type="file" class="crop-input" accept="image/*"></label>' +
+            '<div class="crop-canvas-wrap" style="display:none;margin-top:.5rem">' +
+              '<canvas class="crop-canvas" style="max-width:100%;border:1px solid var(--line);cursor:crosshair;display:block"></canvas>' +
+              '<div style="margin-top:.5rem;display:flex;gap:.7rem;align-items:center;flex-wrap:wrap">' +
+                '<span class="muted" style="font-size:.72rem">Dessine un rectangle autour de la pièce, puis valide</span>' +
+                '<button type="button" class="crop-confirm" style="font-family:inherit;font-size:.75rem;font-weight:600;border:none;border-radius:7px;padding:.45rem .9rem;cursor:pointer;background:#b8860b;color:#fff">Utiliser cette zone</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</details>';
     return '<div class="card" style="padding:1.1rem 1.2rem">' +
       '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:1rem;margin-bottom:.8rem">' +
         '<div><div style="font-weight:600">' + esc(r.name || id) + '</div>' +
@@ -1528,11 +1586,88 @@ function viewShadowList(data) {
         '<div style="' + box + '"><div style="' + lbl + '">Version Hub⁴Fix</div>' +
           '<img style="' + img + '" src="/img/h4f/' + enc + '" alt="version H4F" ' +
           'onerror="this.style.display=\'none\';this.insertAdjacentHTML(\'afterend\',\'<div style=&quot;padding:2rem;text-align:center;color:#7A7268;font-size:.8rem&quot;>indisponible</div>\')"></div>' +
-      '</div>' + actions + upload + '</div>';
+      '</div>' + actions + upload + replaceOriginal + '</div>';
   }).join('');
 
-  return head + exportBtn + '<div style="display:grid;gap:1.2rem">' + cards + '</div>';
+  return head + exportBtn + '<div style="display:grid;gap:1.2rem">' + cards + '</div>' + CROPPER_SCRIPT;
 }
+
+// Recadreur de référence : logique partagée, câblée une seule fois sur toutes
+// les cartes via data-id (pas de duplication par carte). Pur canvas natif,
+// aucune dépendance. Le crop produit un nouveau blob envoyé tel quel à
+// /admin/replace-original — le worker ne fait jamais de traitement d'image.
+const CROPPER_SCRIPT = `<script>
+document.querySelectorAll('.orig-cropper').forEach(function (wrap) {
+  var id = wrap.dataset.id;
+  var input = wrap.querySelector('.crop-input');
+  var canvasWrap = wrap.querySelector('.crop-canvas-wrap');
+  var canvas = wrap.querySelector('.crop-canvas');
+  var confirmBtn = wrap.querySelector('.crop-confirm');
+  var ctx2d = canvas.getContext('2d');
+  var img = new Image();
+  var rect = null, dragging = false, start = null;
+
+  function redraw() {
+    ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+    ctx2d.drawImage(img, 0, 0, canvas.width, canvas.height);
+    if (rect) { ctx2d.strokeStyle = '#C8102E'; ctx2d.lineWidth = 2; ctx2d.strokeRect(rect.x, rect.y, rect.w, rect.h); }
+  }
+
+  input.addEventListener('change', function () {
+    var file = input.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      img.onload = function () {
+        var maxW = 520, scale = Math.min(1, maxW / img.width);
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        rect = null;
+        redraw();
+        canvasWrap.style.display = 'block';
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  canvas.addEventListener('mousedown', function (e) {
+    var r = canvas.getBoundingClientRect();
+    start = { x: e.clientX - r.left, y: e.clientY - r.top };
+    dragging = true;
+  });
+  canvas.addEventListener('mousemove', function (e) {
+    if (!dragging) return;
+    var r = canvas.getBoundingClientRect();
+    var cur = { x: e.clientX - r.left, y: e.clientY - r.top };
+    rect = { x: Math.min(start.x, cur.x), y: Math.min(start.y, cur.y), w: Math.abs(cur.x - start.x), h: Math.abs(cur.y - start.y) };
+    redraw();
+  });
+  window.addEventListener('mouseup', function () { dragging = false; });
+
+  confirmBtn.addEventListener('click', function () {
+    if (!rect || rect.w < 5 || rect.h < 5) { alert("Dessine d'abord un rectangle autour de la pièce."); return; }
+    // Recadre depuis l'image source d'origine (jamais le rectangle rouge dessiné
+    // par-dessus dans le canvas d'affichage) : évite de polluer la référence avec
+    // le trait de sélection, et conserve la pleine résolution du fichier choisi.
+    var toSrc = img.width / canvas.width;
+    var sx = rect.x * toSrc, sy = rect.y * toSrc, sw = rect.w * toSrc, sh = rect.h * toSrc;
+    var crop = document.createElement('canvas');
+    crop.width = Math.round(sw); crop.height = Math.round(sh);
+    crop.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, crop.width, crop.height);
+    crop.toBlob(function (blob) {
+      var fd = new FormData();
+      fd.append('id', id);
+      fd.append('image', blob, 'crop.png');
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Envoi…';
+      fetch('/admin/replace-original', { method: 'POST', body: fd })
+        .then(function () { location.reload(); })
+        .catch(function () { alert("Échec de l'envoi."); confirmBtn.disabled = false; confirmBtn.textContent = 'Utiliser cette zone'; });
+    }, 'image/png');
+  });
+});
+</script>`;
 
 function piecesToCsv(rows) {
   const q = (v) => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
@@ -2031,6 +2166,11 @@ export default {
     // Fichier source 3D : upload (POST) et téléchargement (GET) — admin connecté uniquement.
     if (request.method === 'POST' && path === '/admin/upload3d') {
       return adminUpload3d(request, env, sess);
+    }
+
+    // Remplacement manuel de la référence privée (photo recadrée ou prise soi-même).
+    if (request.method === 'POST' && path === '/admin/replace-original') {
+      return adminReplaceOriginal(request, env, sess, ctx);
     }
 
     // Nettoyage des inscriptions (comptes test, doublons...) : marque "supprime_le"
