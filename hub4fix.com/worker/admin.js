@@ -239,6 +239,8 @@ const PIECE_COLS = [
   // nouvelles colonnes en FIN uniquement : la migration d'en-tête ajoute en queue
   'rejectReason',
   'regenHint', // précision donnée par l'admin à l'IA pour la régénération
+  // score + preuve explicative en Shadow List (2026-08-11) — voir genimg/ingest_veille.py
+  'priority_score', 'occurrences', 'sourceDomains', 'tier',
 ];
 const PIECE_PUBLIC_COLS = [
   'id', 'group', 'brand', 'range', 'model', 'piece', 'name', 'machine', 'category',
@@ -1396,6 +1398,38 @@ function statusTag(s) {
   return `<span class="tag" style="background:${m[1]};color:${m[2]}">${esc(m[0])}</span>`;
 }
 
+const TIER_LABEL = {
+  confirme: 'Confirmé (≥10 témoignages)',
+  confirme_score3: 'Confirmé, score business modéré',
+  signal_faible: 'Signal faible (5-9 témoignages)',
+};
+
+// Barre de score (priority_score = diversité des sources x fraîcheur, voir
+// genimg/ingest_veille.py) + chiffre explicatif traçable (occurrences +
+// domaines sources) + badge "preuve partielle" si la pièce est entrée via
+// un palier de repli (tier != confirme). Absence gracieuse : les pièces
+// plus anciennes ou ajoutées à la main n'ont pas ces champs.
+function scoreExplain(r) {
+  const score = parseFloat(r.priority_score);
+  if (!isFinite(score)) return '';
+  const pct = Math.max(4, Math.min(100, (score / 5) * 100));
+  const isPartial = r.tier && r.tier !== 'confirme';
+  const barColor = isPartial ? '#b8860b' : 'var(--green)';
+  const occ = parseInt(r.occurrences, 10);
+  const explain = (isFinite(occ) ? occ + ' témoignage' + (occ > 1 ? 's' : '') : '')
+    + (r.sourceDomains ? (isFinite(occ) ? ' · ' : '') + esc(r.sourceDomains) : '');
+  const badge = isPartial
+    ? ' <span class="tag" style="background:#fdf1da;color:#8a6116" title="' + esc(TIER_LABEL[r.tier] || r.tier) + '">preuve partielle</span>'
+    : '';
+  return '<div style="display:flex;align-items:center;gap:.55rem;margin-bottom:.7rem;flex-wrap:wrap">' +
+    '<div style="width:70px;height:6px;background:var(--line);border-radius:3px;overflow:hidden;flex:0 0 auto">' +
+      '<div style="width:' + pct.toFixed(0) + '%;height:100%;background:' + barColor + '"></div></div>' +
+    '<span style="font-size:.74rem;font-weight:700;color:var(--ink)">' + score.toFixed(2) + '</span>' +
+    (explain ? '<span class="muted" style="font-size:.78rem">' + explain + '</span>' : '') +
+    badge +
+  '</div>';
+}
+
 function viewShadowList(data) {
   const head = '<h1 class="page">Shadow List</h1>' +
     '<p class="sub">Comparer l\'original (privé) et la version Hub⁴Fix, puis valider. ' +
@@ -1486,6 +1520,7 @@ function viewShadowList(data) {
         '<div><div style="font-weight:600">' + esc(r.name || id) + '</div>' +
         '<div class="muted" style="font-size:.82rem">' + esc(r.machine || '') + '</div></div>' +
         statusTag(r.status) + '</div>' +
+      scoreExplain(r) +
       '<div style="display:flex;gap:.9rem">' +
         '<div style="' + box + '"><div style="' + lbl + '">Original (privé)</div>' +
           '<img style="' + img + '" src="/img/orig/' + enc + '" alt="original" ' +
