@@ -614,10 +614,22 @@ function b64ToBuf(b64) {
   for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
   return out;
 }
-async function geminiGenerate(env, prompt, imgBuf, mime) {
+// `detail` (facultatif) : {buf, mime, source: 'orig'|'h4f'} -- une zone que
+// l'admin a encadrée (recadreur) sur la référence ou le visuel actuel, jointe
+// en 2e image pour que l'IA voie précisément la zone concernée par la
+// consigne texte, plutôt qu'une description en mots seule.
+async function geminiGenerate(env, prompt, imgBuf, mime, detail) {
   const model = env.GEMINI_MODEL || 'gemini-2.5-flash-image';
+  const parts = [{ text: prompt }, { inline_data: { mime_type: mime || 'image/png', data: b64FromBuf(imgBuf) } }];
+  if (detail && detail.buf) {
+    const label = detail.source === 'h4f'
+      ? 'The admin circled this specific area on the CURRENT generated visual -- this exact detail needs to be corrected:'
+      : 'The admin circled this specific area on the reference photo -- focus on this exact detail to identify/imagine the piece:';
+    parts.push({ text: label });
+    parts.push({ inline_data: { mime_type: detail.mime || 'image/png', data: b64FromBuf(detail.buf) } });
+  }
   const body = {
-    contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: mime || 'image/png', data: b64FromBuf(imgBuf) } }] }],
+    contents: [{ parts }],
     generationConfig: { responseModalities: ['IMAGE'] },
   };
   const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${env.GEMINI_API_KEY}`, {
@@ -637,7 +649,8 @@ async function geminiGenerate(env, prompt, imgBuf, mime) {
 // qui a déjà une étape orig/<id> et veut que h4f/<id> + le statut rejoignent
 // le MÊME lot). Sans lot fourni (bouton "Régénérer" seul), regenerateCloud
 // crée et referme son propre lot (h4f/<id> + statut, un seul clic pour annuler).
-async function regenerateCloud(env, id, hint, actor, batch) {
+// `detail` (facultatif) : zone encadrée par l'admin, cf. geminiGenerate.
+async function regenerateCloud(env, id, hint, actor, batch, detail) {
   actor = actor || 'cloud-regen';
   const ownsBatch = !batch;
   const b = batch || newUndoBatch(actor, 'Régénération — ' + id);
@@ -649,7 +662,7 @@ async function regenerateCloud(env, id, hint, actor, batch) {
     let prompt = await promptObj.text();
     if (hint) prompt += '\n\nAdmin guidance for this specific piece (must be respected): ' + hint;
     const mime = (orig.httpMetadata && orig.httpMetadata.contentType) || 'image/png';
-    const out = await geminiGenerate(env, prompt, await orig.arrayBuffer(), mime);
+    const out = await geminiGenerate(env, prompt, await orig.arrayBuffer(), mime, detail);
     await r2Put(env, 'h4f/' + id, out, 'image/png', undefined, b);
     await patchPiece(env, id, { status: 'to-validate' }, b);
     await audit(env, 'cloud-regen', 'piece-regen-done', id);
@@ -1803,16 +1816,47 @@ function viewShadowList(data) {
           '<h4>Rejeter</h4>' +
           '<div class="row"><code>texte</code><span>motif d\'exclusion FA — réévaluable quand l\'état de l\'art évolue (bouton Réactiver)</span></div>' +
         '</div></details>';
+      // Encadrer un détail (barre de régénération) : cercle une zone précise
+      // sur l'original ou la version H4F, jointe à la demande de régénération
+      // comme image de détail en plus de la consigne texte -- l'IA voit
+      // précisément quoi corriger/imaginer, pas seulement une description.
+      const detailToggle = '<button type="button" class="detail-toggle" title="Encadrer un détail sur l\'original ou la version H4F" ' +
+        'style="display:inline-flex;align-items:center;gap:.3rem;font-family:inherit;font-size:.75rem;font-weight:600;border:1px solid var(--line);border-radius:7px;padding:.45rem .6rem;background:#fff;color:var(--earth);cursor:pointer">' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>Encadrer un détail</button>' +
+        '<input type="file" name="detail" class="detail-file" style="display:none">' +
+        '<input type="hidden" name="detailSource" class="detail-source-input">';
       const reactivate = '<button name="action" value="reactivate" style="' + btn + ';background:#fff;color:var(--ink);border:1px solid var(--line)">Réactiver</button>';
       let inner = '';
-      if (st === 'to-validate') inner = publish + regen + note + reject;
-      else if (st === 'published') inner = regen + note + reject;
-      else if (st === 'regenerate') inner = publish + regen + note + reject;
-      else if (st === 'verify-original') inner = publish + regen + note + reject;
+      if (st === 'to-validate') inner = publish + regen + note + detailToggle + reject;
+      else if (st === 'published') inner = regen + note + detailToggle + reject;
+      else if (st === 'regenerate') inner = publish + regen + note + detailToggle + reject;
+      else if (st === 'verify-original') inner = publish + regen + note + detailToggle + reject;
       else if (st === 'rejected') inner = reactivate;
       if (inner) {
-        actions = '<form method="post" action="/admin/shadowlist" style="position:relative;display:flex;gap:.6rem;margin-top:.9rem;flex-wrap:wrap;align-items:center">' +
+        actions = '<form method="post" action="/admin/shadowlist" enctype="multipart/form-data" class="regen-form" style="position:relative;display:flex;gap:.6rem;margin-top:.9rem;flex-wrap:wrap;align-items:center">' +
           '<input type="hidden" name="id" value="' + esc(id) + '">' + inner + '</form>';
+        // Choix de l'image + canvas, hors du <form> (pas besoin d'y être : les
+        // champs cachés detail/detailSource, remplis par wireCropper, SONT dans
+        // le form et voyagent avec lui à la soumission).
+        if (st !== 'rejected') {
+          actions += '<div class="detail-cropper" data-id="' + esc(id) + '" style="display:none;margin-top:.6rem;border-top:1px dashed var(--line);padding-top:.6rem">' +
+            '<div style="display:flex;gap:.5rem;margin-bottom:.5rem">' +
+              '<button type="button" class="detail-pick" data-source="orig" data-url="/img/orig/' + enc + '" style="font-family:inherit;font-size:.72rem;border:1px solid var(--line);border-radius:6px;padding:.35rem .6rem;background:#fff;cursor:pointer">Sur l\'original</button>' +
+              '<button type="button" class="detail-pick" data-source="h4f" data-url="/img/h4f/' + enc + '" style="font-family:inherit;font-size:.72rem;border:1px solid var(--line);border-radius:6px;padding:.35rem .6rem;background:#fff;cursor:pointer">Sur la version H4F</button>' +
+            '</div>' +
+            '<div class="detail-canvas-wrap" style="display:none">' +
+              '<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem">' +
+                '<button type="button" class="detail-mode-toggle" style="line-height:1;border:1px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;padding:.3rem .5rem;display:inline-flex;align-items:center"></button>' +
+                '<span class="detail-hint muted" style="font-size:.72rem"></span>' +
+              '</div>' +
+              '<canvas class="detail-canvas" style="max-width:100%;border:1px solid var(--line);cursor:crosshair;display:block"></canvas>' +
+              '<div style="margin-top:.5rem;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap">' +
+                '<button type="button" class="detail-confirm" style="font-family:inherit;font-size:.75rem;font-weight:600;border:none;border-radius:7px;padding:.45rem .9rem;cursor:pointer;background:#b8860b;color:#fff">Utiliser ce détail</button>' +
+                '<span class="detail-status muted" style="font-size:.72rem"></span>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        }
       }
       if (st === 'regenerate' && r.regenHint) {
         actions = '<div class="muted" style="font-size:.78rem;margin-top:.6rem">Consigne IA : « ' + esc(r.regenHint) + ' »</div>' + actions;
@@ -1925,22 +1969,18 @@ document.querySelectorAll('.crop-quick-launch').forEach(function (btn) {
   });
 });
 
-document.querySelectorAll('.orig-cropper').forEach(function (wrap) {
-  var id = wrap.dataset.id;
-  var input = wrap.querySelector('.crop-input');
-  var canvasWrap = wrap.querySelector('.crop-canvas-wrap');
-  var canvas = wrap.querySelector('.crop-canvas');
-  var confirmBtn = wrap.querySelector('.crop-confirm');
-  var modeBtn = wrap.querySelector('.crop-mode-toggle');
-  var hint = wrap.querySelector('.crop-hint');
+// Logique de recadrage partagée entre les 2 usages : remplacer la référence
+// (.orig-cropper, image choisie en local) et encadrer un détail sur une image
+// déjà affichée (.detail-cropper, chargée depuis son URL /img/...). Même
+// cycle à un bouton (icône crayon) : off -> rect -> freeform -> off. 'off' :
+// outil inactif. 'rect' : rectangle simple. 'freeform' : tracé à main levée
+// (utile pour une forme irrégulière — évite d'embarquer le reste de
+// l'assemblage/de l'image que capturerait un rectangle englobant). Refermer
+// (retour à 'off') CONSERVE le tracé en cours pour que le bouton de
+// validation reste utilisable juste après.
+function wireCropper(canvas, canvasWrap, modeBtn, hint, confirmBtn, onConfirm) {
   var ctx2d = canvas.getContext('2d');
   var img = new Image();
-  // Cycle à un seul bouton (icône crayon) : off -> rect -> freeform -> off.
-  // 'off' : outil inactif (on regarde juste la photo). 'rect' : rectangle
-  // simple. 'freeform' : tracé à main levée (utile pour une pièce de forme
-  // irrégulière — évite d'embarquer le reste de l'assemblage que capturerait
-  // un rectangle englobant). Refermer (retour à 'off') CONSERVE le tracé en
-  // cours pour que "Utiliser cette zone" reste utilisable juste après.
   var mode = 'off';
   var rect = null, dragging = false, start = null;
   var points = [], drawingPath = false;
@@ -1989,26 +2029,6 @@ document.querySelectorAll('.orig-cropper').forEach(function (wrap) {
     redraw();
   });
 
-  input.addEventListener('change', function () {
-    var file = input.files[0];
-    if (!file) return;
-    var reader = new FileReader();
-    reader.onload = function (e) {
-      img.onload = function () {
-        var maxW = 520, scale = Math.min(1, maxW / img.width);
-        canvas.width = Math.round(img.width * scale);
-        canvas.height = Math.round(img.height * scale);
-        mode = 'off';
-        resetSelection();
-        applyModeUI();
-        redraw();
-        canvasWrap.style.display = 'block';
-      };
-      img.src = e.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-
   canvas.addEventListener('mousedown', function (e) {
     if (mode === 'off') return;
     var r = canvas.getBoundingClientRect();
@@ -2036,9 +2056,9 @@ document.querySelectorAll('.orig-cropper').forEach(function (wrap) {
 
   // Recadre depuis l'image source d'origine (jamais le tracé rouge dessiné
   // par-dessus dans le canvas d'affichage) : évite de polluer la référence
-  // avec le trait de sélection, et conserve la pleine résolution du fichier
-  // choisi. En mode forme libre, tout ce qui est hors du tracé est rendu
-  // transparent (masque 'destination-in') : Gemini ne voit que la pièce.
+  // avec le trait de sélection, et conserve la pleine résolution de l'image.
+  // En mode forme libre, tout ce qui est hors du tracé est rendu transparent
+  // (masque 'destination-in') : Gemini ne voit que la zone choisie.
   function buildCropBlob(cb) {
     var toSrc = img.width / canvas.width;
     var crop = document.createElement('canvas');
@@ -2068,7 +2088,35 @@ document.querySelectorAll('.orig-cropper').forEach(function (wrap) {
   confirmBtn.addEventListener('click', function () {
     if (!rect && points.length < 3) { alert("Choisis un mode de découpe (icône) et dessine d'abord une zone."); return; }
     if (rect && (rect.w < 5 || rect.h < 5)) { alert("Dessine d'abord un rectangle autour de la pièce."); return; }
-    buildCropBlob(function (blob) {
+    buildCropBlob(function (blob) { onConfirm(blob); });
+  });
+
+  return {
+    loadImage: function (src) {
+      img.onload = function () {
+        var maxW = 520, scale = Math.min(1, maxW / img.width);
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        mode = 'off';
+        resetSelection();
+        applyModeUI();
+        redraw();
+        canvasWrap.style.display = 'block';
+      };
+      img.onerror = function () { alert('Image indisponible.'); };
+      img.src = src;
+    },
+  };
+}
+
+document.querySelectorAll('.orig-cropper').forEach(function (wrap) {
+  var id = wrap.dataset.id;
+  var input = wrap.querySelector('.crop-input');
+  var confirmBtn = wrap.querySelector('.crop-confirm');
+  var cropper = wireCropper(
+    wrap.querySelector('.crop-canvas'), wrap.querySelector('.crop-canvas-wrap'),
+    wrap.querySelector('.crop-mode-toggle'), wrap.querySelector('.crop-hint'), confirmBtn,
+    function (blob) {
       var fd = new FormData();
       fd.append('id', id);
       fd.append('image', blob, 'crop.png');
@@ -2077,6 +2125,57 @@ document.querySelectorAll('.orig-cropper').forEach(function (wrap) {
       fetch('/admin/replace-original', { method: 'POST', body: fd })
         .then(function () { location.reload(); })
         .catch(function () { alert("Échec de l'envoi."); confirmBtn.disabled = false; confirmBtn.textContent = 'Utiliser cette zone'; });
+    }
+  );
+  input.addEventListener('change', function () {
+    var file = input.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function (e) { cropper.loadImage(e.target.result); };
+    reader.readAsDataURL(file);
+  });
+});
+
+// Bouton "Encadrer un détail" (barre de régénération) : ouvre un choix entre
+// l'original et la version H4F, charge l'image CHOISIE directement depuis son
+// URL déjà servie par le worker (même origine, pas de fichier à uploader),
+// et au lieu d'envoyer immédiatement, remplit les champs cachés du formulaire
+// de régénération -- le détail part avec la consigne texte au clic Régénérer,
+// comme un 2e élément visuel joint à la demande faite à l'IA.
+document.querySelectorAll('.detail-toggle').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var card = btn.closest('.card');
+    var dc = card && card.querySelector('.detail-cropper');
+    if (dc) dc.style.display = dc.style.display === 'none' ? 'block' : 'none';
+  });
+});
+document.querySelectorAll('.detail-cropper').forEach(function (wrap) {
+  var card = wrap.closest('.card');
+  var form = card && card.querySelector('.regen-form');
+  var fileInput = form && form.querySelector('.detail-file');
+  var sourceInput = form && form.querySelector('.detail-source-input');
+  var confirmBtn = wrap.querySelector('.detail-confirm');
+  var statusEl = wrap.querySelector('.detail-status');
+  var pickedSource = null, pickedLabel = '';
+  var cropper = wireCropper(
+    wrap.querySelector('.detail-canvas'), wrap.querySelector('.detail-canvas-wrap'),
+    wrap.querySelector('.detail-mode-toggle'), wrap.querySelector('.detail-hint'), confirmBtn,
+    function (blob) {
+      if (!fileInput || !sourceInput) return;
+      var file = new File([blob], 'detail.png', { type: 'image/png' });
+      var dt = new DataTransfer();
+      dt.items.add(file);
+      fileInput.files = dt.files;
+      sourceInput.value = pickedSource;
+      statusEl.textContent = 'Détail joint ✓ (' + pickedLabel + ') — précise ta consigne si besoin, puis clique Régénérer.';
+    }
+  );
+  wrap.querySelectorAll('.detail-pick').forEach(function (pickBtn) {
+    pickBtn.addEventListener('click', function () {
+      pickedSource = pickBtn.dataset.source;
+      pickedLabel = pickBtn.dataset.source === 'orig' ? 'original' : 'version H4F';
+      wrap.querySelectorAll('.detail-pick').forEach(function (b) { b.style.background = b === pickBtn ? 'var(--cream)' : '#fff'; });
+      cropper.loadImage(pickBtn.dataset.url);
     });
   });
 });
@@ -2654,6 +2753,13 @@ export default {
       const action = (form.get('action') || '').toString();
       const stamp = { validatedBy: sess.email, validatedAt: nowIso() };
       const note = (form.get('note') || '').toString().slice(0, 300);
+      // Détail encadré (recadreur, barre de régénération) : jamais persisté --
+      // utilisé une fois pour CET appel Gemini, cf. geminiGenerate.
+      const detailFile = form.get('detail');
+      const detailSource = (form.get('detailSource') || '').toString();
+      const detail = (detailFile && detailFile.arrayBuffer && (detailSource === 'orig' || detailSource === 'h4f'))
+        ? { buf: await detailFile.arrayBuffer(), mime: detailFile.type || 'image/png', source: detailSource }
+        : undefined;
       if (id && action === 'publish') {
         // publication = consigne de régénération consommée -> on l'efface
         await patchPiece(env, id, Object.assign({ status: 'published', regenHint: '' }, stamp), sess.email);
@@ -2694,7 +2800,7 @@ export default {
           if (env.GEMINI_API_KEY && env.PIECES_R2) {
             const row = pdata.error ? null : pdata.rows.find((r) => r.id === id);
             const hint = freshStart ? hintNote : (hintNote || (row && row.regenHint) || '');
-            const bg = regenerateCloud(env, id, hint, sess.email);
+            const bg = regenerateCloud(env, id, hint, sess.email, undefined, detail);
             if (ctx && ctx.waitUntil) ctx.waitUntil(bg); else await bg;
           }
         }
