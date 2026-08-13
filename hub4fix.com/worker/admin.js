@@ -526,6 +526,7 @@ async function reverseOneStep(env, kind, payload) {
 async function adminUndo(request, env, sess) {
   const referer = request.headers.get('Referer') || '/admin/shadowlist';
   if (!env.DB) return new Response(null, { status: 302, headers: { Location: referer } });
+  await purgeOldUndoEntries(env);
   const entry = await env.DB.prepare(
     'SELECT * FROM undo_log WHERE reversed_at IS NULL ORDER BY id DESC LIMIT 1'
   ).first();
@@ -749,6 +750,46 @@ async function lastUndoLabel(env) {
     const row = await env.DB.prepare('SELECT label FROM undo_log WHERE reversed_at IS NULL ORDER BY id DESC LIMIT 1').first();
     return (row && row.label) || '';
   } catch { return ''; }
+}
+
+// ---- historique undo (page « Journal d'audit ») : conservé 45 jours ----
+const UNDO_RETENTION_DAYS = 45;
+function collectR2BackupKeys(kind, payload, out) {
+  if (kind === 'r2_object' && payload && payload.existed && payload.backupKey) out.push(payload.backupKey);
+  else if (kind === 'batch' && payload && Array.isArray(payload.steps)) {
+    for (const step of payload.steps) collectR2BackupKeys(step.kind, step.payload, out);
+  }
+}
+// Purge les entrées undo_log plus vieilles que la fenêtre de rétention — y
+// compris les clés de secours R2 associées (sinon elles restent facturées
+// indéfiniment pour une action qu'on ne pourra plus jamais annuler). Appelée
+// à chaque ouverture du Journal d'audit et à chaque clic sur l'icône undo :
+// pas de Cron Trigger, volume trop faible (admin à 2 personnes) pour le justifier.
+async function purgeOldUndoEntries(env) {
+  if (!env.DB) return;
+  try {
+    const cutoff = new Date(Date.now() - UNDO_RETENTION_DAYS * 86400000).toISOString();
+    const res = await env.DB.prepare('SELECT id, kind, payload FROM undo_log WHERE ts < ?').bind(cutoff).all();
+    const expired = (res && res.results) || [];
+    if (!expired.length) return;
+    if (env.PIECES_R2) {
+      for (const row of expired) {
+        try {
+          const keys = [];
+          collectR2BackupKeys(row.kind, JSON.parse(row.payload), keys);
+          for (const k of keys) await env.PIECES_R2.delete(k);
+        } catch {}
+      }
+    }
+    await env.DB.prepare('DELETE FROM undo_log WHERE ts < ?').bind(cutoff).run();
+  } catch {}
+}
+async function listUndoHistory(env) {
+  if (!env.DB) return null;
+  try {
+    const res = await env.DB.prepare('SELECT id, ts, actor, label, kind, reversed_at FROM undo_log ORDER BY id DESC LIMIT 200').all();
+    return (res && res.results) || [];
+  } catch { return []; }
 }
 // Upsert au login ; renvoie le rôle (admin par défaut si pas de base / 1er login).
 async function loginAdmin(env, sub, email, name) {
@@ -1597,6 +1638,30 @@ function statusTag(s) {
   return `<span class="tag" style="background:${m[1]};color:${m[2]}">${esc(m[0])}</span>`;
 }
 
+// Journal d'audit : historique des annulations (icône « Annuler », barre
+// latérale). Une entrée disparaît après UNDO_RETENTION_DAYS (purge côté
+// serveur, cf. purgeOldUndoEntries) — la colonne « Expire » l'annonce.
+function viewUndoJournal(rows) {
+  const head = '<h1 class="page">Journal d\'audit</h1>' +
+    '<p class="sub">Historique des annulations (icône « Annuler », barre latérale) — conservé ' + UNDO_RETENTION_DAYS + ' jours.</p>';
+  if (rows === null) return head + '<div class="err"><b>Base D1 non connectée.</b></div>';
+  const tableHead = '<tr><th>Action</th><th>Par</th><th>Date</th><th>Statut</th><th>Expire</th></tr>';
+  const now = Date.now();
+  const body = rows.length
+    ? rows.map((r) => {
+        const ageDays = (now - new Date(r.ts).getTime()) / 86400000;
+        const remaining = Math.max(0, Math.ceil(UNDO_RETENTION_DAYS - ageDays));
+        const badge = r.reversed_at
+          ? '<span class="tag" style="background:var(--cream);color:var(--earth)">annulée</span>'
+          : '<span class="tag" style="background:rgba(45,139,94,.12);color:#1f6b46">disponible</span>';
+        return '<tr><td>' + esc(r.label || r.kind) + '</td><td class="muted">' + esc(r.actor || '') + '</td>' +
+          '<td class="muted">' + fmtDate(r.ts) + '</td><td>' + badge + '</td>' +
+          '<td class="muted">' + (remaining > 0 ? remaining + ' j' : 'aujourd\'hui') + '</td></tr>';
+      }).join('')
+    : '<tr><td colspan="5" class="muted">Aucune action enregistrée.</td></tr>';
+  return head + '<table>' + tableHead + body + '</table>';
+}
+
 const TIER_LABEL = {
   confirme: 'Confirmé (≥10 témoignages)',
   confirme_score3: 'Confirmé, score business modéré',
@@ -1962,8 +2027,6 @@ function piecesToCsv(rows) {
 const SECTIONS = {
   '/admin/comptabilite': () => viewSoon('Comptabilité', 'Paiements et reversements.',
     'À venir : accès <b>comptabilité</b> aux données de paiement (via le Prestataire de Services de Paiement), réservé aux rôles autorisés.'),
-  '/admin/journal': () => viewSoon("Journal d'audit", 'Traçabilité des actions.',
-    'À venir : <b>journal</b> des connexions, approbations d\'appareils et actions sensibles.'),
 };
 
 // ==================== Candidatures modélisateur ====================
@@ -2738,6 +2801,15 @@ export default {
       const data = await loadInscriptions(env);
       const newCount = data.error ? 0 : countNew(data.rows, seen);
       return shell('/admin/appareils', sess, viewDevices(devices, sess, url.searchParams.get('e')), newCount, toValidate, pendingModelers, undoLabel);
+    }
+
+    // Journal d'audit : historique des annulations (icône « Annuler »), conservé 45 jours.
+    if (path === '/admin/journal') {
+      await purgeOldUndoEntries(env);
+      const history = await listUndoHistory(env);
+      const data = await loadInscriptions(env);
+      const newCount = data.error ? 0 : countNew(data.rows, seen);
+      return shell('/admin/journal', sess, viewUndoJournal(history), newCount, toValidate, pendingModelers, undoLabel);
     }
 
     // Tableau de bord
