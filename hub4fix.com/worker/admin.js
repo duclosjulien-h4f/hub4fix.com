@@ -564,19 +564,23 @@ async function reverseOneStep(env, kind, payload) {
     for (const step of payload.steps.slice().reverse()) await reverseOneStep(env, step.kind, step.payload);
   }
 }
-// POST /admin/undo — annule l'action non-annulée la plus récente (icône
-// barre latérale, `shell()`). Pile, pas juste "la dernière" : chaque clic
-// dépile une entrée et redescend d'un cran ; pas de "refaire". Une entrée
-// peut être un lot ('batch') regroupant plusieurs mutations d'UN geste admin
-// (ex. remplacer une référence) — reversée d'un coup, pas sous-étape par
-// sous-étape.
+// POST /admin/undo — annule une action non-annulée. Sans `id` (icône barre
+// latérale, `shell()`) : la plus récente — pile, chaque clic dépile une
+// entrée et redescend d'un cran. Avec `id` (bouton « Réinjecter » du Journal
+// d'audit) : CETTE entrée précisément, même si elle n'est pas la plus
+// récente — sans quoi restaurer un geste d'il y a 5 actions obligerait à
+// annuler les 4 plus récentes au passage. Une entrée peut être un lot
+// ('batch') regroupant plusieurs mutations d'UN geste admin (ex. remplacer
+// une référence) — reversée d'un coup, pas sous-étape par sous-étape.
 async function adminUndo(request, env, sess) {
   const referer = request.headers.get('Referer') || '/admin/shadowlist';
   if (!env.DB) return new Response(null, { status: 302, headers: { Location: referer } });
   await purgeOldUndoEntries(env);
-  const entry = await env.DB.prepare(
-    'SELECT * FROM undo_log WHERE reversed_at IS NULL ORDER BY id DESC LIMIT 1'
-  ).first();
+  let targetId = '';
+  try { const form = await request.formData(); targetId = (form.get('id') || '').toString(); } catch {}
+  const entry = targetId
+    ? await env.DB.prepare('SELECT * FROM undo_log WHERE id=? AND reversed_at IS NULL').bind(targetId).first()
+    : await env.DB.prepare('SELECT * FROM undo_log WHERE reversed_at IS NULL ORDER BY id DESC LIMIT 1').first();
   if (!entry) return new Response(null, { status: 302, headers: { Location: referer } });
   let payload;
   try { payload = JSON.parse(entry.payload); } catch { payload = null; }
@@ -1685,27 +1689,41 @@ function statusTag(s) {
   return `<span class="tag" style="background:${m[1]};color:${m[2]}">${esc(m[0])}</span>`;
 }
 
+const UNDO_REINJECT_ICON = '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="M8.7 4.3 3 10l5.7 5.7 1.4-1.4L6.8 11H14a5 5 0 0 1 0 10h-3v2h3a7 7 0 0 0 0-14H6.8l3.3-3.3z"/></svg>';
 // Journal d'audit : historique des annulations (icône « Annuler », barre
 // latérale). Une entrée disparaît après UNDO_RETENTION_DAYS (purge côté
 // serveur, cf. purgeOldUndoEntries) — la colonne « Expire » l'annonce.
+// Chaque ligne encore « disponible » a son propre bouton « Réinjecter » :
+// contrairement à l'icône barre latérale (toujours la plus récente, pile),
+// celui-ci cible CETTE entrée précisément, même si des actions plus
+// récentes existent encore — sinon remonter à un geste d'il y a 5 actions
+// obligerait à annuler les 4 plus récentes au passage.
 function viewUndoJournal(rows) {
   const head = '<h1 class="page">Journal d\'audit</h1>' +
     '<p class="sub">Historique des annulations (icône « Annuler », barre latérale) — conservé ' + UNDO_RETENTION_DAYS + ' jours.</p>';
   if (rows === null) return head + '<div class="err"><b>Base D1 non connectée.</b></div>';
-  const tableHead = '<tr><th>Action</th><th>Par</th><th>Date</th><th>Statut</th><th>Expire</th></tr>';
+  const tableHead = '<tr><th>Action</th><th>Par</th><th>Date</th><th>Statut</th><th>Expire</th><th></th></tr>';
   const now = Date.now();
   const body = rows.length
     ? rows.map((r) => {
         const ageDays = (now - new Date(r.ts).getTime()) / 86400000;
         const remaining = Math.max(0, Math.ceil(UNDO_RETENTION_DAYS - ageDays));
-        const badge = r.reversed_at
-          ? '<span class="tag" style="background:var(--cream);color:var(--earth)">annulée</span>'
-          : '<span class="tag" style="background:rgba(45,139,94,.12);color:#1f6b46">disponible</span>';
+        const available = !r.reversed_at;
+        const badge = available
+          ? '<span class="tag" style="background:rgba(45,139,94,.12);color:#1f6b46">disponible</span>'
+          : '<span class="tag" style="background:var(--cream);color:var(--earth)">annulée</span>';
+        const reinject = available
+          ? '<form method="post" action="/admin/undo" onsubmit="return confirm(' + JSON.stringify('Réinjecter : ' + (r.label || r.kind) + ' — êtes-vous sûr ?') + ')">' +
+              '<input type="hidden" name="id" value="' + esc(String(r.id)) + '">' +
+              '<button type="submit" title="Réinjecter (restaurer cette entrée précisément)" style="display:inline-flex;align-items:center;gap:.3rem;font-family:inherit;font-size:.72rem;font-weight:600;border:1px solid var(--line);border-radius:6px;padding:.3rem .55rem;background:#fff;color:var(--green);cursor:pointer">' + UNDO_REINJECT_ICON + 'Réinjecter</button>' +
+            '</form>'
+          : '';
         return '<tr><td>' + esc(r.label || r.kind) + '</td><td class="muted">' + esc(r.actor || '') + '</td>' +
           '<td class="muted">' + fmtDate(r.ts) + '</td><td>' + badge + '</td>' +
-          '<td class="muted">' + (remaining > 0 ? remaining + ' j' : 'aujourd\'hui') + '</td></tr>';
+          '<td class="muted">' + (remaining > 0 ? remaining + ' j' : 'aujourd\'hui') + '</td>' +
+          '<td>' + reinject + '</td></tr>';
       }).join('')
-    : '<tr><td colspan="5" class="muted">Aucune action enregistrée.</td></tr>';
+    : '<tr><td colspan="6" class="muted">Aucune action enregistrée.</td></tr>';
   return head + '<table>' + tableHead + body + '</table>';
 }
 
