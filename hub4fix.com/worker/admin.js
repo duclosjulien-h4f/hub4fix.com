@@ -1564,9 +1564,12 @@ function viewShadowList(data) {
             '<label style="' + inp + '">Ou recadrer une photo générale du produit (seule une photo de l\'assemblage complet existe) : ' +
               '<input type="file" class="crop-input" accept="image/*"></label>' +
             '<div class="crop-canvas-wrap" style="display:none;margin-top:.5rem">' +
+              '<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem">' +
+                '<button type="button" class="crop-mode-toggle" title="Basculer en découpe à main levée (pour isoler une pièce de forme irrégulière)" style="font-size:.85rem;line-height:1;border:1px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;padding:.3rem .55rem">✏️</button>' +
+                '<span class="crop-hint muted" style="font-size:.72rem">Dessine un rectangle autour de la pièce, puis valide</span>' +
+              '</div>' +
               '<canvas class="crop-canvas" style="max-width:100%;border:1px solid var(--line);cursor:crosshair;display:block"></canvas>' +
-              '<div style="margin-top:.5rem;display:flex;gap:.7rem;align-items:center;flex-wrap:wrap">' +
-                '<span class="muted" style="font-size:.72rem">Dessine un rectangle autour de la pièce, puis valide</span>' +
+              '<div style="margin-top:.5rem">' +
                 '<button type="button" class="crop-confirm" style="font-family:inherit;font-size:.75rem;font-weight:600;border:none;border-radius:7px;padding:.45rem .9rem;cursor:pointer;background:#b8860b;color:#fff">Utiliser cette zone</button>' +
               '</div>' +
             '</div>' +
@@ -1603,15 +1606,44 @@ document.querySelectorAll('.orig-cropper').forEach(function (wrap) {
   var canvasWrap = wrap.querySelector('.crop-canvas-wrap');
   var canvas = wrap.querySelector('.crop-canvas');
   var confirmBtn = wrap.querySelector('.crop-confirm');
+  var modeBtn = wrap.querySelector('.crop-mode-toggle');
+  var hint = wrap.querySelector('.crop-hint');
   var ctx2d = canvas.getContext('2d');
   var img = new Image();
+  // 'rect' : rectangle simple. 'freeform' : tracé à main levée (utile pour une
+  // pièce de forme irrégulière — évite d'embarquer le reste de l'assemblage
+  // que capturerait un rectangle englobant).
+  var mode = 'rect';
   var rect = null, dragging = false, start = null;
+  var points = [], drawingPath = false;
+
+  function resetSelection() { rect = null; points = []; }
 
   function redraw() {
     ctx2d.clearRect(0, 0, canvas.width, canvas.height);
     ctx2d.drawImage(img, 0, 0, canvas.width, canvas.height);
-    if (rect) { ctx2d.strokeStyle = '#C8102E'; ctx2d.lineWidth = 2; ctx2d.strokeRect(rect.x, rect.y, rect.w, rect.h); }
+    ctx2d.strokeStyle = '#C8102E'; ctx2d.lineWidth = 2;
+    if (mode === 'rect' && rect) {
+      ctx2d.strokeRect(rect.x, rect.y, rect.w, rect.h);
+    } else if (mode === 'freeform' && points.length > 1) {
+      ctx2d.beginPath();
+      ctx2d.moveTo(points[0].x, points[0].y);
+      for (var i = 1; i < points.length; i++) ctx2d.lineTo(points[i].x, points[i].y);
+      if (!drawingPath) ctx2d.closePath();
+      ctx2d.stroke();
+    }
   }
+
+  modeBtn.addEventListener('click', function () {
+    mode = mode === 'rect' ? 'freeform' : 'rect';
+    modeBtn.style.background = mode === 'freeform' ? '#b8860b' : '#fff';
+    modeBtn.style.color = mode === 'freeform' ? '#fff' : '';
+    hint.textContent = mode === 'freeform'
+      ? 'Trace le contour de la pièce à main levée, puis valide'
+      : 'Dessine un rectangle autour de la pièce, puis valide';
+    resetSelection();
+    redraw();
+  });
 
   input.addEventListener('change', function () {
     var file = input.files[0];
@@ -1622,7 +1654,7 @@ document.querySelectorAll('.orig-cropper').forEach(function (wrap) {
         var maxW = 520, scale = Math.min(1, maxW / img.width);
         canvas.width = Math.round(img.width * scale);
         canvas.height = Math.round(img.height * scale);
-        rect = null;
+        resetSelection();
         redraw();
         canvasWrap.style.display = 'block';
       };
@@ -1633,29 +1665,62 @@ document.querySelectorAll('.orig-cropper').forEach(function (wrap) {
 
   canvas.addEventListener('mousedown', function (e) {
     var r = canvas.getBoundingClientRect();
-    start = { x: e.clientX - r.left, y: e.clientY - r.top };
-    dragging = true;
+    var p = { x: e.clientX - r.left, y: e.clientY - r.top };
+    if (mode === 'rect') {
+      start = p; dragging = true;
+    } else {
+      points = [p]; drawingPath = true;
+    }
   });
   canvas.addEventListener('mousemove', function (e) {
-    if (!dragging) return;
     var r = canvas.getBoundingClientRect();
     var cur = { x: e.clientX - r.left, y: e.clientY - r.top };
-    rect = { x: Math.min(start.x, cur.x), y: Math.min(start.y, cur.y), w: Math.abs(cur.x - start.x), h: Math.abs(cur.y - start.y) };
+    if (mode === 'rect') {
+      if (!dragging) return;
+      rect = { x: Math.min(start.x, cur.x), y: Math.min(start.y, cur.y), w: Math.abs(cur.x - start.x), h: Math.abs(cur.y - start.y) };
+    } else {
+      if (!drawingPath) return;
+      points.push(cur);
+    }
     redraw();
   });
-  window.addEventListener('mouseup', function () { dragging = false; });
+  window.addEventListener('mouseup', function () { dragging = false; drawingPath = false; redraw(); });
+
+  // Recadre depuis l'image source d'origine (jamais le tracé rouge dessiné
+  // par-dessus dans le canvas d'affichage) : évite de polluer la référence
+  // avec le trait de sélection, et conserve la pleine résolution du fichier
+  // choisi. En mode forme libre, tout ce qui est hors du tracé est rendu
+  // transparent (masque 'destination-in') : Gemini ne voit que la pièce.
+  function buildCropBlob(cb) {
+    var toSrc = img.width / canvas.width;
+    var crop = document.createElement('canvas');
+    if (mode === 'rect') {
+      var sx = rect.x * toSrc, sy = rect.y * toSrc, sw = rect.w * toSrc, sh = rect.h * toSrc;
+      crop.width = Math.round(sw); crop.height = Math.round(sh);
+      crop.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, crop.width, crop.height);
+    } else {
+      var xs = points.map(function (p) { return p.x; }), ys = points.map(function (p) { return p.y; });
+      var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
+      var minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
+      var bw = maxX - minX, bh = maxY - minY;
+      crop.width = Math.round(bw * toSrc); crop.height = Math.round(bh * toSrc);
+      var cctx = crop.getContext('2d');
+      cctx.drawImage(img, minX * toSrc, minY * toSrc, bw * toSrc, bh * toSrc, 0, 0, crop.width, crop.height);
+      cctx.globalCompositeOperation = 'destination-in';
+      cctx.beginPath();
+      cctx.moveTo((points[0].x - minX) * toSrc, (points[0].y - minY) * toSrc);
+      for (var i = 1; i < points.length; i++) cctx.lineTo((points[i].x - minX) * toSrc, (points[i].y - minY) * toSrc);
+      cctx.closePath();
+      cctx.fill();
+      cctx.globalCompositeOperation = 'source-over';
+    }
+    crop.toBlob(cb, 'image/png');
+  }
 
   confirmBtn.addEventListener('click', function () {
-    if (!rect || rect.w < 5 || rect.h < 5) { alert("Dessine d'abord un rectangle autour de la pièce."); return; }
-    // Recadre depuis l'image source d'origine (jamais le rectangle rouge dessiné
-    // par-dessus dans le canvas d'affichage) : évite de polluer la référence avec
-    // le trait de sélection, et conserve la pleine résolution du fichier choisi.
-    var toSrc = img.width / canvas.width;
-    var sx = rect.x * toSrc, sy = rect.y * toSrc, sw = rect.w * toSrc, sh = rect.h * toSrc;
-    var crop = document.createElement('canvas');
-    crop.width = Math.round(sw); crop.height = Math.round(sh);
-    crop.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, crop.width, crop.height);
-    crop.toBlob(function (blob) {
+    if (mode === 'rect' && (!rect || rect.w < 5 || rect.h < 5)) { alert("Dessine d'abord un rectangle autour de la pièce."); return; }
+    if (mode === 'freeform' && points.length < 3) { alert("Trace d'abord le contour de la pièce."); return; }
+    buildCropBlob(function (blob) {
       var fd = new FormData();
       fd.append('id', id);
       fd.append('image', blob, 'crop.png');
@@ -1664,7 +1729,7 @@ document.querySelectorAll('.orig-cropper').forEach(function (wrap) {
       fetch('/admin/replace-original', { method: 'POST', body: fd })
         .then(function () { location.reload(); })
         .catch(function () { alert("Échec de l'envoi."); confirmBtn.disabled = false; confirmBtn.textContent = 'Utiliser cette zone'; });
-    }, 'image/png');
+    });
   });
 });
 </script>`;
