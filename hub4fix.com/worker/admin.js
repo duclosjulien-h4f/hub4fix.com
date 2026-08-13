@@ -141,7 +141,8 @@ function colLetter(n) {
   while (n > 0) { const r = (n - 1) % 26; s = String.fromCharCode(65 + r) + s; n = Math.floor((n - 1) / 26); }
   return s;
 }
-async function markInscriptionDeleted(env, type, email) {
+// `actor` (facultatif) : email de l'admin, pour undo_log (icône Annuler).
+async function markInscriptionDeleted(env, type, email, actor) {
   const tab = env.SHEET_TAB || 'Inscriptions';
   const token = await googleToken(env);
   const readUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.SHEET_ID}/values/${encodeURIComponent(tab)}`;
@@ -174,13 +175,17 @@ async function markInscriptionDeleted(env, type, email) {
     body: JSON.stringify({ values: outValues }),
   });
   if (!w.ok) throw new Error('sheets write ' + w.status);
+  // Restauration par identité (type+email), pas par snapshot de ligne : la
+  // ligne a été déplacée en fin de feuille, mais le undo la retrouve par
+  // recherche, pas par position — pas besoin de capturer tout l'état avant/après.
+  await recordUndo(env, actor, 'Inscription supprimée — ' + type + ' : ' + email, 'inscription_undelete', { type, email });
   return { ok: true };
 }
 
 // Nettoyage en masse : toutes les lignes marquees test=true (et pas deja
 // supprimees) sont marquees "supprime_le" et deplacees en fin de feuille, en
 // une seule ecriture.
-async function markAllTestDeleted(env) {
+async function markAllTestDeleted(env, actor) {
   const tab = env.SHEET_TAB || 'Inscriptions';
   const token = await googleToken(env);
   const readUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.SHEET_ID}/values/${encodeURIComponent(tab)}`;
@@ -216,7 +221,47 @@ async function markAllTestDeleted(env) {
     body: JSON.stringify({ values: outValues }),
   });
   if (!w.ok) throw new Error('sheets write ' + w.status);
+  // Un lot : chaque ligne nettoyée est une étape 'inscription_undelete'
+  // indépendante (restauration par identité type+email), un seul clic sur
+  // l'icône Annuler les rétablit toutes d'un coup.
+  const batch = newUndoBatch(actor, 'Nettoyage inscriptions test — ' + toDelete.length + ' ligne(s)');
+  for (const row of toDelete) batch.steps.push({ kind: 'inscription_undelete', payload: { type: row[1], email: row[2] } });
+  await flushUndoBatch(env, batch);
   return { ok: true, count: toDelete.length };
+}
+// Annule un markInscriptionDeleted/markAllTestDeleted : retrouve la ligne par
+// identité (type+email, même recherche qu'à la suppression) et efface
+// `supprime_le`. Ne restaure PAS la position d'origine dans la feuille
+// (déplacée en fin de liste au moment du soft-delete) — sans conséquence
+// fonctionnelle (le filtrage/affichage ne dépend pas de la position), juste
+// un ordre d'affichage légèrement décalé jusqu'à la prochaine action dessus.
+async function unmarkInscriptionDeleted(env, type, email) {
+  const tab = env.SHEET_TAB || 'Inscriptions';
+  const token = await googleToken(env);
+  const readUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.SHEET_ID}/values/${encodeURIComponent(tab)}`;
+  const r = await fetch(readUrl, { headers: { Authorization: 'Bearer ' + token } });
+  if (!r.ok) throw new Error('sheets read ' + r.status);
+  const values = (await r.json()).values || [];
+  if (!values.length) return;
+  const header = values[0].slice();
+  const delCol = header.findIndex((h) => h === 'supprime_le');
+  if (delCol === -1) return;
+  const width = header.length;
+  const pad = (row) => { const a = row.slice(0, width); while (a.length < width) a.push(''); return a; };
+  const rows = values.slice(1).map(pad);
+  const emailLower = String(email || '').toLowerCase().trim();
+  const idx = rows.findIndex((row) => row[1] === type && (row[2] || '').toLowerCase().trim() === emailLower && row[delCol]);
+  if (idx === -1) return;
+  rows[idx][delCol] = '';
+  const outValues = [header, ...rows];
+  const range = `${tab}!A1:${colLetter(width)}${outValues.length}`;
+  const writeUrl = `https://sheets.googleapis.com/v4/spreadsheets/${env.SHEET_ID}/values/${encodeURIComponent(range)}?valueInputOption=RAW`;
+  const w = await fetch(writeUrl, {
+    method: 'PUT',
+    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ values: outValues }),
+  });
+  if (!w.ok) throw new Error('sheets write ' + w.status);
 }
 
 function countNew(rows, seen) {
@@ -512,6 +557,8 @@ async function reverseOneStep(env, kind, payload) {
         await db.prepare(`INSERT INTO ${payload.table} (${cols.join(',')}) VALUES (${placeholders})`).bind(...cols.map((c) => row[c])).run();
       }
     }
+  } else if (kind === 'inscription_undelete') {
+    await unmarkInscriptionDeleted(env, payload.type, payload.email);
   } else if (kind === 'batch') {
     // Ordre inverse : la dernière étape enregistrée est la première défaite.
     for (const step of payload.steps.slice().reverse()) await reverseOneStep(env, step.kind, step.payload);
@@ -2547,7 +2594,7 @@ export default {
       const email = form ? String(form.get('email') || '') : '';
       if (!type || !email) return redirect('type et email requis');
       try {
-        const result = await markInscriptionDeleted(env, type, email);
+        const result = await markInscriptionDeleted(env, type, email, sess.email);
         if (result.error === 'not-found') return redirect('Inscription introuvable ou déjà supprimée.');
         if (result.error) return redirect('Erreur : ' + result.error);
         await audit(env, sess.email, 'inscription-supprimer', type + ':' + email);
@@ -2561,7 +2608,7 @@ export default {
     // tools/generate-test-partners.mjs).
     if (request.method === 'POST' && path === '/admin/inscriptions/nettoyer-test') {
       try {
-        const result = await markAllTestDeleted(env);
+        const result = await markAllTestDeleted(env, sess.email);
         await audit(env, sess.email, 'inscriptions-nettoyer-test', String(result.count) + ' ligne(s)');
         return json(result);
       } catch (e) {
