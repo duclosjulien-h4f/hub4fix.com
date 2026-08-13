@@ -340,7 +340,9 @@ async function upsertPiece(env, piece) {
   return { ok: true };
 }
 // Patch ciblé (publish / reject) : ne touche que les colonnes de `patch`.
-async function patchPiece(env, id, patch) {
+// `actor` (facultatif) : chaîne (email) -> enregistrement immédiat isolé ;
+// objet `{steps:[]}` (cf. newUndoBatch) -> empile une étape dans un lot.
+async function patchPiece(env, id, patch, actor) {
   const tab = piecesTab(env);
   const v = await sheetsValues(env, tab);
   if (!v.length) return { ok: false };
@@ -350,13 +352,45 @@ async function patchPiece(env, id, patch) {
   for (let i = 1; i < v.length; i++) { if ((v[i][idIdx] || '') === id) { found = i; break; } }
   if (found < 0) return { ok: false };
   const row = header.map((h, i) => (patch[h] != null ? String(patch[h]) : (v[found][i] != null ? v[found][i] : '')));
-  await sheetsWrite(env, 'update', `${tab}!A${found + 1}`, [row]);
+  const range = `${tab}!A${found + 1}`;
+  // Snapshot de la ligne AVANT écrasement : un seul point de capture couvre
+  // publier/rejeter/régénérer/réactiver/remplacement de référence, tous les
+  // appelants de patchPiece.
+  const nameIdx = header.indexOf('name');
+  const pieceName = (v[found][nameIdx] || id);
+  const label = 'Fiche pièce — ' + pieceName + (patch.status ? ' (' + patch.status + ')' : '');
+  const undoPayload = { range, previousValues: [v[found]] };
+  if (actor && actor.steps) actor.steps.push({ kind: 'sheet_row', payload: undoPayload });
+  else await recordUndo(env, actor, label, 'sheet_row', undoPayload);
+  await sheetsWrite(env, 'update', range, [row]);
   return { ok: true };
 }
 
 // ---- R2 (stockage images + fichiers 3D privé) ----
-async function r2Put(env, key, buf, ct, filename) {
+// `undo` (facultatif) : chaîne+objet `{actor,label}` -> enregistrement immédiat
+// isolé ; objet `{actor,label,steps:[]}` (cf. newUndoBatch) -> empile une
+// étape dans un lot. Sauvegarde l'objet existant à `key` (s'il y en a un)
+// dans une clé de secours avant de l'écraser. Sans ce paramètre, comportement
+// inchangé (écrasement direct) — utilisé par le pipeline automatisé.
+async function r2Put(env, key, buf, ct, filename, undo) {
   if (!env.PIECES_R2) return false;
+  if (undo) {
+    try {
+      const prev = await env.PIECES_R2.get(key);
+      let stepPayload;
+      if (prev) {
+        const backupKey = '_undo/' + crypto.randomUUID();
+        const prevBuf = await prev.arrayBuffer();
+        const prevCt = (prev.httpMetadata && prev.httpMetadata.contentType) || 'application/octet-stream';
+        await env.PIECES_R2.put(backupKey, prevBuf, { httpMetadata: { contentType: prevCt } });
+        stepPayload = { key, backupKey, existed: true, contentType: prevCt };
+      } else {
+        stepPayload = { key, existed: false };
+      }
+      if (undo.steps) undo.steps.push({ kind: 'r2_object', payload: stepPayload });
+      else await recordUndo(env, undo.actor, undo.label, 'r2_object', stepPayload);
+    } catch {}
+  }
   await env.PIECES_R2.put(key, buf, {
     httpMetadata: { contentType: ct || 'application/octet-stream' },
     customMetadata: filename ? { filename } : undefined,
@@ -393,18 +427,20 @@ async function adminUpload3d(request, env, sess) {
     if (!SRC_3D_EXTS.includes(extOf(src.name))) {
       return new Response('Format source non accepté (' + esc(extOf(src.name)) + ') — attendu : ' + SRC_3D_EXTS.join(', '), { status: 400 });
     }
-    await r2Put(env, 'src/' + id, await src.arrayBuffer(), 'application/octet-stream', src.name);
+    await r2Put(env, 'src/' + id, await src.arrayBuffer(), 'application/octet-stream', src.name,
+      { actor: sess.email, label: 'Fichier 3D source — ' + id });
     patch.modeled = 'true';
     done.push('source ' + src.name);
   }
   if (glb && glb.arrayBuffer && glb.name) {
     if (extOf(glb.name) !== '.glb') return new Response('Le mesh d\'affichage doit être un .glb', { status: 400 });
-    await r2Put(env, 'glb/' + id, await glb.arrayBuffer(), 'model/gltf-binary', glb.name);
+    await r2Put(env, 'glb/' + id, await glb.arrayBuffer(), 'model/gltf-binary', glb.name,
+      { actor: sess.email, label: 'Mesh GLB — ' + id });
     patch.model3d = '/model/' + id;
     done.push('glb ' + glb.name);
   }
   if (done.length) {
-    try { await patchPiece(env, id, patch); } catch { /* fichier stocké, patch Sheet à rejouer */ }
+    try { await patchPiece(env, id, patch, sess.email); } catch { /* fichier stocké, patch Sheet à rejouer */ }
     await audit(env, sess.email, 'piece-file', id + ' — ' + done.join(', '));
   }
   return new Response(null, { status: 302, headers: { Location: '/admin/shadowlist' } });
@@ -427,14 +463,85 @@ async function adminReplaceOriginal(request, env, sess, ctx) {
   if (!img || !img.arrayBuffer || !img.type || !img.type.startsWith('image/')) {
     return new Response('Fichier image requis', { status: 400 });
   }
-  await r2Put(env, 'orig/' + id, await img.arrayBuffer(), img.type);
+  // Un seul lot undo pour tout le geste "remplacer la référence" (écrasement
+  // orig/<id> + régénération h4f/<id> + statut) : un clic sur l'icône undo
+  // défait tout d'un coup, pas seulement le dernier des 3 sous-effets.
+  const batch = newUndoBatch(sess.email, 'Référence remplacée — ' + id);
+  await r2Put(env, 'orig/' + id, await img.arrayBuffer(), img.type, undefined, batch);
   await audit(env, sess.email, 'piece-original-replaced', id);
   if (env.GEMINI_API_KEY && env.PIECES_R2) {
     const row = (await loadPieces(env)).rows?.find?.((r) => r.id === id);
-    const bg = regenerateCloud(env, id, row?.regenHint || '');
+    const bg = regenerateCloud(env, id, row?.regenHint || '', sess.email, batch)
+      .then(() => flushUndoBatch(env, batch));
     if (ctx && ctx.waitUntil) ctx.waitUntil(bg); else await bg;
+  } else {
+    await flushUndoBatch(env, batch);
   }
   return new Response(null, { status: 302, headers: { Location: '/admin/shadowlist' } });
+}
+
+// Défait UNE mutation (sheet_row | r2_object | d1_row). Partagé entre une
+// entrée simple et chaque étape d'un lot ('batch', cf. newUndoBatch) — un
+// lot reversé appelle ceci une fois par étape, en ordre inverse.
+async function reverseOneStep(env, kind, payload) {
+  if (kind === 'sheet_row') {
+    await sheetsWrite(env, 'update', payload.range, payload.previousValues);
+  } else if (kind === 'r2_object' && env.PIECES_R2) {
+    if (payload.existed) {
+      const backup = await env.PIECES_R2.get(payload.backupKey);
+      if (backup) {
+        await env.PIECES_R2.put(payload.key, await backup.arrayBuffer(), {
+          httpMetadata: { contentType: payload.contentType || 'application/octet-stream' },
+        });
+        await env.PIECES_R2.delete(payload.backupKey);
+      }
+    } else {
+      await env.PIECES_R2.delete(payload.key);
+    }
+  } else if (kind === 'd1_row' && env[payload.db]) {
+    const db = env[payload.db];
+    for (const row of payload.rows) {
+      const cols = Object.keys(row);
+      const exists = await db.prepare(`SELECT 1 FROM ${payload.table} WHERE ${payload.pkCol}=?`).bind(row[payload.pkCol]).first();
+      if (exists) {
+        const sets = cols.filter((c) => c !== payload.pkCol).map((c) => `${c}=?`).join(',');
+        const vals = cols.filter((c) => c !== payload.pkCol).map((c) => row[c]);
+        await db.prepare(`UPDATE ${payload.table} SET ${sets} WHERE ${payload.pkCol}=?`).bind(...vals, row[payload.pkCol]).run();
+      } else {
+        const placeholders = cols.map(() => '?').join(',');
+        await db.prepare(`INSERT INTO ${payload.table} (${cols.join(',')}) VALUES (${placeholders})`).bind(...cols.map((c) => row[c])).run();
+      }
+    }
+  } else if (kind === 'batch') {
+    // Ordre inverse : la dernière étape enregistrée est la première défaite.
+    for (const step of payload.steps.slice().reverse()) await reverseOneStep(env, step.kind, step.payload);
+  }
+}
+// POST /admin/undo — annule l'action non-annulée la plus récente (icône
+// barre latérale, `shell()`). Pile, pas juste "la dernière" : chaque clic
+// dépile une entrée et redescend d'un cran ; pas de "refaire". Une entrée
+// peut être un lot ('batch') regroupant plusieurs mutations d'UN geste admin
+// (ex. remplacer une référence) — reversée d'un coup, pas sous-étape par
+// sous-étape.
+async function adminUndo(request, env, sess) {
+  const referer = request.headers.get('Referer') || '/admin/shadowlist';
+  if (!env.DB) return new Response(null, { status: 302, headers: { Location: referer } });
+  const entry = await env.DB.prepare(
+    'SELECT * FROM undo_log WHERE reversed_at IS NULL ORDER BY id DESC LIMIT 1'
+  ).first();
+  if (!entry) return new Response(null, { status: 302, headers: { Location: referer } });
+  let payload;
+  try { payload = JSON.parse(entry.payload); } catch { payload = null; }
+  if (payload) {
+    try {
+      await reverseOneStep(env, entry.kind, payload);
+      await env.DB.prepare('UPDATE undo_log SET reversed_at=? WHERE id=?').bind(nowIso(), entry.id).run();
+      await audit(env, sess.email, 'undo', entry.label);
+    } catch (e) {
+      await audit(env, sess.email, 'undo-fail', entry.label + ' — ' + String(e).slice(0, 150));
+    }
+  }
+  return new Response(null, { status: 302, headers: { Location: referer } });
 }
 
 // ---- Régénération cloud (immédiate) : le worker appelle Gemini lui-même ----
@@ -474,7 +581,14 @@ async function geminiGenerate(env, prompt, imgBuf, mime) {
   }
   throw new Error('gemini: aucune image dans la reponse');
 }
-async function regenerateCloud(env, id, hint) {
+// `batch` (facultatif) : lot undo fourni par l'appelant (ex. adminReplaceOriginal,
+// qui a déjà une étape orig/<id> et veut que h4f/<id> + le statut rejoignent
+// le MÊME lot). Sans lot fourni (bouton "Régénérer" seul), regenerateCloud
+// crée et referme son propre lot (h4f/<id> + statut, un seul clic pour annuler).
+async function regenerateCloud(env, id, hint, actor, batch) {
+  actor = actor || 'cloud-regen';
+  const ownsBatch = !batch;
+  const b = batch || newUndoBatch(actor, 'Régénération — ' + id);
   try {
     const orig = await env.PIECES_R2.get('orig/' + id);
     if (!orig) throw new Error('pas d\'original dans R2');
@@ -484,13 +598,14 @@ async function regenerateCloud(env, id, hint) {
     if (hint) prompt += '\n\nAdmin guidance for this specific piece (must be respected): ' + hint;
     const mime = (orig.httpMetadata && orig.httpMetadata.contentType) || 'image/png';
     const out = await geminiGenerate(env, prompt, await orig.arrayBuffer(), mime);
-    await r2Put(env, 'h4f/' + id, out, 'image/png');
-    await patchPiece(env, id, { status: 'to-validate' });
+    await r2Put(env, 'h4f/' + id, out, 'image/png', undefined, b);
+    await patchPiece(env, id, { status: 'to-validate' }, b);
     await audit(env, 'cloud-regen', 'piece-regen-done', id);
   } catch (e) {
     // la pièce reste en 'regenerate' -> le pipeline local prendra le relais
     await audit(env, 'cloud-regen', 'piece-regen-fail', id + ' — ' + String(e).slice(0, 150));
   }
+  if (ownsBatch) await flushUndoBatch(env, b);
 }
 
 // POST /api/pieces — le pipeline pousse méta + original + visuel (auth token).
@@ -588,6 +703,52 @@ function nowIso() { return new Date().toISOString(); }
 async function audit(env, actor, action, detail) {
   if (!env.DB) return;
   try { await env.DB.prepare('INSERT INTO audit (ts,actor,action,detail) VALUES (?,?,?,?)').bind(nowIso(), actor, action, detail || '').run(); } catch {}
+}
+
+// ---- undo global (icône barre latérale) ----
+// Contrairement à audit() (log texte), chaque ligne porte de quoi RESTAURER
+// l'état précédent. Non-fatal comme audit() : une base pas encore migrée ne
+// doit jamais faire échouer l'action elle-même, seulement priver de filet.
+async function recordUndo(env, actor, label, kind, payload) {
+  if (!env.DB) return;
+  try {
+    await env.DB.prepare('INSERT INTO undo_log (ts,actor,label,kind,payload) VALUES (?,?,?,?,?)')
+      .bind(nowIso(), actor || '', label || '', kind, JSON.stringify(payload)).run();
+  } catch {}
+}
+// Snapshot des lignes D1 concernées avant UPDATE/DELETE destructif
+// (candidature modélisateur : suppression, édition). `db` = nom du binding
+// ('DB' ou 'DB_PARTNER') tel qu'exposé sur env. `whereCol`/`whereVal` peut
+// matcher PLUSIEURS lignes (ex. reservations.user_id — pas une clé primaire) :
+// toutes sont capturées, `pkCol` sert à la restauration ligne par ligne.
+// `actorOrBatch` : chaîne (email) -> enregistrement immédiat isolé ; objet
+// `{steps:[]}` -> empile une étape dans un lot (cf. newUndoBatch ci-dessous).
+async function snapshotD1Rows(env, db, actorOrBatch, label, table, pkCol, whereCol, whereVal) {
+  if (!env[db]) return;
+  try {
+    const res = await env[db].prepare(`SELECT * FROM ${table} WHERE ${whereCol}=?`).bind(whereVal).all();
+    const rows = (res && res.results) || [];
+    if (!rows.length) return;
+    const payload = { db, table, pkCol, rows };
+    if (actorOrBatch && actorOrBatch.steps) actorOrBatch.steps.push({ kind: 'd1_row', payload });
+    else await recordUndo(env, actorOrBatch, label, 'd1_row', payload);
+  } catch {}
+}
+// Un "lot" regroupe plusieurs mutations déclenchées par UNE action admin
+// (ex. remplacer une référence -> écrase orig/<id>, régénère h4f/<id>, change
+// le statut) en UNE seule entrée undo_log : un clic sur l'icône undo défait
+// tout le lot d'un coup, dans l'ordre inverse des étapes. Sans ça, l'admin
+// devrait cliquer plusieurs fois pour revenir à l'état d'avant SON geste.
+function newUndoBatch(actor, label) { return { actor, label, steps: [] }; }
+async function flushUndoBatch(env, batch) {
+  if (batch && batch.steps.length) await recordUndo(env, batch.actor, batch.label, 'batch', { steps: batch.steps });
+}
+async function lastUndoLabel(env) {
+  if (!env.DB) return '';
+  try {
+    const row = await env.DB.prepare('SELECT label FROM undo_log WHERE reversed_at IS NULL ORDER BY id DESC LIMIT 1').first();
+    return (row && row.label) || '';
+  } catch { return ''; }
 }
 // Upsert au login ; renvoie le rôle (admin par défaut si pas de base / 1er login).
 async function loginAdmin(env, sub, email, name) {
@@ -757,7 +918,7 @@ tr.is-new td{background:rgba(45,139,94,.05)}
 }
 `;
 
-function shell(activePath, sess, content, newCount, toValidate, pendingModelers) {
+function shell(activePath, sess, content, newCount, toValidate, pendingModelers, lastUndoLabel) {
   const role = sess.role || 'admin';
   const items = NAV.filter((n) => n.roles.includes(role))
     .map((n) => {
@@ -767,6 +928,17 @@ function shell(activePath, sess, content, newCount, toValidate, pendingModelers)
       else if (n.path === '/admin/modelisateurs' && pendingModelers > 0) badge = `<span class="pill">${pendingModelers}</span>`;
       return `<a href="${n.path}"${n.path === activePath ? ' class="active"' : ''}><span>${esc(n.label)}</span>${badge}</a>`;
     }).join('');
+  // Icône undo globale : visible sur toutes les pages, actionnable (verte)
+  // seulement s'il existe une action non-annulée. Confirmation avant d'agir
+  // (annuler une annulation n'est pas prévu — irréversible en ce sens-là).
+  const undoActive = !!lastUndoLabel;
+  const undoIcon = '<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="M8.7 4.3 3 10l5.7 5.7 1.4-1.4L6.8 11H14a5 5 0 0 1 0 10h-3v2h3a7 7 0 0 0 0-14H6.8l3.3-3.3z"/></svg>';
+  const undoBtn = '<form method="post" action="/admin/undo" style="margin-top:.6rem"' +
+      (undoActive ? ' onsubmit="return confirm(' + JSON.stringify('Annuler : ' + lastUndoLabel + ' ?') + ')"' : '') + '>' +
+    '<button type="submit"' + (undoActive ? '' : ' disabled') + ' title="' + esc(undoActive ? 'Annuler : ' + lastUndoLabel : 'Rien à annuler') + '" ' +
+      'style="display:inline-flex;align-items:center;gap:.4rem;font-family:inherit;font-size:.76rem;font-weight:600;border:1px solid var(--line);border-radius:7px;padding:.4rem .7rem;background:#fff;color:' +
+      (undoActive ? 'var(--green);cursor:pointer' : 'var(--line);cursor:not-allowed') + '">' + undoIcon + 'Annuler</button>' +
+    '</form>';
   return htmlResponse(
     '<!doctype html><html lang="fr"><head><meta charset="utf-8">' +
     '<meta name="viewport" content="width=device-width,initial-scale=1"><title>Hub4Fix — Admin</title>' +
@@ -778,7 +950,7 @@ function shell(activePath, sess, content, newCount, toValidate, pendingModelers)
       '<div class="brand">Hub<sup>4</sup>Fix<span>Administration</span></div>' +
       '<nav class="nav">' + items + '</nav>' +
       '<div class="side-foot"><div class="who">' + esc(sess.name) + '<small>' + esc(sess.email) + ' · ' + esc(role) + '</small></div>' +
-      '<a class="logout" href="/auth/logout">Déconnexion</a></div>' +
+      '<a class="logout" href="/auth/logout">Déconnexion</a>' + undoBtn + '</div>' +
     '</aside>' +
     '<main class="content">' + content + '</main>' +
     '</div></body></html>'
@@ -1839,8 +2011,9 @@ async function decideModelerApplication(env, appId, decision, adminEmail) {
 // lien suspect sans tout supprimer.
 async function updatePartnerApplication(env, appId, motivation, portfolio, adminEmail) {
   if (!env.DB_PARTNER) return { ok: false, msg: 'Base partenaire non liée.' };
-  const app = await env.DB_PARTNER.prepare('SELECT id FROM partners WHERE id = ?').bind(appId).first();
+  const app = await env.DB_PARTNER.prepare('SELECT id, email FROM partners WHERE id = ?').bind(appId).first();
   if (!app) return { ok: false, msg: 'Candidature introuvable.' };
+  await snapshotD1Rows(env, 'DB_PARTNER', adminEmail, 'Édition candidature — ' + app.email, 'partners', 'id', 'id', appId);
   await env.DB_PARTNER.prepare('UPDATE partners SET motivation = ?, portfolio = ? WHERE id = ?')
     .bind(String(motivation || '').slice(0, 2000), String(portfolio || '').slice(0, 500), appId).run();
   await audit(env, adminEmail, 'partner_edited', 'partner#' + appId);
@@ -1852,14 +2025,23 @@ async function updatePartnerApplication(env, appId, motivation, portfolio, admin
 // (le compte B2C reste), ni à l'autre rôle si le compte cumule les deux.
 async function deletePartner(env, appId, adminEmail) {
   if (!env.DB_PARTNER) return { ok: false, msg: 'Base partenaire non liée.' };
-  const p = await env.DB_PARTNER.prepare('SELECT id, user_id, type FROM partners WHERE id = ?').bind(appId).first();
+  const p = await env.DB_PARTNER.prepare('SELECT id, user_id, type, email FROM partners WHERE id = ?').bind(appId).first();
   if (!p) return { ok: false, msg: 'Candidature introuvable.' };
+  const label = 'Suppression candidature — ' + p.email;
+  // Un seul lot undo pour les 2 DELETE (lignes enfant + ligne partners) : un
+  // clic défait tout, dans l'ordre inverse (partners recréée d'abord, puis
+  // printer_profiles/reservations — jamais d'enfant orphelin d'un parent absent).
+  const batch = newUndoBatch(adminEmail, label);
   if (p.type === 'printer') {
+    await snapshotD1Rows(env, 'DB_PARTNER', batch, label, 'printer_profiles', 'user_id', 'user_id', p.user_id);
     await env.DB_PARTNER.prepare('DELETE FROM printer_profiles WHERE user_id = ?').bind(p.user_id).run();
   } else {
+    await snapshotD1Rows(env, 'DB_PARTNER', batch, label, 'reservations', 'id', 'user_id', p.user_id);
     await env.DB_PARTNER.prepare('DELETE FROM reservations WHERE user_id = ?').bind(p.user_id).run();
   }
+  await snapshotD1Rows(env, 'DB_PARTNER', batch, label, 'partners', 'id', 'id', appId);
   await env.DB_PARTNER.prepare('DELETE FROM partners WHERE id = ?').bind(appId).run();
+  await flushUndoBatch(env, batch);
   await audit(env, adminEmail, 'partner_deleted', 'partner#' + appId + ' (' + p.type + ')');
   return { ok: true };
 }
@@ -2273,6 +2455,9 @@ export default {
     const pdata = await loadPieces(env);
     const toValidate = pdata.error ? 0 : countToValidate(pdata.rows);
     const pendingModelers = await countPendingModelers(env);
+    // Icône undo (barre latérale, toutes pages) : calculée une fois, réutilisée
+    // par tous les appels shell() ci-dessous.
+    const undoLabel = await lastUndoLabel(env);
 
     // Fichier source 3D : upload (POST) et téléchargement (GET) — admin connecté uniquement.
     if (request.method === 'POST' && path === '/admin/upload3d') {
@@ -2282,6 +2467,12 @@ export default {
     // Remplacement manuel de la référence privée (photo recadrée ou prise soi-même).
     if (request.method === 'POST' && path === '/admin/replace-original') {
       return adminReplaceOriginal(request, env, sess, ctx);
+    }
+
+    // Annulation globale (icône barre latérale) : défait l'action non-annulée
+    // la plus récente, quelle que soit la page d'où elle vient.
+    if (request.method === 'POST' && path === '/admin/undo') {
+      return adminUndo(request, env, sess);
     }
 
     // Nettoyage des inscriptions (comptes test, doublons...) : marque "supprime_le"
@@ -2337,7 +2528,7 @@ export default {
       const note = (form.get('note') || '').toString().slice(0, 300);
       if (id && action === 'publish') {
         // publication = consigne de régénération consommée -> on l'efface
-        await patchPiece(env, id, Object.assign({ status: 'published', regenHint: '' }, stamp));
+        await patchPiece(env, id, Object.assign({ status: 'published', regenHint: '' }, stamp), sess.email);
         await audit(env, sess.email, 'piece-publish', id);
       } else if (id && action === 'regenerate') {
         // Non-correspondance original/H4F. La précision saisie est transmise à
@@ -2362,7 +2553,7 @@ export default {
           const comment = (cmd[2] || '').trim();
           const patch = Object.assign({ status: 'verify-original' }, stamp);
           if (comment) patch.regenHint = comment;
-          await patchPiece(env, id, patch);
+          await patchPiece(env, id, patch, sess.email);
           await audit(env, sess.email, 'piece-verify-original', id + (comment ? ' — ' + comment : ''));
         } else {
           const freshStart = cmdName === 'new';
@@ -2370,27 +2561,27 @@ export default {
           const patch = Object.assign({ status: 'regenerate' }, stamp);
           if (freshStart) patch.regenHint = hintNote; // remplace TOUJOURS (y compris par vide)
           else if (hintNote) patch.regenHint = hintNote;
-          await patchPiece(env, id, patch);
+          await patchPiece(env, id, patch, sess.email);
           await audit(env, sess.email, 'piece-regenerate', id + (freshStart ? ' [/new]' : '') + (hintNote ? ' — ' + hintNote : ''));
           if (env.GEMINI_API_KEY && env.PIECES_R2) {
             const row = pdata.error ? null : pdata.rows.find((r) => r.id === id);
             const hint = freshStart ? hintNote : (hintNote || (row && row.regenHint) || '');
-            const bg = regenerateCloud(env, id, hint);
+            const bg = regenerateCloud(env, id, hint, sess.email);
             if (ctx && ctx.waitUntil) ctx.waitUntil(bg); else await bg;
           }
         }
       } else if (id && action === 'reject') {
         // Verdict métier définitif : fabrication additive non pertinente.
-        await patchPiece(env, id, Object.assign({ status: 'rejected', rejectReason: note }, stamp));
+        await patchPiece(env, id, Object.assign({ status: 'rejected', rejectReason: note }, stamp), sess.email);
         await audit(env, sess.email, 'piece-reject', id + (note ? ' — ' + note : ''));
       } else if (id && action === 'reactivate') {
-        await patchPiece(env, id, Object.assign({ status: 'to-validate', rejectReason: '' }, stamp));
+        await patchPiece(env, id, Object.assign({ status: 'to-validate', rejectReason: '' }, stamp), sess.email);
         await audit(env, sess.email, 'piece-reactivate', id);
       }
       return new Response(null, { status: 302, headers: { Location: '/admin/shadowlist' } });
     }
     if (path === '/admin/shadowlist') {
-      return shell('/admin/shadowlist', sess, viewShadowList(pdata), 0, toValidate, pendingModelers);
+      return shell('/admin/shadowlist', sess, viewShadowList(pdata), 0, toValidate, pendingModelers, undoLabel);
     }
 
     // Candidatures modélisateur : décision (POST, admin/sous-admin) puis liste (GET).
@@ -2414,7 +2605,7 @@ export default {
     }
     if (path === '/admin/modelisateurs') {
       const apps = await loadModelerApplications(env);
-      return shell('/admin/modelisateurs', sess, viewModelerApplications(apps, url.searchParams.get('m'), url.searchParams.get('edit')), 0, toValidate, pendingModelers);
+      return shell('/admin/modelisateurs', sess, viewModelerApplications(apps, url.searchParams.get('m'), url.searchParams.get('edit')), 0, toValidate, pendingModelers, undoLabel);
     }
 
     // Photo de réservation (privée) — admin connecté uniquement, lue dans RESERV_R2.
@@ -2442,7 +2633,7 @@ export default {
     }
     if (path === '/admin/reservations') {
       const resvs = await loadReservations(env);
-      return shell('/admin/reservations', sess, viewReservations(resvs, url.searchParams.get('m')), 0, toValidate, pendingModelers);
+      return shell('/admin/reservations', sess, viewReservations(resvs, url.searchParams.get('m')), 0, toValidate, pendingModelers, undoLabel);
     }
 
     // Fichier déposé par un modélisateur (source natif ou STEP) — admin connecté
@@ -2484,7 +2675,7 @@ export default {
     }
     if (path === '/admin/depot') {
       const pieces = await loadPieces(env);
-      return shell('/admin/depot', sess, viewDepot(pieces, url.searchParams.get('m'), url.searchParams.get('e')), 0, toValidate, pendingModelers);
+      return shell('/admin/depot', sess, viewDepot(pieces, url.searchParams.get('m'), url.searchParams.get('e')), 0, toValidate, pendingModelers, undoLabel);
     }
 
     // Modèles 3D : décision d'examen (POST) puis file d'attente (GET).
@@ -2503,7 +2694,7 @@ export default {
     }
     if (path === '/admin/modeles') {
       const subs = await loadSubmissions(env);
-      return shell('/admin/modeles', sess, viewModeles(subs, url.searchParams.get('m')), 0, toValidate, pendingModelers);
+      return shell('/admin/modeles', sess, viewModeles(subs, url.searchParams.get('m')), 0, toValidate, pendingModelers, undoLabel);
     }
 
     if (path === '/admin/pieces.csv') {
@@ -2528,7 +2719,7 @@ export default {
       const admins = await listAdmins(env);
       const data = await loadInscriptions(env);
       const newCount = data.error ? 0 : countNew(data.rows, seen);
-      return shell('/admin/admins', sess, viewAdmins(admins, sess), newCount, toValidate, pendingModelers);
+      return shell('/admin/admins', sess, viewAdmins(admins, sess), newCount, toValidate, pendingModelers, undoLabel);
     }
 
     // Appareils : approbation / révocation (POST réservé admin), liste (GET)
@@ -2546,21 +2737,21 @@ export default {
       const devices = await listDevices(env);
       const data = await loadInscriptions(env);
       const newCount = data.error ? 0 : countNew(data.rows, seen);
-      return shell('/admin/appareils', sess, viewDevices(devices, sess, url.searchParams.get('e')), newCount, toValidate, pendingModelers);
+      return shell('/admin/appareils', sess, viewDevices(devices, sess, url.searchParams.get('e')), newCount, toValidate, pendingModelers, undoLabel);
     }
 
     // Tableau de bord
     if (path === '/' || path === '/admin') {
       const data = await loadInscriptions(env);
       const newCount = data.error ? 0 : countNew(data.rows, seen);
-      return shell('/admin', sess, viewDashboard(sess, data, seen, toValidate), newCount, toValidate, pendingModelers);
+      return shell('/admin', sess, viewDashboard(sess, data, seen, toValidate), newCount, toValidate, pendingModelers, undoLabel);
     }
 
     // Inscriptions : marque comme "vues" (met à jour le repère) après affichage
     if (path === '/admin/inscriptions') {
       const data = await loadInscriptions(env);
       data.seen = seen;
-      const resp = shell('/admin/inscriptions', sess, viewInscriptions(data, url.searchParams.get('m')), 0, toValidate, pendingModelers);
+      const resp = shell('/admin/inscriptions', sess, viewInscriptions(data, url.searchParams.get('m')), 0, toValidate, pendingModelers, undoLabel);
       // après consultation, on déplace le repère "dernière visite" à maintenant
       resp.headers.append('Set-Cookie', setCookie('h4f_seen', new Date().toISOString(), SEEN_TTL));
       return resp;
@@ -2569,7 +2760,7 @@ export default {
     if (SECTIONS[path]) {
       const data = await loadInscriptions(env);
       const newCount = data.error ? 0 : countNew(data.rows, seen);
-      return shell(path, sess, SECTIONS[path](), newCount, toValidate, pendingModelers);
+      return shell(path, sess, SECTIONS[path](), newCount, toValidate, pendingModelers, undoLabel);
     }
 
     return new Response(null, { status: 302, headers: { Location: '/admin' } });

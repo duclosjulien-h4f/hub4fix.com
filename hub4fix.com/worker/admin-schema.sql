@@ -29,3 +29,20 @@ CREATE TABLE IF NOT EXISTS audit (
   action TEXT,
   detail TEXT
 );
+
+-- Historique d'annulation ("undo" global, icône barre latérale). Contrairement
+-- à `audit` (log texte informatif), chaque ligne porte de quoi RESTAURER
+-- l'état précédent (payload JSON, structure selon `kind`) : fiche pièce
+-- Sheet écrasée, objet R2 écrasé (référence, visuel, fichier 3D), ligne D1
+-- modifiée/supprimée (candidature modélisateur). `reversed_at` NULL tant que
+-- non annulée ; l'icône undo annule toujours la ligne non-annulée la plus
+-- récente (pile), pas de "refaire".
+CREATE TABLE IF NOT EXISTS undo_log (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  ts          TEXT,
+  actor       TEXT,
+  label       TEXT,
+  kind        TEXT NOT NULL,   -- 'sheet_row' | 'r2_object' | 'd1_row'
+  payload     TEXT NOT NULL,   -- JSON
+  reversed_at TEXT
+);
