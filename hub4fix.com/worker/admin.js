@@ -1565,8 +1565,8 @@ function viewShadowList(data) {
               '<input type="file" class="crop-input" accept="image/*"></label>' +
             '<div class="crop-canvas-wrap" style="display:none;margin-top:.5rem">' +
               '<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem">' +
-                '<button type="button" class="crop-mode-toggle" title="Basculer en découpe à main levée (pour isoler une pièce de forme irrégulière)" style="font-size:.85rem;line-height:1;border:1px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;padding:.3rem .55rem">✏️</button>' +
-                '<span class="crop-hint muted" style="font-size:.72rem">Dessine un rectangle autour de la pièce, puis valide</span>' +
+                '<button type="button" class="crop-mode-toggle" style="line-height:1;border:1px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;padding:.3rem .5rem;display:inline-flex;align-items:center"></button>' +
+                '<span class="crop-hint muted" style="font-size:.72rem"></span>' +
               '</div>' +
               '<canvas class="crop-canvas" style="max-width:100%;border:1px solid var(--line);cursor:crosshair;display:block"></canvas>' +
               '<div style="margin-top:.5rem">' +
@@ -1610,22 +1610,44 @@ document.querySelectorAll('.orig-cropper').forEach(function (wrap) {
   var hint = wrap.querySelector('.crop-hint');
   var ctx2d = canvas.getContext('2d');
   var img = new Image();
-  // 'rect' : rectangle simple. 'freeform' : tracé à main levée (utile pour une
-  // pièce de forme irrégulière — évite d'embarquer le reste de l'assemblage
-  // que capturerait un rectangle englobant).
-  var mode = 'rect';
+  // Cycle à un seul bouton (icône crayon) : off -> rect -> freeform -> off.
+  // 'off' : outil inactif (on regarde juste la photo). 'rect' : rectangle
+  // simple. 'freeform' : tracé à main levée (utile pour une pièce de forme
+  // irrégulière — évite d'embarquer le reste de l'assemblage que capturerait
+  // un rectangle englobant). Refermer (retour à 'off') CONSERVE le tracé en
+  // cours pour que "Utiliser cette zone" reste utilisable juste après.
+  var mode = 'off';
   var rect = null, dragging = false, start = null;
   var points = [], drawingPath = false;
+  var PENCIL = '<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
+  var RULER = '<svg width="15" height="15" viewBox="0 0 24 24" style="display:block"><rect x="2" y="9" width="20" height="6" rx="1.5" fill="currentColor"/><rect x="5" y="9" width="1.4" height="3" fill="rgba(255,255,255,.6)"/><rect x="9" y="9" width="1.4" height="3" fill="rgba(255,255,255,.6)"/><rect x="13" y="9" width="1.4" height="3" fill="rgba(255,255,255,.6)"/><rect x="17" y="9" width="1.4" height="3" fill="rgba(255,255,255,.6)"/></svg>';
 
   function resetSelection() { rect = null; points = []; }
+
+  function applyModeUI() {
+    if (mode === 'off') {
+      modeBtn.innerHTML = PENCIL; modeBtn.style.color = 'var(--earth)';
+      modeBtn.title = 'Activer le recadrage (mode rectangle)';
+      hint.textContent = 'Choisis un mode de découpe (icône) pour commencer';
+    } else if (mode === 'rect') {
+      modeBtn.innerHTML = RULER; modeBtn.style.color = 'var(--green)';
+      modeBtn.title = 'Mode rectangle actif — cliquer pour passer en forme libre';
+      hint.textContent = 'Dessine un rectangle autour de la pièce, puis valide';
+    } else {
+      modeBtn.innerHTML = PENCIL; modeBtn.style.color = 'var(--green)';
+      modeBtn.title = 'Mode forme libre actif — cliquer pour fermer la sélection';
+      hint.textContent = 'Trace le contour de la pièce à main levée, puis valide';
+    }
+  }
+  applyModeUI();
 
   function redraw() {
     ctx2d.clearRect(0, 0, canvas.width, canvas.height);
     ctx2d.drawImage(img, 0, 0, canvas.width, canvas.height);
     ctx2d.strokeStyle = '#C8102E'; ctx2d.lineWidth = 2;
-    if (mode === 'rect' && rect) {
+    if (rect) {
       ctx2d.strokeRect(rect.x, rect.y, rect.w, rect.h);
-    } else if (mode === 'freeform' && points.length > 1) {
+    } else if (points.length > 1) {
       ctx2d.beginPath();
       ctx2d.moveTo(points[0].x, points[0].y);
       for (var i = 1; i < points.length; i++) ctx2d.lineTo(points[i].x, points[i].y);
@@ -1635,13 +1657,10 @@ document.querySelectorAll('.orig-cropper').forEach(function (wrap) {
   }
 
   modeBtn.addEventListener('click', function () {
-    mode = mode === 'rect' ? 'freeform' : 'rect';
-    modeBtn.style.background = mode === 'freeform' ? '#b8860b' : '#fff';
-    modeBtn.style.color = mode === 'freeform' ? '#fff' : '';
-    hint.textContent = mode === 'freeform'
-      ? 'Trace le contour de la pièce à main levée, puis valide'
-      : 'Dessine un rectangle autour de la pièce, puis valide';
-    resetSelection();
+    var next = mode === 'off' ? 'rect' : mode === 'rect' ? 'freeform' : 'off';
+    if (next !== 'off') resetSelection(); // nouveau tracé à chaque activation d'un mode de dessin
+    mode = next;
+    applyModeUI();
     redraw();
   });
 
@@ -1654,7 +1673,9 @@ document.querySelectorAll('.orig-cropper').forEach(function (wrap) {
         var maxW = 520, scale = Math.min(1, maxW / img.width);
         canvas.width = Math.round(img.width * scale);
         canvas.height = Math.round(img.height * scale);
+        mode = 'off';
         resetSelection();
+        applyModeUI();
         redraw();
         canvasWrap.style.display = 'block';
       };
@@ -1664,6 +1685,7 @@ document.querySelectorAll('.orig-cropper').forEach(function (wrap) {
   });
 
   canvas.addEventListener('mousedown', function (e) {
+    if (mode === 'off') return;
     var r = canvas.getBoundingClientRect();
     var p = { x: e.clientX - r.left, y: e.clientY - r.top };
     if (mode === 'rect') {
@@ -1673,6 +1695,7 @@ document.querySelectorAll('.orig-cropper').forEach(function (wrap) {
     }
   });
   canvas.addEventListener('mousemove', function (e) {
+    if (mode === 'off') return;
     var r = canvas.getBoundingClientRect();
     var cur = { x: e.clientX - r.left, y: e.clientY - r.top };
     if (mode === 'rect') {
@@ -1694,7 +1717,7 @@ document.querySelectorAll('.orig-cropper').forEach(function (wrap) {
   function buildCropBlob(cb) {
     var toSrc = img.width / canvas.width;
     var crop = document.createElement('canvas');
-    if (mode === 'rect') {
+    if (rect) {
       var sx = rect.x * toSrc, sy = rect.y * toSrc, sw = rect.w * toSrc, sh = rect.h * toSrc;
       crop.width = Math.round(sw); crop.height = Math.round(sh);
       crop.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, crop.width, crop.height);
@@ -1718,8 +1741,8 @@ document.querySelectorAll('.orig-cropper').forEach(function (wrap) {
   }
 
   confirmBtn.addEventListener('click', function () {
-    if (mode === 'rect' && (!rect || rect.w < 5 || rect.h < 5)) { alert("Dessine d'abord un rectangle autour de la pièce."); return; }
-    if (mode === 'freeform' && points.length < 3) { alert("Trace d'abord le contour de la pièce."); return; }
+    if (!rect && points.length < 3) { alert("Choisis un mode de découpe (icône) et dessine d'abord une zone."); return; }
+    if (rect && (rect.w < 5 || rect.h < 5)) { alert("Dessine d'abord un rectangle autour de la pièce."); return; }
     buildCropBlob(function (blob) {
       var fd = new FormData();
       fd.append('id', id);
