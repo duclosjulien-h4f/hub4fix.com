@@ -1137,6 +1137,13 @@ function dataError(kind) {
   }
   return '<div class="err"><b>Impossible de lire le Google Sheet.</b><br>Vérifie que la feuille est partagée avec le compte de service et que les variables Google sont correctes.</div>';
 }
+// Pour les pages D1 (Modèles 3D, Candidatures, Réservations) : dataError()
+// suppose TOUJOURS un problème Sheet dans son message par défaut, ce qui est
+// faux ici (ces pages ne touchent jamais le Sheet) -- affiche l'erreur D1
+// réelle (message de l'exception) plutôt qu'un message Sheet trompeur.
+function dbError(message) {
+  return '<div class="err"><b>Erreur base de données (h4f_partner).</b><br>' + esc(String(message || '')) + '</div>';
+}
 
 function viewSoon(title, sub, text) {
   return '<h1 class="page">' + esc(title) + '</h1><p class="sub">' + esc(sub) + '</p><div class="soon">' + text + '</div>';
@@ -1498,8 +1505,8 @@ function viewModeles(data, flash) {
     '<p class="sub">Fichiers déposés par les modélisateurs. Chaque dossier porte <b>deux fichiers</b> : ' +
     'le <b>source natif</b> (l\'œuvre, archivée, jamais distribuée) et le <b>STEP</b>, qui alimente la conversion en 3MF. ' +
     'L\'<b>acte de cession</b> est horodaté et lié au fichier par son empreinte.</p>';
-  if (data.error === 'no_binding') return head + dataError('Base « partenaire » non liée (binding DB_PARTNER manquant).');
-  if (data.error) return head + dataError(data.error);
+  if (data.error === 'no_binding') return head + dbError('Base « partenaire » non liée (binding DB_PARTNER manquant).');
+  if (data.error) return head + dbError(data.error);
   const rows = data.rows || [];
   const banner = flash ? '<div class="banner">' + esc(flash) + '</div>' : '';
 
@@ -2277,9 +2284,9 @@ function viewModelerApplications(data, flash, editId) {
   const head = '<h1 class="page">Candidatures partenaire</h1>' +
     '<p class="sub">Valider une candidature active le statut correspondant : <b>modélisateur</b> (accès Hot List) ou <b>printer</b> (accès aux commandes de sa zone). Le rejet laisse le compte sans ce statut. <b>Modifier</b> permet de retirer un lien suspect ; <b>Supprimer</b> efface la candidature.</p>';
   if (data.error === 'no_binding') {
-    return head + dataError('Base « partenaire » non liée. Ajoute le binding DB_PARTNER (base h4f_partner) au worker admin, puis redéploie.');
+    return head + dbError('Base « partenaire » non liée. Ajoute le binding DB_PARTNER (base h4f_partner) au worker admin, puis redéploie.');
   }
-  if (data.error) return head + dataError(data.error);
+  if (data.error) return head + dbError(data.error);
   const rows = data.rows || [];
   const banner = flash ? '<div class="banner">' + esc(flash) + '</div>' : '';
   if (!rows.length) return head + banner + '<div class="soon">Aucune candidature pour le moment.</div>';
@@ -2436,8 +2443,8 @@ function viewReservations(data, flash) {
     '<p class="sub">Options posées par les modélisateurs sur la Hot List. ' +
     'Ce qui attend une décision remonte en tête. <b>Valider</b> donne le feu vert et démarre ses <b>72 h</b> pour déposer le fichier — ' +
     'avant ça, la pièce lui est réservée mais aucun délai ne court contre lui.</p>';
-  if (data.error === 'no_binding') return head + dataError('Base « partenaire » non liée (binding DB_PARTNER manquant).');
-  if (data.error) return head + dataError(data.error);
+  if (data.error === 'no_binding') return head + dbError('Base « partenaire » non liée (binding DB_PARTNER manquant).');
+  if (data.error) return head + dbError(data.error);
   const rows = data.rows || [];
   const now = data.now || nowIso();
   const banner = flash ? '<div class="banner">' + esc(flash) + '</div>' : '';
