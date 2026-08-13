@@ -1551,8 +1551,17 @@ function viewShadowList(data) {
     const hasOrig = r.status !== 'pending' && r.status !== 'verify-original';
     const replaceOriginal =
       '<details' + (hasOrig ? '' : ' open') + ' style="margin-top:.8rem;border-top:1px solid var(--line);padding-top:.7rem">' +
-        '<summary style="cursor:pointer;font-size:.78rem;font-weight:600;color:var(--earth)">Remplacer la référence' +
-          (hasOrig ? '' : ' <span class="tag" style="background:#fdf1da;color:#8a6116">aucune référence — recommandé</span>') +
+        '<summary style="cursor:pointer;font-size:.78rem;font-weight:600;color:var(--earth);display:flex;align-items:center;gap:.4rem">' +
+          '<span>Remplacer la référence' +
+            (hasOrig ? '' : ' <span class="tag" style="background:#fdf1da;color:#8a6116">aucune référence — recommandé</span>') +
+          '</span>' +
+          // Accès direct au recadreur depuis la ligne repliée : ouvre la section ET
+          // le sélecteur de fichier en un clic (évite de devoir chercher l'icône
+          // une fois dépliée, en bas du bloc, après avoir choisi une photo).
+          '<button type="button" class="crop-quick-launch" data-id="' + esc(id) + '" title="Recadrer une référence" ' +
+            'style="line-height:1;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--earth);cursor:pointer;padding:.25rem .4rem;display:inline-flex;align-items:center">' +
+            '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>' +
+          '</button>' +
         '</summary>' +
         '<div style="margin-top:.7rem;display:grid;gap:.8rem">' +
           '<form method="post" action="/admin/replace-original" enctype="multipart/form-data" style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">' +
@@ -1600,6 +1609,20 @@ function viewShadowList(data) {
 // aucune dépendance. Le crop produit un nouveau blob envoyé tel quel à
 // /admin/replace-original — le worker ne fait jamais de traitement d'image.
 const CROPPER_SCRIPT = `<script>
+// Icône sur la ligne repliée "Remplacer la référence" : ouvre la section et le
+// sélecteur de fichier du recadreur en un clic. stopPropagation() car un clic
+// dans <summary> déclenche aussi le toggle natif de <details> — on force
+// l'ouverture nous-mêmes plutôt que de laisser un double-toggle refermer.
+document.querySelectorAll('.crop-quick-launch').forEach(function (btn) {
+  btn.addEventListener('click', function (e) {
+    e.preventDefault(); e.stopPropagation();
+    var details = btn.closest('details');
+    if (details) details.open = true;
+    var cropInput = details ? details.querySelector('.crop-input') : null;
+    if (cropInput) cropInput.click();
+  });
+});
+
 document.querySelectorAll('.orig-cropper').forEach(function (wrap) {
   var id = wrap.dataset.id;
   var input = wrap.querySelector('.crop-input');
