@@ -1141,8 +1141,11 @@ function dataError(kind) {
 // suppose TOUJOURS un problème Sheet dans son message par défaut, ce qui est
 // faux ici (ces pages ne touchent jamais le Sheet) -- affiche l'erreur D1
 // réelle (message de l'exception) plutôt qu'un message Sheet trompeur.
-function dbError(message) {
-  return '<div class="err"><b>Erreur base de données (h4f_partner).</b><br>' + esc(String(message || '')) + '</div>';
+// Message volontairement simple : sur cette base à ce stade, une erreur de
+// lecture est en pratique presque toujours "rien n'a encore été écrit dedans"
+// (table pas encore créée) plutôt qu'un vrai bug à investiguer.
+function dbError() {
+  return '<div class="err"><b>La base de données est encore vide.</b></div>';
 }
 
 function viewSoon(title, sub, text) {
