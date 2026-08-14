@@ -1139,13 +1139,17 @@ function dataError(kind) {
 }
 // Pour les pages D1 (Modèles 3D, Candidatures, Réservations) : dataError()
 // suppose TOUJOURS un problème Sheet dans son message par défaut, ce qui est
-// faux ici (ces pages ne touchent jamais le Sheet) -- affiche l'erreur D1
-// réelle (message de l'exception) plutôt qu'un message Sheet trompeur.
-// Message volontairement simple : sur cette base à ce stade, une erreur de
-// lecture est en pratique presque toujours "rien n'a encore été écrit dedans"
-// (table pas encore créée) plutôt qu'un vrai bug à investiguer.
-function dbError() {
-  return '<div class="err"><b>La base de données est encore vide.</b></div>';
+// faux ici (ces pages ne touchent jamais le Sheet). Le message simple
+// "base de données encore vide" n'est affiché QUE quand c'est réellement la
+// cause (table pas encore créée, "no such table") -- Julien : pas de message
+// rassurant sur un vrai bug (binding absent, autre erreur SQL), qui doit
+// rester visible pour être diagnostiqué.
+function dbError(message) {
+  const msg = String(message || '');
+  if (/no such table/i.test(msg)) {
+    return '<div class="err"><b>La base de données est encore vide.</b></div>';
+  }
+  return '<div class="err"><b>Erreur base de données (h4f_partner).</b><br>' + esc(msg) + '</div>';
 }
 
 function viewSoon(title, sub, text) {
