@@ -96,9 +96,12 @@ DEMO_SPEC.md
 *pipeline_ia*
 *veille*
 # Exceptions a *veille* ci-dessus : la regle vise les DOCUMENTS de veille
-# (strategie, shadow list), pas le code ni le suivi operationnel.
+# (strategie, shadow list), pas le CODE ni le suivi operationnel. Exceptions
+# par extension plutot que fichier par fichier, sinon chaque nouveau script
+# de veille se fait avaler en silence — c'est arrive deux fois.
+!veille*.py
+!veille*.pyw
 !pipeline-td/veille-reactivation.md
-!veille.py
 # Visuels generes par le pipeline hotlist (38 Mo). Le site NE les sert PAS depuis
 # ici : les images publiques viennent de R2 via /img/h4f/<id>. Les committer
 # alourdirait l'historique definitivement, sans rien apporter en ligne.
