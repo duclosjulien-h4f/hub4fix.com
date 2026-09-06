@@ -168,7 +168,10 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 
 <script>
 (function() {
-  const ADMIN_PASSWORD = 'hub4fix_admin_2026';
+  // Aucun mot de passe ici, volontairement — voir le meme commentaire dans
+  // hotlist-admin.html. Un mot de passe dans une page servie au navigateur est
+  // lisible en affichant la source : ce n'etait pas une protection. Cette page
+  // est une demo interne, exclue du deploiement Pages.
   const AUTH_KEY = 'h4f_admin_auth';
 
   // Elements
@@ -180,27 +183,9 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
   const demoForm = document.getElementById('demoForm');
   const confirmation = document.getElementById('confirmation');
 
-  // Check sessionStorage auth
-  if (sessionStorage.getItem(AUTH_KEY) === 'true') {
-    showAdmin();
-  }
-
-  // Password submit
-  passwordSubmit.addEventListener('click', checkPassword);
-  passwordInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') checkPassword();
-  });
-
-  function checkPassword() {
-    if (passwordInput.value === ADMIN_PASSWORD) {
-      sessionStorage.setItem(AUTH_KEY, 'true');
-      showAdmin();
-    } else {
-      errorMsg.textContent = 'Mot de passe incorrect.';
-      passwordInput.value = '';
-      passwordInput.focus();
-    }
-  }
+  // Ouverture directe : porte retiree plutot que serrure factice.
+  sessionStorage.setItem(AUTH_KEY, 'true');
+  showAdmin();
 
   function showAdmin() {
     modal.classList.add('hidden');

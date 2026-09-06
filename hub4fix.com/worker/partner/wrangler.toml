@@ -24,10 +24,16 @@ keep_vars = true
 [vars]
 ISSUER = "https://hub4fix-l2itdp.ch1.zitadel.cloud"
 CLIENT_ID = "378989531187151592"
-# Emails autorisés à créer une COMMANDE DE TEST (seed P2), en attendant le tunnel
-# d'achat physique B2C. Liste séparée par des virgules. Mets l'email avec lequel tu te
-# connectes à l'espace partenaire. N'ouvre aucune action destructive.
-ADMIN_EMAILS = "duclosjulien@gmail.com"
+# ADMIN_EMAILS — emails autorisés à créer une COMMANDE DE TEST (seed P2), en
+# attendant le tunnel d'achat physique B2C. Liste séparée par des virgules.
+# N'ouvre aucune action destructive.
+#
+# La valeur N'EST PLUS ICI : ce dépôt est public, et écrire l'email de l'admin
+# dans un fichier public revient à publier la liste des comptes à attaquer.
+# À poser au dashboard Cloudflare (Workers → h4f-partner → Variables), ou :
+#   npx wrangler secret put ADMIN_EMAILS
+# `keep_vars = true` ci-dessus préserve la valeur entre deux déploiements.
+# Tant qu'elle est absente, la commande de test est simplement refusée.
 
 # Base propre au worker partenaire (partenaires + réservations).
 [[d1_databases]]

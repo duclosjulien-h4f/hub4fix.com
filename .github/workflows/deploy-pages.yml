@@ -22,10 +22,51 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Le dossier hub4fix.com/ contient aussi du code qui n'a RIEN a faire sur
+      # le web : la source des workers, leurs schemas SQL, leurs wrangler.toml
+      # (identifiants de bases D1, noms de buckets, liste des noms de secrets),
+      # les scripts d'outillage et les tests.
+      #
+      # Publier ce dossier tel quel servait tout cela sur hub4fix.com/worker/…,
+      # c'est-a-dire la carte complete du back-office sur le domaine de prod.
+      # On assemble donc une copie ne contenant que ce qu'un navigateur doit lire.
+      - name: Assembler le site public (sans backend ni outillage)
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          cp -a hub4fix.com/. _site/
+
+          # Retire du site publie ce qui n'est pas destine a un navigateur.
+          rm -rf _site/worker            # source des workers, SQL, wrangler.toml
+          rm -rf _site/tools             # scripts node d'outillage
+          rm -rf _site/tests             # tests unitaires
+          rm -rf _site/leads             # dossiers de depot, vides
+          # NB : src/ est conserve. Ce n'est pas sensible (source front, dont
+          # l'equivalent compile est public de toute facon) et app.html y
+          # renvoie encore (/src/main.tsx, reference de dev Vite).
+          rm -f  _site/hotlist-admin.html  # outil interne, reference par aucune page
+          rm -f  _site/admin-demo.html     # demo interne, referencee par aucune page
+
+          echo "=== Garde-fou : rien de sensible ne doit rester dans _site/ ==="
+          # Le build echoue plutot que de publier : une regression silencieuse
+          # ici remettrait le back-office en ligne sans que personne le voie.
+          if find _site -type f \( -name '*.toml' -o -name '*.sql' -o -name '.dev.vars' -o -name '*.pem' -o -name '*.key' \) | grep .; then
+            echo "ERREUR : fichiers de configuration ou de schema dans le site publie."
+            exit 1
+          fi
+          if [ -d _site/worker ]; then
+            echo "ERREUR : _site/worker existe encore."
+            exit 1
+          fi
+          echo "OK"
+
+          echo "=== Contenu publie ==="
+          find _site -maxdepth 1 | sort
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: hub4fix.com/
+          path: _site/
 
       - name: Deploy to GitHub Pages
         id: deployment

@@ -413,7 +413,15 @@ document.addEventListener('click', function() { document.getElementById('account
 </script>
 <script>
 (function() {
-  var ADMIN_PASSWORD = 'hub4fix_admin_2026';
+  // Aucun mot de passe ici, volontairement. Un mot de passe ecrit dans une page
+  // servie au navigateur est lisible par quiconque affiche la source : ce
+  // n'etait pas une protection, seulement son apparence — et il a ete public
+  // tant que cette page etait deployee.
+  //
+  // Cette page est un outil interne : elle est exclue du deploiement Pages
+  // (cf. .github/workflows/deploy-pages.yml) et ses donnees vivent dans le
+  // localStorage du navigateur qui l'ouvre, donc il n'y a rien a proteger ici.
+  // La vraie administration est le worker h4f-admin, derriere la session Zitadel.
   var AUTH_KEY = 'h4f_admin_auth';
   var STORAGE_KEY = 'h4f_hotlist';
   var SUB_KEY = 'h4f_hotlist_subvention';
@@ -424,21 +432,10 @@ document.addEventListener('click', function() { document.getElementById('account
   var passwordSubmit = document.getElementById('passwordSubmit');
   var errorMsg = document.getElementById('errorMsg');
 
-  if (sessionStorage.getItem(AUTH_KEY) === 'true') showAdmin();
-
-  passwordSubmit.addEventListener('click', checkPassword);
-  passwordInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') checkPassword(); });
-
-  function checkPassword() {
-    if (passwordInput.value === ADMIN_PASSWORD) {
-      sessionStorage.setItem(AUTH_KEY, 'true');
-      showAdmin();
-    } else {
-      errorMsg.textContent = 'Mot de passe incorrect.';
-      passwordInput.value = '';
-      passwordInput.focus();
-    }
-  }
+  // Ouverture directe : la porte est retiree plutot que laissee ouverte avec
+  // une serrure factice, qui laisserait croire a une protection inexistante.
+  sessionStorage.setItem(AUTH_KEY, 'true');
+  showAdmin();
 
   function showAdmin() {
     modal.classList.add('hidden');
