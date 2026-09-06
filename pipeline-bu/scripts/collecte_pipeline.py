@@ -650,43 +650,111 @@ def charger_references_hotlist() -> list[str]:
     ]
 
 
-def main() -> int:
+SOURCE_FAMILIES = ("forums", "pieces", "marques", "marketplaces")
+
+
+def parse_args(argv: list[str]) -> dict:
+    """
+    Options pensees pour la phase de test manuel : itérer sur une famille de
+    sources a la fois, sans attendre un run complet (2 s par requete).
+
+      --source forums|pieces|marques|marketplaces|all   (defaut: all)
+      --limit N        plafonne les references / requetes interrogees
+      --dry-run        n'ecrit ni le CSV ni le journal, affiche seulement
+      --help
+    """
+    opts = {"source": "all", "limit": None, "dry_run": False}
+    i = 0
+    while i < len(argv):
+        a = argv[i]
+        if a in ("-h", "--help"):
+            print(parse_args.__doc__)
+            sys.exit(0)
+        elif a == "--dry-run":
+            opts["dry_run"] = True
+        elif a == "--source":
+            i += 1
+            if i >= len(argv):
+                print("--source attend une valeur", file=sys.stderr)
+                sys.exit(2)
+            val = argv[i]
+            if val != "all" and val not in SOURCE_FAMILIES:
+                print(
+                    f"--source inconnu : {val} "
+                    f"(attendu : all, {', '.join(SOURCE_FAMILIES)})",
+                    file=sys.stderr,
+                )
+                sys.exit(2)
+            opts["source"] = val
+        elif a == "--limit":
+            i += 1
+            if i >= len(argv):
+                print("--limit attend un entier", file=sys.stderr)
+                sys.exit(2)
+            try:
+                opts["limit"] = max(1, int(argv[i]))
+            except ValueError:
+                print(f"--limit attend un entier, recu : {argv[i]}", file=sys.stderr)
+                sys.exit(2)
+        else:
+            print(f"option inconnue : {a} (--help pour la liste)", file=sys.stderr)
+            sys.exit(2)
+        i += 1
+    return opts
+
+
+def main(argv: Optional[list[str]] = None) -> int:
+    opts = parse_args(argv if argv is not None else sys.argv[1:])
+    want = opts["source"]
+    lim = opts["limit"]
+
     print(f"=== Hub4Fix Pipeline BU — {date.today().isoformat()} ===")
+    print(f"  source : {want}    limite : {lim or 'defaut'}"
+          f"{'    DRY-RUN' if opts['dry_run'] else ''}")
+
     all_signals: list[SignalRarete] = []
-    stats = {"forums": 0, "pieces": 0, "marques": 0, "marketplaces": 0}
+    stats = {k: 0 for k in SOURCE_FAMILIES}
+    stats["source_demandee"] = want
 
     references_hotlist = charger_references_hotlist()
     print(f"  {len(references_hotlist)} références chargées depuis la hotlist")
 
-    print("\n[1/4] Scan forums spécialisés…")
-    forum_signals = scan_forums(SEARCH_QUERIES)
-    all_signals.extend(forum_signals)
-    stats["forums"] = len(forum_signals)
-    print(f"  -> {len(forum_signals)} signaux forum")
+    def run(family: str, label: str, fn):
+        """Execute une famille si elle est demandee, sinon l'annonce ignoree."""
+        if want not in ("all", family):
+            return
+        print(f"\n[{label}]")
+        found = fn()
+        all_signals.extend(found)
+        stats[family] = len(found)
+        print(f"  -> {len(found)} signaux {family}")
 
-    print("\n[2/4] Vérification stock/délai pièces…")
-    pieces_signals = scan_sites_pieces_detachees(references_hotlist[:15])
-    all_signals.extend(pieces_signals)
-    stats["pieces"] = len(pieces_signals)
-    print(f"  -> {len(pieces_signals)} signaux pièces")
-
-    print("\n[3/4] Scan pages officielles marques…")
-    marque_signals = scan_pages_marques(references_hotlist[:15])
-    all_signals.extend(marque_signals)
-    stats["marques"] = len(marque_signals)
-    print(f"  -> {len(marque_signals)} signaux marques")
-
-    print("\n[4/4] Scan eBay occasion…")
-    marketplace_signals = scan_marketplaces_occasion(references_hotlist[:5])
-    all_signals.extend(marketplace_signals)
-    stats["marketplaces"] = len(marketplace_signals)
-    print(f"  -> {len(marketplace_signals)} signaux marketplace")
+    run("forums", "Scan forums spécialisés",
+        lambda: scan_forums(SEARCH_QUERIES[:lim] if lim else SEARCH_QUERIES))
+    run("pieces", "Vérification stock/délai pièces",
+        lambda: scan_sites_pieces_detachees(references_hotlist[:(lim or 15)]))
+    run("marques", "Scan pages officielles marques",
+        lambda: scan_pages_marques(references_hotlist[:(lim or 15)]))
+    run("marketplaces", "Scan eBay occasion",
+        lambda: scan_marketplaces_occasion(references_hotlist[:(lim or 5)]))
 
     print("\n[Post-traitement] Déduplication et consolidation…")
     all_signals = deduplicate(all_signals)
     all_signals = consolider_scores(all_signals)
     all_signals.sort(key=lambda s: s.score_rarete, reverse=True)
     print(f"  -> {len(all_signals)} signaux nets")
+
+    # Apercu lisible : en phase de test c'est ce qu'on relit pour juger les
+    # selecteurs, avant meme de regarder le CSV.
+    if all_signals:
+        print("\n[Aperçu] Signaux les mieux classés :")
+        for s in all_signals[:10]:
+            print(f"  {s.score_rarete}/7  {s.source_nom:<24} "
+                  f"{(s.reference or '—'):<18} {s.symptome[:56]}")
+
+    if opts["dry_run"]:
+        print(f"\n=== DRY-RUN — rien ecrit, {len(all_signals)} signaux nets ===")
+        return 0
 
     print("\n[Export] Écriture CSV…")
     existing = load_existing_csv()
