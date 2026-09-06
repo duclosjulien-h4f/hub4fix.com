@@ -1,8 +1,10 @@
 # Chantier Jarvis — journalisation, photos, identification
 
 Jarvis est le « sélectionneur » du site : l'assistant qui accueille le client et
-l'amène jusqu'à la bonne pièce. Ce chantier couvre trois choses distinctes qu'il
-ne fait pas encore, et une qu'il fait mal.
+l'amène jusqu'à la bonne pièce. Ce chantier couvre quatre choses distinctes qu'il
+ne fait pas encore — journaliser les demandes, accepter plusieurs photos, trier les
+plaques, en extraire la donnée — et une qu'il fait mal : les photos trop lourdes sont
+écartées en silence.
 
 Statut : **à implémenter**, hors du pipeline de veille en cours de test.
 
@@ -168,6 +170,10 @@ suppression est le comportement normal et la conservation l'exception.
 
 ### Politique retenue — trois niveaux
 
+> **Affinée en §6.** Le filtre retenu distingue les photos de *plaque signalétique*
+> des autres, et l'extraction en CSV rend la conservation de l'image inutile dans le
+> cas majoritaire. Lire §6 avant d'implémenter ce tableau.
+
 | Cas | Rétention | Justification |
 |---|---|---|
 | **Identification réussie**, pièce déjà au catalogue | **Supprimée dès la réponse envoyée** | La photo n'a plus aucune valeur résiduelle. C'est le cas majoritaire. |
@@ -183,19 +189,218 @@ linéairement. En régime stable, si ~15 % des demandes tombent dans le seau
 « identification échouée » conservé 30 jours, on stationne autour de
 15 × 2 × 200 Ko × 30 ≈ **180 Mo**, indéfiniment.
 
-### Ce qui reste à trancher avec Julien
+### Ce qui reste ouvert
 
 - **Le seuil de confiance** qui fait basculer une photo de « supprimée » à
-  « conservée 30 jours ». Trop bas, on ne garde rien d'utile ; trop haut, on garde
-  presque tout.
-- **L'information du client.** Deux phrases dans les CGU suffisent, mais elles
-  doivent exister avant le premier upload conservé : ce qui est gardé, combien de
-  temps, et comment demander la suppression.
-- **30 jours est-il le bon délai ?** C'est un point de départ, pas un résultat.
+  « conservée ». Point de départ proposé : conserver si `champs_manquants` n'est pas
+  vide, ou si `confiance_cle` < 0,8 — c'est-à-dire dès qu'on n'a pas lu la clé
+  catalogue avec certitude. À ajuster sur les premiers vrais cas.
+- **La durée de la fenêtre de litige.** 90 jours est un point de départ aligné sur le
+  délai de réclamation courant, pas un résultat.
+
+L'information du client, elle, est tranchée : voir §6.
 
 ---
 
-## 6. Ordre de mise en œuvre suggéré
+## 6. Filtre « plaque signalétique » + extraction CSV
+
+Affinement de §5. Le filtre pertinent n'est pas « photo / pas photo » mais
+**« plaque signalétique / autre »** — parce que ces deux types d'images n'ont ni la
+même valeur ni le même risque.
+
+| | Photo de plaque | Photo d'appareil ou de pièce |
+|---|---|---|
+| Contenu | une étiquette industrielle, cadrée serré | une cuisine, un salon, ce qui traînait dans le cadre |
+| Valeur durable | **élevée** : c'est la clé du catalogue pièces | faible une fois le modèle identifié |
+| Exposition RGPD | **faible**, sauf le numéro de série | réelle : lieu de vie, personnes, documents |
+
+Donc oui : filtrer sur la plaque et ne conserver que celles-là est plus défendable
+que ma proposition initiale, sur les deux plans à la fois.
+
+### Mais la vraie question : pourquoi garder les pixels si on a extrait la donnée ?
+
+C'est le point à trancher avant d'écrire quoi que ce soit. **Une plaque correctement
+lue n'a plus de valeur en tant qu'image** — la ligne CSV porte toute l'information,
+pèse 1000 fois moins, et se requête. Garder les deux, c'est stocker deux fois la même
+chose sous la forme la plus lourde et la plus risquée.
+
+Trois cas seulement justifient de garder l'image, et ils sont étroits :
+
+1. **Extraction incomplète ou douteuse** — un champ non lu, un reflet, une plaque
+   usée. Là seulement, la photo contient ce que le CSV n'a pas. C'est aussi le
+   matériau pour corriger le prompt d'extraction.
+2. **Fenêtre de litige** — si un client conteste (« vous m'avez envoyé la mauvaise
+   pièce »), la plaque qu'il a lui-même photographiée tranche. Besoin réel, mais qui
+   justifie une durée courte, pas une conservation indéfinie.
+3. **Constitution d'un corpus de référence**, plafonné — savoir où chaque fabricant
+   place quoi sur son étiquette s'apprend sur des exemples. Mais la 51ᵉ plaque Bosch
+   n'apprend rien de plus que les 50 premières : échantillonner par marque, ne pas
+   tout garder.
+
+### Le numéro de série — décision : décoder puis hacher
+
+C'est le seul champ de la plaque qui pose vraiment problème. Un numéro de modèle
+n'est pas une donnée personnelle — des millions de personnes possèdent un HF800. Un
+**numéro de série identifie un objet unique chez une personne unique** ; recoupé avec
+le journal des demandes (horodatage, session, éventuellement compte), il devient
+identifiant.
+
+Mais le hacher tout de suite détruirait une information dont on a besoin : le série
+encode souvent **l'année et l'usine de fabrication**, et chez un vendeur de pièces la
+variante décide de la compatibilité. Un même modèle commercial peut porter deux bols
+ou deux charnières incompatibles selon l'année de production. Perdre ça, c'est
+envoyer la mauvaise pièce à un client qui a pourtant donné la bonne référence.
+
+**Décision retenue — dans cet ordre, à l'extraction :**
+
+1. Lire le numéro de série
+2. En **décoder** ce qui est décodable → colonnes `annee_fabrication`, `variante_usine`
+3. **Hacher** le numéro de série
+4. Ne jamais écrire le série en clair dans le CSV d'analyse
+
+On garde la précision de variante sans conserver d'identifiant unique. En clair, le
+série n'existe que là où c'est opérationnellement nécessaire — un litige, une
+commande — et avec la durée de conservation du dossier concerné, pas celle du corpus.
+
+Contrepartie assumée : **l'encodage du série est propre à chaque fabricant** et doit
+s'établir marque par marque. Les champs porteurs sont connus (le `FD` chez BSH, les
+premiers chiffres du série chez Electrolux, le code type chez SEB), mais la convention
+exacte de décodage se vérifie sur de vraies plaques — c'est précisément ce que le
+corpus échantillonné permet de faire.
+
+### Conséquence non évidente du hash : il rend les comptages justes
+
+Hacher le série n'est pas seulement de l'hygiène RGPD, c'est ce qui permet de
+**compter des appareils distincts plutôt que des envois de photo**. Un client qui
+photographie sa plaque trois fois de suite produit trois images mais un seul hash.
+Sans ce champ, toute statistique de fréquence compterait des gestes d'upload ; avec
+lui, elle compte des machines. C'est ce qui rend exploitable le signal de §6bis.
+
+### Schéma CSV proposé
+
+Un fichier distinct du vivier BU : ce n'est pas un signal de rareté, c'est une base
+d'identification.
+
+| Colonne | Contenu |
+|---|---|
+| `plaque_id` | identifiant de l'objet R2, ou son hash si la photo a été purgée |
+| `ts` | date de captation |
+| `marque` | normalisée |
+| `modele_commercial` | ce que le client appelle son appareil |
+| `cle_pieces` | **la référence qui ouvre le catalogue pièces** |
+| `cle_pieces_type` | `e_nr` \| `pnc` \| `type_seb` \| `12nc` \| `model_code` |
+| `serie_hash` | numéro de série **haché**, jamais en clair ici |
+| `annee_fabrication` | décodée du FD ou du n° de série **avant** le hachage |
+| `variante_usine` | code usine / révision décodé du série, quand il l'encode |
+| `puissance_w`, `tension` | tels que lus |
+| `categorie` | lave-linge, robot, cafetière… |
+| `confiance_marque`, `confiance_cle` | par champ, pas globale : on lit souvent la marque avec certitude et la clé mal |
+| `champs_manquants` | liste des champs non lus — c'est ce qui décide de garder la photo |
+| `photo_conservee` | oui/non + motif parmi les trois cas ci-dessus |
+| `demande_id` | lien vers la ligne de journalisation (§4) |
+
+### La subtilité qui compte : la clé pièces dépend du fabricant
+
+Le champ qui permet de retrouver une pièce **n'est pas le même selon la marque**, et
+ce n'est presque jamais le nom commercial :
+
+- **BSH** (Bosch, Siemens, Neff) : le `E-Nr` (Erzeugnisnummer), accompagné du `FD`
+  (date de fabrication). C'est le E-Nr qui ouvre le catalogue, pas « SMI46KS01E » lu
+  sur la façade.
+- **Groupe SEB** (Moulinex, Krups, Tefal, Rowenta) : un code type sur la plaque, plus
+  précis que la référence commerciale — « HF800 » désigne une famille, la plaque
+  porte la variante exacte.
+- **Electrolux, AEG** : le `PNC` (Product Number Code).
+- **Whirlpool, Indesit** : un code `12 NC` ou un « Service Number ».
+
+D'où les deux colonnes `cle_pieces` + `cle_pieces_type` plutôt qu'une colonne
+normalisée unique (qui perdrait de quel système vient la valeur) ou une colonne par
+fabricant (qui serait vide à 90 %).
+
+**Cette liste est à compléter en observant les vraies plaques** — c'est précisément
+l'usage du corpus échantillonné du cas 3.
+
+### Coût de stockage, avec ce filtre
+
+Une plaque cadrée serré, redimensionnée à 1600 px, pèse ~200 Ko. Si la moitié des
+demandes avec photo comportent une plaque, à 50 demandes/jour :
+
+| Politique | Volume | Coût R2 |
+|---|---|---|
+| Plaques gardées 90 jours (fenêtre litige) | ~450 Mo en régime stable | quelques centimes/an |
+| Plaques gardées indéfiniment | ~1,8 Go/an cumulé | **moins d'1 €/an**, même après plusieurs années |
+
+Autrement dit : sur le plan du stockage, garder toutes les plaques pour toujours est
+sans effet sur le budget. **Ce n'est donc pas la place qui doit décider** — c'est le
+numéro de série et la durée de conservation qu'on est capable de justifier.
+
+### Transparence — décision : annoncé, et présenté comme un service
+
+La conservation des plaques est **dite au client, dans l'interface**, pas seulement
+enfouie dans les CGU.
+
+La raison est stratégique autant qu'éthique : Hub4Fix parle à des gens qui se sentent
+déjà lésés par des fabricants qui ne fournissent plus leurs pièces. Si
+« Hub4Fix garde des photos de vos appareils » se découvre au lieu de s'annoncer,
+c'est la découverte qui fait le sujet — pas la finalité, même irréprochable. Le coût
+d'une annonce est de deux phrases ; le coût d'une révélation est la confiance.
+
+Formulation du sens à donner, à écrire proprement le moment venu : *envoyer la plaque
+permet d'identifier l'appareil plus vite, et sert au prochain client qui aura le même
+modèle.* C'est vrai, c'est vérifiable, et ça transforme le corpus en argument.
+
+Trois conséquences concrètes :
+
+- Jarvis peut **demander explicitement** la plaque, au lieu de se contenter de la
+  suggérer comme aujourd'hui
+- Les CGU décrivent : ce qui est conservé, combien de temps, comment demander la
+  suppression — et ces phrases doivent exister **avant** la première plaque conservée
+- Le corpus cesse d'être un risque à gérer pour devenir une raison de participer
+
+### Ce que ça devient
+
+Au bout de quelques mois, ce CSV est une **table de correspondance
+modèle → clé pièces**, construite sur des plaques réelles photographiées par des
+clients réels. Aucun concurrent ne l'a, et elle ne s'achète pas : elle se constitue
+en rendant service. C'est un actif au même titre que le vivier — et il tombe donc
+sous la même règle que lui : **jamais dans le dépôt public.**
+
+---
+
+## 6bis. Le parc signalé — un signal de demande, hors de la grille 0-7
+
+Si quarante personnes photographient la plaque du même lave-linge, ce n'est pas du
+bruit : c'est du **parc installé mesuré chez des gens qui ont un problème**. C'est
+sans doute un meilleur indicateur de demande que les posts de forum, parce qu'il est
+mesuré sur des demandes réelles et non sur des plaintes publiques.
+
+**Décision : ce signal existe, mais il reste hors de la grille de rareté.**
+
+Le briefing pose la grille à sept critères comme une décision actée. En faire un
+huitième critère casserait la notation « 0-7 » et rendrait incomparables tous les
+scores déjà attribués. Le signal vit donc à côté, dans sa propre colonne :
+
+| Champ | Définition |
+|---|---|
+| `parc_signale` | nombre de `serie_hash` **distincts** observés pour une même `cle_pieces` |
+| `parc_fenetre` | période d'observation du comptage (glissante, ex. 90 jours) |
+
+Deux propriétés à respecter :
+
+- **Compter des appareils, pas des uploads** — d'où la dépendance au `serie_hash`
+  décrite en §6. Sans lui, trois photos d'une même plaque compteraient trois fois.
+- **Ne pas convertir en points.** Une fiche se présente avec son score de rareté
+  *et* son parc signalé, côte à côte. Ce sont deux questions différentes : « cette
+  pièce est-elle introuvable ? » et « combien de gens ont cet appareil ? ». Une pièce
+  peut être très rare avec un parc minuscule — c'est justement le cas qu'il faut
+  pouvoir distinguer, pas noyer dans un total.
+
+Ce signal ne dispense de rien : une fiche remontée par le parc signalé entre en
+statut `Brut` et passe la vérification indépendante comme toutes les autres.
+
+---
+
+## 7. Ordre de mise en œuvre suggéré
 
 1. **Redimensionnement côté navigateur** + message d'erreur explicite (§2). Débloque
    la fonctionnalité photo, qui échoue silencieusement aujourd'hui, et supprime
@@ -203,7 +408,23 @@ linéairement. En régime stable, si ~15 % des demandes tombent dans le seau
 2. **Lever la limite à une seule image** par message (§2).
 3. **Table de journalisation** (§4). Indépendante du reste, et c'est elle qui ouvre
    la source de priorité 0 du vivier BU.
-4. **Règle de cycle de vie R2** + les trois niveaux de rétention (§5). À faire avant
-   de conserver la première photo, pas après.
-5. **Alimentation du vivier** depuis les lignes `non_trouvee`, avec entrée en statut
+4. **Règle de cycle de vie R2** + rétention (§5, affinée par §6). À faire avant de
+   conserver la première photo, pas après.
+5. **Classification plaque / autre** à l'analyse vision (§6). C'est le filtre qui
+   commande tout le reste : sans lui, on ne sait pas quelle photo mérite quoi.
+6. **Extraction des champs de plaque vers CSV** (§6), avec confiance par champ, et
+   série décodé **puis** haché (§6). La ligne CSV est le livrable ; la photo n'est
+   conservée que si l'extraction est incomplète.
+7. **Annonce dans l'interface + phrases CGU** (§6). À faire **avant** la première
+   plaque conservée, pas après — c'est ce qui rend l'étape 6 publiable.
+8. **Alimentation du vivier** depuis les lignes `non_trouvee`, avec entrée en statut
    `Brut` et vérification indépendante obligatoire comme toute autre source.
+9. **Compteur `parc_signale`** (§6bis), une fois qu'il y a assez de plaques pour que
+   le comptage veuille dire quelque chose. Dernier de la liste sans être le moins
+   utile : c'est un agrégat, il se calcule quand la base existe.
+
+Les étapes 5 et 6 sont indissociables : classifier sans extraire ne sert à rien,
+extraire sans classifier revient à passer des photos de cuisine dans un lecteur de
+plaques. Et l'étape 7 conditionne la mise en production des deux : le décodage du
+série est du travail par marque, mais l'annonce au client est du travail à faire une
+fois — et sans elle, rien de tout ça ne doit tourner.
