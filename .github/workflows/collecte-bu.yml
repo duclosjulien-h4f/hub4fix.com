@@ -1,0 +1,73 @@
+name: Pipeline BU — Collecte signaux rareté
+
+on:
+  schedule:
+    # Lundi, mardi, jeudi, vendredi à 06h00 UTC
+    - cron: '0 6 * * 1,2,4,5'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (affiche les logs sans écrire les données)'
+        required: false
+        default: 'false'
+        type: boolean
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  collecte-bu:
+    name: Collecte BU — signaux rareté pièces
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Vérification pre-run
+        run: |
+          echo "=== Hub4Fix Pipeline BU ==="
+          echo "Date : $(date -u '+%Y-%m-%d %H:%M UTC')"
+          echo "Branche : ${{ github.ref_name }}"
+          echo "Dry run : ${{ github.event.inputs.dry_run || 'false' }}"
+          python3 --version
+
+      - name: Lancer collecte_pipeline.py
+        env:
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: |
+          cd pipeline-bu/scripts
+          python3 collecte_pipeline.py
+        # Pas de secrets injectés — le script n'utilise que des API publiques sans clé
+
+      - name: Résumé du run
+        if: always()
+        run: |
+          LOG_FILE="pipeline-bu/data/run_log.jsonl"
+          if [ -f "$LOG_FILE" ]; then
+            echo "=== Dernier log de run ==="
+            tail -1 "$LOG_FILE"
+          else
+            echo "Aucun log produit."
+          fi
+
+      - name: Upload CSV comme artifact (accès authentifié)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vivier-brut-${{ github.run_number }}-${{ github.run_id }}
+          path: |
+            pipeline-bu/data/vivier_brut_collecte.csv
+            pipeline-bu/data/run_log.jsonl
+          retention-days: 90
+          if-no-files-found: warn
+        # Les artifacts GitHub Actions sont privés — accès authentifié uniquement.
+        # NE PAS committer les données CSV dans le repo (voir pipeline-bu/data/.gitignore).
+        # Pour usage mobile : télécharger l'artifact via GitHub UI (Actions → run → Artifacts).
