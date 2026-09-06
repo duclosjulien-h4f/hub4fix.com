@@ -95,6 +95,8 @@ DEMO_SPEC.md
 *[Rr]oadmap*
 *pipeline_ia*
 *veille*
+# Exception : suivi operationnel du pipeline TD (pas de strategie brute dedans)
+!pipeline-td/veille-reactivation.md
 # Visuels generes par le pipeline hotlist (38 Mo). Le site NE les sert PAS depuis
 # ici : les images publiques viennent de R2 via /img/h4f/<id>. Les committer
 # alourdirait l'historique definitivement, sans rien apporter en ligne.
