@@ -50,14 +50,33 @@ jobs:
           echo "=== Garde-fou : rien de sensible ne doit rester dans _site/ ==="
           # Le build echoue plutot que de publier : une regression silencieuse
           # ici remettrait le back-office en ligne sans que personne le voie.
-          if find _site -type f \( -name '*.toml' -o -name '*.sql' -o -name '.dev.vars' -o -name '*.pem' -o -name '*.key' \) | grep .; then
-            echo "ERREUR : fichiers de configuration ou de schema dans le site publie."
-            exit 1
+          echec=0
+
+          # 1) Par extension : configurations, schemas, cles.
+          if find _site -type f \( -name '*.toml' -o -name '*.sql' -o -name '.dev.vars' -o -name '*.pem' -o -name '*.key' -o -name '*.p12' \) | grep .; then
+            echo "ERREUR : fichier de configuration, de schema ou de cle dans le site publie."
+            echec=1
           fi
+
+          # 2) Par emplacement.
           if [ -d _site/worker ]; then
             echo "ERREUR : _site/worker existe encore."
-            exit 1
+            echec=1
           fi
+
+          # 3) Par CONTENU. Le filtre par extension ne voit pas du code backend
+          # range sous un autre nom que worker/ : un admin.js copie dans
+          # _site/backend/ passait les deux controles ci-dessus. Ces marqueurs
+          # n'ont aucune raison d'apparaitre dans un fichier destine au
+          # navigateur, et ils sont presents dans tout code de worker.
+          for marqueur in SESSION_SECRET GOOGLE_SA_KEY PIPELINE_TOKEN SLICER_SECRET database_id d1_databases r2_buckets; do
+            if grep -rlF "$marqueur" _site 2>/dev/null | grep .; then
+              echo "ERREUR : marqueur de code serveur « $marqueur » dans le site publie (fichiers ci-dessus)."
+              echec=1
+            fi
+          done
+
+          [ "$echec" -eq 0 ] || exit 1
           echo "OK"
 
           echo "=== Contenu publie ==="
