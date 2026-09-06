@@ -949,6 +949,7 @@ const NAV = [
   { path: '/admin', label: 'Tableau de bord', roles: ['admin', 'sous-admin', 'comptabilite'] },
   { path: '/admin/inscriptions', label: 'Inscriptions', roles: ['admin', 'sous-admin'] },
   { path: '/admin/shadowlist', label: 'Shadow List', roles: ['admin', 'sous-admin'] },
+  { path: '/admin/vivier', label: 'Vivier de veille', roles: ['admin', 'sous-admin'] },
   { path: '/admin/modelisateurs', label: 'Candidatures partenaire', roles: ['admin', 'sous-admin'] },
   { path: '/admin/reservations', label: 'Réservations', roles: ['admin', 'sous-admin'] },
   { path: '/admin/depot', label: 'Dépôt interne', roles: ['admin', 'sous-admin'] },
@@ -1023,7 +1024,7 @@ tr.is-new td{background:rgba(45,139,94,.05)}
 }
 `;
 
-function shell(activePath, sess, content, newCount, toValidate, pendingModelers, lastUndoLabel) {
+function shell(activePath, sess, content, newCount, toValidate, pendingModelers, lastUndoLabel, vivierBrut) {
   const role = sess.role || 'admin';
   const items = NAV.filter((n) => n.roles.includes(role))
     .map((n) => {
@@ -1031,6 +1032,7 @@ function shell(activePath, sess, content, newCount, toValidate, pendingModelers,
       if (n.path === '/admin/inscriptions' && newCount > 0) badge = `<span class="pill">${newCount}</span>`;
       else if (n.path === '/admin/shadowlist' && toValidate > 0) badge = `<span class="pill">${toValidate}</span>`;
       else if (n.path === '/admin/modelisateurs' && pendingModelers > 0) badge = `<span class="pill">${pendingModelers}</span>`;
+      else if (n.path === '/admin/vivier' && vivierBrut > 0) badge = `<span class="pill">${vivierBrut}</span>`;
       return `<a href="${n.path}"${n.path === activePath ? ' class="active"' : ''}><span>${esc(n.label)}</span>${badge}</a>`;
     }).join('');
   // Icône undo globale : visible sur toutes les pages, actionnable (verte)
@@ -2533,9 +2535,361 @@ function viewReservations(data, flash) {
   return head + banner + cards;
 }
 
+// ============================ VIVIER (veille BU) ============================
+// Poste de travail de vérification. Le pipeline pipeline-bu/ collecte des
+// signaux de rareté ; rien n'en sort sans être recoupé sur une source
+// DIFFÉRENTE de celle qui l'a détecté. Cette règle est appliquée ici, côté
+// serveur : verifierSignal() refuse de qualifier sans source de recoupement,
+// et refuse qu'elle soit égale à la source de détection.
+
+const VIVIER_STATUTS = ['Brut', 'Qualifie', 'Contredit', 'Exclu'];
+
+async function loadVivier(env, statut) {
+  if (!env.DB) return { error: 'Base D1 indisponible.', rows: [] };
+  try {
+    const where = statut && VIVIER_STATUTS.includes(statut) ? ' WHERE statut = ?' : '';
+    const sql = 'SELECT * FROM vivier' + where + ' ORDER BY score_rarete DESC, date_collecte DESC LIMIT 400';
+    const st = where ? env.DB.prepare(sql).bind(statut) : env.DB.prepare(sql);
+    const res = await st.all();
+    return { rows: res.results || [] };
+  } catch (e) {
+    // Table pas encore créée : on le dit au lieu de renvoyer une liste vide,
+    // qui laisserait croire que la collecte n'a rien trouvé.
+    return { error: 'Table `vivier` absente ou illisible — exécuter worker/vivier-schema.sql. (' + (e.message || e) + ')', rows: [] };
+  }
+}
+
+async function countVivierBrut(env) {
+  if (!env.DB) return 0;
+  try {
+    const r = await env.DB.prepare("SELECT COUNT(*) AS n FROM vivier WHERE statut = 'Brut'").first();
+    return (r && r.n) || 0;
+  } catch { return 0; }
+}
+
+// Critères d'armement du cron, calculés au lieu d'être cochés à la main
+// (cf. pipeline-bu/JOURNAL-TEST.md). Le taux de faux positifs n'a de sens
+// que sur les lignes RELUES : un signal encore Brut n'est ni juste ni faux.
+async function vivierStats(env) {
+  const vide = { total: 0, brut: 0, qualifie: 0, contredit: 0, exclu: 0, relus: 0, tauxFaux: null, familles: 0 };
+  if (!env.DB) return vide;
+  try {
+    const res = await env.DB.prepare(
+      'SELECT statut, COUNT(*) AS n FROM vivier GROUP BY statut'
+    ).all();
+    const s = { ...vide };
+    for (const r of res.results || []) {
+      const n = r.n || 0;
+      s.total += n;
+      if (r.statut === 'Brut') s.brut = n;
+      else if (r.statut === 'Qualifie') s.qualifie = n;
+      else if (r.statut === 'Contredit') s.contredit = n;
+      else if (r.statut === 'Exclu') s.exclu = n;
+    }
+    s.relus = s.qualifie + s.contredit;
+    s.tauxFaux = s.relus > 0 ? s.contredit / s.relus : null;
+    const f = await env.DB.prepare(
+      'SELECT COUNT(DISTINCT source_type) AS n FROM vivier WHERE statut IN (\'Qualifie\',\'Contredit\')'
+    ).first();
+    s.familles = (f && f.n) || 0;
+    return s;
+  } catch { return vide; }
+}
+
+// Découpe une ligne CSV en respectant les guillemets (les symptômes contiennent
+// des virgules). Volontairement minimal : le CSV vient de notre propre script.
+function splitCsvLine(line) {
+  const out = [];
+  let cur = '';
+  let inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (inQ) {
+      if (c === '"') {
+        if (line[i + 1] === '"') { cur += '"'; i++; } else inQ = false;
+      } else cur += c;
+    } else if (c === '"') inQ = true;
+    else if (c === ',') { out.push(cur); cur = ''; }
+    else cur += c;
+  }
+  out.push(cur);
+  return out;
+}
+
+function parseVivierCsv(texte) {
+  const lignes = String(texte || '').split(/\r?\n/).filter((l) => l.trim() !== '');
+  if (lignes.length < 2) return { error: 'CSV vide ou sans ligne de données.' };
+  const entetes = splitCsvLine(lignes[0]).map((h) => h.trim());
+  const iRef = entetes.indexOf('reference');
+  const iSrc = entetes.indexOf('source_nom');
+  if (iRef === -1 || iSrc === -1) {
+    return { error: 'En-têtes attendus absents : il faut au moins `reference` et `source_nom`. Reçu : ' + entetes.join(', ') };
+  }
+  const lu = (cells, nom) => {
+    const i = entetes.indexOf(nom);
+    return i === -1 ? '' : (cells[i] || '').trim();
+  };
+  const rows = [];
+  for (let n = 1; n < lignes.length; n++) {
+    const c = splitCsvLine(lignes[n]);
+    const reference = lu(c, 'reference');
+    const source_nom = lu(c, 'source_nom');
+    // Sans référence ni preuve, la ligne n'est pas vérifiable : on l'écarte
+    // plutôt que de remplir le vivier de lignes sur lesquelles on ne peut rien.
+    const lien = lu(c, 'lien_preuve');
+    if (!source_nom || (!reference && !lien)) continue;
+    const score = parseInt(lu(c, 'score_rarete'), 10);
+    rows.push({
+      date_collecte: lu(c, 'date_collecte'),
+      source_nom,
+      source_type: lu(c, 'source_type'),
+      lien_preuve: lien,
+      marque: lu(c, 'marque'),
+      modele: lu(c, 'modele'),
+      reference,
+      symptome: lu(c, 'symptome'),
+      categorie_piece: lu(c, 'categorie_piece'),
+      score_rarete: Number.isFinite(score) ? score : 0,
+      details_score: lu(c, 'details_score'),
+      // Le statut du CSV n'est pas repris : toute ligne entre en 'Brut', y
+      // compris si le script l'a pré-marquée. La promotion se fait ici.
+      note_exclusion: lu(c, 'note_exclusion'),
+      cle_dedup: (reference || lien).toLowerCase() + '|' + source_nom.toLowerCase(),
+    });
+  }
+  return { rows };
+}
+
+async function adminVivierImport(request, env, sess) {
+  let form;
+  try { form = await request.formData(); } catch { return new Response('Formulaire invalide', { status: 400 }); }
+  const texte = (form.get('csv') || '').toString();
+  const parsed = parseVivierCsv(texte);
+  if (parsed.error) {
+    return new Response(null, { status: 302, headers: { Location: '/admin/vivier?err=' + encodeURIComponent(parsed.error) } });
+  }
+  if (!env.DB) {
+    return new Response(null, { status: 302, headers: { Location: '/admin/vivier?err=' + encodeURIComponent('Base D1 indisponible.') } });
+  }
+  let ajoutes = 0;
+  let ignores = 0;
+  for (const r of parsed.rows) {
+    try {
+      // INSERT OR IGNORE + cle_dedup UNIQUE : rejouer le même CSV ne duplique
+      // rien et n'écrase aucune vérification déjà faite.
+      const res = await env.DB.prepare(
+        'INSERT OR IGNORE INTO vivier (date_collecte,source_nom,source_type,lien_preuve,marque,modele,reference,' +
+        'symptome,categorie_piece,score_rarete,details_score,statut,note_exclusion,cle_dedup) ' +
+        "VALUES (?,?,?,?,?,?,?,?,?,?,?,'Brut',?,?)"
+      ).bind(
+        r.date_collecte, r.source_nom, r.source_type, r.lien_preuve, r.marque, r.modele, r.reference,
+        r.symptome, r.categorie_piece, r.score_rarete, r.details_score, r.note_exclusion, r.cle_dedup
+      ).run();
+      const changed = res && res.meta ? res.meta.changes : 0;
+      if (changed > 0) ajoutes++; else ignores++;
+    } catch { ignores++; }
+  }
+  await audit(env, sess.email, 'vivier-import', ajoutes + ' ajoutés, ' + ignores + ' déjà connus');
+  const msg = ajoutes + ' signal' + (ajoutes > 1 ? 'aux' : '') + ' ajouté' + (ajoutes > 1 ? 's' : '') +
+    (ignores > 0 ? ' · ' + ignores + ' déjà connu' + (ignores > 1 ? 's' : '') + ', inchangé' + (ignores > 1 ? 's' : '') : '');
+  return new Response(null, { status: 302, headers: { Location: '/admin/vivier?flash=' + encodeURIComponent(msg) } });
+}
+
+// Cœur du verrou. Refuse toute promotion qui ne s'appuie pas sur une source
+// de recoupement distincte de la source de détection.
+function controlerVerification(action, verifSource, sourceNom) {
+  if (action === 'exclure') return null; // exclusion sécurité : pas de recoupement requis
+  if (!verifSource) {
+    return 'Indiquez la source utilisée pour recouper — une vérification sans source n\'en est pas une.';
+  }
+  const a = verifSource.trim().toLowerCase();
+  const b = String(sourceNom || '').trim().toLowerCase();
+  if (a && b && (a === b || a.includes(b) || b.includes(a))) {
+    return 'La source de recoupement doit différer de la source de détection (' + sourceNom + ') : se recouper soi-même n\'est pas une vérification indépendante.';
+  }
+  return null;
+}
+
+async function adminVivierVerifier(request, env, sess) {
+  let form;
+  try { form = await request.formData(); } catch { return new Response('Formulaire invalide', { status: 400 }); }
+  const id = (form.get('id') || '').toString();
+  const action = (form.get('action') || '').toString();   // qualifier | contredire | exclure
+  const verifSource = (form.get('verif_source') || '').toString();
+  const verifNote = (form.get('verif_note') || '').toString();
+  if (!id || !['qualifier', 'contredire', 'exclure'].includes(action)) {
+    return new Response('Action inconnue', { status: 400 });
+  }
+  if (!env.DB) {
+    return new Response(null, { status: 302, headers: { Location: '/admin/vivier?err=' + encodeURIComponent('Base D1 indisponible.') } });
+  }
+
+  const ligne = await env.DB.prepare('SELECT * FROM vivier WHERE id = ?').bind(id).first();
+  if (!ligne) {
+    return new Response(null, { status: 302, headers: { Location: '/admin/vivier?err=' + encodeURIComponent('Signal introuvable.') } });
+  }
+
+  const refus = controlerVerification(action, verifSource, ligne.source_nom);
+  if (refus) {
+    return new Response(null, { status: 302, headers: { Location: '/admin/vivier?err=' + encodeURIComponent(refus) + '#s' + id } });
+  }
+
+  const statut = action === 'qualifier' ? 'Qualifie' : action === 'contredire' ? 'Contredit' : 'Exclu';
+
+  // Filet : la décision est réversible depuis l'icône d'annulation globale.
+  await recordUndo(env, sess.email, 'Vérification vivier : ' + (ligne.reference || ligne.source_nom), 'd1_row', {
+    db: 'DB', table: 'vivier', pkCol: 'id', rows: [ligne],
+  });
+
+  await env.DB.prepare(
+    'UPDATE vivier SET statut = ?, verif_source = ?, verif_note = ?, verif_par = ?, verif_le = ? WHERE id = ?'
+  ).bind(statut, verifSource.trim(), verifNote.trim(), sess.email, nowIso(), id).run();
+
+  await audit(env, sess.email, 'vivier-' + action,
+    (ligne.reference || ligne.lien_preuve || '') + ' → ' + statut + (verifSource ? ' (recoupé sur ' + verifSource.trim() + ')' : ''));
+
+  const msg = (ligne.reference || 'Signal') + ' → ' + statut;
+  return new Response(null, { status: 302, headers: { Location: '/admin/vivier?flash=' + encodeURIComponent(msg) } });
+}
+
+function vivierBadgeStatut(statut) {
+  const map = {
+    Brut: ['var(--earth)', '#fff', 'var(--line)'],
+    Qualifie: ['#fff', 'var(--green)', 'var(--green)'],
+    Contredit: ['#9b1c1c', 'rgba(200,16,46,.08)', '#f3c2c2'],
+    Exclu: ['var(--earth)', 'var(--cream)', 'var(--line)'],
+  };
+  const [fg, bg, bd] = map[statut] || map.Brut;
+  return '<span style="display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;' +
+    'padding:.18rem .5rem;border-radius:3px;color:' + fg + ';background:' + bg + ';border:1px solid ' + bd + '">' + esc(statut) + '</span>';
+}
+
+function viewVivier(data, stats, filtre, flash, err) {
+  const head = '<h1 class="page">Vivier <em>de veille</em></h1>' +
+    '<p class="sub">Signaux collectés par le pipeline BU. Rien ne sort d\'ici sans avoir été recoupé sur une source indépendante.</p>';
+  const banner = flash ? '<div class="banner">' + esc(flash) + '</div>' : '';
+  const erreur = err
+    ? '<div class="banner" style="background:rgba(200,16,46,.08);border-color:var(--red);color:#9b1c1c">' + esc(err) + '</div>'
+    : '';
+
+  // Critères d'armement du cron, calculés. Tant qu'ils ne sont pas tenus, le
+  // pipeline reste en test manuel (cf. pipeline-bu/JOURNAL-TEST.md).
+  const pct = stats.tauxFaux === null ? '—' : Math.round(stats.tauxFaux * 100) + ' %';
+  const okFaux = stats.tauxFaux !== null && stats.tauxFaux < 1 / 3;
+  const okFamilles = stats.familles >= 2;
+  const okQualifie = stats.qualifie >= 1;
+  const critere = (ok, txt) =>
+    '<div style="display:flex;gap:.5rem;align-items:baseline;font-size:.82rem;color:var(--earth)">' +
+    '<span style="color:' + (ok ? 'var(--green)' : 'var(--line)') + ';font-weight:700">' + (ok ? '✓' : '○') + '</span>' +
+    '<span>' + txt + '</span></div>';
+
+  const cartes = '<div class="cards">' +
+      '<div class="card"><div class="k">À vérifier</div><div class="v">' + stats.brut + '</div></div>' +
+      '<div class="card"><div class="k">Qualifiés</div><div class="v">' + stats.qualifie + '</div></div>' +
+      '<div class="card"><div class="k">Contredits</div><div class="v">' + stats.contredit + '</div></div>' +
+      '<div class="card"><div class="k">Faux positifs</div><div class="v">' + pct + '</div></div>' +
+    '</div>' +
+    '<div style="border:1px solid var(--line);border-radius:7px;padding:1rem 1.1rem;margin:1.2rem 0;background:#fff">' +
+      '<div style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--red);margin-bottom:.6rem">' +
+        'Armement du cron' +
+      '</div>' +
+      critere(okQualifie, 'Au moins 1 signal qualifié après vérification' + (okQualifie ? '' : ' — ' + stats.qualifie + '/1')) +
+      critere(okFamilles, 'Au moins 2 familles de sources relues' + (okFamilles ? '' : ' — ' + stats.familles + '/2')) +
+      critere(okFaux, 'Faux positifs sous 1 sur 3' + (stats.tauxFaux === null ? ' — rien de relu encore' : ' — ' + pct)) +
+      '<div class="muted" style="font-size:.76rem;margin-top:.6rem">Tant qu\'un critère manque, le cron reste désarmé dans <code>collecte-bu.yml</code>.</div>' +
+    '</div>';
+
+  const onglet = (v, lbl, n) =>
+    '<a href="/admin/vivier' + (v ? '?statut=' + v : '') + '" style="display:inline-block;padding:.4rem .8rem;font-size:.8rem;' +
+    'text-decoration:none;border:1px solid ' + (filtre === v ? 'var(--red)' : 'var(--line)') + ';border-radius:5px;' +
+    'color:' + (filtre === v ? 'var(--red)' : 'var(--earth)') + ';background:' + (filtre === v ? 'rgba(200,16,46,.07)' : '#fff') + '">' +
+    esc(lbl) + (n === null ? '' : ' (' + n + ')') + '</a>';
+  const onglets = '<div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.2rem">' +
+    onglet('Brut', 'À vérifier', stats.brut) +
+    onglet('Qualifie', 'Qualifiés', stats.qualifie) +
+    onglet('Contredit', 'Contredits', stats.contredit) +
+    onglet('Exclu', 'Exclus', stats.exclu) +
+    onglet('', 'Tous', stats.total) +
+    '</div>';
+
+  const importForm = '<details style="margin-bottom:1.5rem;border:1px solid var(--line);border-radius:7px;padding:.9rem 1.1rem;background:#fff">' +
+    '<summary style="cursor:pointer;font-size:.85rem;font-weight:600">Importer un passage de collecte</summary>' +
+    '<p class="muted" style="font-size:.78rem;margin:.6rem 0">Coller le contenu de <code>vivier_brut_collecte.csv</code>. ' +
+    'L\'import est rejouable : une ligne déjà connue est ignorée, jamais réécrite — vos vérifications ne risquent rien.</p>' +
+    '<form method="post" action="/admin/vivier/import">' +
+      '<textarea name="csv" rows="8" placeholder="date_collecte,source_nom,source_type,lien_preuve,..." ' +
+        'style="width:100%;font-family:ui-monospace,Menlo,monospace;font-size:.76rem;padding:.6rem;border:1px solid var(--line);border-radius:5px"></textarea>' +
+      '<button type="submit" style="margin-top:.6rem;font-family:inherit;font-size:.78rem;font-weight:600;padding:.5rem 1rem;' +
+        'border:none;border-radius:5px;background:var(--ink);color:#fff;cursor:pointer">Importer</button>' +
+    '</form></details>';
+
+  if (data.error) return head + banner + erreur + dataError(data.error);
+
+  const rows = data.rows;
+  if (!rows.length) {
+    return head + banner + erreur + cartes + onglets + importForm +
+      '<div class="soon">Aucun signal ' + (filtre ? 'dans « ' + esc(filtre) +' »' : 'dans le vivier') + '. ' +
+      'Lancer un passage : <code>python3 pipeline-bu/scripts/collecte_pipeline.py</code>, puis importer le CSV ci-dessus.</div>';
+  }
+
+  const cartesSignaux = rows.map((r) => {
+    const preuve = r.lien_preuve
+      ? '<a href="' + esc(r.lien_preuve) + '" target="_blank" rel="noopener noreferrer" style="color:var(--red)">voir la preuve</a>'
+      : '<span class="muted">pas de lien</span>';
+    const titre = esc(r.reference || '(référence non extraite)');
+    const meta = [r.marque, r.modele, r.categorie_piece].filter(Boolean).map(esc).join(' · ');
+
+    // Le formulaire de décision n'apparaît que sur les lignes encore Brut :
+    // une décision déjà prise se défait par l'annulation globale, pas en la
+    // réécrivant silencieusement.
+    const decision = r.statut === 'Brut'
+      ? '<form method="post" action="/admin/vivier/verifier" style="margin-top:.8rem;display:flex;flex-wrap:wrap;gap:.5rem;align-items:flex-start">' +
+          '<input type="hidden" name="id" value="' + esc(String(r.id)) + '">' +
+          '<input name="verif_source" placeholder="Recoupé sur… (obligatoire)" ' +
+            'style="flex:1 1 220px;font-family:inherit;font-size:.8rem;padding:.42rem .6rem;border:1px solid var(--line);border-radius:5px">' +
+          '<input name="verif_note" placeholder="Note (facultatif)" ' +
+            'style="flex:1 1 180px;font-family:inherit;font-size:.8rem;padding:.42rem .6rem;border:1px solid var(--line);border-radius:5px">' +
+          '<button name="action" value="qualifier" style="font-family:inherit;font-size:.78rem;font-weight:600;padding:.42rem .8rem;' +
+            'border:none;border-radius:5px;background:var(--green);color:#fff;cursor:pointer">Confirmé</button>' +
+          '<button name="action" value="contredire" style="font-family:inherit;font-size:.78rem;font-weight:600;padding:.42rem .8rem;' +
+            'border:1px solid #f3c2c2;border-radius:5px;background:#fff;color:var(--red);cursor:pointer">Démenti</button>' +
+          '<button name="action" value="exclure" style="font-family:inherit;font-size:.78rem;font-weight:600;padding:.42rem .8rem;' +
+            'border:1px solid var(--line);border-radius:5px;background:#fff;color:var(--earth);cursor:pointer">Exclure</button>' +
+        '</form>'
+      : '<div class="muted" style="font-size:.78rem;margin-top:.6rem">' +
+          (r.verif_source ? 'Recoupé sur <b>' + esc(r.verif_source) + '</b>' : 'Sans recoupement') +
+          (r.verif_par ? ' · par ' + esc(r.verif_par) : '') +
+          (r.verif_le ? ' le ' + fmtDate(r.verif_le) : '') +
+          (r.verif_note ? '<br>' + esc(r.verif_note) : '') +
+        '</div>';
+
+    return '<div id="s' + esc(String(r.id)) + '" style="border:1px solid var(--line);border-radius:7px;padding:1rem 1.1rem;margin-bottom:.8rem;background:#fff">' +
+      '<div style="display:flex;justify-content:space-between;gap:1rem;align-items:baseline;flex-wrap:wrap">' +
+        '<div style="font-weight:600;font-size:.95rem">' + titre + '</div>' +
+        '<div style="display:flex;gap:.5rem;align-items:center">' +
+          '<span style="font-family:ui-monospace,Menlo,monospace;font-size:.8rem;color:var(--ink)">' + (r.score_rarete || 0) + '/7</span>' +
+          vivierBadgeStatut(r.statut) +
+        '</div>' +
+      '</div>' +
+      (meta ? '<div class="muted" style="font-size:.78rem;margin-top:.15rem">' + meta + '</div>' : '') +
+      '<div style="font-size:.85rem;margin-top:.5rem">' + esc(r.symptome || '') + '</div>' +
+      '<div class="muted" style="font-size:.76rem;margin-top:.4rem">' +
+        'Détecté par <b>' + esc(r.source_nom || '?') + '</b>' +
+        (r.source_type ? ' (' + esc(r.source_type) + ')' : '') +
+        (r.date_collecte ? ' le ' + esc(r.date_collecte) : '') + ' · ' + preuve +
+        (r.details_score ? ' · <span style="font-family:ui-monospace,Menlo,monospace">' + esc(r.details_score) + '</span>' : '') +
+      '</div>' +
+      decision +
+    '</div>';
+  }).join('');
+
+  return head + banner + erreur + cartes + onglets + importForm + cartesSignaux;
+}
+
 // Exports nommés pour tests unitaires uniquement (le runtime n'utilise que `default`).
 export { loadModelerApplications, decideModelerApplication, updatePartnerApplication, deletePartner, loadReservations, decideReservation,
-  loadSubmissions, decideSubmission, remaining, viewReservations, viewModeles, handleDepot, viewDepot };
+  loadSubmissions, decideSubmission, remaining, viewReservations, viewModeles, handleDepot, viewDepot,
+  parseVivierCsv, splitCsvLine, controlerVerification, viewVivier };
 
 // ============================ ROUTAGE ============================
 
@@ -2699,6 +3053,8 @@ export default {
     // Icône undo (barre latérale, toutes pages) : calculée une fois, réutilisée
     // par tous les appels shell() ci-dessous.
     const undoLabel = await lastUndoLabel(env);
+    // Signaux de veille encore non vérifiés : badge de la barre latérale.
+    const vivierBrut = await countVivierBrut(env);
 
     // Fichier source 3D : upload (POST) et téléchargement (GET) — admin connecté uniquement.
     if (request.method === 'POST' && path === '/admin/upload3d') {
@@ -2829,7 +3185,27 @@ export default {
       return new Response(null, { status: 302, headers: { Location: '/admin/shadowlist' } });
     }
     if (path === '/admin/shadowlist') {
-      return shell('/admin/shadowlist', sess, viewShadowList(pdata), 0, toValidate, pendingModelers, undoLabel);
+      return shell('/admin/shadowlist', sess, viewShadowList(pdata), 0, toValidate, pendingModelers, undoLabel, vivierBrut);
+    }
+
+    // Vivier de veille : import d'un passage de collecte, puis vérification
+    // signal par signal. Le recoupement sur une source indépendante est
+    // contrôlé côté serveur (cf. controlerVerification).
+    if (request.method === 'POST' && path === '/admin/vivier/import') {
+      if (sess.role !== 'admin' && sess.role !== 'sous-admin') return new Response('Interdit', { status: 403 });
+      return adminVivierImport(request, env, sess);
+    }
+    if (request.method === 'POST' && path === '/admin/vivier/verifier') {
+      if (sess.role !== 'admin' && sess.role !== 'sous-admin') return new Response('Interdit', { status: 403 });
+      return adminVivierVerifier(request, env, sess);
+    }
+    if (path === '/admin/vivier') {
+      const filtre = url.searchParams.get('statut') || '';
+      const vdata = await loadVivier(env, filtre);
+      const vstats = await vivierStats(env);
+      return shell('/admin/vivier', sess,
+        viewVivier(vdata, vstats, filtre, url.searchParams.get('flash'), url.searchParams.get('err')),
+        0, toValidate, pendingModelers, undoLabel, vivierBrut);
     }
 
     // Candidatures modélisateur : décision (POST, admin/sous-admin) puis liste (GET).
@@ -2853,7 +3229,7 @@ export default {
     }
     if (path === '/admin/modelisateurs') {
       const apps = await loadModelerApplications(env);
-      return shell('/admin/modelisateurs', sess, viewModelerApplications(apps, url.searchParams.get('m'), url.searchParams.get('edit')), 0, toValidate, pendingModelers, undoLabel);
+      return shell('/admin/modelisateurs', sess, viewModelerApplications(apps, url.searchParams.get('m'), url.searchParams.get('edit')), 0, toValidate, pendingModelers, undoLabel, vivierBrut);
     }
 
     // Photo de réservation (privée) — admin connecté uniquement, lue dans RESERV_R2.
@@ -2881,7 +3257,7 @@ export default {
     }
     if (path === '/admin/reservations') {
       const resvs = await loadReservations(env);
-      return shell('/admin/reservations', sess, viewReservations(resvs, url.searchParams.get('m')), 0, toValidate, pendingModelers, undoLabel);
+      return shell('/admin/reservations', sess, viewReservations(resvs, url.searchParams.get('m')), 0, toValidate, pendingModelers, undoLabel, vivierBrut);
     }
 
     // Fichier déposé par un modélisateur (source natif ou STEP) — admin connecté
@@ -2923,7 +3299,7 @@ export default {
     }
     if (path === '/admin/depot') {
       const pieces = await loadPieces(env);
-      return shell('/admin/depot', sess, viewDepot(pieces, url.searchParams.get('m'), url.searchParams.get('e')), 0, toValidate, pendingModelers, undoLabel);
+      return shell('/admin/depot', sess, viewDepot(pieces, url.searchParams.get('m'), url.searchParams.get('e')), 0, toValidate, pendingModelers, undoLabel, vivierBrut);
     }
 
     // Modèles 3D : décision d'examen (POST) puis file d'attente (GET).
@@ -2942,7 +3318,7 @@ export default {
     }
     if (path === '/admin/modeles') {
       const subs = await loadSubmissions(env);
-      return shell('/admin/modeles', sess, viewModeles(subs, url.searchParams.get('m')), 0, toValidate, pendingModelers, undoLabel);
+      return shell('/admin/modeles', sess, viewModeles(subs, url.searchParams.get('m')), 0, toValidate, pendingModelers, undoLabel, vivierBrut);
     }
 
     if (path === '/admin/pieces.csv') {
@@ -2967,7 +3343,7 @@ export default {
       const admins = await listAdmins(env);
       const data = await loadInscriptions(env);
       const newCount = data.error ? 0 : countNew(data.rows, seen);
-      return shell('/admin/admins', sess, viewAdmins(admins, sess), newCount, toValidate, pendingModelers, undoLabel);
+      return shell('/admin/admins', sess, viewAdmins(admins, sess), newCount, toValidate, pendingModelers, undoLabel, vivierBrut);
     }
 
     // Appareils : approbation / révocation (POST réservé admin), liste (GET)
@@ -2985,7 +3361,7 @@ export default {
       const devices = await listDevices(env);
       const data = await loadInscriptions(env);
       const newCount = data.error ? 0 : countNew(data.rows, seen);
-      return shell('/admin/appareils', sess, viewDevices(devices, sess, url.searchParams.get('e')), newCount, toValidate, pendingModelers, undoLabel);
+      return shell('/admin/appareils', sess, viewDevices(devices, sess, url.searchParams.get('e')), newCount, toValidate, pendingModelers, undoLabel, vivierBrut);
     }
 
     // Journal d'audit : historique des annulations (icône « Annuler »), conservé 45 jours.
@@ -2994,21 +3370,21 @@ export default {
       const history = await listUndoHistory(env);
       const data = await loadInscriptions(env);
       const newCount = data.error ? 0 : countNew(data.rows, seen);
-      return shell('/admin/journal', sess, viewUndoJournal(history), newCount, toValidate, pendingModelers, undoLabel);
+      return shell('/admin/journal', sess, viewUndoJournal(history), newCount, toValidate, pendingModelers, undoLabel, vivierBrut);
     }
 
     // Tableau de bord
     if (path === '/' || path === '/admin') {
       const data = await loadInscriptions(env);
       const newCount = data.error ? 0 : countNew(data.rows, seen);
-      return shell('/admin', sess, viewDashboard(sess, data, seen, toValidate), newCount, toValidate, pendingModelers, undoLabel);
+      return shell('/admin', sess, viewDashboard(sess, data, seen, toValidate), newCount, toValidate, pendingModelers, undoLabel, vivierBrut);
     }
 
     // Inscriptions : marque comme "vues" (met à jour le repère) après affichage
     if (path === '/admin/inscriptions') {
       const data = await loadInscriptions(env);
       data.seen = seen;
-      const resp = shell('/admin/inscriptions', sess, viewInscriptions(data, url.searchParams.get('m')), 0, toValidate, pendingModelers, undoLabel);
+      const resp = shell('/admin/inscriptions', sess, viewInscriptions(data, url.searchParams.get('m')), 0, toValidate, pendingModelers, undoLabel, vivierBrut);
       // après consultation, on déplace le repère "dernière visite" à maintenant
       resp.headers.append('Set-Cookie', setCookie('h4f_seen', new Date().toISOString(), SEEN_TTL));
       return resp;
@@ -3017,7 +3393,7 @@ export default {
     if (SECTIONS[path]) {
       const data = await loadInscriptions(env);
       const newCount = data.error ? 0 : countNew(data.rows, seen);
-      return shell(path, sess, SECTIONS[path](), newCount, toValidate, pendingModelers, undoLabel);
+      return shell(path, sess, SECTIONS[path](), newCount, toValidate, pendingModelers, undoLabel, vivierBrut);
     }
 
     return new Response(null, { status: 302, headers: { Location: '/admin' } });
