@@ -24,7 +24,9 @@ on:
         type: boolean
 
 permissions:
-  contents: read
+  # write : necessaire au seul reversement de pipeline-bu/bench.csv (comptes du
+  # jour). Le vivier lui-meme n'est jamais commite, cf. pipeline-bu/data/.gitignore.
+  contents: write
   actions: read
 
 jobs:
@@ -50,15 +52,35 @@ jobs:
           echo "Dry run : ${{ github.event.inputs.dry_run || 'false' }}"
           python3 --version
 
-      - name: Lancer collecte_pipeline.py
+      # Le meme programme que celui lance a la main (veille.py), pour que le
+      # compte rendu du matin soit identique quel que soit l'endroit d'ou on
+      # le declenche. Ce runner a un acces reseau sortant complet, contrairement
+      # a l'environnement de developpement Claude Code dont la politique reseau
+      # refuse le CONNECT vers tout sauf GitHub.
+      - name: Veille du matin
         run: |
-          cd pipeline-bu/scripts
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
-            python3 collecte_pipeline.py --dry-run
+            python3 veille.py --sec
           else
-            python3 collecte_pipeline.py
+            python3 veille.py
           fi
         # Pas de secrets injectés — le script n'utilise que des API publiques sans clé
+
+      # Le banc d'essai (comptes du jour, rien de sensible) est reversé dans le
+      # depot : c'est lui qui permet de comparer les matins entre eux, et il ne
+      # sert a rien s'il disparait avec le runner.
+      - name: Reverser le banc d'essai
+        if: success()
+        run: |
+          if ! git diff --quiet -- pipeline-bu/bench.csv 2>/dev/null; then
+            git config user.name  "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add pipeline-bu/bench.csv
+            git commit -m "Veille $(date -u '+%Y-%m-%d') : ligne de banc d'essai"
+            git push
+          else
+            echo "Banc d'essai inchange, rien a pousser."
+          fi
 
       - name: Résumé du run
         if: always()

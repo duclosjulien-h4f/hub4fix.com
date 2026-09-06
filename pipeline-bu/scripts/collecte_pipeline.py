@@ -161,6 +161,22 @@ class SignalRarete:
 # Utilitaires réseau
 # ---------------------------------------------------------------------------
 
+# Compte rendu des requêtes, par domaine. La première question du banc d'essai
+# n'est pas « combien de signaux ? » mais « les sources répondent-elles ? ».
+# Un 403 systématique n'est pas un bug du script, c'est une source à retirer :
+# encore faut-il le savoir, donc le retenir au lieu de l'écrire sur stderr.
+FETCH_STATS: dict[str, dict] = {}
+
+
+def _noter_fetch(url: str, resultat: str):
+    dom = urlparse(url).netloc or url
+    st = FETCH_STATS.setdefault(dom, {"ok": 0, "echecs": {}})
+    if resultat == "ok":
+        st["ok"] += 1
+    else:
+        st["echecs"][resultat] = st["echecs"].get(resultat, 0) + 1
+
+
 def fetch_url(url: str, timeout: int = 15) -> Optional[str]:
     """Récupère le contenu d'une URL avec rate limiting et User-Agent correct."""
     req = Request(url, headers={"User-Agent": USER_AGENT})
@@ -168,18 +184,22 @@ def fetch_url(url: str, timeout: int = 15) -> Optional[str]:
         with urlopen(req, timeout=timeout) as resp:
             charset = resp.headers.get_content_charset() or "utf-8"
             content = resp.read().decode(charset, errors="replace")
+        _noter_fetch(url, "ok")
         time.sleep(RATE_LIMIT_SECONDS)
         return content
     except HTTPError as e:
         print(f"  [HTTP {e.code}] {url}", file=sys.stderr)
+        _noter_fetch(url, f"HTTP {e.code}")
         time.sleep(RATE_LIMIT_SECONDS)
         return None
     except URLError as e:
         print(f"  [URL Error] {url}: {e.reason}", file=sys.stderr)
+        _noter_fetch(url, "injoignable")
         time.sleep(RATE_LIMIT_SECONDS)
         return None
     except Exception as e:
         print(f"  [Error] {url}: {e}", file=sys.stderr)
+        _noter_fetch(url, "erreur")
         time.sleep(RATE_LIMIT_SECONDS)
         return None
 

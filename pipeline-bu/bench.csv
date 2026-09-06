@@ -1,0 +1,2 @@
+date,heure,source_demandee,domaines_ok,domaines_muets,requetes_ok,requetes_echec,signaux_bruts,signaux_nets,score_max,score_moyen,nouveaux_ajoutes,verdict_sources
+2026-09-06,19:29,marketplaces,0,1,0,2,0,0,0,0,0,aucune source ne repond
