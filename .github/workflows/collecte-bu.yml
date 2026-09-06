@@ -1,9 +1,20 @@
 name: Pipeline BU — Collecte signaux rareté
 
+# CRON DESARME VOLONTAIREMENT.
+#
+# Decision : le pipeline est d'abord teste a la main pendant plusieurs jours,
+# lance depuis Claude Code, avant d'etre confie a un declencheur automatique.
+# Les selecteurs d'extraction n'ont jamais tourne contre les vraies sources ;
+# armer le cron maintenant reviendrait a accumuler du bruit sans savoir lequel.
+#
+# Pour reactiver quand le journal de test le justifie : decommenter le bloc
+# schedule ci-dessous. Criteres d'armement dans pipeline-bu/JOURNAL-TEST.md.
+#
+# schedule:
+#   # Lundi, mardi, jeudi, vendredi a 06h00 UTC
+#   - cron: '0 6 * * 1,2,4,5'
+
 on:
-  schedule:
-    # Lundi, mardi, jeudi, vendredi à 06h00 UTC
-    - cron: '0 6 * * 1,2,4,5'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -40,11 +51,13 @@ jobs:
           python3 --version
 
       - name: Lancer collecte_pipeline.py
-        env:
-          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
         run: |
           cd pipeline-bu/scripts
-          python3 collecte_pipeline.py
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            python3 collecte_pipeline.py --dry-run
+          else
+            python3 collecte_pipeline.py
+          fi
         # Pas de secrets injectés — le script n'utilise que des API publiques sans clé
 
       - name: Résumé du run
