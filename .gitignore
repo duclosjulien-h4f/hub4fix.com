@@ -115,3 +115,6 @@ cartographie_usage_claude_code.md
 /*.dxf.svg
 /*.dxf.png
 /hub4fix_logo_variante1_tricolore.svg
+
+# Sortie de build-site.sh (site assemble) : jamais commitee
+_site/

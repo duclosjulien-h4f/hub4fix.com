@@ -1,5 +1,15 @@
 name: Deploy to GitHub Pages
 
+# TRANSITOIRE — ce workflow disparaît quand le site sera servi par Cloudflare
+# Pages (cf. MIGRATION-CLOUDFLARE-PAGES.md). Objectif de la bascule : rendre le
+# dépôt privé sans couper le site, ce que GitHub Pages ne permet pas sur le
+# plan gratuit alors que Cloudflare Pages le fait.
+#
+# Il n'assemble rien lui-même : le périmètre publiable est décidé par
+# ./build-site.sh, appelé aussi par Cloudflare Pages. Un seul endroit décide
+# de ce qui a le droit d'être public, pour que changer d'hébergeur ne
+# réintroduise pas une fuite que l'autre avait bouchée.
+
 on:
   push:
     branches: [main]
@@ -22,65 +32,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Le dossier hub4fix.com/ contient aussi du code qui n'a RIEN a faire sur
-      # le web : la source des workers, leurs schemas SQL, leurs wrangler.toml
-      # (identifiants de bases D1, noms de buckets, liste des noms de secrets),
-      # les scripts d'outillage et les tests.
-      #
-      # Publier ce dossier tel quel servait tout cela sur hub4fix.com/worker/…,
-      # c'est-a-dire la carte complete du back-office sur le domaine de prod.
-      # On assemble donc une copie ne contenant que ce qu'un navigateur doit lire.
-      - name: Assembler le site public (sans backend ni outillage)
-        run: |
-          set -euo pipefail
-          rm -rf _site
-          cp -a hub4fix.com/. _site/
-
-          # Retire du site publie ce qui n'est pas destine a un navigateur.
-          rm -rf _site/worker            # source des workers, SQL, wrangler.toml
-          rm -rf _site/tools             # scripts node d'outillage
-          rm -rf _site/tests             # tests unitaires
-          rm -rf _site/leads             # dossiers de depot, vides
-          # NB : src/ est conserve. Ce n'est pas sensible (source front, dont
-          # l'equivalent compile est public de toute facon) et app.html y
-          # renvoie encore (/src/main.tsx, reference de dev Vite).
-          rm -f  _site/hotlist-admin.html  # outil interne, reference par aucune page
-          rm -f  _site/admin-demo.html     # demo interne, referencee par aucune page
-
-          echo "=== Garde-fou : rien de sensible ne doit rester dans _site/ ==="
-          # Le build echoue plutot que de publier : une regression silencieuse
-          # ici remettrait le back-office en ligne sans que personne le voie.
-          echec=0
-
-          # 1) Par extension : configurations, schemas, cles.
-          if find _site -type f \( -name '*.toml' -o -name '*.sql' -o -name '.dev.vars' -o -name '*.pem' -o -name '*.key' -o -name '*.p12' \) | grep .; then
-            echo "ERREUR : fichier de configuration, de schema ou de cle dans le site publie."
-            echec=1
-          fi
-
-          # 2) Par emplacement.
-          if [ -d _site/worker ]; then
-            echo "ERREUR : _site/worker existe encore."
-            echec=1
-          fi
-
-          # 3) Par CONTENU. Le filtre par extension ne voit pas du code backend
-          # range sous un autre nom que worker/ : un admin.js copie dans
-          # _site/backend/ passait les deux controles ci-dessus. Ces marqueurs
-          # n'ont aucune raison d'apparaitre dans un fichier destine au
-          # navigateur, et ils sont presents dans tout code de worker.
-          for marqueur in SESSION_SECRET GOOGLE_SA_KEY PIPELINE_TOKEN SLICER_SECRET database_id d1_databases r2_buckets; do
-            if grep -rlF "$marqueur" _site 2>/dev/null | grep .; then
-              echo "ERREUR : marqueur de code serveur « $marqueur » dans le site publie (fichiers ci-dessus)."
-              echec=1
-            fi
-          done
-
-          [ "$echec" -eq 0 ] || exit 1
-          echo "OK"
-
-          echo "=== Contenu publie ==="
-          find _site -maxdepth 1 | sort
+      # Échoue si un fichier sensible se retrouve dans le site assemblé : un
+      # déploiement raté est visible, une fuite silencieuse ne l'est pas.
+      - name: Assembler le site publiable
+        run: ./build-site.sh
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
