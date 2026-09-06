@@ -1,0 +1,9 @@
+# Données du vivier — JAMAIS committer dans le repo public
+# Ces fichiers contiennent la liste des pièces rares identifiées avant production
+# → ils doivent rester privés (avantage concurrentiel / "moat")
+vivier_brut_collecte.csv
+run_log.jsonl
+*.csv
+*.xlsx
+*.json
+!.gitkeep
