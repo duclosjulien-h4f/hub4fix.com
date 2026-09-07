@@ -123,3 +123,6 @@ cartographie_usage_claude_code.md
 
 # Sortie de build-site.sh (site assemble) : jamais commitee
 _site/
+
+# Verdicts du poste de recherche : dit quelles pieces sont rares = l actif
+recherche-verdicts.json
