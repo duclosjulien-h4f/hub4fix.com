@@ -128,8 +128,54 @@ trancheurs en mode couture « alignée » choisissent justement les coins concav
 pour y placer le départ de couche. La gorge n'attend donc pas un réglage
 particulier — elle attire la cicatrice.
 
-`À CONFIRMER : la gorge suffit-elle en pratique, ou la position de couture
-est-elle imposée à la main dans le trancheur ?`
+**Confirmé en pratique** : le trancheur choisit de lui-même le fond de la gorge.
+Aucun réglage de position de couture à imposer.
+
+---
+
+## Lire la pièce d'origine : fonction contre compromis de fabrication
+
+Ceci n'est pas un mode de casse, c'est une méthode de lecture — et elle
+commande tout le reste.
+
+La pièce cassée qu'on a devant soi contient **deux choses mélangées** :
+
+1. **Sa fonction** — ce qu'elle doit faire, ce qu'elle tient, où elle s'emboîte.
+   Ça, on le garde intégralement.
+2. **Les compromis de l'injection** — les formes qui n'existent que parce qu'il
+   a fallu la mouler. Ça, on le jette.
+
+Recopier un compromis, c'est reprendre la solution à un problème qu'on n'a pas.
+
+### Le cas type : évidement à nervures
+
+En injection, on ne peut pas faire une section épaisse et pleine : elle donne
+des retassures en surface et allonge le refroidissement. Le dessinateur évide
+donc la masse et ajoute des **nervures** pour retrouver de la raideur avec des
+parois minces.
+
+En dépôt de filament, cet évidement est contre-productif. Il multiplie les
+parois, les petits détails et les déplacements à vide. Alors qu'un volume
+**plein** imprimé à remplissage partiel est plus rapide, souvent plus solide, et
+surtout : **le remplissage est déjà une nervure**, en gyroïde ou en grille,
+générée automatiquement et répartie dans tout le volume au lieu d'être
+concentrée sur quelques raidisseurs.
+
+**La nervure devient interne, et gratuite.**
+
+Donc : sur une pièce reprise d'un original injecté, **supprimer les évidements
+et leurs nervures, laisser le plein, régler le remplissage.**
+
+`À REMPLIR : à partir de quelle taille de pièce cette règle s'inverse — sur un
+gros volume, le plein coûte du temps et du filament, et l'évidement redevient
+justifié. Quel seuil en pratique ?`
+
+### Les autres compromis à repérer
+
+Même raisonnement, à documenter au fil des pièces :
+
+`À REMPLIR : angles de démoulage inutiles, épaisseur de paroi uniforme imposée
+par le moulage, absence de contre-dépouille — que faire de chacun`
 
 ---
 
@@ -147,6 +193,32 @@ Aucune de ces stratégies ne consiste à mettre plus de matière. Chacune
 
 C'est la règle à retenir avant toute autre : **épaissir est le dernier recours,
 réorienter est le premier réflexe.**
+
+---
+
+## La pièce-école : moyeu de roue d'aspirateur
+
+Une seule pièce porte cinq décisions distinctes. C'est celle à montrer à un
+modélisateur pour qu'il comprenne la doctrine sans lire le guide en entier.
+
+*(Le dessin lui-même n'est pas versionné : ce dépôt est public. Seule
+l'anatomie est décrite ici.)*
+
+| Élément | Rôle | Renvoi |
+|---|---|---|
+| **Gorge longitudinale sur l'axe** | loge la couture Z hors de la surface portante — pas de point dur au tour | mode 4 |
+| **Surface cylindrique de l'axe** | la portée de rotation, à garder continue et lisse | mode 4 |
+| **Couronne en spirale au sommet** | flexion répartie sur la longueur des bras incurvés au lieu d'un pli unique | mode 2 |
+| **Découpes de dégagement** | ce qui permet aux tétons de fléchir : sans elles, la spirale ne sert à rien | mode 2 |
+| **Contreforts d'appui** | le bras bute au lieu de rester en porte-à-faux — la flexion devient compression | mode 3 |
+
+Le point à ne pas manquer : **les découpes et les contreforts vont par paires.**
+Les découpes donnent la souplesse, les contreforts en limitent la course. L'un
+sans l'autre ne tient pas — trop de liberté et le bras casse par fatigue, pas
+assez et il ne s'encliquette plus.
+
+`À REMPLIR : la course laissée aux tétons — de combien fléchissent-ils avant de
+toucher le contrefort ?`
 
 ---
 
