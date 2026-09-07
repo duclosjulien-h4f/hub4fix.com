@@ -81,17 +81,86 @@ elle est dimensionnée en pratique`
 
 ---
 
+## Mode de casse 3 — Clip qui casse à sa racine
+
+**Symptôme.** Le bras d'encliquetage rompt net à son encastrement, là où il
+sort de la pièce.
+
+**Pourquoi.** Un bras de clip classique est une console en porte-à-faux : il
+travaille en flexion, et toute la déformation se concentre à sa racine. Sur un
+angle vif, c'est une concentration de contrainte — exactement la géométrie qui
+amorce une rupture.
+
+**Stratégie : ajouter des contreforts d'appui derrière le bras du clip.**
+
+Le bras ne reste plus suspendu dans le vide : il vient buter contre un
+contrefort. La charge se reprend alors **en compression** dans le contrefort au
+lieu de rester en flexion sur la racine. Le dépôt de filament encaisse
+beaucoup mieux la compression qu'une flexion sur angle vif, où il délamine.
+
+Le principe est le même que pour les deux modes précédents : on ne renforce pas
+la pièce en l'épaississant, on **change la nature de l'effort** pour l'orienter
+vers ce que la technique sait supporter.
+
+`À REMPLIR : jeu à laisser entre le bras et son contrefort — trop serré, le
+clip ne fléchit plus assez pour s'encliqueter`
+
+---
+
+## Mode de casse 4 — Surface cylindrique qui tourne ou coulisse
+
+Concerne les axes, pivots, paliers et glissières. Ce n'est pas une casse mais
+une usure, et elle est propre à l'impression.
+
+**Le problème.** Chaque couche a un point de départ et d'arrêt sur son
+périmètre. Ces points s'empilent en une ligne verticale — la couture Z, la
+« cicatrice ». Ce n'est pas qu'un défaut d'aspect : c'est un **bourrelet en
+relief** sur toute la hauteur. Sur une surface qui tourne dans un alésage, elle
+donne un point dur une fois par tour, et une usure prématurée localisée.
+
+**Stratégie : creuser une gorge longitudinale et y loger la cicatrice.**
+
+La couture passe en retrait de la surface portante. La surface de rotation
+reste continue et le défaut se retrouve dans un creux où il ne frotte plus.
+
+Un effet secondaire utile : la gorge crée un angle rentrant vif, et les
+trancheurs en mode couture « alignée » choisissent justement les coins concaves
+pour y placer le départ de couche. La gorge n'attend donc pas un réglage
+particulier — elle attire la cicatrice.
+
+`À CONFIRMER : la gorge suffit-elle en pratique, ou la position de couture
+est-elle imposée à la main dans le trancheur ?`
+
+---
+
+## Le fil commun aux quatre modes
+
+Aucune de ces stratégies ne consiste à mettre plus de matière. Chacune
+**réoriente l'effort** vers ce que le dépôt de filament sait encaisser :
+
+| Mode | Effort d'origine | Après correction |
+|---|---|---|
+| Téton cisaillé | cisaillement entre couches | traction dans la couche |
+| Clip fatigué | flexion concentrée | flexion répartie sur une spirale |
+| Clip à la racine | flexion sur angle vif | compression dans un contrefort |
+| Surface tournante | frottement sur un bourrelet | défaut logé hors de la portée |
+
+C'est la règle à retenir avant toute autre : **épaissir est le dernier recours,
+réorienter est le premier réflexe.**
+
+---
+
 ## Modes de casse à documenter
 
 Chacun attend la technique correspondante. Rien n'est écrit ici à la place de
 Julien.
 
+Les axes, pivots et surfaces de glissement sont traités au mode 4.
+
 | Mode de casse | Stratégie |
 |---|---|
 | Filetage arraché | `À REMPLIR` |
-| Axe ou pivot usé / ovalisé | `À REMPLIR` |
 | Dents d'engrenage cassées | `À REMPLIR` |
-| Surface de glissement usée | `À REMPLIR` |
 | Pièce en flexion répétée | `À REMPLIR` |
 | Écrou ou insert métallique noyé | `À REMPLIR` |
 | Fonction d'étanchéité (joint) | `À REMPLIR` |
