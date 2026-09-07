@@ -1,5 +1,9 @@
 # Guide de modélisation — stratégies par mode de casse
 
+**Destinataires : les modélisateurs externes.** Objet : simplifier et uniformiser
+le travail de conception, pour que deux modélisateurs différents produisent des
+pièces cohérentes entre elles.
+
 Dicté par Julien, structuré et rédigé ici. **Organisé par mode de casse**, parce
 que c'est ainsi qu'on l'utilise : on a une pièce cassée devant soi, on identifie
 comment elle a lâché, on cherche la technique qui répond.
@@ -7,6 +11,28 @@ comment elle a lâché, on cherche la technique qui répond.
 > **Les sections marquées `À REMPLIR` sont vides, pas devinées.** Ce guide ne
 > contient que ce que Julien a effectivement énoncé. Le reste attend, pour que
 > personne ne prenne une supposition de rédaction pour une pratique validée.
+
+## Ce que ce guide contient — et ce qu'il ne contient pas
+
+| Dans ce guide (partagé) | Hors de ce guide (maison) |
+|---|---|
+| Le sens dans lequel l'effort doit passer par rapport aux couches | La matière retenue |
+| La géométrie qui corrige un mode de casse | Hauteur de couche, parois, remplissage, températures |
+| Ce qu'il faut retirer de la pièce d'origine | Le placement sur le plateau et les supports |
+
+**Les recettes d'impression restent maison.** Ce n'est pas de la rétention
+gratuite : la recette est ce qui rend une pièce reproductible, et c'est le
+savoir-faire qui tient la position de Hub4Fix. Un modélisateur n'en a pas besoin
+pour bien concevoir.
+
+**Mais une chose doit passer la frontière** : l'orientation. « Ce téton
+s'imprime couché » commande la forme de la pièce — un modélisateur qui l'ignore
+livre un modèle inutilisable, quelle que soit la recette appliquée ensuite. Le
+guide dit donc **dans quel sens la pièce sera imprimée et pourquoi**, sans dire
+avec quoi ni à quels réglages.
+
+Autrement dit : ici on parle de **directions d'effort**. La recette parle de
+**matière et de machine**.
 
 ---
 
@@ -241,18 +267,18 @@ Les axes, pivots et surfaces de glissement sont traités au mode 4.
 
 ---
 
-## Choix de matière
+## Matière et réglages
 
-`À REMPLIR` — quelle matière pour quel usage, et surtout les **exclusions** :
-là où une matière est à proscrire (le PLA au froid dans un congélateur, par
-exemple, où il devient cassant).
+**Hors périmètre de ce guide** — voir le tableau en tête de document. La matière
+et les réglages sont fixés par Hub4Fix à la réception du modèle.
 
----
+Ce que le modélisateur doit fournir en revanche, et qui est de sa
+responsabilité : **l'orientation supposée** de chaque élément, et le mode de
+casse que sa géométrie prétend corriger. Sans ces deux informations, la pièce
+n'est pas exploitable, quelle que soit la recette qu'on lui applique.
 
-## Réglages d'impression qui comptent
-
-`À REMPLIR` — hauteur de couche, taux de remplissage, nombre de parois,
-température. Ce qui se règle par pièce et ce qui reste fixe.
+`À REMPLIR : sous quelle forme le modélisateur transmet-il l'orientation
+supposée — une vue annotée, une note écrite, un repère dans le fichier ?`
 
 ---
 
@@ -260,11 +286,12 @@ température. Ce qui se règle par pièce et ce qui reste fixe.
 
 Trois usages, dans cet ordre d'importance :
 
-1. **Décider si une pièce est modélisable.** Une pièce n'est « corrigeable » que
+1. **Uniformiser le travail des modélisateurs externes.** Ils ont un tunnel et
+   des CGV ; il leur manque la règle de l'art. Deux modélisateurs différents
+   doivent produire des pièces cohérentes entre elles.
+2. **Décider si une pièce est modélisable.** Une pièce n'est « corrigeable » que
    s'il existe une technique qui répond à son mode de casse. Sans ce guide, ce
    jugement se fait à l'intuition — et il commande tout le tri du vivier.
-2. **Faire travailler les modélisateurs partenaires à un standard commun.** Ils
-   ont un tunnel et des CGV ; il leur manque la règle de l'art.
 3. **Ne pas laisser cette connaissance dans une seule tête.** C'est aujourd'hui
    le point de fragilité le plus sérieux de Hub4Fix : sans elle, le reste ne
    produit rien.
