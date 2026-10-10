@@ -91,6 +91,8 @@ body{font-family:'Karla',Arial,sans-serif;background:#FAF8F5;color:#3B3632;displ
         email: info.email || '',
         prenom: info.given_name || '',
         sub: info.sub,
+        // Jeton d'acces Zitadel : envoye en Authorization aux routes client pour prouver l'identite.
+        token: tok.access_token,
         at: Date.now()
       }));
       // Une vraie connexion sort du mode demo : session reelle et simulation

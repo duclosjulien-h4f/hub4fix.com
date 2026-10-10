@@ -553,6 +553,8 @@ nav{position:sticky;top:0;z-index:100;padding:.8rem 4rem;display:flex;justify-co
     MACHINES_LIST.map(function(m){ return '<option value="'+m+'">'+m+'</option>'; }).join('') +
     '<option value="Autre">Autre (preciser)</option>';
 
+  // En-tetes d'identite : le jeton de connexion prouve que l'e-mail demande est bien le vôtre.
+  function authHeaders(extra){ var h = extra || {}; try{ var t = (JSON.parse(localStorage.getItem('h4f_client_session')||'null')||{}).token; if(t) h['Authorization'] = 'Bearer ' + t; }catch(e){} return h; }
   var MACHINES_API = 'https://h4f-collect.duclosjulien.workers.dev/client-machines';
   function initProfilMachines(retriesLeft){
     var listEl = document.getElementById('machinesList');
@@ -592,7 +594,7 @@ nav{position:sticky;top:0;z-index:100;padding:.8rem 4rem;display:flex;justify-co
       });
     }
 
-    fetch(MACHINES_API + '?email=' + encodeURIComponent(session.email))
+    fetch(MACHINES_API + '?email=' + encodeURIComponent(session.email), { headers: authHeaders() })
       .then(function(r){ return r.json(); })
       .then(function(j){ current = j.machines || []; renderList(); })
       .catch(function(){ statusEl.style.color = '#C8102E'; statusEl.textContent = 'Impossible de charger vos imprimantes.'; });
@@ -612,7 +614,7 @@ nav{position:sticky;top:0;z-index:100;padding:.8rem 4rem;display:flex;justify-co
     saveBtn.addEventListener('click', function(){
       saveBtn.disabled = true; var label = saveBtn.textContent; saveBtn.textContent = 'Enregistrement…';
       fetch(MACHINES_API, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ email: session.email, machines: current }),
       })
         .then(function(r){ return r.json(); })
@@ -673,7 +675,7 @@ nav{position:sticky;top:0;z-index:100;padding:.8rem 4rem;display:flex;justify-co
     emailEl.value = session.email;
     prenomEl.value = session.prenom || '';
 
-    fetch(PROFILE_API + '?email=' + encodeURIComponent(session.email))
+    fetch(PROFILE_API + '?email=' + encodeURIComponent(session.email), { headers: authHeaders() })
       .then(function(r){ return r.json(); })
       .then(function(j){
         if(j.error) return;
@@ -690,7 +692,7 @@ nav{position:sticky;top:0;z-index:100;padding:.8rem 4rem;display:flex;justify-co
     saveBtn.addEventListener('click', function(){
       saveBtn.disabled = true; var label = saveBtn.textContent; saveBtn.textContent = 'Enregistrement…';
       fetch(PROFILE_API, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           email: session.email, nom: nomEl.value.trim(), adresse: adresseEl.value.trim(),
           telephone: telEl.value.trim(), cp: cpEl.value.trim(), ville: villeEl.value.trim(), pays: paysEl.value
