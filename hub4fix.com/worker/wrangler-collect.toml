@@ -1,0 +1,34 @@
+# Hub4Fix — worker "h4f-collect" (inscriptions modélisateurs/printers + comptes clients B2C).
+# Déploiement : npx wrangler deploy -c wrangler-collect.toml   (depuis hub4fix.com/worker/)
+#
+# Ce fichier reprend à l'identique l'état en ligne au 2026-10-09 (version c731f117) pour qu'un
+# déploiement ne retire rien : mêmes accès D1 et R2, même adresse workers.dev (le site l'appelle).
+# keep_vars : conserve les variables et secrets du tableau de bord (SHEET_ID, CLIENT_SHEET_ID,
+# GOOGLE_SA_EMAIL, GOOGLE_SA_KEY, GITHUB_TOKEN, LEADS_REPO, LEADS_BRANCH).
+#
+# Variables ajoutées pour la sécurité (cf. collect-email.js) :
+#   ISSUER        — Zitadel : sert à vérifier le jeton de connexion d'un client
+#   REQUIRE_AUTH  — "1" : refuse les appels client sans jeton valide. À activer APRÈS déploiement
+#                   du site qui envoie le jeton (voir TodoList). Tant qu'absent : mode doux.
+#   TEST_TOKEN    — secret optionnel (npx wrangler secret put TEST_TOKEN -c wrangler-collect.toml)
+#                   qui rouvre les routes de test (/client-seed, /client-cleanup-test) et les
+#                   scripts sans origine. Absent : ces routes sont fermées.
+
+name = "h4f-collect"
+main = "collect-email.js"
+compatibility_date = "2026-01-01"
+keep_vars = true
+workers_dev = true
+
+[vars]
+ISSUER = "https://hub4fix-l2itdp.ch1.zitadel.cloud"
+
+# Accès présents sur la version en ligne (non utilisés par collect-email.js, conservés par prudence).
+[[d1_databases]]
+binding = "DB"
+database_name = "h4f_admin"
+database_id = "02cfcaa2-c331-48a0-8699-d669cb7ccce4"
+
+[[r2_buckets]]
+binding = "PIECES_R2"
+bucket_name = "h4f-pieces"
