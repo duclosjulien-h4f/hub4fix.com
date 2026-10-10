@@ -588,6 +588,25 @@ export default {
       }
     }
 
+    // Ajout seul (utilisé par h4f-early) : écrit UNE ligne, ne lit jamais la feuille, ne réécrit rien.
+    // Le "déjà inscrit" est tranché par l'appelant dans sa propre base, pas ici.
+    if (url.pathname === '/append') {
+      if (!data.email || !isValidEmail(data.email) || !VALID_TYPES.includes(data.type)) {
+        return jsonResponse({ error: 'Requete invalide' }, 400, origin);
+      }
+      try {
+        await appendToSheet(env, buildRow({
+          date: new Date().toISOString(), email: String(data.email).toLowerCase().trim(), type: data.type,
+          name: data.name ? String(data.name).trim() : null, source: origin || 'unknown',
+          ip_country: request.cf?.country || null, consent: data.consent || null, fields: data.fields || null, test: false,
+        }));
+        return jsonResponse({ ok: true }, 201, origin);
+      } catch (err) {
+        console.error('append failed:', err.message);
+        return jsonResponse({ error: 'Erreur serveur' }, 500, origin);
+      }
+    }
+
     const { email, type, name, consent, fields, test } = data;
     if (!email || !isValidEmail(email)) {
       return jsonResponse({ error: 'Email invalide' }, 400, origin);

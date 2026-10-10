@@ -6,10 +6,13 @@
  * collecteur existant h4f-collect par une liaison interne (service binding COLLECT), qui
  * possède déjà l'accès au Google Sheet. Aucun secret Google n'est donc dupliqué ici.
  * Les inscriptions arrivent dans le même onglet que les autres, avec statut = "Early access".
+ * MODÈLE : le Sheet est en AJOUT SEUL (route /append de h4f-collect : aucune lecture, aucune réécriture).
+ * Le « déjà inscrit » est tranché par la base D1 EARLY_DB (empreinte de l'e-mail + profil), jamais par le Sheet.
  * Un profil = une ligne ; un double profil (modélisateur + printer) = deux lignes.
  *
  * Variables optionnelles :
  *   TURNSTILE_SECRET — si présent, le jeton Turnstile devient obligatoire
+ * Binding obligatoire : EARLY_DB (D1 h4f_early, voir early-schema.sql).
  * Binding optionnel : RATE_LIMITER (voir wrangler-early.toml) — limite par IP.
  */
 
@@ -68,12 +71,18 @@ async function verifyTurnstile(env, token, ip) {
   return j.success === true;
 }
 
+// Empreinte SHA-256 de l'e-mail : le registre ne contient jamais l'adresse en clair.
+async function hashEmail(email) {
+  const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(email));
+  return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 // Transmet UNE inscription au collecteur existant (liaison interne, jamais publique).
-async function forward(env, profil, f, consentAt) {
+async function forward(env, profil, f, consentAt) {  // ajout seul : route /append de h4f-collect
   const msg = [];
   if (f.parcours) msg.push('PARCOURS : ' + f.parcours);
   msg.push('MOTIVATION : ' + f.motivation);
-  const res = await env.COLLECT.fetch('https://h4f-collect.internal/', {
+  const res = await env.COLLECT.fetch('https://h4f-collect.internal/append', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Origin: 'https://hub4fix.com' },
     body: JSON.stringify({
@@ -87,8 +96,7 @@ async function forward(env, profil, f, consentAt) {
       },
     }),
   });
-  // 409 = déjà inscrit avec ce profil : succès silencieux (on ne révèle pas qu'une adresse existe).
-  if (!res.ok && res.status !== 409) throw new Error('collect ' + res.status);
+  if (!res.ok) throw new Error('collect ' + res.status);
 }
 
 export default {
@@ -139,8 +147,28 @@ export default {
 
     try {
       const at = new Date().toISOString();
-      for (const p of new Set(profils)) await forward(env, p, f, at);
-      return reply(201, { ok: true }, origin);
+      const hash = await hashEmail(f.email);
+      const nouveaux = [];
+      const dejaInscrits = [];
+      // Le registre tranche : l'INSERT échoue (0 ligne) si (adresse, profil) existe déjà. Le Sheet n'est pas lu.
+      for (const p of new Set(profils)) {
+        const r = await env.EARLY_DB.prepare('INSERT OR IGNORE INTO early_signups (email_hash, profil, created_at) VALUES (?, ?, ?)')
+          .bind(hash, p, at).run();
+        (r.meta.changes ? nouveaux : dejaInscrits).push(p);
+      }
+      if (!nouveaux.length) return reply(409, { error: 'deja-inscrit', profils: dejaInscrits }, origin);
+      const ecrits = [];
+      try {
+        for (const p of nouveaux) { await forward(env, p, f, at); ecrits.push(p); }
+      } catch (e) {
+        // Échec d'écriture : on retire du registre TOUT ce qui n'a pas été écrit dans le Sheet, sinon la
+        // personne serait marquée "inscrite" sans trace dans le Sheet et ne pourrait plus réessayer.
+        for (const p of nouveaux.filter((x) => !ecrits.includes(x))) {
+          await env.EARLY_DB.prepare('DELETE FROM early_signups WHERE email_hash = ? AND profil = ?').bind(hash, p).run();
+        }
+        throw e;
+      }
+      return reply(201, { ok: true, dejaInscrits }, origin);
     } catch (e) {
       console.error('early-access forward failed:', e.message);
       return reply(500, { error: 'serveur' }, origin);

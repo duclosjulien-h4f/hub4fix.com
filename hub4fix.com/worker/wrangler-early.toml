@@ -39,3 +39,9 @@ simple = { limit = 5, period = 60 }
 [[services]]
 binding = "COLLECT"
 service = "h4f-collect"
+
+# Registre des inscrits (empreintes d'e-mail + profil) : sert à répondre "déjà inscrit" sans lire le Sheet.
+[[d1_databases]]
+binding = "EARLY_DB"
+database_name = "h4f_early"
+database_id = "9d558e2c-8039-4864-8383-9bdb01847c73"
