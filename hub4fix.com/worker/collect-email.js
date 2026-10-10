@@ -67,7 +67,7 @@ function corsHeaders(origin) {
   return {
     'Access-Control-Allow-Origin': allowed,
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Test-Token',
   };
 }
 
@@ -76,6 +76,45 @@ function jsonResponse(data, status, origin) {
     status,
     headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) },
   });
+}
+
+const MAX_BODY = 32 * 1024;
+
+// Comparaison à temps constant pour un jeton secret.
+function safeEqual(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string' || a.length !== b.length) return false;
+  let d = 0;
+  for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return d === 0;
+}
+
+// Jeton d'outillage (comptes de test, scripts) : sans TEST_TOKEN configuré, personne n'y a accès.
+function hasTestToken(request, env) {
+  const t = request.headers.get('X-Test-Token');
+  return !!env.TEST_TOKEN && !!t && safeEqual(t, env.TEST_TOKEN);
+}
+
+// Prouve que l'appelant EST le propriétaire de l'e-mail demandé : jeton d'accès Zitadel envoyé en
+// "Authorization: Bearer", vérifié auprès de Zitadel (userinfo), et son e-mail doit être celui visé.
+// Mode doux : sans jeton, accepté TANT QUE REQUIRE_AUTH != "1" (le temps que le site envoie le
+// jeton). Dès que REQUIRE_AUTH = "1", une requête sans jeton valide est refusée (401).
+async function checkIdentity(request, env, email) {
+  const h = request.headers.get('Authorization') || '';
+  const m = /^Bearer\s+(\S+)$/.exec(h);
+  if (!m) return env.REQUIRE_AUTH === '1' ? { status: 401, error: 'Connexion requise' } : null;
+  if (!env.ISSUER) return { status: 500, error: 'Erreur serveur' };
+  let info;
+  try {
+    const r = await fetch(`${env.ISSUER}/oidc/v1/userinfo`, { headers: { Authorization: `Bearer ${m[1]}` } });
+    if (!r.ok) return { status: 401, error: 'Session expirée' };
+    info = await r.json();
+  } catch {
+    return { status: 401, error: 'Session expirée' };
+  }
+  if (!info.email || String(info.email).toLowerCase() !== String(email).toLowerCase()) {
+    return { status: 403, error: 'Interdit' };
+  }
+  return null;
 }
 
 function isValidEmail(email) {
@@ -418,10 +457,19 @@ export default {
       return new Response(null, { status: 204, headers: corsHeaders(origin) });
     }
 
+    // Origine connue obligatoire (le navigateur l'envoie toujours ; un appel sans origine vient d'un
+    // script). Ce n'est PAS une authentification : l'identité des routes client est prouvée plus bas.
+    const toolOk = hasTestToken(request, env);
+    if (!toolOk && !ALLOWED_ORIGINS.includes(origin)) {
+      return jsonResponse({ error: 'Forbidden' }, 403, origin);
+    }
+
     // Lecture des machines d'un client (Mon compte) — seule route en GET.
     if (request.method === 'GET' && url.pathname === '/client-machines') {
       const email = url.searchParams.get('email') || '';
       if (!email || !isValidEmail(email)) return jsonResponse({ error: 'Email invalide' }, 400, origin);
+      const denied = toolOk ? null : await checkIdentity(request, env, email);
+      if (denied) return jsonResponse({ error: denied.error }, denied.status, origin);
       try {
         const machines = await getClientMachines(env, email);
         return jsonResponse({ machines }, 200, origin);
@@ -435,6 +483,8 @@ export default {
     if (request.method === 'GET' && url.pathname === '/client-profile') {
       const email = url.searchParams.get('email') || '';
       if (!email || !isValidEmail(email)) return jsonResponse({ error: 'Email invalide' }, 400, origin);
+      const denied = toolOk ? null : await checkIdentity(request, env, email);
+      if (denied) return jsonResponse({ error: denied.error }, denied.status, origin);
       try {
         const profile = await getClientProfile(env, email);
         if (!profile) return jsonResponse({ error: 'Client introuvable' }, 404, origin);
@@ -451,8 +501,13 @@ export default {
 
     let data;
     try {
-      data = await request.json();
+      const raw = await request.text();
+      if (raw.length > MAX_BODY) return jsonResponse({ error: 'Corps trop volumineux' }, 413, origin);
+      data = JSON.parse(raw);
     } catch {
+      return jsonResponse({ error: 'Invalid JSON' }, 400, origin);
+    }
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
       return jsonResponse({ error: 'Invalid JSON' }, 400, origin);
     }
 
@@ -461,6 +516,8 @@ export default {
       if (!data.email || !isValidEmail(data.email)) {
         return jsonResponse({ error: 'Email invalide' }, 400, origin);
       }
+      const denied = toolOk ? null : await checkIdentity(request, env, data.email);
+      if (denied) return jsonResponse({ error: denied.error }, denied.status, origin);
       try {
         const result = await appendClientIfNew(env, data);
         return jsonResponse(result, 200, origin);
@@ -475,6 +532,8 @@ export default {
       if (!data.email || !isValidEmail(data.email)) {
         return jsonResponse({ error: 'Email invalide' }, 400, origin);
       }
+      const denied = toolOk ? null : await checkIdentity(request, env, data.email);
+      if (denied) return jsonResponse({ error: denied.error }, denied.status, origin);
       try {
         const result = await setClientMachines(env, data.email, data.machines || []);
         if (result.error === 'not-found') return jsonResponse({ error: 'Client introuvable' }, 404, origin);
@@ -490,6 +549,8 @@ export default {
       if (!data.email || !isValidEmail(data.email)) {
         return jsonResponse({ error: 'Email invalide' }, 400, origin);
       }
+      const denied = toolOk ? null : await checkIdentity(request, env, data.email);
+      if (denied) return jsonResponse({ error: denied.error }, denied.status, origin);
       try {
         const result = await setClientProfile(env, data.email, data);
         if (result.error === 'not-found') return jsonResponse({ error: 'Client introuvable' }, 404, origin);
@@ -502,6 +563,7 @@ export default {
 
     // Cree/maj un compte de TEST complet (panneau d'impersonation test-comptes.html).
     if (url.pathname === '/client-seed') {
+      if (!toolOk) return jsonResponse({ error: 'Not found' }, 404, origin);
       if (!data.email || !isValidEmail(data.email)) {
         return jsonResponse({ error: 'Email invalide' }, 400, origin);
       }
@@ -516,11 +578,31 @@ export default {
 
     // Supprime tous les comptes marques test=true du Sheet clients.
     if (url.pathname === '/client-cleanup-test') {
+      if (!toolOk) return jsonResponse({ error: 'Not found' }, 404, origin);
       try {
         const result = await cleanupTestClients(env);
         return jsonResponse(result, 200, origin);
       } catch (err) {
         console.error('client-cleanup-test failed:', err.message);
+        return jsonResponse({ error: 'Erreur serveur' }, 500, origin);
+      }
+    }
+
+    // Ajout seul (utilisé par h4f-early) : écrit UNE ligne, ne lit jamais la feuille, ne réécrit rien.
+    // Le "déjà inscrit" est tranché par l'appelant dans sa propre base, pas ici.
+    if (url.pathname === '/append') {
+      if (!data.email || !isValidEmail(data.email) || !VALID_TYPES.includes(data.type)) {
+        return jsonResponse({ error: 'Requete invalide' }, 400, origin);
+      }
+      try {
+        await appendToSheet(env, buildRow({
+          date: new Date().toISOString(), email: String(data.email).toLowerCase().trim(), type: data.type,
+          name: data.name ? String(data.name).trim() : null, source: origin || 'unknown',
+          ip_country: request.cf?.country || null, consent: data.consent || null, fields: data.fields || null, test: false,
+        }));
+        return jsonResponse({ ok: true }, 201, origin);
+      } catch (err) {
+        console.error('append failed:', err.message);
         return jsonResponse({ error: 'Erreur serveur' }, 500, origin);
       }
     }
