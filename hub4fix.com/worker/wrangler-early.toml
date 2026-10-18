@@ -1,4 +1,4 @@
-# Hub4Fix — worker "h4f-early" : la page early access ET son collecteur, sur hub4fix.net.
+# Hub4Fix — worker "h4f-early" : la page early access ET son collecteur, sur hub4fix.eu.
 # Déploiement : .\deploy-early.ps1   (depuis hub4fix.com/worker/)
 #
 # Un seul worker sert tout, en même temps :
@@ -17,10 +17,10 @@ compatibility_date = "2026-01-01"
 keep_vars = true
 workers_dev = false
 
-# Prérequis : la zone hub4fix.net doit être sur Cloudflare (serveurs de noms changés chez Gandi).
+# Prérequis : la zone hub4fix.eu doit être sur Cloudflare (serveurs de noms changés chez Gandi : à faire pour hub4fix.eu).
 # Le domaine personnalisé crée l'enregistrement DNS et le certificat tout seul.
 routes = [
-  { pattern = "hub4fix.net", custom_domain = true },
+  { pattern = "hub4fix.eu", custom_domain = true },
 ]
 
 [assets]

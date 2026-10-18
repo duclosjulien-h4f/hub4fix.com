@@ -1,5 +1,5 @@
-# Déploie la page early access + son collecteur sur hub4fix.net.
-# Prérequis : npx wrangler login (une fois), zone hub4fix.net sur Cloudflare, secrets posés.
+# Déploie la page early access + son collecteur sur hub4fix.eu.
+# Prérequis : npx wrangler login (une fois), zone hub4fix.eu sur Cloudflare, secrets posés.
 $ErrorActionPreference = 'Stop'
 Set-Location $PSScriptRoot
 

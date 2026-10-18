@@ -6,8 +6,7 @@
 <link rel="icon" type="image/svg+xml" href="favicon.svg"><link rel="alternate icon" href="favicon.ico">
 <title>Early access — Hub⁴Fix</title>
 <meta name="description" content="Rejoignez Hub4Fix en early access : modélisateurs et imprimeurs, dites-nous qui vous êtes. Sans engagement.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/fonts.css">
 <style>
 :root{--ivory:#FAF8F5;--cream:#EDE6DC;--sand:#D4C9B8;--stone:#A89F91;--earth:#7A7268;--charcoal:#3B3632;--night:#1C1A18;--gold:#B8963E;--red:#C8102E;--green:#2D8B5E}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -153,8 +152,8 @@ footer{text-align:center;font-size:.72rem;color:var(--stone);padding:2rem 1rem}
 (function(){
   var form=document.getElementById('f'), err=document.getElementById('err');
   var btns=document.querySelectorAll('.choice button');
-  // Sur hub4fix.net la page et l'API sont au même endroit ; ailleurs on appelle hub4fix.net.
-  var ENDPOINT=location.hostname==='hub4fix.net' ? '/api/early-access' : 'https://hub4fix.net/api/early-access';
+  // Sur hub4fix.eu la page et l'API sont au même endroit ; ailleurs on appelle hub4fix.eu.
+  var ENDPOINT=location.hostname==='hub4fix.eu' ? '/api/early-access' : 'https://hub4fix.eu/api/early-access';
 
   var types={};
   function refresh(){

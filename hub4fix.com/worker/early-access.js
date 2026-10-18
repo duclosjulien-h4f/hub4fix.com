@@ -19,7 +19,7 @@
 const ALLOWED_ORIGINS = new Set([
   'https://hub4fix.com', 'https://www.hub4fix.com',
   'https://hub4fix.fr', 'https://www.hub4fix.fr',
-  'https://hub4fix.net', 'https://www.hub4fix.net',
+  'https://hub4fix.eu', 'https://www.hub4fix.eu',
 ]);
 
 const MAX_BODY = 8 * 1024;
